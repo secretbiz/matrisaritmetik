@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik", "MatrisAritmetik.csproj", "{690E6713-2292-4093-BDA0-0AA0E03466F1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Core", "..\MatrisAritmetik.Core\MatrisAritmetik.Core.csproj", "{80180B89-545E-4F4F-8762-D02732F09816}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Services", "..\MatrisAritmetik.Services\MatrisAritmetik.Services.csproj", "{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{690E6713-2292-4093-BDA0-0AA0E03466F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{690E6713-2292-4093-BDA0-0AA0E03466F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{690E6713-2292-4093-BDA0-0AA0E03466F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{690E6713-2292-4093-BDA0-0AA0E03466F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80180B89-545E-4F4F-8762-D02732F09816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80180B89-545E-4F4F-8762-D02732F09816}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80180B89-545E-4F4F-8762-D02732F09816}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80180B89-545E-4F4F-8762-D02732F09816}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A374F798-9BD6-4693-BE07-054E0B1F2950}
+	EndGlobalSection
+EndGlobal

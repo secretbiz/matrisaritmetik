@@ -1,0 +1,99 @@
+﻿@page 
+@model MatrisAritmetik.Pages.MatrisModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+@{
+    var token = antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
+}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Matris Aritmetiği</title>
+
+    <script>
+        (function (d, script) {
+            if (d.getElementById("MathJax-script")) {
+                console.log("already exists");return;
+            }
+            script = d.createElement('script');
+            script.type = 'text/javascript';
+            script.async = false;
+            script.id = "MathJax-script";
+            script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+            d.getElementsByTagName('head')[0].appendChild(script);
+        }(document));
+    </script>
+
+    <script type="text/javascript" id="MathJax-script" src="">
+    </script>
+
+    <script type="text/javascript">
+
+        function addMatrix()
+        {
+            $.ajax(
+                {
+                    type: 'POST',
+                    url: 'Matris?handler=AddMatrix',
+                    data:
+                    {
+                        __RequestVerificationToken: '@token',
+                        "name": document.getElementById("matris_name").value,
+                        "vals": document.getElementById("matris_vals").value
+                    },
+                    success: function (data) { console.log("success");updateTable();},
+                    error: function (error) { console.log(error); }
+                }).done(function () {
+                    console.log("done");
+                    //updateMathContent();
+                });
+        }
+
+        function updateTable()
+        {
+            $('#matris_table').load('/Matris?handler=UpdateMatrisTable', { __RequestVerificationToken: '@token' });
+        }
+
+        function updateMathContent() {
+            if (MathJax.Hub != undefined) {
+                var math = MathJax.Hub.getAllJax("matris_table")[0];
+                MathJax.Hub.Queue(["Typeset", math]);
+            }
+            else
+            {
+                console.log("No MathJax.Hub found...");
+            }
+        }
+
+    </script>
+</head>
+<body>
+
+    <div id="matris_main">
+
+        <math id="__mathjaxstarter" xmlns="http://www.w3.org/1998/Math/MathML" display="block" >
+            <mi>Matris Aritmetiği </mi>
+        </math>
+
+        <label asp-for="Matris_name"></label>
+        <input asp-for="Matris_name" type="text" id="matris_name" placeholder="Matris ismi" />
+
+        <textarea asp-for="Matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
+
+        <input onclick="addMatrix()" type="button" class="button" style="color:midnightblue" value="Oluştur" name="matris_create" />
+
+        <table>
+            <thead>
+                <tr>
+                    <td>Matris Adı</td>
+                    <td>Elementler</td>
+                </tr>
+            </thead>
+        </table>
+    </div>
+  
+    <div id="matris_table">
+    </div>
+
+</body>

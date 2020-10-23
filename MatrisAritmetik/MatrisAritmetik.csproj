@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.jQuery.Unobtrusive.Ajax" Version="3.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MatrisAritmetik.Core\MatrisAritmetik.Core.csproj" />
+    <ProjectReference Include="..\MatrisAritmetik.Services\MatrisAritmetik.Services.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,37 @@
+﻿@model Dictionary<string, MatrisAritmetik.Core.MatrisBase<float>>
+@{
+    Layout = null;
+}
+
+<html>
+<head>
+    
+</head>
+<body id="matris_table_inner">
+    @foreach (var name in Model.Keys)
+    {
+        <math id='@name' xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+            <mi>@name </mi>
+            <mo>= </mo>
+            <mrow>
+                <mo> ( </mo>
+                <mtable>
+
+                    @foreach (var row in Model[name].values)
+                    {
+                        <mtr>
+                            @foreach (var val in row)
+                            {
+                                <mtd>
+                                    <mn>@val</mn>
+                                </mtd>
+                            }
+                        </mtr>
+                    }
+                </mtable>
+                <mo> ) </mo>
+            </mrow>
+        </math>
+    }
+</body>
+</html>
