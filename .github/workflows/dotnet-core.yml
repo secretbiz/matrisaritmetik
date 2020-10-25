@@ -7,19 +7,27 @@ on:
     branches: [ dev ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.301
-    - name: Install dependencies
-      run: dotnet restore MatrisAritmetik
-    - name: Build
-      run: dotnet build MatrisAritmetik --configuration Release --no-restore
-    - name: Test
-      run: dotnet test MatrisAritmetik --no-restore --verbosity normal
+  build-and-deploy:  
+    runs-on: windows-latest  
+  
+    steps:  
+    - uses: actions/checkout@dev  
+  
+    - name: Set up .NET Core  
+      uses: actions/setup-dotnet@v1  
+      with:  
+        dotnet-version: '3.1'  
+  
+    - name: Build with dotnet  
+      run: dotnet build MatrisAritmetik --configuration Release  
+  
+    - name: dotnet publish  
+      run: dotnet publish MatrisAritmetik -c Release -o ${{env.DOTNET_ROOT}}/MatrisAritmetik  
+  
+    - name: Deploy to Azure Web App  
+      uses: azure/webapps-deploy@v1  
+      with:  
+        app-name: 'MatrisAritmetik'  
+        slot-name: 'production'  
+        publish-profile: ${{ secrets.SCM_CREDENTIALS }}  
+        package: ${{env.DOTNET_ROOT}}/MatrisAritmetik 
