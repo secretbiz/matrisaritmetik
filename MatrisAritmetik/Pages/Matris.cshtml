@@ -18,26 +18,25 @@
 
         <h2>Matris Aritmetiği </h2>
 
-        <label asp-for="Matris_name"></label>
-        <input asp-for="Matris_name" type="text" id="matris_name" placeholder="Matris ismi" />
+        <label for="matris_name"></label>
+        <input type="text" id="matris_name" placeholder="Matris ismi" />
 
-        <textarea asp-for="Matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
+        <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
 
         <input id="matris_add_button" type="button" class="button" style="color:midnightblue" value="Oluştur" name="matris_create" />
 
-        <table>
-            <thead>
-                <tr>
-                    <td>Matris Adı</td>
-                    <td>Elementler</td>
-                </tr>
-            </thead>
-        </table>
-    </div>
-  
-    <div id="matris_table">
     </div>
 
+    <table>
+        <thead>
+            <tr>
+                <td colspan="6" style="text-align:center;padding:1px;font-weight:bold">Kayıtlı Matrisler</td>
+            </tr>
+        </thead>
+        <tbody id="matris_table">
+            <partial name="_MatrisTablePartial" model=@TempData["floatdict"]/>
+        </tbody>
+    </table>
 </body>
 
 <script>if (matris_add_button) { matris_add_button.token = "@token";}</script>

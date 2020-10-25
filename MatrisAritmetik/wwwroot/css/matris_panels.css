@@ -1,0 +1,17 @@
+﻿#matris_main 
+{
+    width: 50% !important;
+    background-color: aquamarine;
+}
+
+#matris_table 
+{
+    width: 50% !important;
+    background-color: darkgrey;
+    border: 1px groove darkcyan;
+}
+
+.matdelbtn 
+{
+    border-radius: 15px !important;
+}
