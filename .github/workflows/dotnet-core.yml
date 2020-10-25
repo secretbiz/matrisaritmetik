@@ -1,33 +1,28 @@
 name: .NET Core
 
-on:
-  push:
-    branches: [ dev ]
-  pull_request:
-    branches: [ dev ]
+on: [push]
 
 jobs:
-  build-and-deploy:  
-    runs-on: windows-latest  
-  
-    steps:  
-    - uses: actions/checkout@dev  
-  
-    - name: Set up .NET Core  
-      uses: actions/setup-dotnet@v1  
-      with:  
-        dotnet-version: '3.1'  
-  
-    - name: Build with dotnet  
-      run: dotnet build MatrisAritmetik --configuration Release  
-  
-    - name: dotnet publish  
-      run: dotnet publish MatrisAritmetik -c Release -o ${{env.DOTNET_ROOT}}/MatrisAritmetik  
-  
-    - name: Deploy to Azure Web App  
-      uses: azure/webapps-deploy@v1  
-      with:  
-        app-name: 'MatrisAritmetik'  
-        slot-name: 'production'  
-        publish-profile: ${{ secrets.SCM_CREDENTIALS }}  
-        package: ${{env.DOTNET_ROOT}}/MatrisAritmetik 
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+    
+    # dotnet build and publish
+    - name: Build with dotnet
+      run: dotnet build MatrisAritmetik --configuration Release
+    - name: dotnet publish
+      run: |
+        dotnet publish MatrisAritmetik -c Release -o dotnetcorewebapp 
+    - name: 'Run Azure webapp deploy action using publish profile credentials'
+      uses: azure/webapps-deploy@v1
+      with: 
+        app-name: MatrisAritmetik # Replace with your app name
+        publish-profile: ${{secrets.SCM_CREDENTIALS}} # Define secret variable in repository settings as per action documentation
+        package: './MatrisAritmetik' 
