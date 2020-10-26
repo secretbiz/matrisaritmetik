@@ -1,17 +1,151 @@
-﻿#matris_main 
-{
-    width: 50% !important;
-    background-color: aquamarine;
+﻿
+/* BACKGROUND RELATED */
+html {
+    height: 100%;
 }
 
-#matris_table 
-{
-    width: 50% !important;
+body {
+    display: flex;
+    min-height: 100%;
+    background-color: palegoldenrod !important;
+}
+
+/********** LEFT_PANEL *********/
+#left_panel {
+    flex: 60%;
+    padding: 5px;
+    margin: 2px;
+    background-color: palegoldenrod !important;
+}
+#matris_title_left {
+    text-align:center;
+    background-color: #eae073;
+    border: 2px double black !important;
+}
+
+/*MATRIS EKLEME PANEL*/
+#matris_add_table {
+    display: flex;
+    background-color: #eae073;
+    border: 2px solid black;
+}
+
+#matris_name {
+    flex: 14%;
+    padding: 2px;
+    margin: 2px;
+}
+
+#matris_add_eqsign {
+    display:flex;
+    align-items:center;
+    flex: 1%;
+    padding: 2px;
+    margin: 1px;
+}
+
+#matris_vals {
+    flex: 75%;
+    padding: 2px;
+    margin: 2px;
+}
+
+#matris_add_button {
+    flex: 10%;
+    padding: 2px;
+    margin: 2px;
+}
+
+/*MATRIS KAYITLARI TABLOSU*/
+#matris_table_base {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#matris_table {
     background-color: darkgrey;
     border: 1px groove darkcyan;
 }
 
+#matris_table td {
+    overflow:auto;
+}
+
 .matdelbtn 
 {
-    border-radius: 15px !important;
+    border-radius: 13px !important;
+}
+
+/********** RIGHT_PANEL *********/
+#right_panel {
+    background-color: #ceb56c !important;
+    border-left: 4px double darkgoldenrod;
+    flex: 40%;
+    padding: 5px;
+    margin: 2px;
+}
+#matris_title_right {
+    text-align: center;
+    background-color: #eae073;
+    border: 2px double black !important;
+}
+
+/*KOMUT PANEL*/
+#matris_komut_panel {
+    display: flex;
+    background-color: #eae073;
+    border: 2px solid black;
+}
+#matris_komut_satır {
+    flex: 80%;
+    padding: 2px;
+    margin: 2px;
+}
+#matris_komut_yardım {
+    flex: 5%;
+    padding: 1px;
+    margin: 1px;
+}
+#matris_komut_button {
+    flex: 15%;
+    padding: 2px;
+    margin: 1px;
+}
+
+/*OUTPUT PANEL*/
+#matris_komut_table_base {
+    width: 100%;
+    table-layout: fixed;
+}
+
+#output_body {
+    background-color: antiquewhite !important;
+}
+#output_body td {
+    overflow: auto;
+}
+#output_textarea {
+    font-size: 14px;
+    font-weight: normal;
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    flex: 100%;
+    overflow-y: scroll;
+}
+
+.output_footer_info {
+    color: grey;
+    background-color: aliceblue;
+    border: 2px double gray;
+}
+.output_footer_warning {
+    color: sandybrown;
+    background-color: aliceblue;
+    border: 2px double #ff6a00;
+}
+.output_footer_error {
+    color: red;
+    background-color: aliceblue;
+    border: 2px double darkred;
 }

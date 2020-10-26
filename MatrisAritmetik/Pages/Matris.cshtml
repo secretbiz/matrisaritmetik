@@ -13,30 +13,66 @@
     
 </head>
 <body>
+    <div id="left_panel">
+        <div id="matris_title_left">
+            <h2>Matris Oluştur </h2>
+        </div>
+        
+        <div id="matris_add_table">
+            <input type="text" id="matris_name" placeholder="Matris ismi" />
+            <span id="matris_add_eqsign">=</span>
+            <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
 
-    <div id="matris_main">
-
-        <h2>Matris Aritmetiği </h2>
-
-        <label for="matris_name"></label>
-        <input type="text" id="matris_name" placeholder="Matris ismi" />
-
-        <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
-
-        <input id="matris_add_button" type="button" class="button" style="color:midnightblue" value="Oluştur" name="matris_create" />
-
+            <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" />
+        </div>
+        
+        <table id="matris_table_base">
+            <thead>
+                <tr>
+                    <td colspan="15" style="text-align:center;padding:1px;font-weight:bold">Kayıtlı Matrisler</td>
+                </tr>
+            </thead>
+            <tbody id="matris_table">
+                <partial name="_MatrisTablePartial" model=@TempData["floatdict"] />
+            </tbody>
+        </table>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <td colspan="6" style="text-align:center;padding:1px;font-weight:bold">Kayıtlı Matrisler</td>
-            </tr>
-        </thead>
-        <tbody id="matris_table">
-            <partial name="_MatrisTablePartial" model=@TempData["floatdict"]/>
-        </tbody>
-    </table>
+    <div id="right_panel">
+        <div id="matris_title_right">
+            <h2>Aritmetik işlemler </h2>
+        </div>
+
+        <div id="matris_komut_panel">
+            <input type="text" id="matris_komut_satır" placeholder="İşlem girin... (örnek: A+B) (yardım: ?komut)" />
+            <input id="matris_komut_yardım" type="button" class="button" value="Yardım" name="matris_komut_yardım" data-toggle="tooltip" data-placement="top" title="Komutları görüntüle" />
+            <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" />
+        </div>
+
+        <div id="matris_komut_output">
+            <table id="matris_komut_table_base">
+                <thead>
+                    <tr>
+                        <td style="text-align:left;padding:2px;font-weight:bold">Çıktılar</td>
+                    </tr>
+                </thead>
+                <tbody id="output_body">
+                    <tr>
+                        <td>
+                            <textarea id="output_textarea" readonly="readonly">>>> Çıktı geçmişi burada görüntülenir...
+                            </textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="output_footer_info">
+                            >>> Komut uyarıları ve hataları burada görüntülenir...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 </body>
 
 <script>if (matris_add_button) { matris_add_button.token = "@token";}</script>
