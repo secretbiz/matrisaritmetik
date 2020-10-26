@@ -1,37 +1,62 @@
 ﻿@model Dictionary<string, MatrisAritmetik.Core.MatrisBase<float>>
 @{
     Layout = null;
+    string ConcatName(string prefix, string name) { return prefix + name; };
 }
 
-<html>
-<head>
-    
-</head>
-<body id="matris_table_inner">
+@if (Model != null)
+{
     @foreach (var name in Model.Keys)
-    {
-        <math id='@name' xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-            <mi>@name </mi>
-            <mo>= </mo>
-            <mrow>
-                <mo> ( </mo>
-                <mtable>
+    {   
+        <tr id='@ConcatName("matris_table_",name)'>
+            <td colspan="1">
+                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                    <mi>@name </mi>
+                </math>
+            </td>
 
-                    @foreach (var row in Model[name].values)
-                    {
-                        <mtr>
-                            @foreach (var val in row)
+            <td colspan="1">
+                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                    <mo>= </mo>
+                </math>
+            </td>
+
+            <td colspan="10">
+                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                    <mrow>
+                        <mo> ( </mo>
+                        <mtable>
+
+                            @foreach (var row in Model[name].values)
                             {
-                                <mtd>
-                                    <mn>@val</mn>
-                                </mtd>
+                                <mtr>
+                                    @foreach (var val in row)
+                                    {
+                                        <mtd>
+                                            <mn>@val</mn>
+                                        </mtd>
+                                    }
+                                </mtr>
                             }
-                        </mtr>
-                    }
-                </mtable>
-                <mo> ) </mo>
-            </mrow>
-        </math>
+                        </mtable>
+                        <mo> ) </mo>
+                    </mrow>
+                </math>
+            </td>
+            <td colspan="2" align="center">
+                <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="top" title='@ConcatName(name," adlı matrise özel işlemler")'/>
+            </td>
+            <td colspan="1" align="center">
+                <ul class="list-inline m-0">
+                    <li class="list-inline-item">
+                        <button name="matris_table_delbutton" id='@ConcatName("matris_table_delbutton_",name)' class="btn btn-danger btn-sm matdelbtn" type="button" data-toggle="tooltip" data-placement="top" title='@ConcatName(name," adlı matrisi sil")'>
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </li>
+                </ul>
+            </td>
+
+        </tr>
     }
-</body>
-</html>
+}
+

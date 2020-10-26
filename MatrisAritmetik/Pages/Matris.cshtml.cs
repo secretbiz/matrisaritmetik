@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,13 +25,9 @@ namespace MatrisAritmetik.Pages
             _frontService = frontService;
         }
 
-        public string Matris_name;
-
-        public string Matris_vals;
-
         private string[] body;
 
-        private string[] ignoredParams = new string[] { "__RequestVerificationToken" };
+        private readonly string[] ignoredParams = new string[] { "__RequestVerificationToken" };
 
         private Dictionary<string, string> decodeDict = new Dictionary<string, string>();
 
@@ -53,7 +49,10 @@ namespace MatrisAritmetik.Pages
 
         public void OnGet()
         {
-            
+            if(_frontService.GetMatrisDict().Count != 0)
+            {
+                TempData["floatdict"] = _frontService.GetMatrisDict();
+            }
         }
 
         public void OnPost()
@@ -74,6 +73,21 @@ namespace MatrisAritmetik.Pages
             }
 
         }
+
+        public async Task OnPostDeleteMatrix()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.Default))
+            {
+                string temp = await reader.ReadToEndAsync();
+
+                urlDecode(temp);
+
+                if (decodeDict.ContainsKey("name"))
+                    _frontService.DeleteFromMatrisDict(decodeDict["name"].Replace("matris_table_delbutton_",""));
+            }
+
+        }
+
         public PartialViewResult OnPostUpdateMatrisTable()
         {
             PartialViewResult debug = Partial("_MatrisTablePartial", _frontService.GetMatrisDict());
