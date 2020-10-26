@@ -45,6 +45,7 @@ body {
 }
 
 #matris_vals {
+    min-height:34px;
     flex: 75%;
     padding: 2px;
     margin: 2px;

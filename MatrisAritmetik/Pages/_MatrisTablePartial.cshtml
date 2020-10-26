@@ -9,6 +9,7 @@
     @foreach (var name in Model.Keys)
     {   
         <tr id='@ConcatName("matris_table_",name)'>
+            <!--Name-->
             <td colspan="1">
                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                     <mi>@name </mi>
@@ -21,31 +22,37 @@
                 </math>
             </td>
 
+            <!--Values-->
             <td colspan="10">
-                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                    <mrow>
-                        <mo> ( </mo>
-                        <mtable>
+                <div id='@ConcatName("matris_vals_",name)' style="max-height:200px;overflow-y:auto;">
+                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                        <mrow>
+                            <mo> ( </mo>
+                            <mtable>
 
-                            @foreach (var row in Model[name].values)
-                            {
-                                <mtr>
-                                    @foreach (var val in row)
-                                    {
-                                        <mtd>
-                                            <mn>@val</mn>
-                                        </mtd>
-                                    }
-                                </mtr>
-                            }
-                        </mtable>
-                        <mo> ) </mo>
-                    </mrow>
-                </math>
+                                @foreach (var row in Model[name].values)
+                                {
+                                    <mtr>
+                                        @foreach (var val in row)
+                                        {
+                                            <mtd>
+                                                <mn>@val</mn>
+                                            </mtd>
+                                        }
+                                    </mtr>
+                                }
+                            </mtable>
+                            <mo> ) </mo>
+                        </mrow>
+                    </math>
+                </div>
             </td>
+
+            <!--Buttons-->
             <td colspan="2" align="center">
                 <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="top" title='@ConcatName(name," adlı matrise özel işlemler")'/>
             </td>
+
             <td colspan="1" align="center">
                 <ul class="list-inline m-0">
                     <li class="list-inline-item">
