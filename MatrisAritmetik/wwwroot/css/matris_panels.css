@@ -3,18 +3,26 @@
 html {
     height: 100%;
 }
-
 body {
     display: flex;
     min-height: 100%;
     background-color: palegoldenrod !important;
 }
 
+#panel_container {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+}
+
 /********** LEFT_PANEL *********/
 #left_panel {
-    flex: 60%;
+    transition: all 0s ease 0s;
+    flex: 0 0 auto !important;
     padding: 5px;
     margin: 2px;
+    min-width: 45% !important;
+    max-width: 60% !important;
     background-color: palegoldenrod !important;
 }
 #matris_title_left {
@@ -25,6 +33,7 @@ body {
 
 /*MATRIS EKLEME PANEL*/
 #matris_add_table {
+    min-width: 280px;
     display: flex;
     background-color: #eae073;
     border: 2px solid black;
@@ -46,6 +55,7 @@ body {
 
 #matris_vals {
     min-height:34px;
+    height:34px;
     flex: 75%;
     padding: 2px;
     margin: 2px;
@@ -77,13 +87,22 @@ body {
     border-radius: 13px !important;
 }
 
+/*********** SPLITTER  **********/
+#panel_split {
+    touch-action: none;
+    flex: 0 0 auto !important;
+    cursor: col-resize;
+    height: 100% !important;
+    border-left: 4px double darkgoldenrod;
+}
 /********** RIGHT_PANEL *********/
 #right_panel {
     background-color: #ceb56c !important;
     border-left: 4px double darkgoldenrod;
-    flex: 40%;
+    flex: 1 1 auto !important;
     padding: 5px;
     margin: 2px;
+    max-width: 65% !important;
 }
 #matris_title_right {
     text-align: center;
@@ -114,6 +133,9 @@ body {
 }
 
 /*OUTPUT PANEL*/
+#matris_komut_output {
+    padding-right: 6px;
+}
 #matris_komut_table_base {
     width: 100%;
     table-layout: fixed;
