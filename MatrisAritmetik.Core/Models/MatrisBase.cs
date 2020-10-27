@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace MatrisAritmetik.Core
 {
@@ -137,6 +138,39 @@ namespace MatrisAritmetik.Core
             }
 
             return strmat;
+        }
+
+        // Satırı matris olarak döner. 1-based
+        public MatrisBase<T> RowMat(int r,int based=1)
+        {
+            List<List<T>> listrow = new List<List<T>>() { new List<T>() };
+            for(int j=0;j<col;j++)
+            {
+                listrow[0].Add(values[r - based][j]);
+            }
+            return new MatrisBase<T>() { row = 1, col = col, values = listrow };
+        }
+
+        // Sütunu matris olarak döner. 1-based
+        public MatrisBase<T> ColMat(int c, int based = 1)
+        {
+            List<List<T>> listcol = new List<List<T>>();
+            for (int i = 0; i < row; i++)
+            {
+                listcol.Add(new List<T>() { values[i][c - based] });
+            }
+            return new MatrisBase<T>() { row = row, col = 1, values = listcol };
+        }
+
+        // Sütunu liste olarak döner. 1-based
+        public List<T> Col(int c, int based = 1)
+        {
+            List<T> listrow = new List<T>();
+            for (int i = 0; i < row; i++)
+            {
+                listrow.Add(values[i][c - based]);
+            }
+            return listrow;
         }
 
         public IEnumerator<List<T>> GetEnumerator()
