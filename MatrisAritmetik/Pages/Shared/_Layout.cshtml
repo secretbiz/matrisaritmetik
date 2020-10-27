@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - MatrisAritmetik</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/css/matris_panels.css" />
+    <link href='@Url.Content("~/css/matris_panels.css")' rel='stylesheet' type='text/css' asp-append-version="true"/>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js" />
@@ -20,12 +20,12 @@
 </head>
 <body>
     @RenderBody()
-   
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script type="module" src="~/js/matris_requests.js"></script>
+    <script src="~/js/matris_requests.js" asp-append-version="true" type="module"></script>
 
     @RenderSection("Scripts", required: false)
 </body>
