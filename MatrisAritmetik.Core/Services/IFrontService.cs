@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core.Services
 {
@@ -13,6 +14,7 @@ namespace MatrisAritmetik.Core.Services
         void AddToMatrisDict(string name, MatrisBase<float> MatrisDict);
 
         void DeleteFromMatrisDict(string name);
-        
+
+        Command EvaluateCommand(string cmd);
     }
 }

@@ -4,41 +4,41 @@ using MatrisAritmetik.Core.Services;
 
 namespace MatrisAritmetik.Services
 {
-    public class FloatsService : IFloatsService
+    public class FloatsService<T> : IFloatsService<T>
     {
-        public List<List<float>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true)
+        public List<List<T>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true)
         {
             string filteredText = text;
             if (removeliterals)
             {
                 filteredText = filteredText.Replace('\t', delimiter).Replace('\r', ' ');
             }
-            List<List<float>> vals = new List<List<float>>();
+            List<List<T>> vals = new List<List<T>>();
             int temp = -1;
             float element;
             string[] rowsplit;
-            List<float> temprow;
+            List<T> temprow;
 
             foreach (var row in filteredText.Split(newline))
             {
-                temprow = new List<float>();
+                temprow = new List<T>();
                 rowsplit = row.Split(delimiter);
 
                 if (rowsplit.Length != temp && temp != -1)
                 {
                     Console.WriteLine("Bad column size: expected " + temp.ToString() + " got " + rowsplit.Length.ToString());
-                    return new List<List<float>>();
+                    return new List<List<T>>();
                 }
 
                 temp = 0;
 
                 foreach (var val in rowsplit)
                 {
-                    if (float.TryParse(val, out element)) temprow.Add(element);
+                    if (float.TryParse(val, out element)) temprow.Add((dynamic)element);
                     else
                     {
                         Console.WriteLine("Parsing failed: " + val);
-                        return new List<List<float>>();
+                        return new List<List<T>>();
                     }
                     temp += 1;
                 }

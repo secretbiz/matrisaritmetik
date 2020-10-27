@@ -31,7 +31,8 @@ namespace MatrisAritmetik
             services.AddRazorPages();
 
             services.AddSingleton<IFrontService, FrontService>();
-            services.AddScoped<IFloatsService, FloatsService>();
+            services.AddScoped<IFloatsService<float>, FloatsService<float>>();
+            services.AddScoped<IMatrisArithmeticService<float>, MatrisArithmeticService<float>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

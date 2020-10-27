@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MatrisAritmetik.Core.Services
 {
-    public interface IFloatsService
+    public interface IFloatsService<T>
     {
-        List<List<float>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true);
+        List<List<T>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true);
         
     }
 }

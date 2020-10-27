@@ -12,17 +12,20 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using MatrisAritmetik.Core.Services;
 using Microsoft.AspNetCore.Authorization;
+using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Pages
 {   
     public class MatrisModel : PageModel
     {
-        private readonly IFloatsService _floatArithmetic;
+        private readonly IFloatsService<float> _floatArithmetic;
         private readonly IFrontService _frontService;
-        public MatrisModel(IFloatsService floatArithmetic, IFrontService frontService)
+        private readonly IMatrisArithmeticService<float> _matrisService;
+        public MatrisModel(IFloatsService<float> floatArithmetic, IFrontService frontService,IMatrisArithmeticService<float> matrisService)
         {
             _floatArithmetic = floatArithmetic;
             _frontService = frontService;
+            _matrisService = matrisService;
         }
 
         private string[] body;
@@ -49,6 +52,7 @@ namespace MatrisAritmetik.Pages
 
         public void OnGet()
         {
+            // Sayfa yenileme durumunda kayıtlı matrisleri göster
             if(_frontService.GetMatrisDict().Count != 0)
             {
                 TempData["floatdict"] = _frontService.GetMatrisDict();
@@ -69,7 +73,8 @@ namespace MatrisAritmetik.Pages
                 urlDecode(temp);
 
                 if (decodeDict.ContainsKey("name") && decodeDict.ContainsKey("vals"))
-                    _frontService.AddToMatrisDict(decodeDict["name"], new MatrisBase<float>(_floatArithmetic.StringTo2DList(decodeDict["vals"])));
+                    _frontService.AddToMatrisDict(decodeDict["name"],
+                        new MatrisBase<float>(_floatArithmetic.StringTo2DList(decodeDict["vals"])));
             }
 
         }
@@ -90,8 +95,20 @@ namespace MatrisAritmetik.Pages
 
         public PartialViewResult OnPostUpdateMatrisTable()
         {
-            PartialViewResult debug = Partial("_MatrisTablePartial", _frontService.GetMatrisDict());
-            return debug;
+            return Partial("_MatrisTablePartial", _frontService.GetMatrisDict());
+        }
+
+        public async Task OnPostSendCmd()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.Default))
+            {
+                string temp = await reader.ReadToEndAsync();
+
+                urlDecode(temp);
+
+                Command debugCmd = _frontService.EvaluateCommand(decodeDict["cmd"]);
+            }
+
         }
 
     }

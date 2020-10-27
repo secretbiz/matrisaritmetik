@@ -60,3 +60,24 @@ if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
+
+// komut gönder
+function sendCmd(event) {
+    var tkn = event.currentTarget.token;
+    $.ajax(
+        {
+            type: 'POST',
+            url: 'Matris?handler=SendCmd',
+            data:
+            {
+                __RequestVerificationToken: tkn,
+                "cmd": document.getElementById("matris_komut_satır").value,
+            },
+            success: function (data) { updateTable(tkn); },
+            error: function (error) { console.log(error); }
+        });
+}
+
+// komut gönderme butonu click event
+const matris_komut_button = document.getElementById("matris_komut_button");
+if (matris_komut_button) { matris_komut_button.addEventListener("click", sendCmd, false); }
