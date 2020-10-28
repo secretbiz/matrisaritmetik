@@ -31,7 +31,7 @@ namespace MatrisAritmetik
             services.AddRazorPages();
 
             services.AddSingleton<IFrontService, FrontService>();
-            services.AddScoped<IFloatsService<float>, FloatsService<float>>();
+            services.AddScoped<IUtilityService<float>, UtilityService<float>>();
             services.AddScoped<IMatrisArithmeticService<float>, MatrisArithmeticService<float>>();
         }
 

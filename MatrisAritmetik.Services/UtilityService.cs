@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
 
 namespace MatrisAritmetik.Services
 {
-    public class FloatsService<T> : IFloatsService<T>
+    public class UtilityService<T> : IUtilityService<T>
     {
         public List<List<T>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true)
         {
@@ -15,7 +20,6 @@ namespace MatrisAritmetik.Services
             }
             List<List<T>> vals = new List<List<T>>();
             int temp = -1;
-            float element;
             string[] rowsplit;
             List<T> temprow;
 
@@ -34,7 +38,7 @@ namespace MatrisAritmetik.Services
 
                 foreach (var val in rowsplit)
                 {
-                    if (float.TryParse(val, out element)) temprow.Add((dynamic)element);
+                    if (float.TryParse(val, out float element)) temprow.Add((dynamic)element);
                     else
                     {
                         Console.WriteLine("Parsing failed: " + val);
@@ -47,5 +51,29 @@ namespace MatrisAritmetik.Services
 
             return vals;
         }
+
+        public async Task ReadAndDecodeRequest(Stream reqbody, Encoding enc, List<string> ignoredparams, Dictionary<string,string> decodedRequestDict)
+        {
+            using var reader = new StreamReader(reqbody, enc);
+            string url = await reader.ReadToEndAsync();
+
+            string[] body = WebUtility.UrlDecode(url).Split("&");    // body = "param=somevalue&param2=someothervalue"
+            string[] pairsplit;
+
+            decodedRequestDict.Clear();
+
+            foreach (var pair in body)
+            {
+                pairsplit = pair.Split("="); // pairsplit[] = { key , value }
+
+                if (ignoredparams.Contains(pairsplit[0]))
+                    continue;
+
+                if (!decodedRequestDict.ContainsKey(pairsplit[0]))
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1]);
+            }
+
+        }
+
     }
 }
