@@ -72,7 +72,7 @@ namespace MatrisAritmetik.Services
 
         public MatrisBase<T> Conjugate(MatrisBase<T> A)
         {
-            return new MatrisBase<T>();
+            return A.Copy();
         }
 
         public float Determinant(MatrisBase<T> A)

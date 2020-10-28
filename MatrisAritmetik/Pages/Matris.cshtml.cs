@@ -18,37 +18,21 @@ namespace MatrisAritmetik.Pages
 {   
     public class MatrisModel : PageModel
     {
-        private readonly IFloatsService<float> _floatArithmetic;
+        private readonly IUtilityService<float> _utils;
         private readonly IFrontService _frontService;
         private readonly IMatrisArithmeticService<float> _matrisService;
-        public MatrisModel(IFloatsService<float> floatArithmetic, IFrontService frontService,IMatrisArithmeticService<float> matrisService)
+        public MatrisModel(IUtilityService<float> utilityService, IFrontService frontService,IMatrisArithmeticService<float> matrisService)
         {
-            _floatArithmetic = floatArithmetic;
+            _utils = utilityService;
             _frontService = frontService;
             _matrisService = matrisService;
         }
 
-        private string[] body;
+        private readonly List<string> IgnoredParams = new List<string>() { "__RequestVerificationToken" };
 
-        private readonly string[] ignoredParams = new string[] { "__RequestVerificationToken" };
+        public Dictionary<string, string> DecodedRequestDict = new Dictionary<string, string>();
 
-        private Dictionary<string, string> decodeDict = new Dictionary<string, string>();
-
-        private void urlDecode(string url)
-        {
-            body = WebUtility.UrlDecode(url).Split("&");    // body = "param=somevalue&param2=someothervalue"
-            decodeDict.Clear();
-
-            string[] pairsplit;
-            foreach (var pair in body)
-            {
-                pairsplit = pair.Split("=");
-                if (ignoredParams.Contains(pairsplit[0]))
-                    continue;
-
-                decodeDict.Add(pairsplit[0], pairsplit[1]);
-            }
-        }
+        public Command LastExecutedCommand;
 
         public void OnGet()
         {
@@ -57,6 +41,12 @@ namespace MatrisAritmetik.Pages
             {
                 TempData["floatdict"] = _frontService.GetMatrisDict();
             }
+
+            // Hazır komut bilgilerini al
+            if(_frontService.GetCommandLabelList() == null)
+                _frontService.ReadCommandInformation();
+
+            TempData["komut_optionsdict"] = _frontService.GetCommandLabelList();
         }
 
         public void OnPost()
@@ -66,30 +56,20 @@ namespace MatrisAritmetik.Pages
 
         public async Task OnPostAddMatrix()
         {
-            using (var reader = new StreamReader(Request.Body, Encoding.Default))
-            {
-                string temp = await reader.ReadToEndAsync();
-                
-                urlDecode(temp);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-                if (decodeDict.ContainsKey("name") && decodeDict.ContainsKey("vals"))
-                    _frontService.AddToMatrisDict(decodeDict["name"],
-                        new MatrisBase<float>(_floatArithmetic.StringTo2DList(decodeDict["vals"])));
-            }
+            if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("vals"))
+                _frontService.AddToMatrisDict(DecodedRequestDict["name"],
+                    new MatrisBase<float>(_utils.StringTo2DList(DecodedRequestDict["vals"])));
 
         }
 
         public async Task OnPostDeleteMatrix()
         {
-            using (var reader = new StreamReader(Request.Body, Encoding.Default))
-            {
-                string temp = await reader.ReadToEndAsync();
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-                urlDecode(temp);
-
-                if (decodeDict.ContainsKey("name"))
-                    _frontService.DeleteFromMatrisDict(decodeDict["name"].Replace("matris_table_delbutton_",""));
-            }
+            if (DecodedRequestDict.ContainsKey("name"))
+                _frontService.DeleteFromMatrisDict(DecodedRequestDict["name"].Replace("matris_table_delbutton_",""));
 
         }
 
@@ -100,14 +80,10 @@ namespace MatrisAritmetik.Pages
 
         public async Task OnPostSendCmd()
         {
-            using (var reader = new StreamReader(Request.Body, Encoding.Default))
-            {
-                string temp = await reader.ReadToEndAsync();
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-                urlDecode(temp);
-
-                Command debugCmd = _frontService.EvaluateCommand(decodeDict["cmd"]);
-            }
+            if (DecodedRequestDict.ContainsKey("cmd"))
+                LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict["cmd"]);
 
         }
 

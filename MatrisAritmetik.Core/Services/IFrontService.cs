@@ -15,6 +15,14 @@ namespace MatrisAritmetik.Core.Services
 
         void DeleteFromMatrisDict(string name);
 
-        Command EvaluateCommand(string cmd);
+        void ReadCommandInformation();
+
+        CommandLabel[] GetCommandLabelList();
+
+        void AddToCommandLabelList(string label, CommandInfo[] commandInfos);
+
+        void ClearCommandLabel(string label);
+
+        Command CreateCommand(string cmd);
     }
 }

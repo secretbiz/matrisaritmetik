@@ -116,8 +116,13 @@ body {
     background-color: #eae073;
     border: 2px solid black;
 }
+#matris_komut_options{
+    flex: 15%;
+    padding: 1px;
+    margin: 1px
+}
 #matris_komut_satır {
-    flex: 80%;
+    flex: 65%;
     padding: 2px;
     margin: 2px;
 }

@@ -1,0 +1,59 @@
+[
+    {
+        "Label": "Aritmetik",
+        "Functions": [
+            {
+                "fullname": "Matrix Multiplication",
+                "description": "Matrix multiplication of given A and B matrices",
+
+                "alias_list": [ "Matris .* Matris" ],
+                "function": "MatMul",
+                "param_types": [ "Matris", "Matris" ],
+                "required_params": [ 0, 1 ],
+
+                "function_template": "!MatMul(,)",
+                "function_template_filled": "!MatMul(A, B)"
+            }
+        ]
+    },
+
+    {
+        "Label": "Cebirsel",
+        "Functions": [
+            {
+                "fullname": "Transpose",
+                "description": "Transpose of given matrix A",
+
+                "alias_list": [],
+                "function": "Transpose",
+                "param_types": [ "Matris" ],
+                "required_params": [ 0 ],
+
+                "function_template": "!Transpose()",
+                "function_template_filled": "!Transpose(A)"
+            }
+        ]
+    },
+
+    {
+        "Label": "Boyutsal",
+        "Functions": [
+            {
+                "fullname": "Concatenate",
+                "description": "Concatenates given matrices A and B along given axis",
+
+                "alias_list": [],
+                "function": "Concat",
+                "param_types": [
+                    "Matris",
+                    "Matris",
+                    "row | col"
+                ],
+                "required_params": [ 0, 1, 2 ],
+
+                "function_template": "!Concatenate(,,)",
+                "function_template_filled": "!Concatenate(A,B,row_OR_col)"
+            }
+        ]
+    }
+]

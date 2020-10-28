@@ -81,3 +81,23 @@ function sendCmd(event) {
 // komut gönderme butonu click event
 const matris_komut_button = document.getElementById("matris_komut_button");
 if (matris_komut_button) { matris_komut_button.addEventListener("click", sendCmd, false); }
+
+// komut dropdown seçeneklerinde değişim
+function placeAsCommand(event) {
+    if (event.currentTarget.value == "komut_options_placeholder")
+        return;
+
+    var command_row = document.getElementById("matris_komut_satır");
+
+    // Empty input area
+    if (command_row.value == "")
+        command_row.value = event.currentTarget.value;
+    else
+        command_row.value += event.currentTarget.value;
+
+    event.currentTarget.selectedIndex = 0;
+}
+
+// komut dropdown change event
+const matris_komut_options = document.getElementById("matris_komut_options");
+if (matris_komut_options) { matris_komut_options.addEventListener("change", placeAsCommand, false); }

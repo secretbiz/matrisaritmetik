@@ -1,0 +1,20 @@
+﻿@model MatrisAritmetik.Core.Models.CommandLabel[]
+@{
+    Layout = null;
+}
+
+@if (Model != null)
+{
+    <option value="komut_options_placeholder">--Komutlar--</option>
+    @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
+    {
+        <optgroup label=@cmdlabel.Label>
+            @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
+            {
+                <option value="@cmdinfo.function_template_filled" title="@cmdinfo.Info()">
+                    @cmdinfo.fullname
+                </option>
+            }
+        </optgroup>
+    }
+}
