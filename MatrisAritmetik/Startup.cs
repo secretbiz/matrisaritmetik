@@ -32,8 +32,7 @@ namespace MatrisAritmetik
             services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+            {   
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
