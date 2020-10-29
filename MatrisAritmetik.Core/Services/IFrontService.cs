@@ -7,13 +7,9 @@ namespace MatrisAritmetik.Core.Services
 {
     public interface IFrontService
     {
-        void SetMatrisDict(Dictionary<string, MatrisBase<float>> MatrisDict);
+        void AddToMatrisDict(string name, MatrisBase<float> mat, Dictionary<string, MatrisBase<float>> matdict);
 
-        Dictionary<string, MatrisBase<float>> GetMatrisDict();
-
-        void AddToMatrisDict(string name, MatrisBase<float> MatrisDict);
-
-        void DeleteFromMatrisDict(string name);
+        void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<float>> matdict);
 
         void ReadCommandInformation();
 

@@ -33,7 +33,7 @@ function updateTable(token) {
         }
         
     });
-}
+} export { updateTable }
 
 // matris silme fonksiyonu
 function deleteMatrix(event) {
@@ -55,11 +55,6 @@ function deleteMatrix(event) {
 // matris ekleme butonu click event
 const matris_add_button = document.getElementById("matris_add_button");
 if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, false); }
-
-// mouse hover -> ipucu gösterme
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-});
 
 // komut gönder
 function sendCmd(event) {

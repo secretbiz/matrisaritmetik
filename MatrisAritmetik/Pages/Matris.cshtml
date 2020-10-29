@@ -22,7 +22,7 @@
 
         <div id="left_panel">
             <div id="matris_title_left">
-                <h2>Matris Oluştur </h2>
+                <h2>Matrisler</h2>
             </div>
 
             <div id="matris_add_table">
@@ -40,7 +40,7 @@
                     </tr>
                 </thead>
                 <tbody id="matris_table">
-                    <partial name="_MatrisTablePartial" model=@TempData["floatdict"] />
+                    <partial name="_MatrisTablePartial" model=@Model.savedMatrices />
                 </tbody>
             </table>
         </div>
@@ -54,7 +54,7 @@
 
             <div id="matris_komut_panel">
                 <select id="matris_komut_options">
-                    <partial name="_CommandSelectionPartial" model=@TempData["komut_optionsdict"] />
+                    <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
                 </select>
                 <input type="text" id="matris_komut_satır" placeholder=">>> (örnek: A+B) (yardım: ?komut)" />
                 <input id="matris_komut_yardım" type="button" class="button" value="Yardım" name="matris_komut_yardım" data-toggle="tooltip" data-placement="top" title="Komutları görüntüle" />
@@ -95,4 +95,9 @@
         handleSelector: "#panel_split",
         resizeHeight: false,
     });
+
+</script>
+<script type = "module" >
+    import { updateTable } from "/js/matris_requests.js";
+    updateTable('@token');
 </script>

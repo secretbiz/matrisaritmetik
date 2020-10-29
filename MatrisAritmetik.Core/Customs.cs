@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 /* This file is for managing smaller classes, enumerators etc.
  * Created to reduce file amount.
@@ -73,5 +75,21 @@ namespace MatrisAritmetik.Core
     public class Parser
     {
         public Parser() { }
+    }
+
+    // Session stuff
+    public static class SessionExtensions
+    {
+        public static void Set<T>(this ISession session, string key, T value)
+        {
+            string serialized = JsonSerializer.Serialize(value,typeof(T));
+            session.SetString(key, serialized);
+        }
+
+        public static T Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default(T) : JsonSerializer.Deserialize<T>(value);
+        }
     }
 }

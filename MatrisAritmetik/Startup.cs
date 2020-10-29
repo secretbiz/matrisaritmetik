@@ -28,9 +28,17 @@ namespace MatrisAritmetik
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            services.AddRazorPages().AddSessionStateTempDataProvider(); ;
+            services.AddDistributedMemoryCache();
 
-            services.AddSingleton<IFrontService, FrontService>();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            services.AddScoped<IFrontService, FrontService>();
             services.AddScoped<IUtilityService<float>, UtilityService<float>>();
             services.AddScoped<IMatrisArithmeticService<float>, MatrisArithmeticService<float>>();
         }
@@ -87,7 +95,10 @@ namespace MatrisAritmetik
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
