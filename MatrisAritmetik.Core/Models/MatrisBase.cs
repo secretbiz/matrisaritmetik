@@ -172,6 +172,139 @@ namespace MatrisAritmetik.Core
             }
             return listrow;
         }
+        
+        // Matrisin köşelerindeki değerleri içeren string matris döner
+        // Matrisin boyutu yüksekse kullanılabilir
+        public dynamic CornerMatrix(int rowEachCorner = -1, int colEachCorner = -1, string filler = "...")
+        {
+            if (row == 0 || col == 0)
+                return new MatrisBase<T>();
+
+            List<List<string>> smallerList = new List<List<string>>();
+
+            if (rowEachCorner <= 0)
+            {
+                rowEachCorner = Math.Min((int)((float)row * 0.33), 4);
+                rowEachCorner = (rowEachCorner == 0) ? row : rowEachCorner;
+            }
+            if (colEachCorner <= 0)
+            {
+                colEachCorner = Math.Min((int)((float)col * 0.33), 4);
+                colEachCorner = (colEachCorner == 0) ? col : colEachCorner;
+            }
+
+            // No reduction
+            if ( (((float)rowEachCorner) * 2.0 + 1.0 > (float)row) && (((float)colEachCorner) * 2.0 + 1.0 > (float)col))
+            {
+                return new MatrisBase<T>() { row = row, col = col, values = values };
+            }
+            // Only reduce columns
+            else if (((float)rowEachCorner) * 2.0 + 1.0 > (float)row)
+            {
+                // Start reducing columns
+                for (int i = 0; i < row; i++)
+                {
+                    smallerList.Add(new List<string>());
+                    for (int left = 0; left < colEachCorner; left++)
+                    {
+                        smallerList[i].Add(values[i][left].ToString());
+                    }
+
+                    smallerList[i].Add(filler);
+
+                    for (int right = col - colEachCorner; right < col; right++)
+                    {
+                        smallerList[i].Add(values[i][right].ToString());
+                    }
+                }
+
+                return new MatrisBase<string>() { row = rowEachCorner * 2 + 1, col = colEachCorner * 2 + 1, values = smallerList };
+            }
+            // Only reduce rows
+            else if (((float)colEachCorner) * 2.0 + 1.0 > (float)col)
+            {
+                // Start reducing rows
+                // Upper half
+                for (int u = 0; u < rowEachCorner; u++)
+                {
+                    smallerList.Add(new List<string>());
+                    for (int left = 0; left < colEachCorner; left++)
+                    {
+                        smallerList[u].Add(values[u][left].ToString());
+                    }
+                }
+
+                smallerList.Add(new List<string>());
+                for (int j = 0; j < col; j++)
+                {
+                    smallerList[rowEachCorner].Add(filler);
+                }
+
+                int rrowind = rowEachCorner + 1;
+                // Bottom half
+                for (int i = row - rowEachCorner; i < row; i++)
+                {
+                    smallerList.Add(new List<string>());
+                    for (int bleft = 0; bleft < colEachCorner; bleft++)
+                    {
+                        smallerList[rrowind].Add(values[i][bleft].ToString());
+                    }
+                    rrowind++;
+                }
+
+                return new MatrisBase<string>() { row = rowEachCorner * 2 + 1, col = colEachCorner * 2 + 1, values = smallerList };
+            }
+
+            // Reduce both rows and columns
+            // Upper half
+            for (int u=0; u<rowEachCorner; u++)
+            {
+                smallerList.Add(new List<string>());
+                for(int left = 0; left < colEachCorner; left++)
+                {
+                    smallerList[u].Add(values[u][left].ToString());
+                }
+
+                smallerList[u].Add(filler);
+
+                for (int right = col-colEachCorner; right < col; right++)
+                {
+                    smallerList[u].Add(values[u][right].ToString());
+                }
+            }
+
+            smallerList.Add(new List<string>());
+            for (int j = 0; j < colEachCorner * 2 + 1; j++)
+            {
+                smallerList[rowEachCorner].Add(filler);
+            }
+
+            int rowind = rowEachCorner + 1;
+            // Bottom half
+            for (int i = row-rowEachCorner; i < row; i++)
+            {
+                smallerList.Add(new List<string>());
+                for (int bleft = 0; bleft < colEachCorner; bleft++)
+                {
+                    smallerList[rowind].Add(values[i][bleft].ToString());
+                }
+
+                smallerList[rowind].Add(filler);
+
+                for (int bright = col - colEachCorner; bright < col; bright++)
+                {
+                    smallerList[rowind].Add(values[i][bright].ToString());
+                }
+                rowind++;
+            }
+
+            return new MatrisBase<string>() { row = rowEachCorner * 2 + 1, col = colEachCorner * 2 + 1, values = smallerList };
+        }
+
+        public int ElementCount()
+        {
+            return col * row;
+        }
 
         public IEnumerator<List<T>> GetEnumerator()
         {

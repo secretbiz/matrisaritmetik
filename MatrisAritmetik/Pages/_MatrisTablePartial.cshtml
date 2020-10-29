@@ -2,12 +2,13 @@
 @{
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
+    int MaxTolarableSize = 100;
 }
 
 @if (Model != null)
 {
     @foreach (var name in Model.Keys)
-    {   
+    {
         <tr id='@ConcatName("matris_table_",name)'>
             <!--Name-->
             <td colspan="3">
@@ -29,17 +30,33 @@
                         <mrow>
                             <mo> ( </mo>
                             <mtable>
-
-                                @foreach (var row in Model[name].values)
+                                @if (Model[name].ElementCount() > MaxTolarableSize)
                                 {
-                                    <mtr>
-                                        @foreach (var val in row)
-                                        {
-                                            <mtd>
-                                                <mn>@val</mn>
-                                            </mtd>
-                                        }
-                                    </mtr>
+                                    @foreach (var row in Model[name].CornerMatrix().values)
+                                    {
+                                        <mtr>
+                                            @foreach (var val in row)
+                                            {
+                                                <mtd>
+                                                    <mn>@val</mn>
+                                                </mtd>
+                                            }
+                                        </mtr>
+                                    }
+                                }
+                                else
+                                {
+                                    @foreach (var row in Model[name].values)
+                                    {
+                                        <mtr>
+                                            @foreach (var val in row)
+                                            {
+                                                <mtd>
+                                                    <mn>@val</mn>
+                                                </mtd>
+                                            }
+                                        </mtr>
+                                    }
                                 }
                             </mtable>
                             <mo> ) </mo>

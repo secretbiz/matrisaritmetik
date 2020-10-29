@@ -17,6 +17,9 @@ namespace MatrisAritmetik.Services
 
         public void AddToMatrisDict(string name, MatrisBase<float> matris, Dictionary<string,MatrisBase<float>> matdict)
         {
+            if (name.Replace(" ", "") == "")
+                return;
+
             Match match = name_regex.Match(name);
             
             if (match.Groups[0].Value == name && !matdict.ContainsKey(name))
