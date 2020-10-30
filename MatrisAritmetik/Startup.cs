@@ -38,8 +38,9 @@ namespace MatrisAritmetik
             });
 
             services.AddScoped<IFrontService, FrontService>();
-            services.AddScoped<IUtilityService<float>, UtilityService<float>>();
-            services.AddScoped<IMatrisArithmeticService<float>, MatrisArithmeticService<float>>();
+            services.AddScoped<IUtilityService<dynamic>, UtilityService<dynamic>>();
+            services.AddScoped<IMatrisArithmeticService<dynamic>, MatrisArithmeticService<dynamic>>();
+            services.AddScoped<ISpecialMatricesService, SpecialMatricesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

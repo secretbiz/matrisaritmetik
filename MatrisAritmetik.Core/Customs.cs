@@ -10,8 +10,11 @@ using Microsoft.AspNetCore.Http;
 namespace MatrisAritmetik.Core
 {
     // ENUM CLASSES
+    // Command's states
     public enum CommandState { IDLE = -2, UNAVAILABLE = -1, SUCCESS = 0, WARNING = 1, ERROR = 2 };
 
+    // For limiting matrix creation
+    public enum MatrisLimits { forRows = 128, forCols = 128, forSize = 128*128, forMatrisCount = 8};
 
     // COMMAND PARSING RELATED
     // Represents each term of an expression
@@ -92,4 +95,5 @@ namespace MatrisAritmetik.Core
             return value == null ? default(T) : JsonSerializer.Deserialize<T>(value);
         }
     }
+
 }

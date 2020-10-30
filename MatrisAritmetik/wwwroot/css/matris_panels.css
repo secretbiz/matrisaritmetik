@@ -15,6 +15,12 @@ body {
     overflow: hidden !important;
 }
 
+/* Options placeholder row */
+.options_placeholder {
+    font-weight:bold;
+    background-color:lightgrey;
+}
+
 /********** LEFT_PANEL *********/
 #left_panel {
     transition: all 0s ease 0s;
@@ -31,7 +37,30 @@ body {
     border: 2px double black !important;
 }
 
-/*MATRIS EKLEME PANEL*/
+/* TAB SATIRI */
+.tabrow {
+    border-top: 3px solid black;
+    background-color: inherit;
+    width: inherit !important;
+    padding: 0px !important;
+}
+
+    .tabrow > ul > li {
+        font-weight: bold !important;
+        font-size:15px;
+        color: #4c3a0b !important;
+        cursor: pointer !important;
+    }
+
+#special_matris_options {
+    border: none !important;
+    background-color: inherit;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+/* MATRIS EKLEME PANEL */
 #matris_add_table {
     min-width: 280px;
     display: flex;
@@ -43,6 +72,7 @@ body {
     flex: 14%;
     padding: 2px;
     margin: 2px;
+    min-width: 15%;
 }
 
 #matris_add_eqsign {
@@ -53,21 +83,42 @@ body {
     margin: 1px;
 }
 
+/* Standard panel */
 #matris_vals {
-    min-height:34px;
-    height:34px;
-    flex: 75%;
+    min-height: 34px;
+    height: 34px;
+    flex: 70%;
     padding: 2px;
     margin: 2px;
+    min-width: 22%;
 }
 
 #matris_add_button {
-    flex: 10%;
+    flex: 15%;
     padding: 2px;
     margin: 2px;
+    min-width: 13%;
 }
 
-/*MATRIS KAYITLARI TABLOSU*/
+/* Özel matris ekleme panel */
+
+#matris_vals_special {
+    min-height: 34px;
+    height: 34px;
+    flex: 35%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 11.5%;
+}
+
+#matris_special_args {
+    flex: 35%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 11.5%;
+}
+
+/*** MATRIS KAYITLARI TABLOSU ***/
 #matris_table_base {
     width: 100%;
     table-layout: fixed;
@@ -110,7 +161,7 @@ body {
     border: 2px double black !important;
 }
 
-/*KOMUT PANEL*/
+/* KOMUT PANEL */
 #matris_komut_panel {
     display: flex;
     background-color: #eae073;
@@ -119,7 +170,8 @@ body {
 #matris_komut_options{
     flex: 15%;
     padding: 1px;
-    margin: 1px
+    margin: 1px;
+    min-width:20%;
 }
 #matris_komut_satır {
     flex: 65%;
@@ -137,7 +189,7 @@ body {
     margin: 1px;
 }
 
-/*OUTPUT PANEL*/
+/* OUTPUT PANEL */
 #matris_komut_output {
     padding-right: 6px;
 }

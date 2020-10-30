@@ -7,13 +7,13 @@ namespace MatrisAritmetik.Core.Services
 {
     public interface IFrontService
     {
-        void AddToMatrisDict(string name, MatrisBase<float> mat, Dictionary<string, MatrisBase<float>> matdict);
+        void AddToMatrisDict(string name, MatrisBase<dynamic> mat, Dictionary<string, MatrisBase<dynamic>> matdict);
 
-        void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<float>> matdict);
+        void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict);
 
         void ReadCommandInformation();
 
-        CommandLabel[] GetCommandLabelList();
+        List<CommandLabel> GetCommandLabelList(List<string> filter=null);
 
         void AddToCommandLabelList(string label, CommandInfo[] commandInfos);
 

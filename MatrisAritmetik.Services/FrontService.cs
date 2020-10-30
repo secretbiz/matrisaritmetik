@@ -15,21 +15,27 @@ namespace MatrisAritmetik.Services
     {
         private Regex name_regex = new Regex(@"^[^0-9\s]\w*|[0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public void AddToMatrisDict(string name, MatrisBase<float> matris, Dictionary<string,MatrisBase<float>> matdict)
+        public void AddToMatrisDict(string name, MatrisBase<dynamic> matris, Dictionary<string,MatrisBase<dynamic>> matdict)
         {
+            if (matdict.Count >= (int)MatrisLimits.forMatrisCount)
+                return;
+
             if (name.Replace(" ", "") == "")
                 return;
 
             Match match = name_regex.Match(name);
             
-            if (match.Groups[0].Value == name && !matdict.ContainsKey(name))
+            if (match.Groups[0].Value == name)
                 matdict.Add(name, matris);
         }
 
-        public void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<float>> matdict)
-        {
+        public void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict)
+        {   
             if (matdict.ContainsKey(name))
+            {
+                matdict[name].values = null;
                 matdict.Remove(name);
+            }
         }
 
         public Command CreateCommand(string cmd)
@@ -37,23 +43,32 @@ namespace MatrisAritmetik.Services
             return new Command(cmd);
         }
 
-        public CommandLabel[] builtInCommands;
+        public List<CommandLabel> builtInCommands;
 
         public void ReadCommandInformation()
         {
             using StreamReader r = new StreamReader("_builtInCmds.json");
             string json = r.ReadToEnd();
-            builtInCommands = JsonConvert.DeserializeObject<CommandLabel[]>(json);
+            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
         }
 
-        public CommandLabel[] GetCommandLabelList()
+        public List<CommandLabel> GetCommandLabelList(List<string> filter = null)
         {
-            return builtInCommands;
+            if (filter == null)
+                return builtInCommands;
+
+            List<CommandLabel> filtered = new List<CommandLabel>();
+            foreach(CommandLabel lbl in builtInCommands)
+            {
+                if (filter.Contains(lbl.Label))
+                    filtered.Add(lbl);
+            }
+            return filtered;
         }
 
         public void AddToCommandLabelList(string label, CommandInfo[] commandInfos)
         {
-            int labelIndex = Array.FindIndex(builtInCommands, cmdlbl => cmdlbl.Label == label);
+            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
             if (labelIndex == -1)
             {
                 builtInCommands.Append(new CommandLabel() { Functions = commandInfos, Label = label });
@@ -66,7 +81,7 @@ namespace MatrisAritmetik.Services
 
         public void ClearCommandLabel(string label)
         {
-            int labelIndex = Array.FindIndex(builtInCommands, cmdlbl => cmdlbl.Label == label);
+            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
             if (labelIndex != -1)
             {
                 builtInCommands[labelIndex] = new CommandLabel() { Label = label };

@@ -208,14 +208,12 @@ namespace MatrisAritmetik.Core.Models
                 // Komut işlenmekte veya hatalı
                 case CommandState.UNAVAILABLE:
                     {
-                        Console.WriteLine("Komut işleme hatası-> \nOriginal:" + OriginalCommand + "\nCleaned:" + CleanedCommand);
-                        break;
+                        throw new Exception("Komut işleme hatası-> \nOriginal:" + OriginalCommand + "\nCleaned:" + CleanedCommand);
                     }
                 // Komut zaten işlenmiş
                 default:
                     {
-                        Console.WriteLine("Komut zaten işlenmiş. State: " + STATE + " Extra message: " + STATE_MESSAGE);
-                        break;
+                        throw new Exception("Komut zaten işlenmiş. State: " + STATE + " Extra message: " + STATE_MESSAGE);
                     }
 
             }

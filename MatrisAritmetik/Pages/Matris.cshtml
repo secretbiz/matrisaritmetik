@@ -12,55 +12,109 @@
 
     <title>Matris Aritmetiği</title>
 
+    @* JQuery için *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
+    @* Tablar için *@
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 </head>
 <body>
+    @* Panelleri sarar *@
     <div id="panel_container">
 
+        @* Sol panel *@
         <div id="left_panel">
+
+            @* Panel başlığı ve tab satırı *@
             <div id="matris_title_left">
-                <h2>Matrisler</h2>
+                <h2>Matris Tablosu</h2>
+
+                <div class="container tabrow">
+
+                    @* Tablar *@
+                    <ul class="nav nav-tabs" style="width:fit-content">
+
+                        <li id="matris_create_bytext_parent" class="active"><a id="matris_create_bytext">Yazı ile</a></li>
+
+                        @* Dosyadan oku
+
+                            <li id="matris_create_byfile_parent"><a  id="matris_create_byfile">Dosya ile</a></li>
+
+                        *@
+                        @* Özel matris dropdown menü partial *@
+                        <select id="special_matris_options">
+                            <partial name="_SpecialSelectionPartial" model=@ViewData["special_opiondict"] />
+                        </select>
+
+                    </ul>
+
+                </div>
+
             </div>
 
+            @* Matris ekleme bilgileri satırı *@
             <div id="matris_add_table">
+
                 <input type="text" id="matris_name" placeholder="Matris ismi" />
                 <span id="matris_add_eqsign">=</span>
-                <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
 
-                <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" />
+                @* Özel matris ekleme inputları*@
+                <textarea name="matris_vals_special" id="matris_vals_special" style="display:none" readonly="readonly"></textarea>
+                <input type="text" id="matris_special_args" style="display:none" placeholder="Parametre:Değer" />
+                @**@
+                @* Text ile matris ekleme inputları*@
+                <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
+                @**@
+
+                <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" currenttab="text" />
+
             </div>
 
+            @* Kayıtlı matris tablosu *@
             <table id="matris_table_base">
                 <thead>
                     <tr>
                         <td colspan="18" style="text-align:center;padding:1px;font-weight:bold">Kayıtlı Matrisler</td>
                     </tr>
                 </thead>
+
+                @* Ekli matrislerin satırları partial *@
                 <tbody id="matris_table">
                     <partial name="_MatrisTablePartial" model=@Model.savedMatrices />
                 </tbody>
+
             </table>
-        </div>
-        <div id="panel_split">
 
         </div>
+
+        @* Panel bölücü *@
+        <div id="panel_split"></div>
+
+        @* Sağ panel *@
         <div id="right_panel">
+
+            @* Panel başlığı *@
             <div id="matris_title_right">
                 <h2>Aritmetik işlemler </h2>
             </div>
 
+            @* Komut girme satırı *@
             <div id="matris_komut_panel">
+
+                <input type="text" id="matris_komut_satır" placeholder=">>> (örnek: A+B) (yardım: ?komut)" />
                 <select id="matris_komut_options">
                     <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
                 </select>
-                <input type="text" id="matris_komut_satır" placeholder=">>> (örnek: A+B) (yardım: ?komut)" />
-                <input id="matris_komut_yardım" type="button" class="button" value="Yardım" name="matris_komut_yardım" data-toggle="tooltip" data-placement="top" title="Komutları görüntüle" />
-                <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" />
+                <input id="matris_komut_yardım" type="button" class="button" value="Yardım" name="matris_komut_yardım" data-toggle="tooltip" data-placement="top" title="Nasıl kullanılır?" />
+                <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" data-toggle="tooltip" data-placement="top" title="İfadeyi/Komutu çözümle" />
+
             </div>
 
+            @* Komut çıktısı tablosu/bölgesi *@
             <div id="matris_komut_output">
                 <table id="matris_komut_table_base">
                     <thead>
@@ -68,19 +122,26 @@
                             <td style="text-align:left;padding:2px;font-weight:bold">Çıktılar</td>
                         </tr>
                     </thead>
+
+                    @* Çıktılar *@
+                    @* TO-DO: Make partial *@
                     <tbody id="output_body">
+
                         <tr>
                             <td>
                                 <textarea id="output_textarea" readonly="readonly">>>> Çıktı geçmişi burada görüntülenir...
                             </textarea>
                             </td>
                         </tr>
+
                         <tr>
                             <td class="output_footer_info">
                                 >>> Komut uyarıları ve hataları burada görüntülenir...
                             </td>
                         </tr>
+
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -88,8 +149,10 @@
     </div>
 </body>
 
+@* Tokenlere erişim için *@
 <script>if (matris_add_button) { matris_add_button.token = "@token";}</script>
 <script>if (matris_komut_button) { matris_komut_button.token = "@token";}</script>
+@* Ara panel için*@
 <script>
     $("#left_panel").resizable({
         handleSelector: "#panel_split",
@@ -97,7 +160,9 @@
     });
 
 </script>
-<script type = "module" >
+@* Sayfa yenilendiğinde listener'lar için*@
+@* TO-DO: Daha düzgün bi yol bul*@
+<script type="module">
     import { updateTable } from "/js/matris_requests.js";
     updateTable('@token');
 </script>

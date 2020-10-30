@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Numerics;
 
@@ -7,21 +8,129 @@ namespace MatrisAritmetik.Core
 {
     public class MatrisBase<T>
     {
-        public int row = 3;
-        public int col = 3;
-        public List<List<T>> values = new List<List<T>>();
+        private int _row = -1;
+        private int _col = -1;
+        private List<List<T>> _values = null;
+        public int row
+        {
+            get
+            {
+                return _row;
+            }
+            set
+            {
+                if (_row == -1) // Only set if first time
+                {
+                    if (value > (int)MatrisLimits.forRows)
+                        _row = (int)MatrisLimits.forRows;
+                    else
+                        _row = value;
+                }
+            }
+        }
+
+        public int col
+        {
+            get
+            {
+                return _col;
+            }
+            set
+            {
+                if (_col == -1) // Only set if first time
+                {
+                    if (value > (int)MatrisLimits.forCols)
+                        _col = (int)MatrisLimits.forCols;
+                    else
+                        _col = value;
+                }
+            }
+        }
+
+        public List<List<T>> values
+        { 
+            get
+            {
+                if(_values != null)
+                {
+                    if (_values.Count * _values[0].Count > (int)MatrisLimits.forSize)
+                    {
+                        if (_values.Count > (int)MatrisLimits.forRows)
+                        {
+                            int delindex = (int)MatrisLimits.forRows;
+                            for (int i = 0; i < _values.Count - delindex; i++)
+                                _values.RemoveAt(delindex);
+                        }
+                        if (_values.Count >= 1)
+                        {
+                            if (_values[0].Count > (int)MatrisLimits.forCols)
+                            {
+                                int delindex = (int)MatrisLimits.forCols;
+                                for (int i = 0; i < _values.Count; i++)
+                                {
+                                    if (_values[i].Count > delindex)
+                                    {
+                                        for (int j = 0; j < delindex; j++)
+                                            _values[i].RemoveAt(delindex);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+               
+                return _values;
+
+            }
+            set // Just clones it
+            {
+                if (value != null)
+                {
+                    if(_values == null) // Only set if first time
+                    {
+                        if (value.Count * value[0].Count > (int)MatrisLimits.forSize)
+                        {
+                            List<List<T>> temp = new List<List<T>>();
+                            int collimit = (int)MatrisLimits.forCols;
+
+                            for (int i = 0; i < Math.Min(value.Count, (int)MatrisLimits.forRows); i++)
+                            {
+                                temp.Add(new List<T>());
+                                for (int j = 0; j < Math.Min(value[i].Count, collimit); j++)
+                                    temp[i].Add(value[i][j]);
+
+                            }
+                            _values = temp;
+                        }
+                        else
+                            _values = value;
+                    }
+                }
+                else
+                {
+                    if(_values != null)
+                        _values.Clear();
+                }
+            }
+        }
 
         public string delimiter = ",";
 
         // Emtpy 3x3 constructor
-        public MatrisBase() {}
+        public MatrisBase() { }
 
         // Constructor with row, column, fill
-        public MatrisBase(int r,int c, T fill) 
-        { 
-            row = r; col = c;
+        public MatrisBase(int r, int c, T fill)
+        {
+            if (r > (int)MatrisLimits.forRows)
+                r = (int)MatrisLimits.forRows;
 
-            values = new List<List<T>>();
+            if (c > (int)MatrisLimits.forCols)
+                c = (int)MatrisLimits.forCols;
+
+            _row = r; _col = c;
+
+            _values = new List<List<T>>();
             List<T> temp;
 
             for (int i = 0; i < r; i++)
@@ -39,16 +148,16 @@ namespace MatrisAritmetik.Core
         // Constructor with given list of list of values
         public MatrisBase(List<List<T>> vals)
         {
-            row = vals.Count;
-            if (row == 0)
+            _row = vals.Count;
+            if (_row == 0)
             {
-                col = 0;
+                _col = 0;
                 return;
             }
 
-            col = vals.ElementAt(0).Count;
+            _col = vals.ElementAt(0).Count;
 
-            values = vals;
+            _values = vals;
         }
 
         // Matris kopyası
@@ -140,7 +249,18 @@ namespace MatrisAritmetik.Core
             return strmat;
         }
 
-        // Satırı matris olarak döner. 1-based
+        // Sütunu yeni bir liste olarak döner. 1-based
+        public List<T> Row(int r, int based = 1)
+        {
+            List<T> listrow = new List<T>();
+            for (int j = 0; j < col; j++)
+            {
+                listrow.Add(values[r - based][j]);
+            }
+            return listrow;
+        }
+
+        // Satırı yeni bir matris olarak döner. 1-based
         public MatrisBase<T> RowMat(int r,int based=1)
         {
             List<List<T>> listrow = new List<List<T>>() { new List<T>() };
@@ -151,7 +271,7 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<T>() { row = 1, col = col, values = listrow };
         }
 
-        // Sütunu matris olarak döner. 1-based
+        // Sütunu yeni bir matris olarak döner. 1-based
         public MatrisBase<T> ColMat(int c, int based = 1)
         {
             List<List<T>> listcol = new List<List<T>>();
@@ -162,7 +282,7 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<T>() { row = row, col = 1, values = listcol };
         }
 
-        // Sütunu liste olarak döner. 1-based
+        // Sütunu yeni bir liste olarak döner. 1-based
         public List<T> Col(int c, int based = 1)
         {
             List<T> listrow = new List<T>();

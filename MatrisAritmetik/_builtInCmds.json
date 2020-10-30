@@ -1,14 +1,66 @@
-[
+﻿[
+    {
+        "Label": "Genel",
+        "Functions": [
+            {
+                "fullname": "Birim matris",
+                "description": "Birim matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "Identity",
+                "param_types": [ "int" ],
+                "param_names": [ "dimension" ],
+                "required_params": [ 0 ],
+
+                "function_template": "!Identity()",
+                "function_template_filled": "!Identity(n)"
+            }
+        ]
+    },
+
+    {
+        "Label": "Rastgele",
+        "Functions": [
+            {
+                "fullname": "Tamsayı",
+                "description": "Rastgele tamsayılar ile matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "RandIntMat",
+                "param_types": [ "int", "int", "int", "int", "int" ],
+                "param_names": [ "row", "col", "min", "max", "seed" ],
+                "required_params": [ 0, 1, 2, 3 ],
+
+                "function_template": "!RandIntMat(,,,,)",
+                "function_template_filled": "!RandIntMat(row,col,min,max,seed)"
+            },
+            {
+                "fullname": "Rasyonel",
+                "description": "Rastgele rasyonel sayılar ile matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "RandFloatMat",
+                "param_types": [ "int", "int", "float", "float", "int" ],
+                "param_names": [ "row", "col", "min", "max", "seed" ],
+                "required_params": [ 0, 1, 2, 3 ],
+
+                "function_template": "!RandFloatMat(,,,,)",
+                "function_template_filled": "!RandFloatMat(row,col,min,max,seed)"
+            }
+        ]
+    },
+
     {
         "Label": "Aritmetik",
         "Functions": [
             {
-                "fullname": "Matrix Multiplication",
-                "description": "Matrix multiplication of given A and B matrices",
+                "fullname": "Matris Çarpımı",
+                "description": "Verilen A ve B matrislerinin matris çarpımı",
 
                 "alias_list": [ "Matris .* Matris" ],
                 "function": "MatMul",
                 "param_types": [ "Matris", "Matris" ],
+                "param_names": [ "A","B" ],
                 "required_params": [ 0, 1 ],
 
                 "function_template": "!MatMul(,)",
@@ -21,12 +73,13 @@
         "Label": "Cebirsel",
         "Functions": [
             {
-                "fullname": "Transpose",
-                "description": "Transpose of given matrix A",
+                "fullname": "Transpoz",
+                "description": "Verilen A matrisinin transpozu",
 
                 "alias_list": [],
                 "function": "Transpose",
                 "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
                 "required_params": [ 0 ],
 
                 "function_template": "!Transpose()",
@@ -39,8 +92,8 @@
         "Label": "Boyutsal",
         "Functions": [
             {
-                "fullname": "Concatenate",
-                "description": "Concatenates given matrices A and B along given axis",
+                "fullname": "Birleştir",
+                "description": "Verilen A ve B matrislerini satır veya sütün olarak birleşmiş hali",
 
                 "alias_list": [],
                 "function": "Concat",
@@ -49,6 +102,7 @@
                     "Matris",
                     "row | col"
                 ],
+                "param_names": [ "A", "B", "row_OR_col" ],
                 "required_params": [ 0, 1, 2 ],
 
                 "function_template": "!Concatenate(,,)",

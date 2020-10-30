@@ -5,13 +5,13 @@
 
 @if (Model != null)
 {
-    <option value="komut_options_placeholder" class="options_placeholder">Komutlar</option>
+    <option value="special_options_placeholder" class="options_placeholder">Özel Matrisler</option>
     @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
     {
-        <optgroup label="@cmdlabel.Label">
+        <optgroup label="@cmdlabel.Label" >
             @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
             {
-                <option value="@cmdinfo.function_template_filled" title="@cmdinfo.Info()">
+                <option value="@cmdinfo.function_template_filled" title="@cmdinfo.Info()" data="@cmdinfo.MinimalFormat()">
                     @cmdinfo.fullname
                 </option>
             }

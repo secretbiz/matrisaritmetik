@@ -1,8 +1,10 @@
-﻿@model Dictionary<string, MatrisAritmetik.Core.MatrisBase<float>>
+﻿@model Dictionary<string, MatrisAritmetik.Core.MatrisBase<dynamic>>
 @{
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
     int MaxTolarableSize = 100;
+    var tkn = ViewData["tkn"];
+
 }
 
 @if (Model != null)
@@ -10,20 +12,20 @@
     @foreach (var name in Model.Keys)
     {
         <tr id='@ConcatName("matris_table_",name)'>
-            <!--Name-->
+            @*Name*@
             <td colspan="3">
                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                    <mi>@name </mi>
+                    <mi>@name</mi>
                 </math>
             </td>
 
             <td colspan="1">
                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                    <mo>= </mo>
+                    <mo>=</mo>
                 </math>
             </td>
 
-            <!--Values-->
+            @*Values*@
             <td colspan="11">
                 <div id='@ConcatName("matris_vals_",name)' style="max-height:200px;overflow-y:auto;">
                     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
@@ -65,9 +67,9 @@
                 </div>
             </td>
 
-            <!--Buttons-->
+            @*Buttons*@
             <td colspan="2" align="center">
-                <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrise özel işlemler")'/>
+                <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrise özel işlemler")' />
             </td>
 
             <td colspan="1" align="center">
@@ -83,4 +85,3 @@
         </tr>
     }
 }
-

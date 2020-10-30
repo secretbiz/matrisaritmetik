@@ -6,26 +6,30 @@ namespace MatrisAritmetik.Core.Services
 {
     public interface IMatrisArithmeticService<T>
     {
-        MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B);
-
         MatrisBase<T> Transpose(MatrisBase<T> A);
 
         MatrisBase<T> Conjugate(MatrisBase<T> A);
 
+        MatrisBase<T> Echelon(MatrisBase<T> A, bool row_reduce=false);
+
         float Determinant(MatrisBase<T> A);
 
-        float Minor(MatrisBase<T> A,int row, int col);
-        MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col);
+        float Rank(MatrisBase<T> A);
 
-        MatrisBase<T> Adjoint(MatrisBase<T> A, int row, int col);
+        MatrisBase<T> Adjoint(MatrisBase<T> A);
 
         MatrisBase<T> Inverse(MatrisBase<T> A);
 
         MatrisBase<T> PseudeInverse(MatrisBase<T> A);
 
-        float Rank(MatrisBase<T> A);
+        MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B);
 
-        MatrisBase<T> Echelon(MatrisBase<T> A, bool row_reduce=false);
+        MatrisBase<T> Concat(MatrisBase<T> A, MatrisBase<T> B, string concat_as = "row");
+
+        float Minor(MatrisBase<T> A,int row, int col);
+
+        MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col);
+
 
     }
 }
