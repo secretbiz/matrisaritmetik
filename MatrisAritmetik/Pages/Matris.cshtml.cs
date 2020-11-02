@@ -21,6 +21,7 @@ namespace MatrisAritmetik.Pages
         public const string SessionMatrisDict = "_MatDictVals";
         public const string SessionLastCommand = "_LastCmd";
         public const string SessionLastMessage = "_lastMsg";
+        public const string SessionOutputHistory = "_outputHistory";
 
         private readonly IUtilityService<dynamic> _utils;                   // string işleme fonksiyonları
         private readonly IMatrisArithmeticService<dynamic> _matrisService;  // matris fonksiyonları
@@ -50,9 +51,13 @@ namespace MatrisAritmetik.Pages
 
         public Dictionary<string, string> DecodedRequestDict = new Dictionary<string, string>();
 
-        public Command LastExecutedCommand;
+        public Command LastExecutedCommand = new Command("");
 
-        public string LastMessage;
+        public List<Command> CommandHistory = new List<Command>();
+
+        public string LastMessage = "";
+
+        public Dictionary<string, dynamic> OutputHistory = new Dictionary<string, dynamic>();
 
         // Sayfa kökü GET ile istendiğinde
         public void OnGet()
@@ -98,44 +103,26 @@ namespace MatrisAritmetik.Pages
                 if (savedMatrices.ContainsKey(DecodedRequestDict["name"]))
                     return;
 
-                    string actualFuncName = DecodedRequestDict["func"].Substring(1, DecodedRequestDict["func"].IndexOf("(")-1);
+                string actualFuncName = DecodedRequestDict["func"].Substring(1, DecodedRequestDict["func"].IndexOf("(")-1);
+                
                 if (actualFuncName == string.Empty)
                     return;
 
-
-                List<CommandLabel> cmdLabelList = _frontService.GetCommandLabelList();
-                if (cmdLabelList == null)
+                if(_frontService.TryParseBuiltFunc(actualFuncName,out CommandInfo cmdinfo))
                 {
-                    _frontService.ReadCommandInformation();
-                    cmdLabelList = _frontService.GetCommandLabelList();
-                }
-
-                bool found = false;
-
-                foreach(CommandLabel lbl in cmdLabelList)
-                {
-                    if (found)
-                        break;
-                    foreach (CommandInfo cmdinfo in lbl.Functions)
+                    try
                     {
-                        if (cmdinfo.function == actualFuncName)
-                        {
-                            try
-                            {
-                                _frontService.AddToMatrisDict(DecodedRequestDict["name"],
-                                    _utils.SpecialStringTo2DList(DecodedRequestDict["args"], cmdinfo, savedMatrices),
-                                    savedMatrices);
-                                found = true;
-                                break;
-                            }
-                            catch(Exception err)
-                            {
-                                LastMessage = err.Message;
-                            }
-                        }
+                        _frontService.AddToMatrisDict(DecodedRequestDict["name"],
+                            _utils.SpecialStringTo2DList(DecodedRequestDict["args"], cmdinfo, savedMatrices),
+                            savedMatrices);
+                    }
+                    catch(Exception err)
+                    {
+                        LastMessage = err.Message;
                     }
                 }
-
+                else
+                    LastMessage = "Fonksiyon adı hatalı";
             }
 
             SetSessionVariables();
@@ -177,33 +164,74 @@ namespace MatrisAritmetik.Pages
 
             if (DecodedRequestDict.ContainsKey("cmd"))
             {
-                LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict["cmd"]);
+                try
+                {
+                    LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict["cmd"]);
+
+                    LastExecutedCommand.Tokens = _frontService.ShuntingYardAlg(_frontService.Tokenize(LastExecutedCommand.TermsToEvaluate[0]));
+
+                    _frontService.EvaluateCommand(LastExecutedCommand, savedMatrices);
+
+                    LastMessage = LastExecutedCommand.STATE_MESSAGE;
+                }
+                catch(Exception err)
+                {
+                    if (err.Message == "Stack empty.")
+                        LastMessage = "Format hatası: Parantezler uyuşmalı.";
+                    else
+                        LastMessage = "Format hatası: " + err.Message;
+                }
+
+                if(OutputHistory == null)
+                    OutputHistory = new Dictionary<string, dynamic>();
+
+                if(OutputHistory.ContainsKey("CommandHistory"))
+                    OutputHistory["CommandHistory"].Add(LastExecutedCommand);
+                else
+                    OutputHistory.Add("CommandHistory", new List<Command>() { LastExecutedCommand });
+
+                if (OutputHistory.ContainsKey("LastMessage"))
+                    OutputHistory["LastMessage"] = LastMessage;
+                else
+                    OutputHistory.Add("LastMessage", LastMessage);
             }
 
             SetSessionVariables();
+        }
+
+        // Komut panelini güncelleme, rerenderlama
+        public PartialViewResult OnPostUpdateHistoryPanel()
+        {
+            GetSessionVariables();
+
+            PartialViewResult mpart = Partial("_OutputPanelPartial", OutputHistory);
+
+            SetSessionVariables();
+
+            return mpart;
         }
 
         // Session değişkenlerini al, istek işleme fonksiyonlarının başında kullanılmalı
         private void GetSessionVariables()
         {
             // Matrix dictionaries
-            if (HttpContext.Session.Get<Dictionary<string, List<List<dynamic>>>>(SessionMatrisDict) != null)
+            if (HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict) != null)
             {
-                savedMatricesValDict = HttpContext.Session.Get<Dictionary<string, List<List<dynamic>>>>(SessionMatrisDict);
+                savedMatricesValDict = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict);
 
                 // TO-DO: Eliminate this process
-                savedMatrices = new Dictionary<string, MatrisBase<dynamic>>();
+                savedMatrices = new Dictionary<string, MatrisBase<object>>();
                 foreach(string name in savedMatricesValDict.Keys)
                 {
-                    savedMatrices.Add(name, new MatrisBase<dynamic>(savedMatricesValDict[name]));
+                    savedMatrices.Add(name, new MatrisBase<object>(savedMatricesValDict[name]));
                 }
                 //
             }
 
             // Last Command
-            if (HttpContext.Session.Get<Command>(SessionLastCommand) != null)
+            if (HttpContext.Session.Get<string>(SessionLastCommand) != null)
             {
-                LastExecutedCommand = HttpContext.Session.Get<Command>(SessionLastCommand);
+                LastExecutedCommand = new Command(HttpContext.Session.Get<string>(SessionLastCommand));
             }
 
             // Last Message
@@ -211,14 +239,25 @@ namespace MatrisAritmetik.Pages
             {
                 LastMessage = HttpContext.Session.Get<string>(SessionLastMessage);
             }
+
+            // Command and output history
+            if (HttpContext.Session.GetCmdList(SessionOutputHistory) != null)
+            {
+                CommandHistory = HttpContext.Session.GetCmdList(SessionOutputHistory);
+            }
+
+            OutputHistory.Add("CommandHistory", CommandHistory);
+            OutputHistory.Add("LastMessage", LastMessage);
         }
 
         // Session değişkenlerini güncelle, istek işleme fonksiyonlarının sonunda kullanılmalı
         private void SetSessionVariables()
         {
-            HttpContext.Session.Set<Command>(SessionLastCommand, LastExecutedCommand);
+            HttpContext.Session.Set<string>(SessionLastCommand, LastExecutedCommand.OriginalCommand);
 
             HttpContext.Session.Set<string>(SessionLastMessage, LastMessage);
+
+            HttpContext.Session.SetCmdList(SessionOutputHistory,CommandHistory);
 
             // TO-DO: Eliminate this process
             savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();

@@ -82,6 +82,7 @@ if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, 
 //////// komut gönder
 function sendCmd(event) {
     var tkn = event.currentTarget.token;
+    var filteredcmd = document.getElementById("matris_komut_satır").value.split("=").join("!__EQ!");
     $.ajax(
         {
             type: 'POST',
@@ -89,9 +90,9 @@ function sendCmd(event) {
             data:
             {
                 __RequestVerificationToken: tkn,
-                "cmd": document.getElementById("matris_komut_satır").value,
+                "cmd": filteredcmd,
             },
-            success: function (data) { updateTable(tkn); },
+            success: function (data) { updateHistoryPanel(tkn); },
             error: function (error) { console.log(error); }
         });
 }
@@ -181,3 +182,12 @@ function textMatrisPick(event) {
 // komut dropdown change event
 const matris_create_bytext = document.getElementById("matris_create_bytext");
 if (matris_create_bytext) { matris_create_bytext.addEventListener("click", textMatrisPick, false); }
+
+//////// komut geçmişi panelini güncelle
+function updateHistoryPanel(token) {
+    $('#output_body').load('/Matris?handler=UpdateHistoryPanel', { __RequestVerificationToken: token }, function () {
+        updateTable(token);
+        }
+
+    );
+}

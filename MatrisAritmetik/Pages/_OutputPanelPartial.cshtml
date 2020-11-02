@@ -1,0 +1,69 @@
+﻿@model Dictionary<string, dynamic>
+@{
+    Layout = null;
+    MatrisAritmetik.Core.Models.Command cmd;
+    string msg = "";
+    if (Model != null)
+    {
+        if (!Model.ContainsKey("CommandHistory"))
+            Model.Add("CommandHistory", new List<MatrisAritmetik.Core.Models.Command>());
+        if (!Model.ContainsKey("LastMessage"))
+            Model.Add("LastMessage", "");
+    }
+}
+
+@if (Model != null)
+{
+    if (Model["CommandHistory"].Count == 0)
+    {
+        <tr>
+            <td class="output_cmd_info">
+                <span class="command_start">>>></span> Komut uyarıları ve hataları burada görüntülenir...
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="command_start">>>></span> Çıktı geçmişi burada görüntülenir...
+            </td>
+        </tr>
+    }
+    else
+    {
+        msg = Model["LastMessage"].ToString();
+        <tr>
+            <td class="output_cmd_info">
+                Son mesaj: @msg
+            </td>
+        </tr>
+        @for (int i = Model["CommandHistory"].Count - 1; i >= 0; i--)
+        {
+            cmd = Model["CommandHistory"][i];
+
+            @if (cmd.STATE == Core.CommandState.SUCCESS)
+            {
+                <tr title='@cmd.CommandSummary()'>
+                    <td>
+                        <span class="command_start">>>></span> @cmd.OriginalCommand =
+                    </td>
+                </tr>
+
+                <tr style="border-bottom:2px dashed black">
+                    <td style="white-space: pre-wrap;">@cmd.Output</td>
+                </tr>
+            }
+            else if (cmd.STATE == Core.CommandState.ERROR)
+            {
+                <tr title='@cmd.CommandSummary()'>
+                    <td class="commandError">
+                        <span class="command_start">>>></span> @cmd.OriginalCommand
+                    </td>
+                </tr>
+                <tr style="border-bottom:2px dashed black">
+                    <td>
+                        <span style="color:red">[HATA]</span> @cmd.STATE_MESSAGE
+                    </td>
+                </tr>
+            }
+        }
+    }
+}

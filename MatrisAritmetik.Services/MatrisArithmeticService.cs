@@ -13,14 +13,12 @@ namespace MatrisAritmetik.Services
          */
         private T Add(T a, T b)
         {
-            dynamic a1 = a;dynamic b1 = b;
-            return (a1 + b1);
+            return (dynamic)(float.Parse(a.ToString()) + float.Parse(b.ToString()));
         }
 
         private T Mul(T a, T b)
         {
-            dynamic a1 = a; dynamic b1 = b;
-            return (a1 * b1);
+            return (dynamic)(float.Parse(a.ToString()) * float.Parse(b.ToString()));
         }
 
         private T DotProduct(List<T> a, List<T> b)

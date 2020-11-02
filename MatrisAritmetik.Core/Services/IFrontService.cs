@@ -20,5 +20,13 @@ namespace MatrisAritmetik.Core.Services
         void ClearCommandLabel(string label);
 
         Command CreateCommand(string cmd);
+
+        bool TryParseBuiltFunc(string name, out CommandInfo cmdinfo);
+
+        List<Token> Tokenize(string exp);
+
+        List<Token> ShuntingYardAlg(List<Token> tkns);
+
+        CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict);
     }
 }

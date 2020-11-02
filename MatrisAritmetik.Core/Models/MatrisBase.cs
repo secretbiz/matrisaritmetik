@@ -48,10 +48,10 @@ namespace MatrisAritmetik.Core
         }
 
         public List<List<T>> values
-        { 
+        {
             get
             {
-                if(_values != null)
+                if (_values != null)
                 {
                     if (_values.Count * _values[0].Count > (int)MatrisLimits.forSize)
                     {
@@ -78,7 +78,7 @@ namespace MatrisAritmetik.Core
                         }
                     }
                 }
-               
+
                 return _values;
 
             }
@@ -86,7 +86,7 @@ namespace MatrisAritmetik.Core
             {
                 if (value != null)
                 {
-                    if(_values == null) // Only set if first time
+                    if (_values == null) // Only set if first time
                     {
                         if (value.Count * value[0].Count > (int)MatrisLimits.forSize)
                         {
@@ -108,13 +108,13 @@ namespace MatrisAritmetik.Core
                 }
                 else
                 {
-                    if(_values != null)
+                    if (_values != null)
                         _values.Clear();
                 }
             }
         }
 
-        public string delimiter = ",";
+        public string delimiter = " ";
 
         // Emtpy 3x3 constructor
         public MatrisBase() { }
@@ -130,19 +130,16 @@ namespace MatrisAritmetik.Core
 
             _row = r; _col = c;
 
-            _values = new List<List<T>>();
-            List<T> temp;
-
+            List<List<T>> vals = new List<List<T>>();
             for (int i = 0; i < r; i++)
             {
-                temp = new List<T>();
+                vals.Add(new List<T>());
                 for (int j = 0; j < c; j++)
                 {
-                    temp.Add(fill);
+                    vals[i].Add(fill);
                 }
-                values.Add(temp);
-
             }
+            _values = vals;
         }
 
         // Constructor with given list of list of values
@@ -164,10 +161,10 @@ namespace MatrisAritmetik.Core
         public MatrisBase<T> Copy()
         {
             List<List<T>> lis = new List<List<T>>();
-            for(int i=0;i<row;i++)
+            for (int i = 0; i < row; i++)
             {
                 lis.Add(new List<T>());
-                for(int j=0;j<col;j++)
+                for (int j = 0; j < col; j++)
                 {
                     lis[i].Add(values[i][j]);
                 }
@@ -209,16 +206,16 @@ namespace MatrisAritmetik.Core
             int[] longest_in_col = GetColumnWidths(this);
 
             int colno;
-            foreach(var row in values)
+            foreach (var row in values)
             {
                 colno = 0;
-                foreach(var element in row)
+                foreach (var element in row)
                 {
                     str += new string(' ', (longest_in_col[colno] - element.ToString().Length)) + element.ToString();
-                    
+
                     if (colno != col - 1)
                         str += delimiter;
-                    
+
                     colno++;
                 }
                 str += "\n";
@@ -231,7 +228,7 @@ namespace MatrisAritmetik.Core
         public MatrisBase<string> PrintStrMaxtrisForm()
         {
             if (row == 0 || col == 0)
-                return new MatrisBase<string>(1,1,"");
+                return new MatrisBase<string>(1, 1, "");
 
             MatrisBase<string> strmat = new MatrisBase<string>(row, col, "");
 
@@ -261,10 +258,10 @@ namespace MatrisAritmetik.Core
         }
 
         // Satırı yeni bir matris olarak döner. 1-based
-        public MatrisBase<T> RowMat(int r,int based=1)
+        public MatrisBase<T> RowMat(int r, int based = 1)
         {
             List<List<T>> listrow = new List<List<T>>() { new List<T>() };
-            for(int j=0;j<col;j++)
+            for (int j = 0; j < col; j++)
             {
                 listrow[0].Add(values[r - based][j]);
             }
@@ -292,7 +289,7 @@ namespace MatrisAritmetik.Core
             }
             return listrow;
         }
-        
+
         // Matrisin köşelerindeki değerleri içeren string matris döner
         // Matrisin boyutu yüksekse kullanılabilir
         public dynamic CornerMatrix(int rowEachCorner = -1, int colEachCorner = -1, string filler = "...")
@@ -314,7 +311,7 @@ namespace MatrisAritmetik.Core
             }
 
             // No reduction
-            if ( (((float)rowEachCorner) * 2.0 + 1.0 > (float)row) && (((float)colEachCorner) * 2.0 + 1.0 > (float)col))
+            if ((((float)rowEachCorner) * 2.0 + 1.0 > (float)row) && (((float)colEachCorner) * 2.0 + 1.0 > (float)col))
             {
                 return new MatrisBase<T>() { row = row, col = col, values = values };
             }
@@ -377,17 +374,17 @@ namespace MatrisAritmetik.Core
 
             // Reduce both rows and columns
             // Upper half
-            for (int u=0; u<rowEachCorner; u++)
+            for (int u = 0; u < rowEachCorner; u++)
             {
                 smallerList.Add(new List<string>());
-                for(int left = 0; left < colEachCorner; left++)
+                for (int left = 0; left < colEachCorner; left++)
                 {
                     smallerList[u].Add(values[u][left].ToString());
                 }
 
                 smallerList[u].Add(filler);
 
-                for (int right = col-colEachCorner; right < col; right++)
+                for (int right = col - colEachCorner; right < col; right++)
                 {
                     smallerList[u].Add(values[u][right].ToString());
                 }
@@ -401,7 +398,7 @@ namespace MatrisAritmetik.Core
 
             int rowind = rowEachCorner + 1;
             // Bottom half
-            for (int i = row-rowEachCorner; i < row; i++)
+            for (int i = row - rowEachCorner; i < row; i++)
             {
                 smallerList.Add(new List<string>());
                 for (int bleft = 0; bleft < colEachCorner; bleft++)
@@ -426,9 +423,249 @@ namespace MatrisAritmetik.Core
             return col * row;
         }
 
+        private T pow(dynamic a, int n)
+        {
+            dynamic a1 = a;
+            for (int i = 0; i < n - 1; i++)
+                a1 *= a;
+            return a1;
+        }
+
+        public MatrisBase<T> Power(int n)
+        {
+            List<List<T>> newlist = new List<List<T>>();
+            for (int i = 0; i < row; i++)
+            {
+                newlist.Add(new List<T>());
+                for (int j = 0; j < col; j++)
+                {
+                    newlist[i].Add(pow((dynamic)(float.Parse(values[i][j].ToString())), n));
+                }
+            }
+            return new MatrisBase<T>(newlist);
+        }
+
+        // Matrix features
+        public bool IsSquare()
+        {
+            return row == col;
+        }
+
+        // Overloads
         public IEnumerator<List<T>> GetEnumerator()
         {
             return values.GetEnumerator();
         }
+        public override string ToString()
+        {
+            return PrintStrMaxtrisForm().Printstr();
+        }
+        ////// Parsers
+        public static List<List<float>> FloatListParse(MatrisBase<T> mat)
+        {
+            List<List<float>> floatlis = new List<List<float>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                floatlis.Add(new List<float>());
+                for (int j = 0; j < mat.col; j++)
+                    floatlis[i].Add((float.Parse(mat.values[i][j].ToString())));
+            }
+            return floatlis;
+        }
+
+        ////// Operator overloads
+        //// Addition
+        // Unary
+        public static MatrisBase<T> operator +(MatrisBase<T> mat) => mat;
+        // Mat + Mat
+        public static MatrisBase<dynamic> operator +(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.row != mat2.row || mat.col != mat2.col)
+                throw new Exception("Matris boyutları toplama işlemi için aynı olmalı");
+
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(mat.values[i][j].ToString())) + (dynamic)(float.Parse(mat2.values[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat + val
+        public static MatrisBase<dynamic> operator +(MatrisBase<T> mat, dynamic val)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) + val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // val + Mat
+        public static MatrisBase<dynamic> operator +(dynamic val, MatrisBase<T> mat)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) + val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+
+        //// Subtraction
+        // Unary
+        public static MatrisBase<dynamic> operator -(MatrisBase<T> mat)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for(int i=0;i<mat.row;i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * -1);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat - Mat
+        public static MatrisBase<dynamic> operator -(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.row != mat2.row || mat.col != mat2.col)
+                throw new Exception("Matris boyutları çıkarma işlemi için aynı olmalı");
+
+            List<List<T>> vals1 = mat.values;
+            List<List<T>> vals2 = mat2.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) - (dynamic)(float.Parse(vals2[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat - val
+        public static MatrisBase<dynamic> operator -(MatrisBase<T> mat, dynamic val)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) - val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // val - Mat
+        public static MatrisBase<dynamic> operator -(dynamic val, MatrisBase<T> mat)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add( val - (dynamic)(float.Parse(vals[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+
+        //// Multiplication
+        // Mat * Mat
+        public static MatrisBase<dynamic> operator *(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.row != mat2.row || mat.col != mat2.col)
+                throw new Exception("Matris boyutları çarpma işlemi için aynı olmalı");
+
+            List<List<T>> vals1 = mat.values;
+            List<List<T>> vals2 = mat2.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) * (dynamic)(float.Parse(vals2[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat * val
+        public static MatrisBase<dynamic> operator *(MatrisBase<T> mat, dynamic val)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // val * Mat
+        public static MatrisBase<dynamic> operator *(dynamic val, MatrisBase<T> mat)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+
+        //// Division
+        // Mat / Mat
+        public static MatrisBase<dynamic> operator /(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.row != mat2.row || mat.col != mat2.col)
+                throw new Exception("Matris boyutları bölme işlemi için aynı olmalı");
+
+            List<List<T>> vals1 = mat.values;
+            List<List<T>> vals2 = mat2.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) / (dynamic)(float.Parse(vals2[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat / val
+        public static MatrisBase<dynamic> operator /(MatrisBase<T> mat, dynamic val)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) / val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // val / Mat
+        public static MatrisBase<dynamic> operator /(dynamic val, MatrisBase<T> mat)
+        {
+            List<List<T>> vals = mat.values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.col; j++)
+                    newlis[i].Add( val / (dynamic)(float.Parse(vals[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+
     }
 }

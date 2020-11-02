@@ -11,9 +11,12 @@
                 "param_types": [ "int" ],
                 "param_names": [ "dimension" ],
                 "required_params": [ 0 ],
+                "returns": "Matris",
 
                 "function_template": "!Identity()",
-                "function_template_filled": "!Identity(n)"
+                "function_template_filled": "!Identity(n)",
+
+                "service": "SpecialMatricesService"
             }
         ]
     },
@@ -30,9 +33,12 @@
                 "param_types": [ "int", "int", "int", "int", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
                 "required_params": [ 0, 1, 2, 3 ],
+                "returns": "Matris",
 
                 "function_template": "!RandIntMat(,,,,)",
-                "function_template_filled": "!RandIntMat(row,col,min,max,seed)"
+                "function_template_filled": "!RandIntMat(row,col,min,max,seed)",
+
+                "service": "SpecialMatricesService"
             },
             {
                 "fullname": "Rasyonel",
@@ -43,9 +49,12 @@
                 "param_types": [ "int", "int", "float", "float", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
                 "required_params": [ 0, 1, 2, 3 ],
+                "returns": "Matris",
 
                 "function_template": "!RandFloatMat(,,,,)",
-                "function_template_filled": "!RandFloatMat(row,col,min,max,seed)"
+                "function_template_filled": "!RandFloatMat(row,col,min,max,seed)",
+
+                "service": "SpecialMatricesService"
             }
         ]
     },
@@ -58,13 +67,16 @@
                 "description": "Verilen A ve B matrislerinin matris çarpımı",
 
                 "alias_list": [ "Matris .* Matris" ],
-                "function": "MatMul",
+                "function": "MatrisMul",
                 "param_types": [ "Matris", "Matris" ],
-                "param_names": [ "A","B" ],
+                "param_names": [ "A", "B" ],
                 "required_params": [ 0, 1 ],
+                "returns": "Matris",
 
-                "function_template": "!MatMul(,)",
-                "function_template_filled": "!MatMul(A, B)"
+                "function_template": "!MatrisMul(,)",
+                "function_template_filled": "!MatrisMul(A, B)",
+
+                "service": "MatrisArithmeticService"
             }
         ]
     },
@@ -81,9 +93,12 @@
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
                 "required_params": [ 0 ],
+                "returns": "Matris",
 
                 "function_template": "!Transpose()",
-                "function_template_filled": "!Transpose(A)"
+                "function_template_filled": "!Transpose(A)",
+
+                "service": "MatrisArithmeticService>"
             }
         ]
     },
@@ -100,13 +115,16 @@
                 "param_types": [
                     "Matris",
                     "Matris",
-                    "row | col"
+                    "string"
                 ],
-                "param_names": [ "A", "B", "row_OR_col" ],
+                "param_names": [ "A", "B", "direction" ],
                 "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
 
                 "function_template": "!Concatenate(,,)",
-                "function_template_filled": "!Concatenate(A,B,row_OR_col)"
+                "function_template_filled": "!Concatenate(A,B,direction)",
+
+                "service": "MatrisArithmeticService"
             }
         ]
     }

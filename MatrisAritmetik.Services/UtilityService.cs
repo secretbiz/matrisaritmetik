@@ -210,7 +210,7 @@ namespace MatrisAritmetik.Services
                     continue;
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1]);
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "="));
             }
 
         }

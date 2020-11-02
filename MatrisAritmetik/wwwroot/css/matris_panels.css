@@ -195,11 +195,29 @@ body {
 }
 #matris_komut_table_base {
     width: 100%;
+}
+#matris_komut_table_base thead {
+    display: table;
+    width: 100%;
     table-layout: fixed;
 }
 
+.command_start{
+    font-weight:bold;
+    color:blue;
+}
 #output_body {
-    background-color: antiquewhite !important;
+    border: 2px double #4c3a0b;
+    background-color: burlywood !important;
+    display: block;
+    max-height: 48em;
+    overflow-y: scroll;
+    max-width: inherit;
+}
+#output_body tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 #output_body td {
     overflow: auto;
@@ -214,18 +232,22 @@ body {
     overflow-y: scroll;
 }
 
-.output_footer_info {
+.output_cmd_info {
     color: grey;
     background-color: aliceblue;
     border: 2px double gray;
 }
-.output_footer_warning {
+.output_cmd_warning {
     color: sandybrown;
     background-color: aliceblue;
     border: 2px double #ff6a00;
 }
-.output_footer_error {
+.output_cmd_error {
     color: red;
     background-color: aliceblue;
     border: 2px double darkred;
+}
+
+.commandError{
+    font-style:italic;
 }

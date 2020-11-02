@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -14,7 +16,7 @@ namespace MatrisAritmetik.Core.Models
      * 
      *      fonksiyonlar: isimden önce "!" ile kullanılır, _builtInCmds.json içinde belirtilmiştir
      * 
-     *      aritmetik operatörler:  + , - , * , / , .* , ./ , %
+     *      aritmetik operatörler:  + , - , * , / , ^ , .^ , .* , ./ , %
      * 
      *      karşılaştırma operatörleri: < , <= , > , >= , == , !=
      * 
@@ -81,6 +83,10 @@ namespace MatrisAritmetik.Core.Models
     {
         public string[] TermsToEvaluate;
 
+        public List<Token> Tokens = new List<Token>();
+
+        public dynamic Output = "";
+
         public string OriginalCommand = "";
 
         public string CleanedCommand = "";
@@ -91,9 +97,23 @@ namespace MatrisAritmetik.Core.Models
 
         public Dictionary<string, string> ValsSettings = new Dictionary<string, string>();
 
-        private dynamic STATE = CommandState.IDLE;
+        private CommandState _state = CommandState.IDLE;
+        public CommandState STATE
+        {
+            get
+            {
+                return _state;
+            }
+            set
+            {
+                _state = value;
+                STATEID = (int)value;
+            }
+        }
 
-        private string STATE_MESSAGE = "";
+        public int STATEID = -1;
+
+        public string STATE_MESSAGE = "";
 
         private void SettingDecider(string settingname, string param)
         {
@@ -134,8 +154,21 @@ namespace MatrisAritmetik.Core.Models
                 ValsSettings[settingname] = param;
         }
 
+        public Command(string org, Dictionary<string, string> nset,Dictionary<string,string> vset, int stat, string statmsg, string output)
+        {
+            OriginalCommand = org;
+            NameSettings = nset;
+            ValsSettings = vset;
+            STATE = (CommandState)stat;
+            STATE_MESSAGE = statmsg;
+            Output = output;
+        }
+
         public Command(string cmd)
         {
+            if (cmd == "")
+                return;
+
             OriginalCommand = cmd;
 
             /* Check if custom settings given */
@@ -185,40 +218,86 @@ namespace MatrisAritmetik.Core.Models
                     }
                 }
             }
-
-            // Clean the actual command
-            // Remove whitespace
-            CleanedCommand = String.Join("", TermsToEvaluate[0].Split(" ", StringSplitOptions.RemoveEmptyEntries));
-
             // At this point command should be ready to be examined and settings should all be done
-
+            CleanedCommand = TermsToEvaluate[0];
         }
 
-        public dynamic EvaluateCommand()
+        public string CommandSummary()
         {
-            switch (STATE)
-            {
-                // Komut ilk defa işlenmekte
-                case CommandState.IDLE:
-                    {
-                        STATE = CommandState.UNAVAILABLE;
+            string nset = "";
+            string vset = "";
+            string state = "IDLE";
+            
+            foreach(string setting in NameSettings.Keys)
+                nset += setting + ":" +NameSettings[setting]+"\t";
+            foreach (string setting in ValsSettings.Keys)
+                vset += setting + ":" + ValsSettings[setting] + "\t";
 
-                        break;
-                    }
-                // Komut işlenmekte veya hatalı
-                case CommandState.UNAVAILABLE:
-                    {
-                        throw new Exception("Komut işleme hatası-> \nOriginal:" + OriginalCommand + "\nCleaned:" + CleanedCommand);
-                    }
-                // Komut zaten işlenmiş
-                default:
-                    {
-                        throw new Exception("Komut zaten işlenmiş. State: " + STATE + " Extra message: " + STATE_MESSAGE);
-                    }
-
+            switch(STATE)
+            { 
+                case CommandState.ERROR:state = "HATA";break;
+                case CommandState.IDLE:state = "BEKLEMEDE";break;
+                case CommandState.SUCCESS:state = "İŞLENDİ";break;
+                default:state = "---";break;
             }
 
-            return STATE;
+            return "Komut: " + OriginalCommand + @"
+Temizlenmiş: " + CleanedCommand + @"
+Ek ayarlar(Komut):" + nset + @"
+Ek ayarlar(Çıktı):" + vset + @"
+Çıktı:
+" + Output.ToString() + @"
+Durum: " + state;
+
+        }
+    }
+
+    // Represent a token
+    public class Token
+    {
+        // Type of token
+        public TokenType tknType = TokenType.NULL;
+
+        public void SetValues(string _symbol,OperatorAssociativity _assoc, int _priority, int _paramCount)
+        {
+            symbol = _symbol;
+            assoc = _assoc;
+            priority = _priority;
+            paramCount = _paramCount;
+        }
+        // Number
+        public dynamic val = 0.0;
+
+        // Operator
+        public string symbol = " ";
+        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
+        public int priority = 0;       // Precedence
+        public int paramCount = 0;     // unary or binary 
+
+        // Matrix or function
+        public string name = " ";
+        public List<string> paramTypes = new List<string>(); 
+        public string service = "";
+        public string returns = "";
+
+        public Token() { }
+
+        public override string ToString() // For easier debugging
+        {
+            switch(tknType)
+            {
+                case TokenType.ARGSEPERATOR: return "ARGSEPERATOR";
+
+                case TokenType.FUNCTION: return "FUNC(" + service + ")"+ name +" "+ paramCount.ToString() +" params" ;
+
+                case TokenType.MATRIS: return "MAT "+name + " " + val.ToString();
+
+                case TokenType.NUMBER: return "NUM " + val.ToString();
+
+                case TokenType.OPERATOR: return "OP '" + symbol + "'";
+
+                default: return tknType.ToString();
+            }
         }
     }
 

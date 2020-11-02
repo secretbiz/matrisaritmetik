@@ -20,9 +20,13 @@ namespace MatrisAritmetik.Core.Models
 
         public int[] required_params;
 
+        public string returns;
+
         public string function_template;
 
         public string function_template_filled;
+
+        public string service;
 
         public CommandInfo()
         {
