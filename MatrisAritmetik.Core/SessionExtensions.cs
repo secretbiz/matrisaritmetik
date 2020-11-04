@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using MatrisAritmetik.Core.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -11,25 +8,12 @@ using Microsoft.AspNetCore.Http;
  */
 namespace MatrisAritmetik.Core
 {
-    // ENUM CLASSES
-    // Command's states
-    public enum CommandState { IDLE, UNAVAILABLE, SUCCESS, WARNING, ERROR };
-
-    // For limiting matrix creation
-    public enum MatrisLimits { forRows = 128, forCols = 128, forSize = 128*128, forMatrisCount = 8, forName = 64};
-
-    // Token types
-    public enum TokenType { NULL, NUMBER, MATRIS, FUNCTION, ARGSEPERATOR, OPERATOR, LEFTBRACE, RIGHTBRACE };
-
-    // Operator order
-    public enum OperatorAssociativity { LEFT, RIGHT };
-
     // Session stuff
     public static class SessionExtensions
     {
         public static void Set<T>(this ISession session, string key, T value)
         {
-            string serialized = JsonSerializer.Serialize(value,typeof(T));
+            string serialized = JsonSerializer.Serialize(value, typeof(T));
             session.SetString(key, serialized);
         }
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
@@ -38,13 +22,15 @@ namespace MatrisAritmetik.Core
             for(int i = 0; i < lis.Count; i++)
             {
                 Command cmd = lis[i];
-                Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>();
-                cmdinfo.Add("org", cmd.OriginalCommand);
-                cmdinfo.Add("nset", cmd.NameSettings);
-                cmdinfo.Add("vset", cmd.ValsSettings);
-                cmdinfo.Add("output", cmd.Output);
-                cmdinfo.Add("statid", (int)cmd.STATE);
-                cmdinfo.Add("statmsg", cmd.STATE_MESSAGE);
+                Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
+                {
+                    { "org", cmd.OriginalCommand },
+                    { "nset", cmd.NameSettings },
+                    { "vset", cmd.ValsSettings },
+                    { "output", cmd.Output },
+                    { "statid", (int)cmd.STATE },
+                    { "statmsg", cmd.STATE_MESSAGE }
+                };
                 serialized += JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>));
                 if (i != lis.Count - 1)
                     serialized += ",";
@@ -56,7 +42,8 @@ namespace MatrisAritmetik.Core
         public static T Get<T>(this ISession session, string key)
         {
             var value = session.GetString(key);
-            return value == null ? default(T) : JsonSerializer.Deserialize<T>(value);
+            T t = default;
+            return value == null ? t : JsonSerializer.Deserialize<T>(value);
         }
         public static List<Command> GetCmdList(this ISession session, string key)
         {
@@ -81,23 +68,5 @@ namespace MatrisAritmetik.Core
             }
             return cmds;
         }
-    }
-
-    public static class Validations
-    {
-        public static bool ValidMatrixName(string name)
-        {
-            Regex name_regex = new Regex(@"^\w*|[0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-            if (name.Replace(" ", "") == "")
-                return false;
-
-            if (name.Length > (int)MatrisLimits.forName)
-                return false;
-
-            return !("0123456789".Contains(name[0])) &&
-                   (name_regex.Match(name).Groups[0].Value == name);
-        }
-
     }
 }

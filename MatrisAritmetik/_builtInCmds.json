@@ -108,21 +108,21 @@
         "Functions": [
             {
                 "fullname": "Birleştir",
-                "description": "Verilen A ve B matrislerini satır veya sütün olarak birleşmiş hali",
+                "description": "Verilen A ve B matrislerini satır veya sütün olarak birleşmiş hali, axis=0 satır , axis=1 sütün olarak",
 
                 "alias_list": [],
-                "function": "Concat",
+                "function": "Concatenate",
                 "param_types": [
                     "Matris",
                     "Matris",
-                    "string"
+                    "int"
                 ],
-                "param_names": [ "A", "B", "direction" ],
+                "param_names": [ "A", "B", "axis" ],
                 "required_params": [ 0, 1, 2 ],
                 "returns": "Matris",
 
                 "function_template": "!Concatenate(,,)",
-                "function_template_filled": "!Concatenate(A,B,direction)",
+                "function_template_filled": "!Concatenate(A,B,0)",
 
                 "service": "MatrisArithmeticService"
             }

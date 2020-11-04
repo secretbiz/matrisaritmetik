@@ -24,7 +24,7 @@ namespace MatrisAritmetik.Core.Services
 
         MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B);
 
-        MatrisBase<T> Concat(MatrisBase<T> A, MatrisBase<T> B, string concat_as = "row");
+        MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis = 0);
 
         float Minor(MatrisBase<T> A,int row, int col);
 

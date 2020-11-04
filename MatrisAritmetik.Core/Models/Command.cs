@@ -226,78 +226,27 @@ namespace MatrisAritmetik.Core.Models
         {
             string nset = "";
             string vset = "";
-            string state = "IDLE";
-            
-            foreach(string setting in NameSettings.Keys)
+            foreach (string setting in NameSettings.Keys)
                 nset += setting + ":" +NameSettings[setting]+"\t";
             foreach (string setting in ValsSettings.Keys)
                 vset += setting + ":" + ValsSettings[setting] + "\t";
 
-            switch(STATE)
-            { 
-                case CommandState.ERROR:state = "HATA";break;
-                case CommandState.IDLE:state = "BEKLEMEDE";break;
-                case CommandState.SUCCESS:state = "İŞLENDİ";break;
-                default:state = "---";break;
-            }
-
+            string state = STATE switch
+            {
+                CommandState.ERROR => "HATA",
+                CommandState.IDLE => "BEKLEMEDE",
+                CommandState.SUCCESS => "İŞLENDİ",
+                CommandState.UNAVAILABLE => throw new NotImplementedException("Komut işlenemedi"),
+                CommandState.WARNING => throw new NotImplementedException("Komut işlenemedi"),
+                _ => "---",
+            };
             return "Komut: " + OriginalCommand + @"
-Temizlenmiş: " + CleanedCommand + @"
 Ek ayarlar(Komut):" + nset + @"
 Ek ayarlar(Çıktı):" + vset + @"
 Çıktı:
 " + Output.ToString() + @"
 Durum: " + state;
 
-        }
-    }
-
-    // Represent a token
-    public class Token
-    {
-        // Type of token
-        public TokenType tknType = TokenType.NULL;
-
-        public void SetValues(string _symbol,OperatorAssociativity _assoc, int _priority, int _paramCount)
-        {
-            symbol = _symbol;
-            assoc = _assoc;
-            priority = _priority;
-            paramCount = _paramCount;
-        }
-        // Number
-        public dynamic val = 0.0;
-
-        // Operator
-        public string symbol = " ";
-        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
-        public int priority = 0;       // Precedence
-        public int paramCount = 0;     // unary or binary 
-
-        // Matrix or function
-        public string name = " ";
-        public List<string> paramTypes = new List<string>(); 
-        public string service = "";
-        public string returns = "";
-
-        public Token() { }
-
-        public override string ToString() // For easier debugging
-        {
-            switch(tknType)
-            {
-                case TokenType.ARGSEPERATOR: return "ARGSEPERATOR";
-
-                case TokenType.FUNCTION: return "FUNC(" + service + ")"+ name +" "+ paramCount.ToString() +" params" ;
-
-                case TokenType.MATRIS: return "MAT "+name + " " + val.ToString();
-
-                case TokenType.NUMBER: return "NUM " + val.ToString();
-
-                case TokenType.OPERATOR: return "OP '" + symbol + "'";
-
-                default: return tknType.ToString();
-            }
         }
     }
 

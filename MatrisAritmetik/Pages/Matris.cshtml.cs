@@ -103,7 +103,7 @@ namespace MatrisAritmetik.Pages
                 if (savedMatrices.ContainsKey(DecodedRequestDict["name"]))
                     return;
 
-                string actualFuncName = DecodedRequestDict["func"].Substring(1, DecodedRequestDict["func"].IndexOf("(")-1);
+                string actualFuncName = DecodedRequestDict["func"][1..DecodedRequestDict["func"].IndexOf("(")];
                 
                 if (actualFuncName == string.Empty)
                     return;
@@ -166,6 +166,9 @@ namespace MatrisAritmetik.Pages
             {
                 try
                 {
+                    if (DecodedRequestDict["cmd"].Trim() == "")
+                        return;
+
                     LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict["cmd"]);
 
                     LastExecutedCommand.Tokens = _frontService.ShuntingYardAlg(_frontService.Tokenize(LastExecutedCommand.TermsToEvaluate[0]));
@@ -263,7 +266,7 @@ namespace MatrisAritmetik.Pages
             savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
             foreach (string name in savedMatrices.Keys)
             {
-                savedMatricesValDict.Add(name, savedMatrices[name].values);
+                savedMatricesValDict.Add(name, savedMatrices[name].Values);
             }
             //
 

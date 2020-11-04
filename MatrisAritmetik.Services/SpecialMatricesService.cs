@@ -58,7 +58,7 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { row = row, col = col, values = vals };
+            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
         }
 
         public MatrisBase<dynamic> RandFloatMat(int row, int col, float min, float max, dynamic seed = null)
@@ -74,18 +74,18 @@ namespace MatrisAritmetik.Services
                 random = new Random(seed);
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
-            float maxoffset = max - min;
+            float realmax = max - min;
 
             for (int i = 0; i < row; i++)
             {
                 vals.Add(new List<dynamic>());
                 for (int j = 0; j < col; j++)
                 {
-                    vals[i].Add(min + (float)random.NextDouble() % maxoffset);
+                    vals[i].Add((dynamic)(min + ((float)random.NextDouble())*realmax));
                 }
             }
 
-            return new MatrisBase<dynamic>() { row = row, col = col, values = vals };
+            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
         }
     }
 }

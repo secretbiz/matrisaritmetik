@@ -178,13 +178,9 @@ body {
     padding: 2px;
     margin: 2px;
 }
-#matris_komut_yardım {
-    flex: 5%;
-    padding: 1px;
-    margin: 1px;
-}
+
 #matris_komut_button {
-    flex: 15%;
+    flex: 20%;
     padding: 2px;
     margin: 1px;
 }

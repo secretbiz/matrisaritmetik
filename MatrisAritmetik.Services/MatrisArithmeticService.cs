@@ -46,9 +46,9 @@ namespace MatrisAritmetik.Services
         {
             List<List<T>> result = new List<List<T>>();
 
-            for (int j = 0; j < A.col; j++)
+            for (int j = 0; j < A.Col; j++)
             {
-                result.Add(A.Col(j,0));
+                result.Add(A.ColList(j,0));
             }
 
             return new MatrisBase<T>(result);
@@ -94,19 +94,19 @@ namespace MatrisAritmetik.Services
          */
         public MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B)
         {
-            if (A.col != B.row)
+            if (A.Col != B.Row)
             {
                 throw new Exception("Satır ve sütun boyutları hatalı");
             }
 
             List<List<T>> result = new List<List<T>>();
 
-            for (int i = 0; i < A.row; i++)
+            for (int i = 0; i < A.Row; i++)
             {
                 result.Add(new List<T>());
-                for (int j = 0; j < B.col; j++)
+                for (int j = 0; j < B.Col; j++)
                 {
-                    result[i].Add(DotProduct(A.values[i], B.Col(j, 0)));
+                    result[i].Add(DotProduct(A.Values[i], B.ColList(j, 0)));
                 }
             }
 
@@ -114,49 +114,49 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public MatrisBase<T> Concat(MatrisBase<T> A, MatrisBase<T> B, string concat_as = "row")
+        public MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis=0)
         {
-            if(concat_as == "row")
+            if(axis == 0)
             {
-                if (A.col != B.col)
+                if (A.Col != B.Col)
                 {
                     throw new Exception("Column dimensions don't match for concatenation");
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
 
-                for (int r1 = 0; r1 < A.row; r1++)
+                for (int r1 = 0; r1 < A.Row; r1++)
                 {
-                    newvals.Add(A.Row(r1, 0));
+                    newvals.Add(A.RowList(r1, 0));
                 }
-                for (int r2 = 0; r2 < B.row; r2++)
+                for (int r2 = 0; r2 < B.Row; r2++)
                 {
-                    newvals.Add(B.Row(r2, 0));
+                    newvals.Add(B.RowList(r2, 0));
                 }
 
-                return new MatrisBase<T>() { row = A.row + B.row, col = A.col, values = newvals };
+                return new MatrisBase<T>() { Row = A.Row + B.Row, Col = A.Col, Values = newvals };
             }
-            else if(concat_as == "col")
+            else if(axis == 1)
             {
-                if (A.row != B.row)
+                if (A.Row != B.Row)
                 {
                     throw new Exception("Row dimensions don't match for concatenation");
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
 
-                for (int r = 0; r < A.row; r++)
+                for (int r = 0; r < A.Row; r++)
                 {
-                    newvals.Add(A.Row(r, 0));
-                    newvals[r].AddRange(B.Row(r, 0));
+                    newvals.Add(A.RowList(r, 0));
+                    newvals[r].AddRange(B.RowList(r, 0));
                 }
 
-                return new MatrisBase<T>() { row = A.row, col = A.col + B.col, values = newvals };
+                return new MatrisBase<T>() { Row = A.Row, Col = A.Col + B.Col, Values = newvals };
                 
             }
             else
             {
-                throw new Exception("concat_as should be 'row' or 'col'");
+                throw new Exception("Axis should be 0 to concat as rows, 1 for cols");
             }
         }
 
