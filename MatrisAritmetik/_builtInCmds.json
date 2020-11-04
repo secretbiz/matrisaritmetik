@@ -98,7 +98,7 @@
                 "function_template": "!Transpose()",
                 "function_template_filled": "!Transpose(A)",
 
-                "service": "MatrisArithmeticService>"
+                "service": "MatrisArithmeticService"
             }
         ]
     },
