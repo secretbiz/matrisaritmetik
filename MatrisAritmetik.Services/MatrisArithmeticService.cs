@@ -96,7 +96,7 @@ namespace MatrisAritmetik.Services
         {
             if (A.Col != B.Row)
             {
-                throw new Exception("Satır ve sütun boyutları hatalı");
+                throw new Exception("Satır ve sütun boyutları uyuşmalı");
             }
 
             List<List<T>> result = new List<List<T>>();

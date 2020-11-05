@@ -21,8 +21,9 @@ namespace MatrisAritmetik.Core.Models
         // Operator
         public string symbol = " ";
         public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
-        public int priority = 0;       // Precedence
-        public int paramCount = 0;     // unary or binary 
+        public int priority = 0;       
+        public int paramCount = 0;     
+        public int argCount = 0;
 
         // Matrix or function
         public string name = " ";

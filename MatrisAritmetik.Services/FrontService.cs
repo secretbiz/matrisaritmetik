@@ -284,16 +284,36 @@ namespace MatrisAritmetik.Services
         {
             Queue<Token> outputQueue = new Queue<Token>();
             Stack<Token> operatorStack = new Stack<Token>();
+            Stack<bool> valtracker = new Stack<bool>();
+            Stack<int> argcounter = new Stack<int>();
+
             int ind = 0;
             while (ind < tkns.Count)
             {
                 Token tkn = tkns[ind];
                 if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.DOCS)        // NUMBER | MATRIX | INFORMATION
+                {
                     outputQueue.Enqueue(tkn);
 
-                else if (tkn.tknType == TokenType.FUNCTION)   // FUNCTION
-                    operatorStack.Push(tkn);
+                    if (valtracker.Count > 0)
+                    {
+                        valtracker.Pop();
+                        valtracker.Push(true);
+                    }
+                }
 
+                else if (tkn.tknType == TokenType.FUNCTION)   // FUNCTION
+                {
+                    operatorStack.Push(tkn);
+                    argcounter.Push(0);
+                    if (valtracker.Count > 0)
+                    {
+                        valtracker.Pop();
+                        valtracker.Push(true);
+                    }
+                    valtracker.Push(false);
+
+                }
                 else if (tkn.tknType == TokenType.ARGSEPERATOR)     // ARGUMENT SEPERATOR
                 {
                     while (operatorStack.Peek().tknType != TokenType.LEFTBRACE)
@@ -302,6 +322,13 @@ namespace MatrisAritmetik.Services
                         if (operatorStack.Count == 0)
                             throw new Exception("Parantez formatı hatalı.");
                     }
+                    if(valtracker.Pop())
+                    {
+                        int a = argcounter.Pop();
+                        a++;
+                        argcounter.Push(a);
+                    }
+                    valtracker.Push(false);
                 }
 
                 else if (tkn.tknType == TokenType.OPERATOR)  // OPERATOR
@@ -333,7 +360,14 @@ namespace MatrisAritmetik.Services
                     operatorStack.Pop();
 
                     if (operatorStack.Peek().tknType == TokenType.FUNCTION)
-                        outputQueue.Enqueue(operatorStack.Pop());
+                    {
+                        Token functkn = operatorStack.Pop();
+                        int args = argcounter.Pop();
+                        if (valtracker.Pop())
+                            args++;
+                        functkn.argCount = args;
+                        outputQueue.Enqueue(functkn);
+                    }
 
 
                 }
@@ -761,7 +795,7 @@ namespace MatrisAritmetik.Services
                 if (op.tknType == TokenType.DOCS)
                     throw new Exception("'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.");
 
-                if (operands.Count == 0 && op.paramCount != 0)
+                if (operands.Count == 0 && op.argCount != 0)
                     throw new Exception("Parametre sayısı hatalı!");
 
                 if(op.service != "")
@@ -782,7 +816,7 @@ namespace MatrisAritmetik.Services
                 }
 
                 // Put values in order
-                for (int k = 0; k < operands.Count; k++)
+                for (int k = 0; k < op.argCount; k++)
                 {
                     switch (operands[k].tknType)
                     {
@@ -810,16 +844,20 @@ namespace MatrisAritmetik.Services
                     }
 
                     if (param_arg[k] != null) // Parse given value
-                    { 
-                        switch (op.paramTypes[k])
+                    {
+                        try
                         {
-                            case "int":param_arg[k] = Convert.ToInt32(param_arg[k]); break;
-
-                            case "Matris": param_arg[k] = ((MatrisBase<dynamic>)param_arg[k]); break;
-
-                            case "float": param_arg[k] = Convert.ToSingle(param_arg[k]); break;
-
-                            default: throw new Exception("Fonksiyon parametre türü tanımlanamadı:" + op.paramTypes[k]);
+                            param_arg[k] = (op.paramTypes[k]) switch
+                            {
+                                "int" => Convert.ToInt32(param_arg[k]),
+                                "Matris" => ((MatrisBase<dynamic>)param_arg[k]),
+                                "float" => Convert.ToSingle(param_arg[k]),
+                                _ => throw new Exception("Fonksiyon parametre türü tanımlanamadı:" + op.paramTypes[k]),
+                            };
+                        }
+                        catch(Exception)
+                        {
+                            throw new Exception("Parametre türü hatalı");
                         }
                     }
                     else // Replace with default value
@@ -828,26 +866,31 @@ namespace MatrisAritmetik.Services
                             param_arg[k] = null;
                         else
                         {
-                            switch (paraminfo[k].DefaultValue.GetType().ToString())
+                            param_arg[k] = (paraminfo[k].DefaultValue.GetType().ToString()) switch
                             {
-                                case "System.DBNull":throw new Exception(paraminfo[k].Name+" parametresine değer verilmeli");
-
-                                case "System.Int32": param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue); break;
-
-                                case "System.Double": param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue); break;
-
-                                case "System.Single": param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue); break;
-
-                                default: throw new Exception(paraminfo[k].Name+" için verilen argüman hatalı, " + paraminfo[k].ParameterType + " olmalı");
-                            }
+                                "System.DBNull" => throw new Exception(paraminfo[k].Name + " parametresine değer verilmeli"),
+                                "System.Int32" => Convert.ToInt32(paraminfo[k].DefaultValue),
+                                "System.Double" => Convert.ToDouble(paraminfo[k].DefaultValue),
+                                "System.Single" => Convert.ToSingle(paraminfo[k].DefaultValue),
+                                _ => throw new Exception(paraminfo[k].Name + " için verilen argüman hatalı, " + paraminfo[k].ParameterType + " olmalı"),
+                            };
                         }
                     }
                 }
 
                 if(op.service != "")
                 {
-                    // Invoke the method
-                    operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
+                    try
+                    {
+                        // Invoke the method
+                        operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
+                    }
+                    catch(Exception err)
+                    {
+                        if (err.InnerException != null)
+                            throw new Exception(err.InnerException.Message);
+                        throw err;
+                    }
 
                     operands[0].tknType = op.returns switch
                     {
@@ -982,7 +1025,6 @@ namespace MatrisAritmetik.Services
                         }
                         // More than a single token
                         int ind = 0;
-                        int pushedtoOperand = 0;    // Keep track of pushed ones, in case of default values
                         Stack<Token> operandStack = new Stack<Token>();
                         try
                         {
@@ -994,28 +1036,20 @@ namespace MatrisAritmetik.Services
 
                                 else
                                 {
-                                    /*
-                                    if (operandStack.Count < tkn.paramCount)
+                                    if (operandStack.Count < tkn.argCount)
                                         throw new Exception("Gerekli parameterlere değer verilmeli.");
-                                    */
                                     List<Token> operands = new List<Token>();
-                                    int givenargcount = operandStack.Count - pushedtoOperand;
-                                    int needed_defaults = tkn.paramCount - givenargcount ;
 
-                                    if (needed_defaults > 0)
-                                        pushedtoOperand++;
-                                    else if (needed_defaults == 0 && pushedtoOperand > 0)
-                                        pushedtoOperand--;
-                                    else if (needed_defaults < 0)
-                                        needed_defaults = 0;
-
-                                    // Fill missing ones with defaults
-                                    for (int i = 0; i < needed_defaults; i++)
-                                        operands.Add(new Token() { tknType = TokenType.DEFAULT });
-
-                                    for (int i = 0; i < tkn.paramCount - needed_defaults; i++)
-                                        operands.Add(operandStack.Pop());
-
+                                    if(tkn.tknType == TokenType.FUNCTION)
+                                    {
+                                        for (int i = 0; i < tkn.argCount; i++)
+                                            operands.Add(operandStack.Pop());
+                                    }
+                                    else
+                                    {
+                                        for (int i = 0; i < tkn.paramCount; i++)
+                                            operands.Add(operandStack.Pop());
+                                    }
 
                                     operandStack.Push(EvalOperator(tkn, operands, matdict));
                                     
