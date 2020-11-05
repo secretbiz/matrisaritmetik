@@ -131,6 +131,7 @@ namespace MatrisAritmetik.Services
                         tkn.name = exp;
                         tkn.returns = cmdinfo.returns;
                         tkn.paramTypes = new List<string>(cmdinfo.param_types);
+                        tkn.priority = 100;
                     }
                     else
                         throw new Exception("'" + exp + "' bir fonksiyon değil");
@@ -256,7 +257,7 @@ namespace MatrisAritmetik.Services
                         {
                             tkn.tknType = TokenType.OPERATOR;
                             tkn.symbol = ".*";
-                            tkn.priority = 10;
+                            tkn.priority = 20;
                             tkn.assoc = OperatorAssociativity.LEFT;
                             tkn.paramCount = 2;
                             break;
@@ -265,7 +266,7 @@ namespace MatrisAritmetik.Services
                         {
                             tkn.tknType = TokenType.OPERATOR;
                             tkn.symbol = "./";
-                            tkn.priority = 20;
+                            tkn.priority = 25;
                             tkn.assoc = OperatorAssociativity.LEFT;
                             tkn.paramCount = 2;
                             break;
@@ -359,14 +360,17 @@ namespace MatrisAritmetik.Services
                     }
                     operatorStack.Pop();
 
-                    if (operatorStack.Peek().tknType == TokenType.FUNCTION)
+                    if(operatorStack.Count>0)
                     {
-                        Token functkn = operatorStack.Pop();
-                        int args = argcounter.Pop();
-                        if (valtracker.Pop())
-                            args++;
-                        functkn.argCount = args;
-                        outputQueue.Enqueue(functkn);
+                        if (operatorStack.Peek().tknType == TokenType.FUNCTION)
+                        {
+                            Token functkn = operatorStack.Pop();
+                            int args = argcounter.Pop();
+                            if (valtracker.Pop())
+                                args++;
+                            functkn.argCount = args;
+                            outputQueue.Enqueue(functkn);
+                        }
                     }
 
 
@@ -500,7 +504,8 @@ namespace MatrisAritmetik.Services
                             }
                             
                             operands[0].val = operands[1].val + operands[0].val;
-                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType); 
+                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
+                            operands[0].name = "";
 
                             break;
                         }
@@ -524,6 +529,8 @@ namespace MatrisAritmetik.Services
 
                             operands[0].val = operands[1].val - operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
+                            operands[0].name = "";
+
                             break;
                         }
                     case "*":
@@ -546,6 +553,7 @@ namespace MatrisAritmetik.Services
                                 operands[0].tknType = TokenType.MATRIS;
                             }
 
+                            operands[0].name = "";
                             operands[0].val *= operands[1].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
 
@@ -571,6 +579,7 @@ namespace MatrisAritmetik.Services
                                 operands[0].tknType = TokenType.MATRIS;
                             }
 
+                            operands[0].name = "";
                             operands[0].val = operands[1].val / operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
                             break;
@@ -599,6 +608,7 @@ namespace MatrisAritmetik.Services
                                     operands[0].val = operands[1].val % operands[0].val;
                                     operands[0].tknType = TokenType.NUMBER;
                                 }
+                                operands[0].name = "";
                             }
                             else if (operands[0].tknType == TokenType.MATRIS) // matris % matris
                             {
@@ -628,6 +638,8 @@ namespace MatrisAritmetik.Services
                                 }
                                 else
                                     throw new Exception("Mod matris ise diğer terim de matris olmalı!");
+
+                                operands[0].name = "";
                             }
                             else
                                 throw new Exception("Modülo işlemi sadece sayı%sayı , matris%sayı ve matris%matris formatında olabilir!");
@@ -664,6 +676,7 @@ namespace MatrisAritmetik.Services
                                 operands[0].tknType = TokenType.NUMBER;
                             }
 
+                            operands[0].name = "";
                             break;
                         }
                     case ".^":      // A.^3 == A@A@A  , A kare matris
@@ -678,10 +691,10 @@ namespace MatrisAritmetik.Services
                                     if (!matDict[operands[1].name].IsSquare())
                                         throw new Exception("Sadece kare matrisler .^ operatörünü kullanabilir ");
 
-                                    MatrisBase<float> res = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(matDict[operands[1].name]));
-                                    MatrisBase<float> mat = res.Copy();
+                                    MatrisBase<dynamic> res = matDict[operands[1].name].Copy();
+                                    MatrisBase<dynamic> mat = res.Copy();
 
-                                    IMatrisArithmeticService<float> matservice = new MatrisArithmeticService<float>();
+                                    IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
 
                                     for (int i = 1; i < operands[0].val; i++)
                                         res = matservice.MatrisMul(res, mat);
@@ -689,12 +702,12 @@ namespace MatrisAritmetik.Services
                                     operands[0].val = res;
                                     operands[0].tknType = TokenType.MATRIS;
                                 }
-                                else if (operands[1].val is MatrisBase<object>) // Inner mat
+                                else if (operands[1].val is MatrisBase<dynamic>) // Inner mat
                                 {
-                                    MatrisBase<float> res = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(operands[1].val));
-                                    MatrisBase<float> mat = res.Copy();
+                                    MatrisBase<dynamic> res = new MatrisBase<dynamic>(MatrisBase<dynamic>.FloatListParse(operands[1].val));
+                                    MatrisBase<dynamic> mat = res.Copy();
 
-                                    IMatrisArithmeticService<float> matservice = new MatrisArithmeticService<float>();
+                                    IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
 
                                     for (int i = 1; i < operands[0].val; i++)
                                         res = matservice.MatrisMul(res, mat);
@@ -708,27 +721,29 @@ namespace MatrisAritmetik.Services
                             else
                                 throw new Exception(" .^ işlemi taban olarak matris gerektirir");
 
+                            operands[0].name = "";
                             break;
                         }
                     case ".*":
                         {
-                            MatrisBase<float> mat1, mat2;
+                            MatrisBase<dynamic> mat1, mat2;
                             if (matDict.ContainsKey(operands[0].name))
-                            { mat1 = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(matDict[operands[0].name])); }
+                            { mat1 = matDict[operands[0].name].Copy(); }
                             else if((operands[0].val is MatrisBase<object>))
-                            { mat1 = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(operands[0].val)); }
+                            { mat1 = operands[0].val; }
                             else
                                 throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
 
                             if (matDict.ContainsKey(operands[1].name))
-                            { mat2 = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(matDict[operands[1].name])); }
+                            { mat2 = matDict[operands[1].name].Copy(); }
                             else if ((operands[1].val is MatrisBase<object>))
-                            { mat2 = new MatrisBase<float>(MatrisBase<dynamic>.FloatListParse(operands[1].val)); }
+                            { mat2 = operands[1].val; }
                             else
                                 throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
 
-                            operands[0].val = new MatrisArithmeticService<float>().MatrisMul(mat2, mat1);
+                            operands[0].val = new MatrisArithmeticService<object>().MatrisMul(mat2, mat1);
 
+                            operands[0].name = "";
                             break;
                         }
                     case "u-":
@@ -743,7 +758,8 @@ namespace MatrisAritmetik.Services
                             }
 
                             operands[0].val = -operands[0].val;
-                            
+
+                            operands[0].name = "";
                             break;
                         }
                     case "u+":
@@ -755,6 +771,7 @@ namespace MatrisAritmetik.Services
                                 else if (!(operands[0].val is MatrisBase<object>))
                                     throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
                             }
+                            operands[0].name = "";
                             break;
                         }
                     case "=":
@@ -763,10 +780,18 @@ namespace MatrisAritmetik.Services
                                 throw new Exception("Atama işlemi sadece 'matris = matris' formatında olabilir");
                             else
                             {
+                                if (!(operands[0].val is MatrisBase<object>))
+                                    throw new Exception("Atama işlemi başarısız. Atanan değer bir matris olmalı!");
+
                                 if (matDict.ContainsKey(operands[1].name))
                                     matDict[operands[1].name] = operands[0].val;
                                 else if (Validations.ValidMatrixName(operands[1].name))
-                                    matDict.Add(operands[1].name, operands[0].val); // Ignore matris limit for now
+                                {
+                                    if (matDict.Count < (int)MatrisLimits.forMatrisCount)
+                                        matDict.Add(operands[1].name, operands[0].val);
+                                    else
+                                        throw new Exception("Matris limitine(=" + (int)MatrisLimits.forMatrisCount + ") ulaşıldı, atama işlemi yapmak için bir matrisi siliniz! ");
+                                }
                                 else
                                 {
                                     if (operands[1].name == "")
@@ -775,6 +800,7 @@ namespace MatrisAritmetik.Services
                                         throw new Exception("Matris ismi " + operands[1].name + " olamaz.");
                                 }
                             }
+                            operands[0].name = "";
                             break;
                         }
                     default:
@@ -783,6 +809,9 @@ namespace MatrisAritmetik.Services
             }
             else                             // FUNCTIONS
             {
+                if(op.argCount > op.paramCount)
+                    throw new Exception(op.name + " fonksiyonu maksimum " + op.paramCount + " parametre kabul eder("+op.argCount+" argüman verildi).");
+
                 //operands.Reverse();
                 object[] param_arg = new object[op.paramCount];
 
@@ -814,7 +843,7 @@ namespace MatrisAritmetik.Services
                     method = serviceType.GetMethod(op.name);
                     paraminfo = method.GetParameters();
                 }
-
+                
                 // Put values in order
                 for (int k = 0; k < op.argCount; k++)
                 {
@@ -1036,17 +1065,19 @@ namespace MatrisAritmetik.Services
 
                                 else
                                 {
-                                    if (operandStack.Count < tkn.argCount)
-                                        throw new Exception("Gerekli parameterlere değer verilmeli.");
                                     List<Token> operands = new List<Token>();
 
                                     if(tkn.tknType == TokenType.FUNCTION)
                                     {
+                                        if (operandStack.Count < tkn.argCount)
+                                            throw new Exception("Argüman sayısı hatalı!");
                                         for (int i = 0; i < tkn.argCount; i++)
                                             operands.Add(operandStack.Pop());
                                     }
                                     else
                                     {
+                                        if (operandStack.Count < tkn.paramCount)
+                                            throw new Exception("Argüman sayısı hatalı!");
                                         for (int i = 0; i < tkn.paramCount; i++)
                                             operands.Add(operandStack.Pop());
                                     }
