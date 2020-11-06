@@ -676,6 +676,9 @@ namespace MatrisAritmetik.Services
                             if (operands[0].tknType != TokenType.NUMBER)
                                 throw new Exception("Üssel kısım sayı olmalı");
 
+                            if (operands[0].val < 0)
+                                throw new Exception("'.^' operatöründe 2. argüman negatif olamaz");
+
                             if (operands[1].tknType == TokenType.MATRIS)
                             {
                                 if (matDict.ContainsKey(operands[1].name))
@@ -696,7 +699,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (operands[1].val is MatrisBase<dynamic>) // Inner mat
                                 {
-                                    MatrisBase<dynamic> res = new MatrisBase<dynamic>(MatrisBase<dynamic>.FloatListParse(operands[1].val));
+                                    MatrisBase<dynamic> res = operands[1].val.Copy();
                                     MatrisBase<dynamic> mat = res.Copy();
 
                                     IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
