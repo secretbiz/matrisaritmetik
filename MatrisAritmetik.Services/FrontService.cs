@@ -651,31 +651,23 @@ namespace MatrisAritmetik.Services
                             if (operands[0].tknType != TokenType.NUMBER)
                                 throw new Exception("Üssel kısım sayı olmalı");
 
-                            if(operands[1].tknType == TokenType.MATRIS)
+                            if (operands[1].tknType == TokenType.MATRIS)
                             {
-                                if(matDict.ContainsKey(operands[1].name))
-                                {
-                                   operands[0].val = matDict[operands[1].name].Power((int)operands[0].val);
-                                }
+                                if (matDict.ContainsKey(operands[1].name))
+                                    operands[0].val = matDict[operands[1].name].Power((int)operands[0].val);
+
                                 else if (operands[1].val is MatrisBase<object>) // Inner matrix, not named
-                                {
                                     operands[0].val = operands[1].val.Power((int)operands[0].val);
-                                }
+
                                 else
                                     throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
 
                                 operands[0].tknType = TokenType.MATRIS;
                             }
                             else
-                            {
-                                dynamic val = operands[1].val;
-                                for (int i = 0; i < operands[0].val - 1; i++)
-                                    val *= operands[1].val;
+                                operands[0].val = MatrisBase<dynamic>.PowerMethod(operands[1].val, operands[0].val);
 
-                                operands[0].val = val;
-                                operands[0].tknType = TokenType.NUMBER;
-                            }
-
+                            operands[0].tknType = TokenType.NUMBER;
                             operands[0].name = "";
                             break;
                         }
@@ -852,8 +844,6 @@ namespace MatrisAritmetik.Services
                         case TokenType.NULL: param_arg[k] = null; break;
 
                         case TokenType.NUMBER: param_arg[k] = operands[k].val; break;
-
-                        case TokenType.DEFAULT: param_arg[k] = default; break;
 
                         case TokenType.MATRIS:
                             {

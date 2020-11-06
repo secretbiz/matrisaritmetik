@@ -423,14 +423,6 @@ namespace MatrisAritmetik.Core
             return Col * Row;
         }
 
-        private T Pow(dynamic a, int n)
-        {
-            dynamic a1 = a;
-            for (int i = 0; i < n - 1; i++)
-                a1 *= a;
-            return a1;
-        }
-
         public MatrisBase<T> Power(int n)
         {
             List<List<T>> newlist = new List<List<T>>();
@@ -439,7 +431,7 @@ namespace MatrisAritmetik.Core
                 newlist.Add(new List<T>());
                 for (int j = 0; j < Col; j++)
                 {
-                    newlist[i].Add(Pow((dynamic)(float.Parse(Values[i][j].ToString())), n));
+                    newlist[i].Add(PowerMethod((dynamic)(float.Parse(Values[i][j].ToString())), n));
                 }
             }
             return new MatrisBase<T>(newlist);
@@ -493,7 +485,16 @@ namespace MatrisAritmetik.Core
         {
             return PrintStrMaxtrisForm().Printstr();
         }
-        ////// Parsers
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        ////// Static stuff
+        //// Parse as float matrix
         public static List<List<float>> FloatListParse(MatrisBase<T> mat)
         {
             List<List<float>> floatlis = new List<List<float>>();
@@ -505,8 +506,195 @@ namespace MatrisAritmetik.Core
             }
             return floatlis;
         }
+        //// a^b handling
+        public static dynamic PowerMethod(dynamic a,dynamic b)
+        {
+            dynamic result;
+            if (b == 0)
+            {
+                if (a == 0) // 0^0
+                    result = double.NaN;
+                else
+                    result = 1;    // x^0
+            }
+            else if (b < 0)
+            {
+                if (a == 0)       // 0^(-x)
+                    result = double.PositiveInfinity;
+                else                 // y^(-x)
+                {
+                    dynamic val = 1;
+                    for (int i = 0; i < (b*-1); i++)
+                        val *= a;
+
+                    result = 1.0 / val;
+                }
+            }
+            else
+            {
+                if (a == 0)   // 0^x
+                    result = 0;
+                else                          // y^x
+                {
+                    dynamic val = 1;
+                    for (int i = 0; i < b; i++)
+                        val *= a;
+
+                    result = val;
+                }
+            }
+            return result;
+        }
 
         ////// Operator overloads
+        //// Equals
+        // Mat == Mat
+        public static bool operator ==(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.Row != mat2.Row || mat.Col != mat2.Col)
+                return false;
+            bool isEqual = true;
+            List<List<T>> vals1 = mat.Values;
+            List<List<T>> vals2 = mat2.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (!isEqual)
+                    break;
+                for(int j = 0; j < mat.Col; j++)
+                {
+                    if((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(vals2[i][j].ToString())))
+                    {
+                        isEqual = false;
+                        break;
+                    }
+                }
+            }
+            return isEqual;
+        }
+        // Mat == List<List<dynamic>>
+        public static bool operator ==(MatrisBase<T> mat, List<List<dynamic>> lis)
+        {
+            if (mat.Row != lis.Count || lis.Count == 0)
+                return false;
+            if (lis[0].Count != mat.Col)
+                return false;
+
+            bool isEqual = true;
+            List<List<T>> vals1 = mat.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (!isEqual)
+                    break;
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    {
+                        isEqual = false;
+                        break;
+                    }
+                }
+            }
+            return isEqual;
+        }
+        // List<List<dynamic>> == Mat
+        public static bool operator ==(List<List<dynamic>> lis, MatrisBase<T> mat)
+        {
+            if (mat.Row != lis.Count || lis.Count == 0)
+                return false;
+            if (lis[0].Count != mat.Col)
+                return false;
+
+            bool isEqual = true;
+            List<List<T>> vals1 = mat.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (!isEqual)
+                    break;
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    {
+                        isEqual = false;
+                        break;
+                    }
+                }
+            }
+            return isEqual;
+        }
+        //// Not Equals
+        // Mat != Mat
+        public static bool operator !=(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.Row != mat2.Row || mat.Col != mat2.Col)
+                return true;
+            bool isNotEqual = false;
+            List<List<T>> vals1 = mat.Values;
+            List<List<T>> vals2 = mat2.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (isNotEqual)
+                    break;
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(vals2[i][j].ToString())))
+                    {
+                        isNotEqual = true;
+                        break;
+                    }
+                }
+            }
+            return isNotEqual;
+        }
+        // Mat != List<List<dynamic>>
+        public static bool operator !=(MatrisBase<T> mat, List<List<dynamic>> lis)
+        {
+            if (mat.Row != lis.Count || lis.Count == 0)
+                return true;
+            if (lis[0].Count != mat.Col)
+                return true;
+
+            bool isNotEqual = false;
+            List<List<T>> vals1 = mat.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (isNotEqual)
+                    break;
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    {
+                        isNotEqual = true;
+                        break;
+                    }
+                }
+            }
+            return isNotEqual;
+        }
+        // List<List<dynamic>> != Mat
+        public static bool operator !=(List<List<dynamic>> lis, MatrisBase<T> mat)
+        {
+            if (mat.Row != lis.Count || lis.Count == 0)
+                return true;
+            if (lis[0].Count != mat.Col)
+                return true;
+
+            bool isNotEqual = false;
+            List<List<T>> vals1 = mat.Values;
+            for (int i = 0; i < mat.Row; i++)
+            {
+                if (isNotEqual)
+                    break;
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    {
+                        isNotEqual = true;
+                        break;
+                    }
+                }
+            }
+            return isNotEqual;
+        }
         //// Addition
         // Unary
         public static MatrisBase<T> operator +(MatrisBase<T> mat) => mat;

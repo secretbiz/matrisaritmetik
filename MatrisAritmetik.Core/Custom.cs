@@ -9,13 +9,40 @@ namespace MatrisAritmetik.Core
 {
     // ENUM CLASSES
     // Command's states
-    public enum CommandState { IDLE, UNAVAILABLE, SUCCESS, WARNING, ERROR };
+    public enum CommandState 
+    { 
+        IDLE,
+        UNAVAILABLE,
+        SUCCESS,
+        WARNING,
+        ERROR 
+    };
 
     // For limiting matrix creation
-    public enum MatrisLimits { forRows = 128, forCols = 128, forSize = 128 * 128, forMatrisCount = 8, forName = 64 };
+    public enum MatrisLimits 
+    { 
+        forRows = 128,
+        forCols = 128,
+        forSize = 128 * 128,
+        forMatrisCount = 8,
+        forName = 64 
+    };
 
     // Token types
-    public enum TokenType { NULL, NUMBER, MATRIS, FUNCTION, ARGSEPERATOR, OPERATOR, LEFTBRACE, RIGHTBRACE, DOCS, DEFAULT };
+    public enum TokenType 
+    { 
+        NULL,
+        NUMBER,
+        MATRIS,
+        FUNCTION,
+        ARGSEPERATOR,
+        OPERATOR,
+        LEFTBRACE,
+        RIGHTBRACE,
+        DOCS,
+        OUTPUT,
+        ERROR
+    };
 
     // Operator order
     public enum OperatorAssociativity { LEFT, RIGHT };

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Core", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Services", "..\MatrisAritmetik.Services\MatrisAritmetik.Services.csproj", "{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatrisAritmetik.Tests", "..\MatrisAritmetik.Tests\MatrisAritmetik.Tests.csproj", "{67BA1384-938A-42C1-B277-DBCA4AE3288D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67BA1384-938A-42C1-B277-DBCA4AE3288D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67BA1384-938A-42C1-B277-DBCA4AE3288D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67BA1384-938A-42C1-B277-DBCA4AE3288D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67BA1384-938A-42C1-B277-DBCA4AE3288D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
