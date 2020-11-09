@@ -66,7 +66,7 @@
                 "fullname": "Matris Çarpımı",
                 "description": "Verilen A ve B matrislerinin matris çarpımı",
 
-                "alias_list": [ "Matris .* Matris" ],
+                "alias_list": [ "A .* B" , "A ./ !Inverse(B)"],
                 "function": "MatrisMul",
                 "param_types": [ "Matris", "Matris" ],
                 "param_names": [ "A", "B" ],
@@ -198,7 +198,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "B", "axis" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": [ 0, 1 ],
                 "returns": "Matris",
 
                 "function_template": "!Concatenate(,,)",
