@@ -90,11 +90,10 @@ namespace MatrisAritmetik.Pages
 
             if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("vals"))
             {
-                if(!savedMatrices.ContainsKey(DecodedRequestDict["name"]))
+                if (!savedMatrices.ContainsKey(DecodedRequestDict["name"]))
                     _frontService.AddToMatrisDict(DecodedRequestDict["name"],
                         new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict["vals"])),
                         savedMatrices);
-
             }
 
             else if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("func") && DecodedRequestDict.ContainsKey("args"))
@@ -108,7 +107,7 @@ namespace MatrisAritmetik.Pages
                 if (actualFuncName == string.Empty)
                     return;
 
-                if(_frontService.TryParseBuiltFunc(actualFuncName,out CommandInfo cmdinfo))
+                if (_frontService.TryParseBuiltFunc(actualFuncName,out CommandInfo cmdinfo))
                 {
                     try
                     {

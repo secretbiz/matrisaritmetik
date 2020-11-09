@@ -41,14 +41,14 @@
 
             @if (cmd.STATE == Core.CommandState.SUCCESS)
             {
-                <tr title='@cmd.CommandSummary()'>
+                <tr class="cmdrepeat" title='@cmd.CommandSummary()'>
                     <td>
-                        <span class="command_start">>>></span> @cmd.OriginalCommand =
+                        <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
                     </td>
                 </tr>
 
                 <tr style="border-bottom:2px dashed black">
-                    <td style="white-space: pre-wrap;">@cmd.Output</td>
+                    <td class="cmdoutput">@cmd.Output</td>
                 </tr>
             }
             else if (cmd.STATE == Core.CommandState.ERROR)

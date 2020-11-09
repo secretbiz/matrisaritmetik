@@ -29,7 +29,7 @@ namespace MatrisAritmetik.Services
             foreach (var row in filteredText.Split(newline))
             {
                 temprow = new List<T>();
-                rowsplit = row.Split(delimiter);
+                rowsplit = row.Split(delimiter,StringSplitOptions.RemoveEmptyEntries);
 
                 if (rowsplit.Length != temp && temp != -1)
                 {
@@ -84,8 +84,8 @@ namespace MatrisAritmetik.Services
             string currentParamType;
             string currentArg;
 
-            if (args.Length != funcinfo.required_params.Length)
-                throw new Exception("Not enough parameters or wrong format given");
+            if (args.Length < funcinfo.required_params.Length)
+                throw new Exception("Yeterli sayıda parametre verilmedi!");
 
             // Start checking arguments, parse them
             for (int argind = 0; argind < args.Length; argind++)
@@ -210,7 +210,7 @@ namespace MatrisAritmetik.Services
                     continue;
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "="));
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "=").Replace("!__REVMUL!","./"));
             }
 
         }

@@ -122,16 +122,27 @@ body {
 #matris_table_base {
     width: 100%;
     table-layout: fixed;
+    border-spacing: 0px 1rem !important;
 }
 
 #matris_table {
-    background-color: darkgrey;
-    border: 1px groove darkcyan;
+    background-color: #d6c081;
 }
+    #matris_table tr td:first-child {
+        border-top-left-radius: 11px;
+        border-bottom-left-radius: 11px;
+    }
 
-#matris_table td {
-    overflow:auto;
-}
+    #matris_table tr td:last-child {
+        border-top-right-radius: 11px;
+        border-bottom-right-radius: 11px;
+    }
+    #matris_table tr {
+        padding-bottom:3px;
+    }
+    #matris_table td {
+        overflow: auto;
+    }
 
 .matdelbtn 
 {
@@ -201,6 +212,18 @@ body {
 .command_start{
     font-weight:bold;
     color:blue;
+}
+.cmdrepeat {
+    min-height: 25px;
+    font-family: monospace;
+    background-color: #d39f5a;
+    font-weight:bold;
+}
+
+.cmdoutput {
+    white-space: pre-wrap;
+    font-weight: 600;
+    font-family: "Courier New", Courier, monospace
 }
 #output_body {
     border: 2px double #4c3a0b;

@@ -59,24 +59,220 @@ namespace MatrisAritmetik.Services
             return A.Copy();
         }
 
-        public MatrisBase<T> Echelon(MatrisBase<T> A, bool row_reduce = false)
+        public int AbsMaxOfList(List<T> lis)
         {
-            return new MatrisBase<T>();
+            if (lis.Count == 0)
+                throw new Exception("Liste boş!");
+
+            if (lis.Count == 1)
+                return 0;
+
+            int currentmax = 0;
+            for(int i = 1; i < lis.Count; i++)
+            {
+                if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
+                    currentmax = i;
+            }
+            return currentmax;
+        }
+
+        public T MinOfList(List<T> lis)
+        {
+            if (lis.Count == 0)
+                throw new Exception("Liste boş!");
+
+            if (lis.Count == 1)
+                return lis[0];
+
+            T currentmin = lis[0];
+            foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
+            {
+                if ((float.Parse(val.ToString()) < (float.Parse(currentmin.ToString()))))
+                    currentmin = val;
+            }
+            return currentmin;
+        }
+
+        public MatrisBase<T> Echelon(MatrisBase<T> A)
+        {
+            // Bad dimensions
+            if (!A.IsValid())
+                throw new Exception("Matris boyutları uygun değil!");
+
+            // Zero matrix
+            if (A.IsZero((float)0.0))
+                return A;
+
+            MatrisBase<T> result = A.Copy();
+
+            int nr = A.Row;
+            int nc = A.Col;
+
+            for(int r=0;r<nr;r++)
+            {
+                if(result.IsZeroRow(r,0,(float)0.0))
+                {
+                    result.SwapToEnd(r,0);
+                    nr--;
+                }
+            }
+
+            int p = 0;
+            bool next;
+            int swapCount = 0;
+            while( p < nr && p < nc)
+            {
+                next = false;
+                int r = 1;
+                /*   BAD
+                    0 3 0
+                    1 0 0
+                    0 2 3
+                 */
+                while ((float.Parse(result.Values[p][p].ToString())) == (float)0.0)
+                {
+                    if(p + 1 < nr)
+                    {
+                        if (result.IsZeroRow(p, 0, (float)0.0))
+                            nr--;
+                        result.SwapToEnd(p, 0);
+                        next = true;
+                        swapCount++;
+                        
+                        break;
+                    }
+                    else
+                    {
+                        result.FixMinusZero();
+                        result.swapCount = swapCount;
+                        return result;
+                    }
+                }
+
+                if (next)
+                    continue;
+
+                for(;(r>=1 && r< (nr-p)); r++)
+                {
+                    if(float.Parse(result.Values[p+r][p].ToString()) != (float)0.0)
+                    {
+                        float x = -(float.Parse(result.Values[p + r][p].ToString()) / float.Parse(result.Values[p][p].ToString()));
+                        for (int c = p; c < nc; c++)
+                            result.Values[p + r][c] = (dynamic)(float.Parse(result.Values[p][c].ToString()) * x + float.Parse(result.Values[p + r][c].ToString())); 
+                    }
+                }
+                p++;
+            }
+
+            for (int i = 0; i < A.Row; i++)
+            {
+                if (result.IsZeroRow(i, 0, (float)0.0))
+                    result.SwapToEnd(i, 0);
+            }
+
+            result.FixMinusZero();
+            result.swapCount = swapCount;
+            return result;
+        }
+
+        public MatrisBase<T> RREchelon(MatrisBase<T> A)
+        {
+            // Bad dimensions
+            if (!A.IsValid())
+                throw new Exception("Matris boyutları uygun değil!");
+
+            // Zero matrix
+            if (A.IsZero((float)0.0))
+                return A;
+
+            MatrisBase<T> result = Echelon(A);
+
+            int rowCount = A.Row;
+            while (result.IsZeroRow(rowCount, 1, (float)0.0))
+                rowCount--;
+            
+            if (rowCount < 1)
+                return A;
+
+            int colCount = A.Col;
+
+            for(int i= rowCount-1 ; i>=0;i--)
+            {
+                if (result.IsZeroRow(i, 0, (float)0.0))
+                    continue;
+
+                int pivotindex = 0;
+                while (float.Parse(result.Values[i][pivotindex].ToString()) == (float)0.0)
+                    pivotindex++;
+
+                result.MulRow(i, (float)1.0/float.Parse(result.Values[i][pivotindex].ToString()), 0);
+
+                for(int e = i-1; e >= 0;e--)
+                {
+                    if (float.Parse(result.Values[e][pivotindex].ToString()) == (float)0.0)
+                        continue;
+
+                    float factor = -float.Parse(result.Values[e][pivotindex].ToString());
+                    for (int j = pivotindex; j < colCount; j++)
+                        result.Values[e][j] = (dynamic)(float.Parse(result.Values[e][j].ToString()) + float.Parse(result.Values[i][j].ToString()) * factor);
+                }
+            }
+
+            result.FixMinusZero();
+
+            return result;
         }
 
         public float Determinant(MatrisBase<T> A)
         {
-            return (float)0.0;
+            if (!A.IsSquare())
+                throw new Exception("Determinant hesabı için matris kare olmalı!");
+
+            if (A.Row == 1)
+                return float.Parse(A.Values[0][0].ToString());
+
+            if (A.Row == 2)
+                return float.Parse(A.Values[0][0].ToString())* float.Parse(A.Values[1][1].ToString())
+                       - float.Parse(A.Values[0][1].ToString())* float.Parse(A.Values[1][0].ToString());
+
+            MatrisBase<T> ech = Echelon(A);
+
+            float det = float.Parse(ech.Values[0][0].ToString());
+            if (ech.swapCount % 2 == 1)
+                det *= -1;
+
+            int dim = A.Row;
+
+            for (int i=1;i<dim;i++)
+            {
+                det *= float.Parse(ech.Values[i][i].ToString());
+            }
+            return det;
         }
 
-        public float Rank(MatrisBase<T> A)
+        public int Rank(MatrisBase<T> A)
         {
-            return (float)0.0;
+            MatrisBase<T> ech = Echelon(A);
+            int zeroRowCount = 0;
+            for(int i=ech.Row-1;i>=0;i--)
+            {
+                if (!ech.IsZeroRow(i, 0, (float)0.0))
+                    break;
+                zeroRowCount++;
+            }
+            return ech.Row-zeroRowCount;
         }
 
         public MatrisBase<T> Inverse(MatrisBase<T> A)
         {
-            return new MatrisBase<T>();
+            if (!A.IsSquare())
+                throw new Exception("Ters matris hesabı için matris kare olmalı!");
+
+            if (Determinant(A) == (float)(0.0))
+                throw new Exception("Determinant 0, ters matris bulunamadı");
+
+            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row),1);
+            return new MatrisBase<T>(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
         public MatrisBase<T> PseudeInverse(MatrisBase<T> A)

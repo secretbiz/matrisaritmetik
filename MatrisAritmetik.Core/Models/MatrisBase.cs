@@ -8,6 +8,7 @@ namespace MatrisAritmetik.Core
 {
     public class MatrisBase<T>
     {
+        public int swapCount = 0;
         private int _row = -1;
         private int _col = -1;
         private List<List<T>> _values = null;
@@ -197,6 +198,8 @@ namespace MatrisAritmetik.Core
         // Matrisi string olarak döner
         public string Printstr()
         {
+            bool stringmat = typeof(T) == typeof(String);
+
             if (Row == 0 || Col == 0)
                 return "";
 
@@ -211,7 +214,10 @@ namespace MatrisAritmetik.Core
                 colno = 0;
                 foreach (var element in row)
                 {
-                    str += new string(' ', (longest_in_col[colno] - element.ToString().Length)) + element.ToString();
+                    if (stringmat)
+                        str += element.ToString();
+                    else
+                        str += new string(' ', (longest_in_col[colno] - element.ToString().Length)) + element.ToString();
 
                     if (colno != Col - 1)
                         str += delimiter;
@@ -245,6 +251,140 @@ namespace MatrisAritmetik.Core
 
             return strmat;
         }
+
+        //// Indexers, base 0
+        // Rows
+        public List<List<T>> this[Range r]
+        {
+            get
+            {
+                if (r.Start.Equals(r.End) || r.End.Value > _row || r.Start.Value >= _row)
+                    return null;
+
+
+                return _values.GetRange(r.Start.Value, r.End.Value - r.Start.Value);
+            }
+            set
+            {
+                if (r.Start.Equals(r.End) || r.End.Value > _row || r.Start.Value >= _row)
+                    return;
+
+                List<List<T>> newVals = new List<List<T>>();
+                List<T>[] temp = new List<T>[_row];
+
+                if (r.Start.Value > 0)
+                    newVals.AddRange(_values.GetRange(0, r.Start.Value));
+
+                newVals.AddRange(value);
+
+                if(_row-r.End.Value > 0)
+                    newVals.AddRange(_values.GetRange(r.End.Value, _row - r.End.Value));
+
+                newVals.CopyTo(temp);
+                newVals.Clear();
+
+                _values.Clear();
+                _values = new List<List<T>>(temp);
+            }
+        }
+
+        // Row
+        public List<T> this[int index]
+        {
+
+            get
+            {
+                if (index >= _row)
+                    return null;
+                return _values[index];
+            }
+            set
+            {
+                if (index >= _row)
+                    return;
+                _values[index] = value;
+            }
+        }
+
+        // Single value
+        public T this[int r,int c]
+        {
+            get
+            {
+                if (r >= _row)
+                    return default(T);
+
+                if (c >= _col)
+                    return default(T);
+
+                return _values[r][c];
+            }
+            set
+            {
+                if (r >= _row)
+                    return;
+
+                if (c >= _col)
+                    return;
+
+                _values[r][c] = value;
+            }
+        }
+
+        // Cols and rows
+        public List<List<T>> this[Range r,Range c]
+        {
+            get
+            {
+                if (r.Start.Equals(r.End) || r.End.Value > _row || r.Start.Value >= _row)
+                    return null;
+
+                if (c.Start.Equals(c.End) || c.End.Value > _col || c.Start.Value >= _col)
+                    return null;
+
+                List<List<T>> newVals = new List<List<T>>();
+                for(int i=r.Start.Value;i<r.End.Value;i++)
+                {
+                    List<T> temp = new List<T>();
+                    for(int j = c.Start.Value; j < c.End.Value; j++)
+                        temp.Add(_values[i][j]);
+
+                    newVals.Add(temp);
+                }
+                return newVals;
+            }
+            set
+            {
+
+                if (r.Start.Equals(r.End) || r.End.Value > _row || r.Start.Value >= _row)
+                    return;
+
+                if (c.Start.Equals(c.End) || c.End.Value > _col || c.Start.Value >= _col)
+                    return;
+
+                for (int i = r.Start.Value; i < r.End.Value; i++)
+                {
+                    List<T> newVals = new List<T>();
+                    T[] temp = new T[_col];
+
+                    if (c.Start.Value > 0)
+                        newVals.AddRange(_values[i].GetRange(0, c.Start.Value));
+
+                    newVals.AddRange(value[i]);
+
+                    if (_col - c.End.Value > 0)
+                        newVals.AddRange(_values[i].GetRange(c.End.Value, _col - c.End.Value));
+
+                    newVals.CopyTo(temp);
+                    newVals.Clear();
+
+                    _values[i].Clear();
+                    _values[i] = new List<T>(temp);
+                }
+
+            }
+        }
+        ////
 
         // Sütunu yeni bir liste olarak döner. 1-based
         public List<T> RowList(int r, int based = 1)
@@ -436,44 +576,121 @@ namespace MatrisAritmetik.Core
             }
             return new MatrisBase<T>(newlist);
         }
-
-        public MatrisBase<T> Modulo(int n)
+        
+        public void MulRow(int row, float factor,int based=1)
         {
-            List<List<T>> newlist = new List<List<T>>();
-            for (int i = 0; i < Row; i++)
+            for(int j = 0; j<Col;j++)
             {
-                newlist.Add(new List<T>());
-                for (int j = 0; j < Col; j++)
-                {
-                    newlist[i].Add((dynamic)(float.Parse(Values[i][j].ToString())) % n);
-                }
+                _values[row - based][j] = (dynamic)(float.Parse(_values[row - based][j].ToString()) * factor);
             }
-            return new MatrisBase<T>(newlist);
         }
 
-        // this % mat
-        public MatrisBase<T> Modulo(MatrisBase<T> mat)
+        public void SwapToEnd(int a, int based = 1)
         {
-            if (Row != mat.Row || Col != mat.Col)
-                throw new Exception("Modülo operatörü için boyutlar uyuşmalı!");
-
-            List<List<T>> newlist = new List<List<T>>();
-            List<List<T>> mat2 = mat.Values;
-            for (int i = 0; i < Row; i++)
-            {
-                newlist.Add(new List<T>());
-                for (int j = 0; j < Col; j++)
-                {
-                    newlist[i].Add((dynamic)(float.Parse(Values[i][j].ToString())) % (dynamic)(float.Parse(mat2[i][j].ToString())));
-                }
-            }
-            return new MatrisBase<T>(newlist);
+            a -= based;
+            // Row swap
+            T[] temp = new T[Col];
+            Values[a].CopyTo(temp);
+            _values.Remove(Values[a]);
+            _values.Add(new List<T>(temp));
         }
 
-        // Matrix features
+        public void Swap(int a,int b,int axis=0,int based=1)
+        {
+            if (a == b)
+                return;
+            a -= based;
+            b -= based;
+            // Row swap
+            if(axis == 0)
+            {
+                T[] temp = new T[Col];
+                Values[a].CopyTo(temp);
+                Values[a] = new List<T>(Values[b]);
+                Values[b] = new List<T>(temp);
+            }
+            // Column swap
+            else
+            {
+                T temp;
+                for(int i = 0; i < Row; i++)
+                {
+                    temp = Values[i][a];
+                    Values[i][a] = Values[i][b];
+                    Values[i][b] = temp;
+                }
+            }
+        }
+
+        public void FixMinusZero()
+        {
+            for(int i = 0; i < _row; i++)
+            {
+                for(int j = 0; j <_col;j++)
+                {
+                    if (_values[i][j].ToString() == "-0")
+                        _values[i][j] = (dynamic)(float)0.0;
+                }
+            }
+        }
+
+        public MatrisBase<T> Round(int decimals = 5)
+        {
+            for (int i = 0; i < _row; i++)
+            {
+                for (int j = 0; j < _col; j++)
+                    _values[i][j] = (dynamic)(float)Math.Round(float.Parse(_values[i][j].ToString()),decimals);
+            }
+            return this;
+        }
+
+        //// Matrix features
+        // Valid ?
+        public bool IsValid()
+        {
+            return (Row > 0) && (Col > 0);
+        }
+
+        // Square ?
         public bool IsSquare()
         {
             return Row == Col;
+        }
+        
+        // Zero matrix ?
+        public bool IsZero(float tolerance = (float)0.00001)
+        {
+            bool inRange (float num, float tol) =>  (num <= tol) && (num >= -tol) ;
+
+            bool isZero = true;
+            List<List<T>> vals1 = Values;
+            for (int i = 0; i < Row; i++)
+            {
+                if (!isZero)
+                    break;
+                for (int j = 0; j < Col; j++)
+                {
+                    if (!inRange(float.Parse(vals1[i][j].ToString()), tolerance))
+                    {
+                        isZero = false;
+                        break;
+                    }
+                }
+            }
+            return isZero;
+        }
+        public bool IsZeroCol(int col_index, int based=1, float tolerance = (float)0.00001)
+        {
+            return ColMat(col_index, based).IsZero(tolerance);
+        }
+        public bool IsZeroRow(int row_index, int based = 1, float tolerance = (float)0.00001)
+        {
+            return RowMat(row_index, based).IsZero(tolerance);
+        }
+
+        public bool IsSameSize(MatrisBase<T> other)
+        {
+            return (Row == other.Row ) && ( Col == other.Col );
         }
 
         // Overloads
@@ -483,7 +700,14 @@ namespace MatrisAritmetik.Core
         }
         public override string ToString()
         {
-            return PrintStrMaxtrisForm().Printstr();
+            try
+            {
+                return Round(4).PrintStrMaxtrisForm().Printstr();
+            }
+            catch(Exception)
+            {
+                return PrintStrMaxtrisForm().Printstr();
+            }
         }
         public override bool Equals(object obj)
         {
@@ -888,5 +1112,41 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<dynamic>(newlis);
         }
 
+        //// Modulo
+        // Mat % Mat
+        public static MatrisBase<dynamic> operator %(MatrisBase<T> mat, MatrisBase<T> mat2)
+        {
+            if (mat.Row != mat2.Row || mat.Col != mat2.Col)
+                throw new Exception("Matris boyutları bölme işlemi için aynı olmalı");
+
+            List<List<T>> vals1 = mat.Values;
+            List<List<T>> vals2 = mat2.Values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.Col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) % (dynamic)(float.Parse(vals2[i][j].ToString())));
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // Mat % val
+        public static MatrisBase<dynamic> operator %(MatrisBase<T> mat, dynamic val)
+        {
+            List<List<T>> vals = mat.Values;
+            List<List<dynamic>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < mat.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < mat.Col; j++)
+                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) % val);
+            }
+            return new MatrisBase<dynamic>(newlis);
+        }
+        // val % Mat
+        public static MatrisBase<dynamic> operator %(dynamic val, MatrisBase<T> mat)
+        {
+            throw new Exception("Matris mod olarak kullanılamaz!");
+        }
     }
 }

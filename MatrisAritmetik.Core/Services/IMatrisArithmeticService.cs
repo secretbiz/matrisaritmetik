@@ -10,11 +10,13 @@ namespace MatrisAritmetik.Core.Services
 
         MatrisBase<T> Conjugate(MatrisBase<T> A);
 
-        MatrisBase<T> Echelon(MatrisBase<T> A, bool row_reduce=false);
+        MatrisBase<T> Echelon(MatrisBase<T> A);
+
+        MatrisBase<T> RREchelon(MatrisBase<T> A);
 
         float Determinant(MatrisBase<T> A);
 
-        float Rank(MatrisBase<T> A);
+        int Rank(MatrisBase<T> A);
 
         MatrisBase<T> Adjoint(MatrisBase<T> A);
 

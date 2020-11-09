@@ -62,10 +62,10 @@ namespace MatrisAritmetik.Tests
                                                new Token(){tknType=TokenType.OUTPUT,val=8}}
                     },
                     { "3^-1", new List<Token>(){new Token(){tknType=TokenType.NUMBER,val=3},
-                                               new Token(){tknType=TokenType.OPERATOR,symbol="^"},
-                                               new Token(){tknType=TokenType.OPERATOR,symbol="u-"},
-                                               new Token(){tknType=TokenType.NUMBER,val=1},
-                                               new Token(){tknType=TokenType.OUTPUT,val=0.3333333333333333}}
+                                                new Token(){tknType=TokenType.OPERATOR,symbol="^"},
+                                                new Token(){tknType=TokenType.OPERATOR,symbol="u-"},
+                                                new Token(){tknType=TokenType.NUMBER,val=1},
+                                                new Token(){tknType=TokenType.OUTPUT,val=0.3333333333333333}}
                     },
                     { "2%1", new List<Token>(){new Token(){tknType=TokenType.NUMBER,val=2},
                                                new Token(){tknType=TokenType.OPERATOR,symbol="%"},
@@ -440,7 +440,130 @@ namespace MatrisAritmetik.Tests
                                                        }
                     },
                 }
-            }
+            },
+
+            { "Matris_Combined_Aritmetik" ,
+                new Dictionary<string,List<Token>>(){
+                    { "!RandIntMat(2,2,0,4,0)^3", new List<Token>(){ 
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=4},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="^"},
+                                                         new Token(){tknType=TokenType.NUMBER,val=3},
+                                                         new Token(){
+                                                             tknType=TokenType.OUTPUT,
+                                                             val=new MatrisBase<dynamic>(new List<List<dynamic>>()
+                                                             {
+                                                                 new List<dynamic>(){ 1, 64 },
+                                                                 new List<dynamic>(){ 1, 1 }
+                                                             })
+                                                         }
+                                                       }
+                    },
+                    { "2*!RandIntMat(2,2,0,4,0)^-2", new List<Token>(){
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="*"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=4},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="^"},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="u-"},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){
+                                                             tknType=TokenType.OUTPUT,
+                                                             val=new MatrisBase<dynamic>(new List<List<dynamic>>()
+                                                             {
+                                                                 new List<dynamic>(){ 2, 0.125 },
+                                                                 new List<dynamic>(){ 2, 2 }
+                                                             })
+                                                         }
+                                                       }
+                    },
+                    { "(2*!RandIntMat(2,2,0,4,0))^-2", new List<Token>(){
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="*"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=4},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="^"},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="u-"},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){
+                                                             tknType=TokenType.OUTPUT,
+                                                             val=new MatrisBase<dynamic>(new List<List<dynamic>>()
+                                                             {
+                                                                 new List<dynamic>(){ 0.25, 1.0/64 },
+                                                                 new List<dynamic>(){ 0.25, 0.25 }
+                                                             })
+                                                         }
+                                                       }
+                    },
+                    { "(!Identity(2)+1.5).*!RandIntMat(2,2,0,4,0)%2", new List<Token>(){
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="Identity"},
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="+"},
+                                                         new Token(){tknType=TokenType.NUMBER,val=1.5},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol=".*"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.LEFTBRACE},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=4},
+                                                         new Token(){tknType=TokenType.ARGSEPERATOR},
+                                                         new Token(){tknType=TokenType.NUMBER,val=0},
+                                                         new Token(){tknType=TokenType.RIGHTBRACE},
+                                                         new Token(){tknType=TokenType.OPERATOR,symbol="%"},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){tknType=TokenType.NUMBER,val=2},
+                                                         new Token(){
+                                                             tknType=TokenType.OUTPUT,
+                                                             val=new MatrisBase<dynamic>(new List<List<dynamic>>()
+                                                             {
+                                                                 new List<dynamic>(){ 0, 1.5 },
+                                                                 new List<dynamic>(){ 0, 0.5 }
+                                                             })
+                                                         }
+                                                       }
+                    },
+                }
+            },
         };
 
         private void Tokenize_And_Evaluate_Command(Dictionary<string, List<Token>> cmds, Dictionary<string, MatrisBase<dynamic>> matdict)
@@ -563,6 +686,14 @@ namespace MatrisAritmetik.Tests
         public void Matris_Special_Service()
         {
             Tokenize_And_Evaluate_Command(CMDS["Matris_Special_Service"],
+                   new Dictionary<string, MatrisBase<dynamic>>()
+            );
+        }
+
+        [TestMethod]
+        public void Matris_Combined_Aritmetik()
+        {
+            Tokenize_And_Evaluate_Command(CMDS["Matris_Combined_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }

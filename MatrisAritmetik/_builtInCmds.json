@@ -99,6 +99,86 @@
                 "function_template_filled": "!Transpose(A)",
 
                 "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Determinant",
+                "description": "Verilen A matrisinin determinantı",
+
+                "alias_list": [],
+                "function": "Determinant",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "float",
+
+                "function_template": "!Determinant()",
+                "function_template_filled": "!Determinant(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Rank",
+                "description": "Verilen A matrisinin rankı",
+
+                "alias_list": [],
+                "function": "Rank",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "int",
+
+                "function_template": "!Rank()",
+                "function_template_filled": "!Rank(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Eşelon",
+                "description": "Verilen A matrisinin eşelon formu",
+
+                "alias_list": [],
+                "function": "Echelon",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!Echelon()",
+                "function_template_filled": "!Echelon(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "İndirgenmiş-Eşelon",
+                "description": "Verilen A matrisinin indirgenmiş-eşelon formu",
+
+                "alias_list": [],
+                "function": "RREchelon",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!RREchelon()",
+                "function_template_filled": "!RREchelon(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Ters Matris",
+                "description": "Verilen A matrisinin tersi",
+
+                "alias_list": [],
+                "function": "Inverse",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!Inverse()",
+                "function_template_filled": "!Inverse(A)",
+
+                "service": "MatrisArithmeticService"
             }
         ]
     },

@@ -82,7 +82,7 @@ if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, 
 //////// komut gönder
 function sendCmd(event) {
     var tkn = event.currentTarget.token;
-    var filteredcmd = document.getElementById("matris_komut_satır").value.split("=").join("!__EQ!");
+    var filteredcmd = document.getElementById("matris_komut_satır").value.split("=").join("!__EQ!").split("./").join("!__REVMUL!");
     $.ajax(
         {
             type: 'POST',
