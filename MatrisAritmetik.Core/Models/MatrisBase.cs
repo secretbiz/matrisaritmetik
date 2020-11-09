@@ -47,6 +47,8 @@ namespace MatrisAritmetik.Core
                 }
             }
         }
+        public void SetCol(int c)
+        { _col = c; }
 
         public List<List<T>> Values
         {
@@ -312,10 +314,10 @@ namespace MatrisAritmetik.Core
             get
             {
                 if (r >= _row)
-                    return default(T);
+                    return default;
 
                 if (c >= _col)
-                    return default(T);
+                    return default;
 
                 return _values[r][c];
             }
@@ -660,7 +662,7 @@ namespace MatrisAritmetik.Core
         // Zero matrix ?
         public bool IsZero(float tolerance = (float)0.00001)
         {
-            bool inRange (float num, float tol) =>  (num <= tol) && (num >= -tol) ;
+            static bool inRange (float num, float tol) =>  (num <= tol) && (num >= -tol) ;
 
             bool isZero = true;
             List<List<T>> vals1 = Values;

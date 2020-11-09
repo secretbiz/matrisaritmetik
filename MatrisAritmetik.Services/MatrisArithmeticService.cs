@@ -103,16 +103,30 @@ namespace MatrisAritmetik.Services
             if (A.IsZero((float)0.0))
                 return A;
 
-            MatrisBase<T> result = A.Copy();
+            MatrisBase<T> result;
 
             int nr = A.Row;
             int nc = A.Col;
 
-            for(int r=0;r<nr;r++)
+            List<int> zeroCols = new List<int>();
+            List<List<T>> filteredResult = A.Copy().Values; 
+            for(int j=0;j<nc;j++)
             {
-                if(result.IsZeroRow(r,0,(float)0.0))
+                if (A.IsZeroCol(j, 0, (float)0.0))
                 {
-                    result.SwapToEnd(r,0);
+                    for (int i = 0; i < nr; i++)
+                        filteredResult[i].RemoveAt(j - zeroCols.Count);
+                    zeroCols.Add(j);
+                    nc--;
+                }
+            }
+            result = new MatrisBase<T>(filteredResult);
+
+            for (int r = 0; r < nr; r++)
+            {
+                if (result.IsZeroRow(r, 0, (float)0.0))
+                {
+                    result.SwapToEnd(r, 0);
                     nr--;
                 }
             }
@@ -120,18 +134,14 @@ namespace MatrisAritmetik.Services
             int p = 0;
             bool next;
             int swapCount = 0;
+
             while( p < nr && p < nc)
             {
                 next = false;
                 int r = 1;
-                /*   BAD
-                    0 3 0
-                    1 0 0
-                    0 2 3
-                 */
                 while ((float.Parse(result.Values[p][p].ToString())) == (float)0.0)
                 {
-                    if(p + 1 < nr)
+                    if(p + 1 < nr )
                     {
                         if (result.IsZeroRow(p, 0, (float)0.0))
                             nr--;
@@ -143,6 +153,24 @@ namespace MatrisAritmetik.Services
                     }
                     else
                     {
+                        // Zeros to bottom
+                        for (int i = 0; i < A.Row; i++)
+                        {
+                            if (result.IsZeroRow(i, 0, (float)0.0))
+                                result.SwapToEnd(i, 0);
+                        }
+                        // Restore zero columns
+                        if (zeroCols.Count > 0)
+                        {
+                            foreach (int j in zeroCols)
+                            {
+                                for (int i = 0; i < result.Row; i++)
+                                {
+                                    result[i].Insert(j, (dynamic)(float)0.0);
+                                }
+                            }
+                            result.SetCol(A.Col);
+                        }
                         result.FixMinusZero();
                         result.swapCount = swapCount;
                         return result;
@@ -164,10 +192,23 @@ namespace MatrisAritmetik.Services
                 p++;
             }
 
+            // Zeros to bottom
             for (int i = 0; i < A.Row; i++)
             {
                 if (result.IsZeroRow(i, 0, (float)0.0))
                     result.SwapToEnd(i, 0);
+            }
+            // Restore zero columns
+            if (zeroCols.Count > 0)
+            {
+                foreach (int j in zeroCols)
+                {
+                    for (int i = 0; i < result.Row; i++)
+                    {
+                        result[i].Insert(j, (dynamic)(float)0.0);
+                    }
+                }
+                result.SetCol(A.Col);
             }
 
             result.FixMinusZero();
