@@ -294,14 +294,25 @@ namespace MatrisAritmetik.Services
         public int Rank(MatrisBase<T> A)
         {
             MatrisBase<T> ech = Echelon(A);
-            int zeroRowCount = 0;
-            for(int i=ech.Row-1;i>=0;i--)
+            int zeroCount = 0;
+            if(A.Row <= A.Col)
             {
-                if (!ech.IsZeroRow(i, 0, (float)0.0))
-                    break;
-                zeroRowCount++;
+                for (int i = ech.Row - 1; i >= 0; i--)
+                {
+                    if (ech.IsZeroRow(i, 0, (float)0.0))
+                        zeroCount++;
+                }
+                return ech.Row - zeroCount;
             }
-            return ech.Row-zeroRowCount;
+            else
+            {
+                for (int i = ech.Col - 1; i >= 0; i--)
+                {
+                    if (ech.IsZeroCol(i, 0, (float)0.0))
+                        zeroCount++;
+                }
+                return ech.Col - zeroCount;
+            }
         }
 
         public MatrisBase<T> Inverse(MatrisBase<T> A)

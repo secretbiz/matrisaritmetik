@@ -630,7 +630,7 @@ namespace MatrisAritmetik.Core
             {
                 for(int j = 0; j <_col;j++)
                 {
-                    if (_values[i][j].ToString() == "-0")
+                    if (_values[i][j].ToString() == "-0" || Math.Abs(float.Parse(_values[i][j].ToString())) < 1e-6)
                         _values[i][j] = (dynamic)(float)0.0;
                 }
             }
