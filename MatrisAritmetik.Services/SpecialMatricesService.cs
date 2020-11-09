@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Services;
 
@@ -21,7 +19,7 @@ namespace MatrisAritmetik.Services
             for (int i = 0; i < dimension; i++)
             {
                 temprow = new List<dynamic>();
-                for(int j = 0; j < dimension; j++)
+                for (int j = 0; j < dimension; j++)
                 {
                     if (i == j)
                         temprow.Add((float)1.0);
@@ -49,12 +47,12 @@ namespace MatrisAritmetik.Services
             List<List<dynamic>> vals = new List<List<dynamic>>();
             int maxoffset = max - min + 1;
 
-            for(int i = 0; i < row; i++)
+            for (int i = 0; i < row; i++)
             {
                 vals.Add(new List<dynamic>());
-                for(int j = 0; j < col; j++)
+                for (int j = 0; j < col; j++)
                 {
-                    vals[i].Add(min + random.Next()%maxoffset);
+                    vals[i].Add(min + random.Next() % maxoffset);
                 }
             }
 
@@ -81,7 +79,7 @@ namespace MatrisAritmetik.Services
                 vals.Add(new List<dynamic>());
                 for (int j = 0; j < col; j++)
                 {
-                    vals[i].Add((dynamic)(min + ((float)random.NextDouble())*realmax));
+                    vals[i].Add((dynamic)(min + ((float)random.NextDouble()) * realmax));
                 }
             }
 

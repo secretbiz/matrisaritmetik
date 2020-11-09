@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 /* This file is for managing smaller classes, enumerators etc.
  * Created to reduce file amount.
@@ -9,28 +7,28 @@ namespace MatrisAritmetik.Core
 {
     // ENUM CLASSES
     // Command's states
-    public enum CommandState 
-    { 
+    public enum CommandState
+    {
         IDLE,
         UNAVAILABLE,
         SUCCESS,
         WARNING,
-        ERROR 
+        ERROR
     };
 
     // For limiting matrix creation
-    public enum MatrisLimits 
-    { 
+    public enum MatrisLimits
+    {
         forRows = 128,
         forCols = 128,
         forSize = 128 * 128,
         forMatrisCount = 8,
-        forName = 64 
+        forName = 64
     };
 
     // Token types
-    public enum TokenType 
-    { 
+    public enum TokenType
+    {
         NULL,
         NUMBER,
         MATRIS,

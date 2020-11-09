@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -56,12 +54,12 @@ namespace MatrisAritmetik.Core.Models
         public string Info()
         {
 
-            return "Fonksiyon(Tam): " + function_template_filled  + @"
+            return "Fonksiyon(Tam): " + function_template_filled + @"
         Açıklama: " + description + @"
-        Alternatif: """ + string.Join(",", alias_list) + @""""+ @"
-        Gerekli Minimal Format: !"+ function + "(" + MinimalFormat() + ")"+ @"
+        Alternatif: """ + string.Join(",", alias_list) + @"""" + @"
+        Gerekli Minimal Format: !" + function + "(" + MinimalFormat() + ")" + @"
         Örnek: !" + function + "(" + string.Join(",", param_types) + ")";
-        
+
         }
     }
 }

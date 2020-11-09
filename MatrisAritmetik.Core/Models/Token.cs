@@ -8,7 +8,7 @@ namespace MatrisAritmetik.Core.Models
         // Type of token
         public TokenType tknType = TokenType.NULL;
 
-        public void SetValues(string _symbol,OperatorAssociativity _assoc, int _priority, int _paramCount)
+        public void SetValues(string _symbol, OperatorAssociativity _assoc, int _priority, int _paramCount)
         {
             symbol = _symbol;
             assoc = _assoc;
@@ -21,13 +21,13 @@ namespace MatrisAritmetik.Core.Models
         // Operator
         public string symbol = " ";
         public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
-        public int priority = 0;       
-        public int paramCount = 0;     
+        public int priority = 0;
+        public int paramCount = 0;
         public int argCount = 0;
 
         // Matrix or function
         public string name = " ";
-        public List<string> paramTypes = new List<string>(); 
+        public List<string> paramTypes = new List<string>();
         public string service = "";
         public string returns = "";
 

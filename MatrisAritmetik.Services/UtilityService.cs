@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -29,7 +28,7 @@ namespace MatrisAritmetik.Services
             foreach (var row in filteredText.Split(newline))
             {
                 temprow = new List<T>();
-                rowsplit = row.Split(delimiter,StringSplitOptions.RemoveEmptyEntries);
+                rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
 
                 if (rowsplit.Length != temp && temp != -1)
                 {
@@ -53,9 +52,9 @@ namespace MatrisAritmetik.Services
             return vals;
         }
 
-        public MatrisBase<T> SpecialStringTo2DList( string text,
+        public MatrisBase<T> SpecialStringTo2DList(string text,
                                                     CommandInfo funcinfo,
-                                                    Dictionary<string,MatrisBase<dynamic>> matdict,
+                                                    Dictionary<string, MatrisBase<dynamic>> matdict,
                                                     char argseperator = ',',
                                                     char argnamevalseperator = ':',
                                                     bool removeliterals = true)
@@ -63,22 +62,21 @@ namespace MatrisAritmetik.Services
             string filteredText = text;
             if (removeliterals)
             {
-                filteredText = filteredText.Replace('\t', ' ').Replace('\r', ' ').Replace('\n',' ').Replace(" ","");
+                filteredText = filteredText.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ').Replace(" ", "");
             }
 
             string[] rowsplit;
-            List<T> temprow;
 
             // Check required parameters and if they are referenced more than once
             Dictionary<string, bool> parameterRequired = new Dictionary<string, bool>();
-            for(int i = 0; i < funcinfo.param_names.Length;i++)
+            for (int i = 0; i < funcinfo.param_names.Length; i++)
             {
-                parameterRequired.Add(funcinfo.param_names[i], (Array.IndexOf(funcinfo.required_params,i)!=-1));
+                parameterRequired.Add(funcinfo.param_names[i], (Array.IndexOf(funcinfo.required_params, i) != -1));
             }
 
             // Store given arguments
-            Dictionary<string,object> param_dict = new Dictionary<string, object>();
-            
+            Dictionary<string, object> param_dict = new Dictionary<string, object>();
+
             string[] args = filteredText.Split(argseperator);
             string currentParamName;
             string currentParamType;
@@ -90,9 +88,8 @@ namespace MatrisAritmetik.Services
             // Start checking arguments, parse them
             for (int argind = 0; argind < args.Length; argind++)
             {
-                temprow = new List<T>();
                 rowsplit = args[argind].Split(argnamevalseperator);
-                
+
                 // Positional
                 if (rowsplit.Length == 1)
                 {
@@ -105,7 +102,7 @@ namespace MatrisAritmetik.Services
 
                 }
                 // Parameter name given
-                else if(rowsplit.Length == 2)
+                else if (rowsplit.Length == 2)
                 {
                     currentArg = rowsplit[1];
                     currentParamName = rowsplit[0];
@@ -116,7 +113,7 @@ namespace MatrisAritmetik.Services
                     if (param_dict.ContainsKey(currentParamName))
                         throw new Exception("Can't reference parameter " + currentParamName + " more than once");
 
-                    currentParamType = funcinfo.param_types[Array.IndexOf(funcinfo.param_names,currentParamName)];
+                    currentParamType = funcinfo.param_types[Array.IndexOf(funcinfo.param_names, currentParamName)];
                 }
                 else
                 {
@@ -184,7 +181,7 @@ namespace MatrisAritmetik.Services
             // Create the service
             ConstructorInfo service = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetConstructor(Type.EmptyTypes);
             object serviceObject = service.Invoke(new object[] { });
-            
+
             // Find and invoke method inside named same as given function name in funcinfo
             MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.function);
             MatrisBase<T> result = (MatrisBase<T>)method.Invoke(serviceObject, param_arg);
@@ -192,7 +189,7 @@ namespace MatrisAritmetik.Services
             return result;
         }
 
-        public async Task ReadAndDecodeRequest(Stream reqbody, Encoding enc, List<string> ignoredparams, Dictionary<string,string> decodedRequestDict)
+        public async Task ReadAndDecodeRequest(Stream reqbody, Encoding enc, List<string> ignoredparams, Dictionary<string, string> decodedRequestDict)
         {
             using var reader = new StreamReader(reqbody, enc);
             string url = await reader.ReadToEndAsync();
@@ -210,7 +207,7 @@ namespace MatrisAritmetik.Services
                     continue;
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "=").Replace("!__REVMUL!","./"));
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "=").Replace("!__REVMUL!", "./"));
             }
 
         }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Services;
 using MatrisAritmetik.Services;
@@ -41,7 +39,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void MatrisMul()
         {
-            MatrisBase<dynamic> matmul_A_B = 
+            MatrisBase<dynamic> matmul_A_B =
                 new MatrisBase<dynamic>(new List<List<dynamic>>()
                 {
                     new List<dynamic>(){ -1, 1 },
@@ -70,8 +68,8 @@ namespace MatrisAritmetik.Tests
             Assert.AreEqual(A.ToString(),
                             matmul_A_ID.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + A.ToString() + "\nAlınan:\n" + matmul_A_ID.ToString());
-           
-            MatrisBase<dynamic> matmul_ID_A = matrisArithmeticService.MatrisMul(specialMatricesService.Identity(2),A);
+
+            MatrisBase<dynamic> matmul_ID_A = matrisArithmeticService.MatrisMul(specialMatricesService.Identity(2), A);
             Assert.AreEqual(A.ToString(),
                             matmul_ID_A.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + A.ToString() + "\nAlınan:\n" + matmul_ID_A.ToString());

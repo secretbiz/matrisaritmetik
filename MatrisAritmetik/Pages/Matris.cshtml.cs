@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using MatrisAritmetik.Core;
+using MatrisAritmetik.Core.Models;
+using MatrisAritmetik.Core.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MatrisAritmetik.Core;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Text;
-using System.Net;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using MatrisAritmetik.Core.Services;
-using Microsoft.AspNetCore.Authorization;
-using MatrisAritmetik.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace MatrisAritmetik.Pages
-{   
+{
     public class MatrisModel : PageModel
     {
         public const string SessionMatrisDict = "_MatDictVals";
@@ -23,17 +19,20 @@ namespace MatrisAritmetik.Pages
         public const string SessionLastMessage = "_lastMsg";
         public const string SessionOutputHistory = "_outputHistory";
 
+        private readonly ILogger<MatrisModel> _logger;
         private readonly IUtilityService<dynamic> _utils;                   // string işleme fonksiyonları
         private readonly IMatrisArithmeticService<dynamic> _matrisService;  // matris fonksiyonları
         private readonly IFrontService _frontService;                     // önyüzde gösterilecek bilgi ile ilgili fonksiyonlar
         private readonly ISpecialMatricesService _specialMatricesService; // özel matris oluşturma fonksiyonları
 
         // Page constructor
-        public MatrisModel(IUtilityService<dynamic> utilityService,
+        public MatrisModel(ILogger<MatrisModel> logger,
+                           IUtilityService<dynamic> utilityService,
                            IMatrisArithmeticService<dynamic> matrisService,
                            IFrontService frontService,
                            ISpecialMatricesService specialMatricesService)
         {
+            _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
             _matrisService = matrisService;
@@ -103,11 +102,11 @@ namespace MatrisAritmetik.Pages
                     return;
 
                 string actualFuncName = DecodedRequestDict["func"][1..DecodedRequestDict["func"].IndexOf("(")];
-                
+
                 if (actualFuncName == string.Empty)
                     return;
 
-                if (_frontService.TryParseBuiltFunc(actualFuncName,out CommandInfo cmdinfo))
+                if (_frontService.TryParseBuiltFunc(actualFuncName, out CommandInfo cmdinfo))
                 {
                     try
                     {
@@ -115,7 +114,7 @@ namespace MatrisAritmetik.Pages
                             _utils.SpecialStringTo2DList(DecodedRequestDict["args"], cmdinfo, savedMatrices),
                             savedMatrices);
                     }
-                    catch(Exception err)
+                    catch (Exception err)
                     {
                         LastMessage = err.Message;
                     }
@@ -176,7 +175,7 @@ namespace MatrisAritmetik.Pages
 
                     LastMessage = LastExecutedCommand.STATE_MESSAGE;
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
                     if (err.Message == "Stack empty.")
                         LastMessage = "Format hatası: Parantezler uyuşmalı.";
@@ -184,10 +183,10 @@ namespace MatrisAritmetik.Pages
                         LastMessage = "Format hatası: " + err.Message;
                 }
 
-                if(OutputHistory == null)
+                if (OutputHistory == null)
                     OutputHistory = new Dictionary<string, dynamic>();
 
-                if(OutputHistory.ContainsKey("CommandHistory"))
+                if (OutputHistory.ContainsKey("CommandHistory"))
                     OutputHistory["CommandHistory"].Add(LastExecutedCommand);
                 else
                     OutputHistory.Add("CommandHistory", new List<Command>() { LastExecutedCommand });
@@ -223,7 +222,7 @@ namespace MatrisAritmetik.Pages
 
                 // TO-DO: Eliminate this process
                 savedMatrices = new Dictionary<string, MatrisBase<object>>();
-                foreach(string name in savedMatricesValDict.Keys)
+                foreach (string name in savedMatricesValDict.Keys)
                 {
                     savedMatrices.Add(name, new MatrisBase<object>(savedMatricesValDict[name]));
                 }
@@ -259,7 +258,7 @@ namespace MatrisAritmetik.Pages
 
             HttpContext.Session.Set<string>(SessionLastMessage, LastMessage);
 
-            HttpContext.Session.SetCmdList(SessionOutputHistory,CommandHistory);
+            HttpContext.Session.SetCmdList(SessionOutputHistory, CommandHistory);
 
             // TO-DO: Eliminate this process
             savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();

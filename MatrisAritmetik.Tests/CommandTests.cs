@@ -1,10 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MatrisAritmetik.Core.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MatrisAritmetik.Core;
-using System;
+using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
 using MatrisAritmetik.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MatrisAritmetik.Tests
 {
@@ -20,11 +19,11 @@ namespace MatrisAritmetik.Tests
         /// Example matrices to use for tests
         /// A = { {1, 2}, {3, 4} }
         /// </summary>
-        public MatrisBase<dynamic> A = 
+        public MatrisBase<dynamic> A =
             new MatrisBase<dynamic>(new List<List<dynamic>>()
-                {   
+                {
                     new List<dynamic>(){ 1, 2 },
-                    new List<dynamic>(){ 3, 4 }                       
+                    new List<dynamic>(){ 3, 4 }
                 }
             );
 
@@ -444,7 +443,7 @@ namespace MatrisAritmetik.Tests
 
             { "Matris_Combined_Aritmetik" ,
                 new Dictionary<string,List<Token>>(){
-                    { "!RandIntMat(2,2,0,4,0)^3", new List<Token>(){ 
+                    { "!RandIntMat(2,2,0,4,0)^3", new List<Token>(){
                                                          new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
@@ -569,43 +568,43 @@ namespace MatrisAritmetik.Tests
         private void Tokenize_And_Evaluate_Command(Dictionary<string, List<Token>> cmds, Dictionary<string, MatrisBase<dynamic>> matdict)
         {
             // Loop through expressions
-            foreach (string cmd in cmds.Keys)       
-            {             
+            foreach (string cmd in cmds.Keys)
+            {
                 int tknind = 0;
 
                 // Create a command
-                Command command = new Command(cmd);  
-                
+                Command command = new Command(cmd);
+
                 // Tokenize 
-                command.Tokens = frontService.Tokenize(command.TermsToEvaluate[0]);     
+                command.Tokens = frontService.Tokenize(command.TermsToEvaluate[0]);
 
                 // Check tokens
-                foreach (Token tkn in command.Tokens)       
+                foreach (Token tkn in command.Tokens)
                 {
                     // Check token type
                     Assert.AreEqual(cmds[cmd][tknind].tknType, tkn.tknType,
                         "\n" + cmd + "\nToken tipleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].tknType.ToString() + " \nAlınan:" + tkn.tknType.ToString());
-                    
+
                     // Check matrix names
-                    if(tkn.tknType == TokenType.MATRIS)    
+                    if (tkn.tknType == TokenType.MATRIS)
                         Assert.AreEqual(cmds[cmd][tknind].name, tkn.name,
                         "\n" + cmd + "\nToken isimleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].name + " \nAlınan:" + tkn.name);
-                    
+
                     // Check symbol
-                    else if(tkn.tknType == TokenType.OPERATOR) 
+                    else if (tkn.tknType == TokenType.OPERATOR)
                         Assert.AreEqual(cmds[cmd][tknind].symbol, tkn.symbol,
                         "\n" + cmd + "\nToken sembolleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].symbol + " \nAlınan:" + tkn.symbol);
-                    
+
                     // Check token val
-                    else    
+                    else
                         Assert.AreEqual(cmds[cmd][tknind].val, tkn.val,
                         "\n" + cmd + "\nToken değerleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].val.ToString() + " \nAlınan:" + tkn.val.ToString());
-                    
+
                     tknind++;
                 }
 
                 // If last token is output , evaluate command and check output
-                if (cmds[cmd][^1].tknType == TokenType.OUTPUT) 
+                if (cmds[cmd][^1].tknType == TokenType.OUTPUT)
                 {
                     command.Tokens = frontService.ShuntingYardAlg(command.Tokens);  // Order tokens
 

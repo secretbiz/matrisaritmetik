@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core.Services
@@ -13,7 +11,7 @@ namespace MatrisAritmetik.Core.Services
 
         void ReadCommandInformation();
 
-        List<CommandLabel> GetCommandLabelList(List<string> filter=null);
+        List<CommandLabel> GetCommandLabelList(List<string> filter = null);
 
         void AddToCommandLabelList(string label, CommandInfo[] commandInfos);
 

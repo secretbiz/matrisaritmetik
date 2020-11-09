@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MatrisAritmetik.Core.Models
+﻿namespace MatrisAritmetik.Core.Models
 {
     public class CommandLabel
     {
@@ -14,7 +10,7 @@ namespace MatrisAritmetik.Core.Models
         {
         }
 
-        public CommandLabel(string label,CommandInfo[] cmds)
+        public CommandLabel(string label, CommandInfo[] cmds)
         {
             Label = label;
             Functions = cmds;

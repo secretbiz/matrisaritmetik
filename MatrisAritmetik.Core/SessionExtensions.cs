@@ -19,7 +19,7 @@ namespace MatrisAritmetik.Core
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
         {
             string serialized = "[";
-            for(int i = 0; i < lis.Count; i++)
+            for (int i = 0; i < lis.Count; i++)
             {
                 Command cmd = lis[i];
                 Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
@@ -52,19 +52,19 @@ namespace MatrisAritmetik.Core
                 return new List<Command>();
 
             List<Command> cmds = new List<Command>();
-            foreach(Dictionary<string, dynamic> cmd in JsonSerializer.Deserialize<List<Dictionary<string,dynamic>>>(value))
+            foreach (Dictionary<string, dynamic> cmd in JsonSerializer.Deserialize<List<Dictionary<string, dynamic>>>(value))
             {
                 int st = int.Parse(cmd["statid"].ToString());
-                
+
                 Dictionary<string, string> nset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["nset"].ToString());
                 Dictionary<string, string> vset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["vset"].ToString());
-                
+
                 cmds.Add(new Command((string)(cmd["org"].ToString()),
                                      nset,
                                      vset,
                                      st,
                                      (string)(cmd["statmsg"].ToString()),
-                                     (string)(cmd["output"].ToString()))); 
+                                     (string)(cmd["output"].ToString())));
             }
             return cmds;
         }

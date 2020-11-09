@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Services;
 
 namespace MatrisAritmetik.Services
 {
-    public class MatrisArithmeticService<T>: IMatrisArithmeticService<T>
+    public class MatrisArithmeticService<T> : IMatrisArithmeticService<T>
     {
         /*
          * Operations for generics
@@ -28,10 +27,10 @@ namespace MatrisAritmetik.Services
 
             if (a.Count == 0)
                 throw new Exception("Boyut sıfır");
-            
-            T res = Mul(a[0],b[0]);
-            
-            for(int i = 1; i <a.Count; i++)
+
+            T res = Mul(a[0], b[0]);
+
+            for (int i = 1; i < a.Count; i++)
             {
                 res = Add(res, Mul(a[i], b[i]));
             }
@@ -48,7 +47,7 @@ namespace MatrisAritmetik.Services
 
             for (int j = 0; j < A.Col; j++)
             {
-                result.Add(A.ColList(j,0));
+                result.Add(A.ColList(j, 0));
             }
 
             return new MatrisBase<T>(result);
@@ -68,7 +67,7 @@ namespace MatrisAritmetik.Services
                 return 0;
 
             int currentmax = 0;
-            for(int i = 1; i < lis.Count; i++)
+            for (int i = 1; i < lis.Count; i++)
             {
                 if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
                     currentmax = i;
@@ -109,8 +108,8 @@ namespace MatrisAritmetik.Services
             int nc = A.Col;
 
             List<int> zeroCols = new List<int>();
-            List<List<T>> filteredResult = A.Copy().Values; 
-            for(int j=0;j<nc;j++)
+            List<List<T>> filteredResult = A.Copy().Values;
+            for (int j = 0; j < nc; j++)
             {
                 if (A.IsZeroCol(j, 0, (float)0.0))
                 {
@@ -135,20 +134,20 @@ namespace MatrisAritmetik.Services
             bool next;
             int swapCount = 0;
 
-            while( p < nr && p < nc)
+            while (p < nr && p < nc)
             {
                 next = false;
                 int r = 1;
                 while ((float.Parse(result.Values[p][p].ToString())) == (float)0.0)
                 {
-                    if(p + 1 < nr )
+                    if (p + 1 < nr)
                     {
                         if (result.IsZeroRow(p, 0, (float)0.0))
                             nr--;
                         result.SwapToEnd(p, 0);
                         next = true;
                         swapCount++;
-                        
+
                         break;
                     }
                     else
@@ -180,13 +179,13 @@ namespace MatrisAritmetik.Services
                 if (next)
                     continue;
 
-                for(;(r>=1 && r< (nr-p)); r++)
+                for (; (r >= 1 && r < (nr - p)); r++)
                 {
-                    if(float.Parse(result.Values[p+r][p].ToString()) != (float)0.0)
+                    if (float.Parse(result.Values[p + r][p].ToString()) != (float)0.0)
                     {
                         float x = -(float.Parse(result.Values[p + r][p].ToString()) / float.Parse(result.Values[p][p].ToString()));
                         for (int c = p; c < nc; c++)
-                            result.Values[p + r][c] = (dynamic)(float.Parse(result.Values[p][c].ToString()) * x + float.Parse(result.Values[p + r][c].ToString())); 
+                            result.Values[p + r][c] = (dynamic)(float.Parse(result.Values[p][c].ToString()) * x + float.Parse(result.Values[p + r][c].ToString()));
                     }
                 }
                 p++;
@@ -231,13 +230,13 @@ namespace MatrisAritmetik.Services
             int rowCount = A.Row;
             while (result.IsZeroRow(rowCount, 1, (float)0.0))
                 rowCount--;
-            
+
             if (rowCount < 1)
                 return A;
 
             int colCount = A.Col;
 
-            for(int i= rowCount-1 ; i>=0;i--)
+            for (int i = rowCount - 1; i >= 0; i--)
             {
                 if (result.IsZeroRow(i, 0, (float)0.0))
                     continue;
@@ -246,9 +245,9 @@ namespace MatrisAritmetik.Services
                 while (float.Parse(result.Values[i][pivotindex].ToString()) == (float)0.0)
                     pivotindex++;
 
-                result.MulRow(i, (float)1.0/float.Parse(result.Values[i][pivotindex].ToString()), 0);
+                result.MulRow(i, (float)1.0 / float.Parse(result.Values[i][pivotindex].ToString()), 0);
 
-                for(int e = i-1; e >= 0;e--)
+                for (int e = i - 1; e >= 0; e--)
                 {
                     if (float.Parse(result.Values[e][pivotindex].ToString()) == (float)0.0)
                         continue;
@@ -273,8 +272,8 @@ namespace MatrisAritmetik.Services
                 return float.Parse(A.Values[0][0].ToString());
 
             if (A.Row == 2)
-                return float.Parse(A.Values[0][0].ToString())* float.Parse(A.Values[1][1].ToString())
-                       - float.Parse(A.Values[0][1].ToString())* float.Parse(A.Values[1][0].ToString());
+                return float.Parse(A.Values[0][0].ToString()) * float.Parse(A.Values[1][1].ToString())
+                       - float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString());
 
             MatrisBase<T> ech = Echelon(A);
 
@@ -284,7 +283,7 @@ namespace MatrisAritmetik.Services
 
             int dim = A.Row;
 
-            for (int i=1;i<dim;i++)
+            for (int i = 1; i < dim; i++)
             {
                 det *= float.Parse(ech.Values[i][i].ToString());
             }
@@ -295,7 +294,7 @@ namespace MatrisAritmetik.Services
         {
             MatrisBase<T> ech = Echelon(A);
             int zeroCount = 0;
-            if(A.Row <= A.Col)
+            if (A.Row <= A.Col)
             {
                 for (int i = ech.Row - 1; i >= 0; i--)
                 {
@@ -323,7 +322,7 @@ namespace MatrisAritmetik.Services
             if (Determinant(A) == (float)(0.0))
                 throw new Exception("Determinant 0, ters matris bulunamadı");
 
-            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row),1);
+            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row), 1);
             return new MatrisBase<T>(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
@@ -362,13 +361,13 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis=0)
+        public MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis = 0)
         {
-            if(axis == 0)
+            if (axis == 0)
             {
                 if (A.Col != B.Col)
                 {
-                    throw new Exception("Column dimensions don't match for concatenation");
+                    throw new Exception("Satır olarak eklemek için sütun boyutları aynı olmalı!");
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
@@ -384,11 +383,11 @@ namespace MatrisAritmetik.Services
 
                 return new MatrisBase<T>() { Row = A.Row + B.Row, Col = A.Col, Values = newvals };
             }
-            else if(axis == 1)
+            else if (axis == 1)
             {
                 if (A.Row != B.Row)
                 {
-                    throw new Exception("Row dimensions don't match for concatenation");
+                    throw new Exception("Sütun olarak eklemek için satır boyutları aynı olmalı!");
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
@@ -400,11 +399,11 @@ namespace MatrisAritmetik.Services
                 }
 
                 return new MatrisBase<T>() { Row = A.Row, Col = A.Col + B.Col, Values = newvals };
-                
+
             }
             else
             {
-                throw new Exception("Axis should be 0 to concat as rows, 1 for cols");
+                throw new Exception("Axis parametresi satır eklemek için 0, sütün için 1 olmalı.");
             }
         }
 

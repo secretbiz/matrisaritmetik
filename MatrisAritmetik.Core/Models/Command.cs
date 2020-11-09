@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -142,7 +138,7 @@ namespace MatrisAritmetik.Core.Models
                     return;
                 }
             }
-            
+
             if (!NameSettings.ContainsKey(settingname))
                 NameSettings.Add(settingname, param);
             else
@@ -154,7 +150,7 @@ namespace MatrisAritmetik.Core.Models
                 ValsSettings[settingname] = param;
         }
 
-        public Command(string org, Dictionary<string, string> nset,Dictionary<string,string> vset, int stat, string statmsg, string output)
+        public Command(string org, Dictionary<string, string> nset, Dictionary<string, string> vset, int stat, string statmsg, string output)
         {
             OriginalCommand = org;
             NameSettings = nset;
@@ -182,14 +178,14 @@ namespace MatrisAritmetik.Core.Models
             {
                 string[] currentsetting;
 
-                for(int i = 1 ; i < TermsToEvaluate.Length ; i++)
+                for (int i = 1; i < TermsToEvaluate.Length; i++)
                 {
                     currentsetting = TermsToEvaluate[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-                    switch(currentsetting.Length)
+                    switch (currentsetting.Length)
                     {
                         case 0: // Bad setting given
-                            { 
+                            {
                                 break;
                             }
                         case 1: // Setting without parameters
@@ -208,7 +204,7 @@ namespace MatrisAritmetik.Core.Models
                                 //      from    string "border 2px solid black" 
                                 //      to      Key-Value {"border":"2px solid black"}
                                 string combinedsetting = "";
-                                for(int j=1; j<currentsetting.Length; j++)
+                                for (int j = 1; j < currentsetting.Length; j++)
                                 { combinedsetting += " " + currentsetting[j]; }
 
                                 SettingDecider(currentsetting[0], combinedsetting);
@@ -227,7 +223,7 @@ namespace MatrisAritmetik.Core.Models
             string nset = "";
             string vset = "";
             foreach (string setting in NameSettings.Keys)
-                nset += setting + ":" +NameSettings[setting]+"\t";
+                nset += setting + ":" + NameSettings[setting] + "\t";
             foreach (string setting in ValsSettings.Keys)
                 vset += setting + ":" + ValsSettings[setting] + "\t";
 

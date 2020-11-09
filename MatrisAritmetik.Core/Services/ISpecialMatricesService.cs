@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MatrisAritmetik.Core.Services
+﻿namespace MatrisAritmetik.Core.Services
 {
     public interface ISpecialMatricesService
     {

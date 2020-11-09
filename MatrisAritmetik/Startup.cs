@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using MatrisAritmetik.Core.Services;
 using MatrisAritmetik.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,7 +28,7 @@ namespace MatrisAritmetik
             services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
-            {   
+            {
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });

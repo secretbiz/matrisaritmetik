@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MatrisAritmetik.Core.Services
+﻿namespace MatrisAritmetik.Core.Services
 {
     public interface IMatrisArithmeticService<T>
     {
@@ -28,7 +24,7 @@ namespace MatrisAritmetik.Core.Services
 
         MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis = 0);
 
-        float Minor(MatrisBase<T> A,int row, int col);
+        float Minor(MatrisBase<T> A, int row, int col);
 
         MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col);
 
