@@ -64,7 +64,9 @@ namespace MatrisAritmetik.Pages
             GetSessionVariables();
 
             if (_frontService.GetCommandLabelList() == null)
+            {
                 _frontService.ReadCommandInformation();
+            }
 
             ViewData["komut_optionsdict"] = _frontService.GetCommandLabelList();
 
@@ -90,21 +92,27 @@ namespace MatrisAritmetik.Pages
             if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("vals"))
             {
                 if (!savedMatrices.ContainsKey(DecodedRequestDict["name"]))
+                {
                     _frontService.AddToMatrisDict(DecodedRequestDict["name"],
                         new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict["vals"])),
                         savedMatrices);
+                }
             }
 
             else if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("func") && DecodedRequestDict.ContainsKey("args"))
             {
 
                 if (savedMatrices.ContainsKey(DecodedRequestDict["name"]))
+                {
                     return;
+                }
 
                 string actualFuncName = DecodedRequestDict["func"][1..DecodedRequestDict["func"].IndexOf("(")];
 
                 if (actualFuncName == string.Empty)
+                {
                     return;
+                }
 
                 if (_frontService.TryParseBuiltFunc(actualFuncName, out CommandInfo cmdinfo))
                 {
@@ -120,7 +128,9 @@ namespace MatrisAritmetik.Pages
                     }
                 }
                 else
+                {
                     LastMessage = "Fonksiyon adı hatalı";
+                }
             }
 
             SetSessionVariables();
@@ -165,7 +175,9 @@ namespace MatrisAritmetik.Pages
                 try
                 {
                     if (DecodedRequestDict["cmd"].Trim() == "")
+                    {
                         return;
+                    }
 
                     LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict["cmd"]);
 
@@ -178,23 +190,37 @@ namespace MatrisAritmetik.Pages
                 catch (Exception err)
                 {
                     if (err.Message == "Stack empty.")
+                    {
                         LastMessage = "Format hatası: Parantezler uyuşmalı.";
+                    }
                     else
+                    {
                         LastMessage = "Format hatası: " + err.Message;
+                    }
                 }
 
                 if (OutputHistory == null)
+                {
                     OutputHistory = new Dictionary<string, dynamic>();
+                }
 
                 if (OutputHistory.ContainsKey("CommandHistory"))
+                {
                     OutputHistory["CommandHistory"].Add(LastExecutedCommand);
+                }
                 else
+                {
                     OutputHistory.Add("CommandHistory", new List<Command>() { LastExecutedCommand });
+                }
 
                 if (OutputHistory.ContainsKey("LastMessage"))
+                {
                     OutputHistory["LastMessage"] = LastMessage;
+                }
                 else
+                {
                     OutputHistory.Add("LastMessage", LastMessage);
+                }
             }
 
             SetSessionVariables();

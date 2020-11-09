@@ -67,7 +67,7 @@ namespace MatrisAritmetik
                     {   // This solution is bad, can't debug issues easily
                         Console.WriteLine("Can't rewind body stream. " + ex.Message);
                     }
-                    using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8))
+                    using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
                     {
 
                         tmp = await reader.ReadToEndAsync();

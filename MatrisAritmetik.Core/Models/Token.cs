@@ -60,18 +60,21 @@ namespace MatrisAritmetik.Core.Models
         }
 
         // For easier debugging
-        public override string ToString() => tknType switch
+        public override string ToString()
         {
-            TokenType.ARGSEPERATOR => "ARGSEPERATOR",
-            TokenType.FUNCTION => "FUNC(" + service + ")" + name + " " + paramCount.ToString() + " params",
-            TokenType.MATRIS => "MAT " + name + " " + val.ToString(),
-            TokenType.NUMBER => "NUM " + val.ToString(),
-            TokenType.OPERATOR => "OP '" + symbol + "'",
-            TokenType.NULL => "NULL",
-            TokenType.LEFTBRACE => "LEFTBR",
-            TokenType.RIGHTBRACE => "RIGHTBR",
-            _ => tknType.ToString(),
-        };
+            return tknType switch
+            {
+                TokenType.ARGSEPERATOR => "ARGSEPERATOR",
+                TokenType.FUNCTION => "FUNC(" + service + ")" + name + " " + paramCount.ToString() + " params",
+                TokenType.MATRIS => "MAT " + name + " " + val.ToString(),
+                TokenType.NUMBER => "NUM " + val.ToString(),
+                TokenType.OPERATOR => "OP '" + symbol + "'",
+                TokenType.NULL => "NULL",
+                TokenType.LEFTBRACE => "LEFTBR",
+                TokenType.RIGHTBRACE => "RIGHTBR",
+                _ => tknType.ToString(),
+            };
+        }
     }
 
 }

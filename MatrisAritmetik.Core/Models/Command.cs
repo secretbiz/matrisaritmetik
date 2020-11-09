@@ -96,10 +96,7 @@ namespace MatrisAritmetik.Core.Models
         private CommandState _state = CommandState.IDLE;
         public CommandState STATE
         {
-            get
-            {
-                return _state;
-            }
+            get => _state;
             set
             {
                 _state = value;
@@ -120,9 +117,13 @@ namespace MatrisAritmetik.Core.Models
                     settingname = settingname.Replace("name:", "");
 
                     if (!NameSettings.ContainsKey(settingname))
+                    {
                         NameSettings.Add(settingname, param);
+                    }
                     else
+                    {
                         NameSettings[settingname] = param;
+                    }
 
                     return;
                 }
@@ -131,23 +132,35 @@ namespace MatrisAritmetik.Core.Models
                     settingname = settingname.Replace("vals:", "");
 
                     if (!ValsSettings.ContainsKey(settingname))
+                    {
                         ValsSettings.Add(settingname, param);
+                    }
                     else
+                    {
                         ValsSettings[settingname] = param;
+                    }
 
                     return;
                 }
             }
 
             if (!NameSettings.ContainsKey(settingname))
+            {
                 NameSettings.Add(settingname, param);
+            }
             else
+            {
                 NameSettings[settingname] = param;
+            }
 
             if (!ValsSettings.ContainsKey(settingname))
+            {
                 ValsSettings.Add(settingname, param);
+            }
             else
+            {
                 ValsSettings[settingname] = param;
+            }
         }
 
         public Command(string org, Dictionary<string, string> nset, Dictionary<string, string> vset, int stat, string statmsg, string output)
@@ -163,7 +176,9 @@ namespace MatrisAritmetik.Core.Models
         public Command(string cmd)
         {
             if (cmd == "")
+            {
                 return;
+            }
 
             OriginalCommand = cmd;
 
@@ -171,7 +186,9 @@ namespace MatrisAritmetik.Core.Models
             TermsToEvaluate = OriginalCommand.Split(";", StringSplitOptions.RemoveEmptyEntries);
 
             if (TermsToEvaluate.Length == 0)
+            {
                 return;
+            }
 
             // Settings given
             if (TermsToEvaluate.Length > 1)
@@ -223,9 +240,14 @@ namespace MatrisAritmetik.Core.Models
             string nset = "";
             string vset = "";
             foreach (string setting in NameSettings.Keys)
+            {
                 nset += setting + ":" + NameSettings[setting] + "\t";
+            }
+
             foreach (string setting in ValsSettings.Keys)
+            {
                 vset += setting + ":" + ValsSettings[setting] + "\t";
+            }
 
             string state = STATE switch
             {

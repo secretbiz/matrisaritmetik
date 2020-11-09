@@ -12,10 +12,14 @@ namespace MatrisAritmetik.Core
             Regex name_regex = new Regex(@"^\w*|[0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             if (name.Replace(" ", "") == "")
+            {
                 return false;
+            }
 
             if (name.Length > (int)MatrisLimits.forName)
+            {
                 return false;
+            }
 
             return !("0123456789".Contains(name[0])) &&
                    (name_regex.Match(name).Groups[0].Value == name);

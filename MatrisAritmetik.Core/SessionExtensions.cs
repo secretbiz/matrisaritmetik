@@ -33,7 +33,9 @@ namespace MatrisAritmetik.Core
                 };
                 serialized += JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>));
                 if (i != lis.Count - 1)
+                {
                     serialized += ",";
+                }
             }
             serialized += "]";
             session.SetString(key, serialized);
@@ -41,15 +43,17 @@ namespace MatrisAritmetik.Core
 
         public static T Get<T>(this ISession session, string key)
         {
-            var value = session.GetString(key);
+            string value = session.GetString(key);
             T t = default;
             return value == null ? t : JsonSerializer.Deserialize<T>(value);
         }
         public static List<Command> GetCmdList(this ISession session, string key)
         {
-            var value = session.GetString(key);
+            string value = session.GetString(key);
             if (value == null || value == "" || value == "[]")
+            {
                 return new List<Command>();
+            }
 
             List<Command> cmds = new List<Command>();
             foreach (Dictionary<string, dynamic> cmd in JsonSerializer.Deserialize<List<Dictionary<string, dynamic>>>(value))

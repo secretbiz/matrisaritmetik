@@ -10,7 +10,9 @@ namespace MatrisAritmetik.Services
         public MatrisBase<dynamic> Identity(int dimension)
         {
             if (dimension <= 0)
+            {
                 throw new Exception("Dimensions of identity matrix can't be lower than 1");
+            }
 
             dimension = Math.Min(dimension, (int)MatrisLimits.forCols);
 
@@ -22,9 +24,13 @@ namespace MatrisAritmetik.Services
                 for (int j = 0; j < dimension; j++)
                 {
                     if (i == j)
+                    {
                         temprow.Add((float)1.0);
+                    }
                     else
+                    {
                         temprow.Add((float)0.0);
+                    }
                 }
                 empty.Add(temprow);
             }
@@ -35,14 +41,18 @@ namespace MatrisAritmetik.Services
         public MatrisBase<dynamic> RandIntMat(int row, int col, int min, int max, dynamic seed = null)
         {
             if (row <= 0 || col <= 0)
+            {
                 throw new Exception("Bad dimensions for a matrix");
+            }
 
             row = Math.Min(row, (int)MatrisLimits.forRows);
             col = Math.Min(col, (int)MatrisLimits.forCols);
 
-            var random = new Random();
+            Random random = new Random();
             if (seed != null)
+            {
                 random = new Random(seed);
+            }
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
             int maxoffset = max - min + 1;
@@ -62,14 +72,18 @@ namespace MatrisAritmetik.Services
         public MatrisBase<dynamic> RandFloatMat(int row, int col, float min, float max, dynamic seed = null)
         {
             if (row <= 0 || col <= 0)
+            {
                 throw new Exception("Bad dimensions for a matrix");
+            }
 
             row = Math.Min(row, (int)MatrisLimits.forRows);
             col = Math.Min(col, (int)MatrisLimits.forCols);
 
-            var random = new Random();
+            Random random = new Random();
             if (seed != null)
+            {
                 random = new Random(seed);
+            }
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
             float realmax = max - min;

@@ -587,18 +587,24 @@ namespace MatrisAritmetik.Tests
 
                     // Check matrix names
                     if (tkn.tknType == TokenType.MATRIS)
+                    {
                         Assert.AreEqual(cmds[cmd][tknind].name, tkn.name,
                         "\n" + cmd + "\nToken isimleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].name + " \nAlınan:" + tkn.name);
+                    }
 
                     // Check symbol
                     else if (tkn.tknType == TokenType.OPERATOR)
+                    {
                         Assert.AreEqual(cmds[cmd][tknind].symbol, tkn.symbol,
                         "\n" + cmd + "\nToken sembolleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].symbol + " \nAlınan:" + tkn.symbol);
+                    }
 
                     // Check token val
                     else
+                    {
                         Assert.AreEqual(cmds[cmd][tknind].val, tkn.val,
                         "\n" + cmd + "\nToken değerleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].val.ToString() + " \nAlınan:" + tkn.val.ToString());
+                    }
 
                     tknind++;
                 }

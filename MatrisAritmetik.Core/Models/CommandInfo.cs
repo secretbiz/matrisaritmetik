@@ -43,7 +43,9 @@ namespace MatrisAritmetik.Core.Models
                     if (i != param_types.Length - 1)
                     {
                         if (paraminds.Contains(i + 1))
+                        {
                             reqparams += ", ";
+                        }
                     }
                 }
 
@@ -56,7 +58,7 @@ namespace MatrisAritmetik.Core.Models
 
             return "Fonksiyon(Tam): " + function_template_filled + @"
         Açıklama: " + description + @"
-        Alternatif: """ + string.Join(",", alias_list) + @"""" + @"
+        Alternatif: """ + string.Join(" , ", alias_list) + @"""" + @"
         Gerekli Minimal Format: !" + function + "(" + MinimalFormat() + ")" + @"
         Örnek: !" + function + "(" + string.Join(",", param_types) + ")";
 

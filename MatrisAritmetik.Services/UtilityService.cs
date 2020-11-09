@@ -25,7 +25,7 @@ namespace MatrisAritmetik.Services
             string[] rowsplit;
             List<T> temprow;
 
-            foreach (var row in filteredText.Split(newline))
+            foreach (string row in filteredText.Split(newline))
             {
                 temprow = new List<T>();
                 rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
@@ -37,9 +37,12 @@ namespace MatrisAritmetik.Services
 
                 temp = 0;
 
-                foreach (var val in rowsplit)
+                foreach (string val in rowsplit)
                 {
-                    if (float.TryParse(val, out float element)) temprow.Add((dynamic)element);
+                    if (float.TryParse(val, out float element))
+                    {
+                        temprow.Add((dynamic)element);
+                    }
                     else
                     {
                         throw new Exception("Parsing failed: " + val);
@@ -83,7 +86,9 @@ namespace MatrisAritmetik.Services
             string currentArg;
 
             if (args.Length < funcinfo.required_params.Length)
+            {
                 throw new Exception("Yeterli sayıda parametre verilmedi!");
+            }
 
             // Start checking arguments, parse them
             for (int argind = 0; argind < args.Length; argind++)
@@ -98,8 +103,9 @@ namespace MatrisAritmetik.Services
                     currentParamType = funcinfo.param_types[argind];
 
                     if (param_dict.ContainsKey(currentParamName))
+                    {
                         throw new Exception("Can't reference parameter " + currentParamName + " more than once");
-
+                    }
                 }
                 // Parameter name given
                 else if (rowsplit.Length == 2)
@@ -108,10 +114,14 @@ namespace MatrisAritmetik.Services
                     currentParamName = rowsplit[0];
 
                     if (Array.IndexOf(funcinfo.param_names, currentParamName) == -1)
+                    {
                         throw new Exception("No parameter is named " + currentParamName);
+                    }
 
                     if (param_dict.ContainsKey(currentParamName))
+                    {
                         throw new Exception("Can't reference parameter " + currentParamName + " more than once");
+                    }
 
                     currentParamType = funcinfo.param_types[Array.IndexOf(funcinfo.param_names, currentParamName)];
                 }
@@ -126,32 +136,44 @@ namespace MatrisAritmetik.Services
                     case "int":
                         {
                             if (int.TryParse(currentArg, out int element))
-                                param_dict.Add(currentParamName, (object)element);
+                            {
+                                param_dict.Add(currentParamName, element);
+                            }
                             else
+                            {
                                 throw new Exception("Parsing failed as int: " + currentArg);
+                            }
 
                             break;
                         }
                     case "float":
                         {
                             if (float.TryParse(currentArg, out float element))
-                                param_dict.Add(currentParamName, (object)element);
+                            {
+                                param_dict.Add(currentParamName, element);
+                            }
                             else
+                            {
                                 throw new Exception("Parsing failed as float: " + currentArg);
+                            }
 
                             break;
                         }
                     case "string":
                         {
-                            param_dict.Add(currentParamName, (object)currentArg);
+                            param_dict.Add(currentParamName, currentArg);
                             break;
                         }
                     case "Matris":
                         {
                             if (matdict.ContainsKey(currentArg))
-                                param_dict.Add(currentParamName, (object)matdict[currentArg]);
+                            {
+                                param_dict.Add(currentParamName, matdict[currentArg]);
+                            }
                             else
+                            {
                                 throw new Exception("No matris found named: " + currentArg);
+                            }
 
                             break;
                         }
@@ -167,8 +189,9 @@ namespace MatrisAritmetik.Services
             foreach (int reqindex in funcinfo.required_params)
             {
                 if (!param_dict.ContainsKey(funcinfo.param_names[reqindex]))
+                {
                     throw new Exception("Parameter " + funcinfo.param_names[reqindex] + " requires a value");
-
+                }
             }
 
             object[] param_arg = new object[funcinfo.param_names.Length];
@@ -191,7 +214,7 @@ namespace MatrisAritmetik.Services
 
         public async Task ReadAndDecodeRequest(Stream reqbody, Encoding enc, List<string> ignoredparams, Dictionary<string, string> decodedRequestDict)
         {
-            using var reader = new StreamReader(reqbody, enc);
+            using StreamReader reader = new StreamReader(reqbody, enc);
             string url = await reader.ReadToEndAsync();
 
             string[] body = WebUtility.UrlDecode(url).Split("&");    // body = "param=somevalue&param2=someothervalue"
@@ -199,15 +222,19 @@ namespace MatrisAritmetik.Services
 
             decodedRequestDict.Clear();
 
-            foreach (var pair in body)
+            foreach (string pair in body)
             {
                 pairsplit = pair.Split("="); // pairsplit[] = { key , value }
 
                 if (ignoredparams.Contains(pairsplit[0]))
+                {
                     continue;
+                }
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
+                {
                     decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "=").Replace("!__REVMUL!", "./"));
+                }
             }
 
         }

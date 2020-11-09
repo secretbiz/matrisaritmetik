@@ -23,10 +23,14 @@ namespace MatrisAritmetik.Services
         private T DotProduct(List<T> a, List<T> b)
         {
             if (a.Count != b.Count)
+            {
                 throw new Exception("Boyutlar hatalı");
+            }
 
             if (a.Count == 0)
+            {
                 throw new Exception("Boyut sıfır");
+            }
 
             T res = Mul(a[0], b[0]);
 
@@ -61,16 +65,22 @@ namespace MatrisAritmetik.Services
         public int AbsMaxOfList(List<T> lis)
         {
             if (lis.Count == 0)
+            {
                 throw new Exception("Liste boş!");
+            }
 
             if (lis.Count == 1)
+            {
                 return 0;
+            }
 
             int currentmax = 0;
             for (int i = 1; i < lis.Count; i++)
             {
                 if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
+                {
                     currentmax = i;
+                }
             }
             return currentmax;
         }
@@ -78,16 +88,22 @@ namespace MatrisAritmetik.Services
         public T MinOfList(List<T> lis)
         {
             if (lis.Count == 0)
+            {
                 throw new Exception("Liste boş!");
+            }
 
             if (lis.Count == 1)
+            {
                 return lis[0];
+            }
 
             T currentmin = lis[0];
             foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
             {
                 if ((float.Parse(val.ToString()) < (float.Parse(currentmin.ToString()))))
+                {
                     currentmin = val;
+                }
             }
             return currentmin;
         }
@@ -96,11 +112,15 @@ namespace MatrisAritmetik.Services
         {
             // Bad dimensions
             if (!A.IsValid())
+            {
                 throw new Exception("Matris boyutları uygun değil!");
+            }
 
             // Zero matrix
             if (A.IsZero((float)0.0))
+            {
                 return A;
+            }
 
             MatrisBase<T> result;
 
@@ -114,7 +134,10 @@ namespace MatrisAritmetik.Services
                 if (A.IsZeroCol(j, 0, (float)0.0))
                 {
                     for (int i = 0; i < nr; i++)
+                    {
                         filteredResult[i].RemoveAt(j - zeroCols.Count);
+                    }
+
                     zeroCols.Add(j);
                     nc--;
                 }
@@ -143,7 +166,10 @@ namespace MatrisAritmetik.Services
                     if (p + 1 < nr)
                     {
                         if (result.IsZeroRow(p, 0, (float)0.0))
+                        {
                             nr--;
+                        }
+
                         result.SwapToEnd(p, 0);
                         next = true;
                         swapCount++;
@@ -156,7 +182,9 @@ namespace MatrisAritmetik.Services
                         for (int i = 0; i < A.Row; i++)
                         {
                             if (result.IsZeroRow(i, 0, (float)0.0))
+                            {
                                 result.SwapToEnd(i, 0);
+                            }
                         }
                         // Restore zero columns
                         if (zeroCols.Count > 0)
@@ -177,7 +205,9 @@ namespace MatrisAritmetik.Services
                 }
 
                 if (next)
+                {
                     continue;
+                }
 
                 for (; (r >= 1 && r < (nr - p)); r++)
                 {
@@ -185,7 +215,9 @@ namespace MatrisAritmetik.Services
                     {
                         float x = -(float.Parse(result.Values[p + r][p].ToString()) / float.Parse(result.Values[p][p].ToString()));
                         for (int c = p; c < nc; c++)
+                        {
                             result.Values[p + r][c] = (dynamic)(float.Parse(result.Values[p][c].ToString()) * x + float.Parse(result.Values[p + r][c].ToString()));
+                        }
                     }
                 }
                 p++;
@@ -195,7 +227,9 @@ namespace MatrisAritmetik.Services
             for (int i = 0; i < A.Row; i++)
             {
                 if (result.IsZeroRow(i, 0, (float)0.0))
+                {
                     result.SwapToEnd(i, 0);
+                }
             }
             // Restore zero columns
             if (zeroCols.Count > 0)
@@ -219,42 +253,58 @@ namespace MatrisAritmetik.Services
         {
             // Bad dimensions
             if (!A.IsValid())
+            {
                 throw new Exception("Matris boyutları uygun değil!");
+            }
 
             // Zero matrix
             if (A.IsZero((float)0.0))
+            {
                 return A;
+            }
 
             MatrisBase<T> result = Echelon(A);
 
             int rowCount = A.Row;
             while (result.IsZeroRow(rowCount, 1, (float)0.0))
+            {
                 rowCount--;
+            }
 
             if (rowCount < 1)
+            {
                 return A;
+            }
 
             int colCount = A.Col;
 
             for (int i = rowCount - 1; i >= 0; i--)
             {
                 if (result.IsZeroRow(i, 0, (float)0.0))
+                {
                     continue;
+                }
 
                 int pivotindex = 0;
                 while (float.Parse(result.Values[i][pivotindex].ToString()) == (float)0.0)
+                {
                     pivotindex++;
+                }
 
                 result.MulRow(i, (float)1.0 / float.Parse(result.Values[i][pivotindex].ToString()), 0);
 
                 for (int e = i - 1; e >= 0; e--)
                 {
                     if (float.Parse(result.Values[e][pivotindex].ToString()) == (float)0.0)
+                    {
                         continue;
+                    }
 
                     float factor = -float.Parse(result.Values[e][pivotindex].ToString());
                     for (int j = pivotindex; j < colCount; j++)
+                    {
                         result.Values[e][j] = (dynamic)(float.Parse(result.Values[e][j].ToString()) + float.Parse(result.Values[i][j].ToString()) * factor);
+                    }
                 }
             }
 
@@ -266,20 +316,28 @@ namespace MatrisAritmetik.Services
         public float Determinant(MatrisBase<T> A)
         {
             if (!A.IsSquare())
+            {
                 throw new Exception("Determinant hesabı için matris kare olmalı!");
+            }
 
             if (A.Row == 1)
+            {
                 return float.Parse(A.Values[0][0].ToString());
+            }
 
             if (A.Row == 2)
+            {
                 return float.Parse(A.Values[0][0].ToString()) * float.Parse(A.Values[1][1].ToString())
                        - float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString());
+            }
 
             MatrisBase<T> ech = Echelon(A);
 
             float det = float.Parse(ech.Values[0][0].ToString());
             if (ech.swapCount % 2 == 1)
+            {
                 det *= -1;
+            }
 
             int dim = A.Row;
 
@@ -299,7 +357,9 @@ namespace MatrisAritmetik.Services
                 for (int i = ech.Row - 1; i >= 0; i--)
                 {
                     if (ech.IsZeroRow(i, 0, (float)0.0))
+                    {
                         zeroCount++;
+                    }
                 }
                 return ech.Row - zeroCount;
             }
@@ -308,7 +368,9 @@ namespace MatrisAritmetik.Services
                 for (int i = ech.Col - 1; i >= 0; i--)
                 {
                     if (ech.IsZeroCol(i, 0, (float)0.0))
+                    {
                         zeroCount++;
+                    }
                 }
                 return ech.Col - zeroCount;
             }
@@ -317,10 +379,14 @@ namespace MatrisAritmetik.Services
         public MatrisBase<T> Inverse(MatrisBase<T> A)
         {
             if (!A.IsSquare())
+            {
                 throw new Exception("Ters matris hesabı için matris kare olmalı!");
+            }
 
             if (Determinant(A) == (float)(0.0))
+            {
                 throw new Exception("Determinant 0, ters matris bulunamadı");
+            }
 
             MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row), 1);
             return new MatrisBase<T>(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
