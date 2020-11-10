@@ -1,6 +1,27 @@
 ﻿[
     {
-        "Label": "Genel",
+        "Label": "Derleyici",
+        "Functions": [
+            {
+                "fullname": "Geçmişi sil",
+                "description": "Komut ve çıktı geçmişini siler",
+
+                "alias_list": [],
+                "function": "CleanUp",
+                "param_types": [],
+                "param_names": [],
+                "required_params": [],
+                "returns": "void",
+
+                "function_template": "!CleanUp()",
+                "function_template_filled": "!CleanUp()",
+
+                "service": "FrontService"
+            }
+        ]
+    },
+    {
+        "Label": "Özel Matris",
         "Functions": [
             {
                 "fullname": "Birim matris",
@@ -17,13 +38,7 @@
                 "function_template_filled": "!Identity(n)",
 
                 "service": "SpecialMatricesService"
-            }
-        ]
-    },
-
-    {
-        "Label": "Rastgele",
-        "Functions": [
+            },
             {
                 "fullname": "Tamsayı",
                 "description": "Rastgele tamsayılar ile matris oluşturma fonksiyonu",
@@ -32,7 +47,7 @@
                 "function": "RandIntMat",
                 "param_types": [ "int", "int", "int", "int", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
-                "required_params": [ 0, 1, 2, 3 ],
+                "required_params": [ 0, 1 ],
                 "returns": "Matris",
 
                 "function_template": "!RandIntMat(,,,,)",
@@ -48,7 +63,7 @@
                 "function": "RandFloatMat",
                 "param_types": [ "int", "int", "float", "float", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
-                "required_params": [ 0, 1, 2, 3 ],
+                "required_params": [ 0, 1 ],
                 "returns": "Matris",
 
                 "function_template": "!RandFloatMat(,,,,)",
@@ -66,7 +81,7 @@
                 "fullname": "Matris Çarpımı",
                 "description": "Verilen A ve B matrislerinin matris çarpımı",
 
-                "alias_list": [ "A .* B" , "A ./ !Inverse(B)"],
+                "alias_list": [ "A .* B", "A ./ !Inverse(B)" ],
                 "function": "MatrisMul",
                 "param_types": [ "Matris", "Matris" ],
                 "param_names": [ "A", "B" ],

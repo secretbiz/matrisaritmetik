@@ -12,6 +12,7 @@ namespace MatrisAritmetik.Services
 {
     public class FrontService : IFrontService
     {
+        public bool state = false;
         public void AddToMatrisDict(string name, MatrisBase<dynamic> matris, Dictionary<string, MatrisBase<dynamic>> matdict)
         {
             if (matdict.Count >= (int)MatrisLimits.forMatrisCount)
@@ -173,7 +174,7 @@ namespace MatrisAritmetik.Services
                     }
                     else
                     {
-                        throw new Exception("'" + exp + "' bir fonksiyon değil");
+                        throw new Exception(CompilerMessage.NOT_A_(exp, "fonksiyon"));
                     }
                 }
                 else if (Validations.ValidMatrixName(exp))
@@ -183,7 +184,7 @@ namespace MatrisAritmetik.Services
                 }
                 else if (exp[0] == '?')                 // Information about following expression
                 {
-                    exp = exp.Replace("?", "");
+                    exp = exp.Replace("?", "").Trim();
                     tkn.tknType = TokenType.DOCS;
                     if (TknTryParseBuiltFunc(exp, out CommandInfo cmdinfo))
                     {   // VALID FUNCTION
@@ -201,6 +202,7 @@ namespace MatrisAritmetik.Services
                     }
                     else    // NOTHING FOUND
                     {
+                        tkn.val = exp;
                         tkn.info = "null";
                     }
                 }
@@ -371,7 +373,7 @@ namespace MatrisAritmetik.Services
                         outputQueue.Enqueue(operatorStack.Pop());
                         if (operatorStack.Count == 0)
                         {
-                            throw new Exception("Parantez formatı hatalı.");
+                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
                         }
                     }
                     if (valtracker.Pop())
@@ -415,7 +417,7 @@ namespace MatrisAritmetik.Services
                         outputQueue.Enqueue(operatorStack.Pop());
                         if (operatorStack.Count == 0)
                         {
-                            throw new Exception("Parantez formatı hatalı.");
+                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
                         }
                     }
                     operatorStack.Pop();
@@ -445,7 +447,7 @@ namespace MatrisAritmetik.Services
             {
                 if ((operatorStack.Peek().tknType == TokenType.LEFTBRACE) || (operatorStack.Peek().tknType == TokenType.RIGHTBRACE))
                 {
-                    throw new Exception("Parantez formatı hatalı.");
+                    throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
                 }
 
                 outputQueue.Enqueue(operatorStack.Pop());
@@ -480,13 +482,13 @@ namespace MatrisAritmetik.Services
                 string[] expsplits = exp.Split("=");
                 if (expsplits.Length != 2)
                 {
-                    throw new Exception("Atama operatörü birden fazla kez kullanılamaz");
+                    throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
                 }
                 else
                 {
                     if (!Validations.ValidMatrixName(expsplits[0].Trim()))
                     {
-                        throw new Exception("'" + expsplits[0].Trim() + "' uygun bir matris ismi değil.");
+                        throw new Exception(CompilerMessage.NOT_A_(expsplits[0].Trim(), "matris ismi"));
                     }
                     else
                     {
@@ -565,7 +567,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
 
@@ -577,7 +579,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[1].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
                             }
 
@@ -597,7 +599,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
 
@@ -609,7 +611,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[1].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
                             }
 
@@ -629,7 +631,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
 
@@ -641,7 +643,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[1].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
 
                                 operands[0].tknType = TokenType.MATRIS;
@@ -663,7 +665,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
 
@@ -675,7 +677,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[1].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
 
                                 operands[0].tknType = TokenType.MATRIS;
@@ -702,7 +704,7 @@ namespace MatrisAritmetik.Services
                                     }
                                     else
                                     {
-                                        throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                     }
 
                                     operands[0].tknType = TokenType.MATRIS;
@@ -723,7 +725,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>)) // Not inner matrix, not named
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
 
                                 // term to get mod of
@@ -739,21 +741,21 @@ namespace MatrisAritmetik.Services
                                     }
                                     else
                                     {
-                                        throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                     }
 
                                     operands[0].tknType = TokenType.MATRIS;
                                 }
                                 else
                                 {
-                                    throw new Exception("Mod matris ise diğer terim de matris olmalı!");
+                                    throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
                                 }
 
                                 operands[0].name = "";
                             }
                             else
                             {
-                                throw new Exception("Modülo işlemi sadece sayı%sayı , matris%sayı ve matris%matris formatında olabilir!");
+                                throw new Exception(CompilerMessage.MODULO_FORMATS);
                             }
 
                             break;
@@ -762,7 +764,7 @@ namespace MatrisAritmetik.Services
                         {
                             if (operands[0].tknType != TokenType.NUMBER)
                             {
-                                throw new Exception("Üssel kısım sayı olmalı");
+                                throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
                             }
 
                             if (operands[1].tknType == TokenType.MATRIS)
@@ -777,7 +779,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
 
                                 operands[0].tknType = TokenType.MATRIS;
@@ -795,12 +797,12 @@ namespace MatrisAritmetik.Services
                         {
                             if (operands[0].tknType != TokenType.NUMBER)
                             {
-                                throw new Exception("Üssel kısım sayı olmalı");
+                                throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
                             }
 
                             if (operands[0].val < 0)
                             {
-                                throw new Exception("'.^' operatöründe 2. argüman negatif olamaz");
+                                throw new Exception(CompilerMessage.SPECOP_MATPOWER_EXPO);
                             }
 
                             if (operands[1].tknType == TokenType.MATRIS)
@@ -809,7 +811,7 @@ namespace MatrisAritmetik.Services
                                 {
                                     if (!matDict[operands[1].name].IsSquare())
                                     {
-                                        throw new Exception("Sadece kare matrisler .^ operatörünü kullanabilir ");
+                                        throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
                                     }
 
                                     MatrisBase<dynamic> res = matDict[operands[1].name].Copy();
@@ -842,12 +844,12 @@ namespace MatrisAritmetik.Services
                                 }
                                 else
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
                             }
                             else
                             {
-                                throw new Exception(" .^ işlemi taban olarak matris gerektirir");
+                                throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
                             }
 
                             operands[0].name = "";
@@ -864,12 +866,12 @@ namespace MatrisAritmetik.Services
                                 { mat1 = operands[0].val; }
                                 else
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
                             else
                             {
-                                throw new Exception(" .* işlemi matrisler arasında gerçekleştirilir");
+                                throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
                             }
 
                             if (operands[1].tknType == TokenType.MATRIS)
@@ -880,12 +882,12 @@ namespace MatrisAritmetik.Services
                                 { mat2 = operands[1].val; }
                                 else
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
                             }
                             else
                             {
-                                throw new Exception(" .* işlemi matrisler arasında gerçekleştirilir");
+                                throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
                             }
 
                             operands[0].val = new MatrisArithmeticService<object>().MatrisMul(mat2, mat1);
@@ -904,12 +906,12 @@ namespace MatrisAritmetik.Services
                                 { mat1 = operands[0].val; }
                                 else
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
                             else
                             {
-                                throw new Exception(" ./ işlemi matrisler arasında gerçekleştirilir");
+                                throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
                             }
 
                             if (operands[1].tknType == TokenType.MATRIS)
@@ -920,12 +922,12 @@ namespace MatrisAritmetik.Services
                                 { mat2 = operands[1].val; }
                                 else
                                 {
-                                    throw new Exception("'" + operands[1].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
                                 }
                             }
                             else
                             {
-                                throw new Exception(" ./ işlemi matrisler arasında gerçekleştirilir");
+                                throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
                             }
 
                             IMatrisArithmeticService<object> matservice = new MatrisArithmeticService<object>();
@@ -945,7 +947,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
 
@@ -964,7 +966,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("'" + operands[0].name + "' adlı bir matris bulunamadı");
+                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
                                 }
                             }
                             operands[0].name = "";
@@ -974,13 +976,13 @@ namespace MatrisAritmetik.Services
                         {
                             if (operands[0].tknType != TokenType.MATRIS || operands[1].tknType != TokenType.MATRIS)
                             {
-                                throw new Exception("Atama işlemi sadece 'matris = matris' formatında olabilir");
+                                throw new Exception(CompilerMessage.EQ_FORMAT);
                             }
                             else
                             {
                                 if (!(operands[0].val is MatrisBase<object>))
                                 {
-                                    throw new Exception("Atama işlemi başarısız. Atanan değer bir matris olmalı!");
+                                    throw new Exception(CompilerMessage.EQ_FAILED);
                                 }
 
                                 if (matDict.ContainsKey(operands[1].name))
@@ -995,18 +997,18 @@ namespace MatrisAritmetik.Services
                                     }
                                     else
                                     {
-                                        throw new Exception("Matris limitine(=" + (int)MatrisLimits.forMatrisCount + ") ulaşıldı, atama işlemi yapmak için bir matrisi siliniz! ");
+                                        throw new Exception(CompilerMessage.MAT_LIMIT);
                                     }
                                 }
                                 else
                                 {
                                     if (operands[1].name == "")
                                     {
-                                        throw new Exception("Format hatası!");
+                                        throw new Exception(CompilerMessage.EQ_FORMAT);
                                     }
                                     else
                                     {
-                                        throw new Exception("Matris ismi " + operands[1].name + " olamaz.");
+                                        throw new Exception(CompilerMessage.INVALID_MAT_NAME(operands[1].name));
                                     }
                                 }
                             }
@@ -1014,14 +1016,14 @@ namespace MatrisAritmetik.Services
                             break;
                         }
                     default:
-                        throw new Exception("Hatalı işlem operatörü");
+                        throw new Exception(CompilerMessage.OP_INVALID(op.symbol));
                 }
             }
             else                             // FUNCTIONS
             {
                 if (op.argCount > op.paramCount)
                 {
-                    throw new Exception(op.name + " fonksiyonu maksimum " + op.paramCount + " parametre kabul eder(" + op.argCount + " argüman verildi).");
+                    throw new Exception(CompilerMessage.FUNC_PARAMCOUNT_EXCESS(op.name, op.paramCount, op.argCount));
                 }
 
                 //operands.Reverse();
@@ -1035,21 +1037,21 @@ namespace MatrisAritmetik.Services
 
                 if (op.tknType == TokenType.DOCS)
                 {
-                    throw new Exception("'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.");
+                    throw new Exception(CompilerMessage.DOCS_HELP);
                 }
 
                 if (operands.Count == 0 && op.argCount != 0)
                 {
-                    throw new Exception("Parametre sayısı hatalı!");
+                    throw new Exception(CompilerMessage.PARANTHESIS_COUNT_ERROR);
                 }
 
-                if (op.service != "")
+                if (op.service != "" && op.service != "FrontService")
                 {
                     Type serviceType = op.service switch
                     {
                         "MatrisArithmeticService" => typeof(MatrisArithmeticService<object>),
                         "SpecialMatricesService" => typeof(SpecialMatricesService),
-                        _ => throw new Exception("Bilinmeyen servis ismi: " + op.service),
+                        _ => throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service))
                     };
 
                     // Construct service
@@ -1081,7 +1083,7 @@ namespace MatrisAritmetik.Services
                                 }
                                 else
                                 {
-                                    throw new Exception("'" + operands[k].name + "' adlı bir matris/değişken bulunamadı");
+                                    throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operands[k].name));
                                 }
 
                                 break;
@@ -1089,7 +1091,7 @@ namespace MatrisAritmetik.Services
 
                         default:
                             {
-                                throw new Exception("Parametre türü tanımlanamadı");
+                                throw new Exception(CompilerMessage.UNKNOWN_ARGUMENT_TYPE(op.name, k + 1));
                             }
                     }
 
@@ -1102,40 +1104,78 @@ namespace MatrisAritmetik.Services
                                 "int" => Convert.ToInt32(param_arg[k]),
                                 "Matris" => ((MatrisBase<dynamic>)param_arg[k]),
                                 "float" => Convert.ToSingle(param_arg[k]),
-                                _ => throw new Exception("Fonksiyon parametre türü tanımlanamadı:" + op.paramTypes[k]),
+                                _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[k])),
                             };
                         }
                         catch (Exception)
                         {
-                            throw new Exception("Parametre türü hatalı");
-                        }
-                    }
-                    else // Replace with default value
-                    {
-                        if (paraminfo[k].DefaultValue == null) // default value was null
-                        {
-                            param_arg[k] = null;
-                        }
-                        else
-                        {
-                            param_arg[k] = (paraminfo[k].DefaultValue.GetType().ToString()) switch
-                            {
-                                "System.DBNull" => throw new Exception(paraminfo[k].Name + " parametresine değer verilmeli"),
-                                "System.Int32" => Convert.ToInt32(paraminfo[k].DefaultValue),
-                                "System.Double" => Convert.ToDouble(paraminfo[k].DefaultValue),
-                                "System.Single" => Convert.ToSingle(paraminfo[k].DefaultValue),
-                                _ => throw new Exception(paraminfo[k].Name + " için verilen argüman hatalı, " + paraminfo[k].ParameterType + " olmalı"),
-                            };
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_arg[k].ToString(), op.paramTypes[k]));
                         }
                     }
                 }
-
-                if (op.service != "")
+                // Replace rest with default value
+                for (int k = op.argCount; k < op.paramCount; k++)
+                {
+                    if (paraminfo[k].DefaultValue == null) // default value was null
+                    {
+                        param_arg[k] = null;
+                    }
+                    else
+                    {
+                        switch (paraminfo[k].DefaultValue.GetType().ToString())
+                        {
+                            case "System.DBNull":
+                                {
+                                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(paraminfo[k].Name));
+                                }
+                            case "System.Int32":
+                                {
+                                    param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue);
+                                    break;
+                                }
+                            case "System.Single":
+                                {
+                                    param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue);
+                                    break;
+                                }
+                            case "System.Double":
+                                {
+                                    param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue);
+                                    break;
+                                }
+                            default:
+                                throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(paraminfo[k].Name, paraminfo[k].ParameterType.Name));
+                        }
+                    }
+                }
+                if (op.service == "FrontService")
+                {
+                    switch (op.name)
+                    {
+                        case "CleanUp":
+                            {
+                                CleanUp();
+                                operands.Add(new Token() { val = null, tknType = TokenType.VOID });
+                                break;
+                            }
+                        default: throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
+                    }
+                }
+                else if (op.service != "")
                 {
                     try
                     {
                         // Invoke the method
-                        operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
+                        // No parameters
+                        if (param_arg.Length == 0)
+                        {
+                            method.Invoke(serviceObject, null);
+                            operands.Add(new Token() { val = null, tknType = TokenType.VOID });
+                        }
+                        else
+                        {
+                            operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
+                        }
                     }
                     catch (Exception err)
                     {
@@ -1152,6 +1192,7 @@ namespace MatrisAritmetik.Services
                         "Matris" => TokenType.MATRIS,
                         "int" => TokenType.NUMBER,
                         "float" => TokenType.NUMBER,
+                        "void" => TokenType.VOID,
                         _ => TokenType.NULL,
                     };
                 }
@@ -1160,7 +1201,7 @@ namespace MatrisAritmetik.Services
             return operands[0];
         }
 
-        public CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict)
+        public CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory)
         {
             List<Token> tkns = cmd.Tokens;
 
@@ -1179,13 +1220,13 @@ namespace MatrisAritmetik.Services
                                 if (matdict.ContainsKey(tkns[0].name))
                                 {
                                     cmd.STATE = CommandState.SUCCESS;
-                                    cmd.STATE_MESSAGE = "";
+                                    cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_RET_MAT;
                                     cmd.Output = matdict[tkns[0].name].ToString();
                                 }
                                 else
                                 {
                                     cmd.STATE = CommandState.SUCCESS;
-                                    cmd.STATE_MESSAGE = "";
+                                    cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_RET_NULL;
                                     cmd.Output = "null";
                                 }
                                 return CommandState.SUCCESS;
@@ -1197,7 +1238,7 @@ namespace MatrisAritmetik.Services
                                     case TokenType.NUMBER:
                                         {
                                             cmd.STATE = CommandState.SUCCESS;
-                                            cmd.STATE_MESSAGE = "";
+                                            cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_RET_NUM;
                                             cmd.Output = tkns[0].val.ToString();
                                             return CommandState.SUCCESS;
                                         }
@@ -1210,30 +1251,39 @@ namespace MatrisAritmetik.Services
                                                         if (matdict.ContainsKey(tkns[0].name))
                                                         {
                                                             cmd.STATE = CommandState.SUCCESS;
-                                                            cmd.STATE_MESSAGE = "Matris hakkında bilgi alındı";
-                                                            cmd.Output = "Matris " + tkns[0].name +
-                                                                ", Boyut(" + matdict[tkns[0].name].Row + "," + matdict[tkns[0].name].Col + ")" +
-                                                                "\nElementler:\n" +
-                                                                matdict[tkns[0].name].ToString();
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_MAT_FOUND(tkns[0].name);
+                                                            cmd.Output = matdict[tkns[0].name].Details(tkns[0].name);
                                                         }
                                                         else
                                                         {
                                                             cmd.STATE = CommandState.ERROR;
-                                                            cmd.STATE_MESSAGE = tkns[0].name + " bir matris ya da komut değil";
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NOT_MAT_FUNC(tkns[0].name);
                                                         }
                                                         break;
                                                     }
                                                 case "info":    // info about how to use the compiler
                                                     {
                                                         cmd.STATE = CommandState.SUCCESS;
-                                                        cmd.STATE_MESSAGE = "Konsol kullanma bilgisi alındı";
-                                                        cmd.Output = Custom.Messages["console_info"];
+                                                        cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_COMPILER_DOCS;
+                                                        cmd.Output = CompilerMessage.COMPILER_HELP;
                                                         break;
                                                     }
                                                 case "null":    // nothing found
                                                     {
                                                         cmd.STATE = CommandState.ERROR;
-                                                        cmd.STATE_MESSAGE = tkns[0].name + " bir matris ya da komut değil";
+                                                        if (tkns[0].name.Trim() != "")
+                                                        {
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NOT_MAT_FUNC(tkns[0].name);
+                                                        }
+                                                        else if (tkns[0].symbol.Trim() != "")
+                                                        {
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NONE_FOUND(tkns[0].symbol);
+                                                        }
+                                                        else
+                                                        {
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NONE_FOUND(tkns[0].val);
+                                                        }
+
                                                         break;
                                                     }
                                                 default:        // given name was a function, and also possibly a matrix
@@ -1241,16 +1291,15 @@ namespace MatrisAritmetik.Services
                                                         if (matdict.ContainsKey(tkns[0].name))
                                                         {
                                                             cmd.STATE = CommandState.SUCCESS;
-                                                            cmd.STATE_MESSAGE = "Matris ve komut hakkında bilgi alındı";
-                                                            cmd.Output = tkns[0].name + " adlı matris:" + matdict[tkns[0].name].Row +
-                                                                "x" + matdict[tkns[0].name].Col + "\n" +
-                                                                matdict[tkns[0].name].ToString() + "\n" + tkns[0].name + " adlı komut:\n" +
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_MAT_FUNC_FOUND(tkns[0].name);
+                                                            cmd.Output = matdict[tkns[0].name].Details(tkns[0].name) +
+                                                                "\nKomut: " + tkns[0].name + "\n" +
                                                                 tkns[0].info;
                                                         }
                                                         else
                                                         {
                                                             cmd.STATE = CommandState.SUCCESS;
-                                                            cmd.STATE_MESSAGE = "Komut hakkında bilgi alındı";
+                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_FUNC_FOUND(tkns[0].name);
                                                             cmd.Output = tkns[0].info;
                                                         }
                                                         break;
@@ -1260,14 +1309,20 @@ namespace MatrisAritmetik.Services
                                         }
                                     case TokenType.OPERATOR:
                                         {
+                                            tkns[0].symbol = (tkns[0].symbol == "u+" || tkns[0].symbol == "u-") ? tkns[0].symbol[1].ToString() : tkns[0].symbol;
                                             cmd.STATE = CommandState.ERROR;
-                                            cmd.STATE_MESSAGE = "'" + tkns[0].symbol + "' operatörü tek başına kullanılamaz ";
+                                            cmd.STATE_MESSAGE = CompilerMessage.OP_CANT_BE_ALONE(tkns[0].symbol);
                                             return CommandState.ERROR;
                                         }
                                     case TokenType.FUNCTION:
                                         {
+                                            if (tkns[0].paramCount == 0)
+                                            {
+                                                break;
+                                            }
+
                                             cmd.STATE = CommandState.WARNING;
-                                            cmd.STATE_MESSAGE = tkns[0].name + " bir fonksiyondur. Detaylar için: ?" + tkns[0].name;
+                                            cmd.STATE_MESSAGE = CompilerMessage.FUNC_REQUIRES_ARGS(tkns[0].name, tkns[0].paramCount);
                                             return CommandState.WARNING;
                                         }
                                     default:
@@ -1299,7 +1354,7 @@ namespace MatrisAritmetik.Services
                                     {
                                         if (operandStack.Count < tkn.argCount)
                                         {
-                                            throw new Exception("Argüman sayısı hatalı!");
+                                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
                                         }
 
                                         for (int i = 0; i < tkn.argCount; i++)
@@ -1311,7 +1366,7 @@ namespace MatrisAritmetik.Services
                                     {
                                         if (operandStack.Count < tkn.paramCount)
                                         {
-                                            throw new Exception("Argüman sayısı hatalı!");
+                                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
                                         }
 
                                         for (int i = 0; i < tkn.paramCount; i++)
@@ -1328,14 +1383,27 @@ namespace MatrisAritmetik.Services
 
                             if (operandStack.Count == 1)
                             {
-                                cmd.Output = operandStack.Pop().val.ToString();
-                                cmd.STATE = CommandState.SUCCESS;
-                                cmd.STATE_MESSAGE = "";
+                                if (operandStack.Peek().tknType == TokenType.VOID)
+                                {
+                                    cmd.Output = CommandStateMessage.SUCCESS_RET_NULL;
+                                    cmd.STATE = CommandState.SUCCESS;
+                                }
+                                else
+                                {
+                                    cmd.Output = operandStack.Pop().val.ToString();
+                                    cmd.STATE = CommandState.SUCCESS;
+                                    cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_RET_NULL;
+                                }
+                            }
+                            else if (operandStack.Count == 0)
+                            {
+                                cmd.STATE = CommandState.ERROR;
+                                cmd.STATE_MESSAGE = CompilerMessage.ARG_COUNT_ERROR;
                             }
                             else
                             {
                                 cmd.STATE = CommandState.ERROR;
-                                cmd.STATE_MESSAGE = "Argüman sayısı hatalı.";
+                                cmd.STATE_MESSAGE = CompilerMessage.CMD_FORMAT_ERROR;
                             }
                         }
                         catch (Exception err)
@@ -1349,19 +1417,29 @@ namespace MatrisAritmetik.Services
                 // Komut işlenmekte veya hatalı
                 case CommandState.UNAVAILABLE:
                     {
-                        cmd.STATE_MESSAGE = "Komut işleme hatası-> \nOriginal:" + cmd.OriginalCommand + "\nCleaned:" + cmd.CleanedCommand;
+                        cmd.STATE_MESSAGE = CommandStateMessage.CMD_UNAVAILABLE(cmd.OriginalCommand);
                         break;
                     }
                 // Komut zaten işlenmiş
                 default:
                     {
-                        cmd.STATE_MESSAGE = "Komut zaten işlenmiş. Durum: " + cmd.STATE + " Extra message: " + cmd.STATE_MESSAGE;
+                        cmd.STATE_MESSAGE = CommandStateMessage.CMD_COMPILED(cmd.STATE, cmd.STATE_MESSAGE);
                         break;
                     }
 
             }
-
+            if (state && cmd.STATE == CommandState.SUCCESS)
+            {
+                cmdHistory.Clear();
+                state = false;
+                cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_CLEANUP;
+            }
             return cmd.STATE;
+        }
+
+        public void CleanUp()
+        {
+            state = true;
         }
     }
 }

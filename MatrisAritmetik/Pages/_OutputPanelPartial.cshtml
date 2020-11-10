@@ -2,65 +2,109 @@
 @{
     Layout = null;
     MatrisAritmetik.Core.Models.Command cmd;
-    string msg = "";
+    MatrisAritmetik.Core.CommandMessage msg;
     if (Model != null)
     {
         if (!Model.ContainsKey("CommandHistory"))
             Model.Add("CommandHistory", new List<MatrisAritmetik.Core.Models.Command>());
         if (!Model.ContainsKey("LastMessage"))
-            Model.Add("LastMessage", "");
+            Model.Add("LastMessage", new Core.CommandMessage("", Core.CommandState.IDLE));
     }
 }
 
 @if (Model != null)
 {
-    if (Model["CommandHistory"].Count == 0)
+    msg = Model["LastMessage"];
+    if (msg.State == Core.CommandState.ERROR)
+    {
+        <tr>
+            <td class="output_cmd_error">
+                Son mesaj: <span style="font-weight:bold">@msg.Message</span>
+            </td>
+        </tr>
+    }
+    else if (msg.State == Core.CommandState.WARNING)
+    {
+        <tr>
+            <td class="output_cmd_warning">
+                Son mesaj: <span style="font-weight:bold">@msg.Message</span>
+            </td>
+        </tr>
+    }
+    else if (msg.State == Core.CommandState.SUCCESS)
     {
         <tr>
             <td class="output_cmd_info">
-                <span class="command_start">>>></span> Komut uyarıları ve hataları burada görüntülenir...
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <span class="command_start">>>></span> Çıktı geçmişi burada görüntülenir...
+                Son mesaj: <span style="font-weight:bold">@msg.Message</span>
             </td>
         </tr>
     }
     else
     {
-        msg = Model["LastMessage"].ToString();
         <tr>
             <td class="output_cmd_info">
-                Son mesaj: @msg
+                Son bilgilendirme mesajı: <span style="font-weight:bold">Burada gösterilir</span>
             </td>
         </tr>
+    }
+
+    if (Model["CommandHistory"].Count == 0)
+    {
+
+        <tr class="cmdrepeat" title='Komut ek-bilgileri burada görüntülenir'>
+            <td>
+                <span class="command_start">>>></span> Komut geçmişi burada görüntülenir <span class="command_start">=</span>
+            </td>
+        </tr>
+
+        <tr class="outputRow">
+            <td class="cmdoutput">Çıktı geçmişi burada görüntülenir...</td>
+        </tr>
+
+    }
+    else
+    {
         @for (int i = Model["CommandHistory"].Count - 1; i >= 0; i--)
         {
             cmd = Model["CommandHistory"][i];
 
             @if (cmd.STATE == Core.CommandState.SUCCESS)
             {
-                <tr class="cmdrepeat" title='@cmd.CommandSummary()'>
-                    <td>
-                        <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
-                    </td>
-                </tr>
+                if (cmd.OriginalCommand.Contains("?"))
+                {
+                    <tr class="cmdrepeat cmdHelpCommandGiven" title='@cmd.CommandSummary()'>
+                        <td>
+                            <span class="cmdHelpStart">>>></span> @cmd.OriginalCommand <span class="cmdHelpStart">=</span>
+                        </td>
+                    </tr>
 
-                <tr style="border-bottom:2px dashed black">
-                    <td class="cmdoutput">@cmd.Output</td>
-                </tr>
+                    <tr class="outputRow">
+                        <td class="cmdoutput compilerHelp">@cmd.Output</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr class="cmdrepeat" title='@cmd.CommandSummary()'>
+                        <td>
+                            <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
+                        </td>
+                    </tr>
+
+                    <tr class="outputRow">
+                        <td class="cmdoutput">@cmd.Output</td>
+                    </tr>
+                }
             }
             else if (cmd.STATE == Core.CommandState.ERROR)
             {
-                <tr title='@cmd.CommandSummary()'>
+                <tr class="cmdrepeat" style="min-height:unset !important;" title='@cmd.CommandSummary()'>
                     <td class="commandError">
                         <span class="command_start">>>></span> @cmd.OriginalCommand
                     </td>
                 </tr>
-                <tr style="border-bottom:2px dashed black">
-                    <td>
-                        <span style="color:red">[HATA]</span> @cmd.STATE_MESSAGE
+                <tr class="outputRow">
+                    <td class="cmdoutput" style="white-space:unset !important;">
+                        <span style="color:red;font-size:16px;font-weight:bolder">[HATA]</span> @cmd.STATE_MESSAGE
                     </td>
                 </tr>
             }

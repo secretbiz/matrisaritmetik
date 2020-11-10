@@ -7,6 +7,7 @@ namespace MatrisAritmetik.Core
     public class MatrisBase<T>
     {
         public int swapCount = 0;
+        private int _seed;
         private int _row = -1;
         private int _col = -1;
         private List<List<T>> _values = null;
@@ -126,7 +127,16 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        public string delimiter = " ";
+        public int Seed
+        {
+            get => _seed;
+            set => _seed = value;
+        }
+
+        public string Delimiter = " ";
+        public string NewLine = "\n";
+        public int Digits = 6;
+        public bool CreatedFromSeed = false;
 
         // Emtpy 3x3 constructor
         public MatrisBase() { }
@@ -242,7 +252,7 @@ namespace MatrisAritmetik.Core
 
                     if (colno != Col - 1)
                     {
-                        str += delimiter;
+                        str += Delimiter;
                     }
 
                     colno++;
@@ -490,6 +500,16 @@ namespace MatrisAritmetik.Core
             return listrow;
         }
 
+        // Detaylı bilgi
+        public string Details(string name = "")
+        {
+            string seed_str = CreatedFromSeed ? Seed.ToString() : "-";
+            return "Matris: " + name + ", Seed: " + seed_str +
+                ", Boyut(" + _row + "," + _col + ")" +
+                "\nElementler:\n" +
+                ToString();
+
+        }
         // Matrisin köşelerindeki değerleri içeren string matris döner
         // Matrisin boyutu yüksekse kullanılabilir
         public dynamic CornerMatrix(int rowEachCorner = -1, int colEachCorner = -1, string filler = "...")
@@ -777,7 +797,7 @@ namespace MatrisAritmetik.Core
         {
             try
             {
-                return Round(4).PrintStrMaxtrisForm().Printstr();
+                return Round(Digits).PrintStrMaxtrisForm().Printstr();
             }
             catch (Exception)
             {

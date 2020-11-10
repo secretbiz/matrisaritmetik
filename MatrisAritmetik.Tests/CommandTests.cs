@@ -615,7 +615,7 @@ namespace MatrisAritmetik.Tests
                     command.Tokens = frontService.ShuntingYardAlg(command.Tokens);  // Order tokens
 
                     // Check evaluating state
-                    Assert.AreEqual(frontService.EvaluateCommand(command, matdict), CommandState.SUCCESS,
+                    Assert.AreEqual(frontService.EvaluateCommand(command, matdict, new List<Command>()), CommandState.SUCCESS,
                         "\n" + cmd + "\nÇözümleme başarısız! \n" + command.CommandSummary());
 
                     // Check output

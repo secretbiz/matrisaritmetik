@@ -32,7 +32,7 @@ namespace MatrisAritmetik.Services
 
                 if (rowsplit.Length != temp && temp != -1)
                 {
-                    throw new Exception("Bad column size: expected " + temp.ToString() + " got " + rowsplit.Length.ToString());
+                    throw new Exception(CompilerMessage.MAT_UNEXPECTED_COLUMN_SIZE(temp.ToString(), rowsplit.Length.ToString()));
                 }
 
                 temp = 0;
@@ -45,7 +45,7 @@ namespace MatrisAritmetik.Services
                     }
                     else
                     {
-                        throw new Exception("Parsing failed: " + val);
+                        throw new Exception(CompilerMessage.ARG_PARSE_ERROR(val, "float"));
                     }
                     temp += 1;
                 }
@@ -85,9 +85,9 @@ namespace MatrisAritmetik.Services
             string currentParamType;
             string currentArg;
 
-            if (args.Length < funcinfo.required_params.Length)
+            if (args.Length < funcinfo.required_params.Length || args.Length > funcinfo.param_names.Length)
             {
-                throw new Exception("Yeterli sayıda parametre verilmedi!");
+                throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
             }
 
             // Start checking arguments, parse them
@@ -104,7 +104,7 @@ namespace MatrisAritmetik.Services
 
                     if (param_dict.ContainsKey(currentParamName))
                     {
-                        throw new Exception("Can't reference parameter " + currentParamName + " more than once");
+                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(currentParamName));
                     }
                 }
                 // Parameter name given
@@ -115,19 +115,19 @@ namespace MatrisAritmetik.Services
 
                     if (Array.IndexOf(funcinfo.param_names, currentParamName) == -1)
                     {
-                        throw new Exception("No parameter is named " + currentParamName);
+                        throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(currentParamName));
                     }
 
                     if (param_dict.ContainsKey(currentParamName))
                     {
-                        throw new Exception("Can't reference parameter " + currentParamName + " more than once");
+                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(currentParamName));
                     }
 
                     currentParamType = funcinfo.param_types[Array.IndexOf(funcinfo.param_names, currentParamName)];
                 }
                 else
                 {
-                    throw new Exception("Bad format. Acceptable formats: |1) param1 : value1, param2 : value2 ... |2) value1,value2...");
+                    throw new Exception(CompilerMessage.STRING_FORMAT_INVALID("param_1:değer_1, param_2:değer_2 ... veya değer_1,değer_2,..."));
                 }
 
                 // Parse as param type
@@ -141,7 +141,7 @@ namespace MatrisAritmetik.Services
                             }
                             else
                             {
-                                throw new Exception("Parsing failed as int: " + currentArg);
+                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "tamsayı"));
                             }
 
                             break;
@@ -154,7 +154,7 @@ namespace MatrisAritmetik.Services
                             }
                             else
                             {
-                                throw new Exception("Parsing failed as float: " + currentArg);
+                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "ondalıklı"));
                             }
 
                             break;
@@ -172,14 +172,14 @@ namespace MatrisAritmetik.Services
                             }
                             else
                             {
-                                throw new Exception("No matris found named: " + currentArg);
+                                throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
                             }
 
                             break;
                         }
                     default:
                         {
-                            throw new Exception("No type found named: " + currentArg);
+                            throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
                         }
                 }
 
@@ -190,7 +190,7 @@ namespace MatrisAritmetik.Services
             {
                 if (!param_dict.ContainsKey(funcinfo.param_names[reqindex]))
                 {
-                    throw new Exception("Parameter " + funcinfo.param_names[reqindex] + " requires a value");
+                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.param_names[reqindex]));
                 }
             }
 
@@ -207,6 +207,42 @@ namespace MatrisAritmetik.Services
 
             // Find and invoke method inside named same as given function name in funcinfo
             MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.function);
+            ParameterInfo[] paraminfo = method.GetParameters();
+
+            for (int k = param_dict.Count; k < funcinfo.param_names.Length; k++)
+            {
+                if (paraminfo[k].DefaultValue == null) // default value was null
+                {
+                    param_arg[k] = null;
+                }
+                else
+                {
+                    switch (paraminfo[k].DefaultValue.GetType().ToString())
+                    {
+                        case "System.DBNull":
+                            {
+                                throw new Exception(CompilerMessage.MISSING_ARGUMENT(paraminfo[k].Name));
+                            }
+                        case "System.Int32":
+                            {
+                                param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue);
+                                break;
+                            }
+                        case "System.Single":
+                            {
+                                param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue);
+                                break;
+                            }
+                        case "System.Double":
+                            {
+                                param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue);
+                                break;
+                            }
+                        default:
+                            throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(paraminfo[k].Name, paraminfo[k].ParameterType.Name));
+                    }
+                }
+            }
             MatrisBase<T> result = (MatrisBase<T>)method.Invoke(serviceObject, param_arg);
 
             return result;

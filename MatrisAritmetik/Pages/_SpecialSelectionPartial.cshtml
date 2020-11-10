@@ -5,7 +5,7 @@
 
 @if (Model != null)
 {
-    <option value="special_options_placeholder" class="options_placeholder">Özel Matrisler</option>
+    <option value="special_options_placeholder" class="options_placeholder">Matris Türleri</option>
     @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
     {
         <optgroup label="@cmdlabel.Label" >

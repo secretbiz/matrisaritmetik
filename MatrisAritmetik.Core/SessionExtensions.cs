@@ -40,6 +40,34 @@ namespace MatrisAritmetik.Core
             serialized += "]";
             session.SetString(key, serialized);
         }
+        public static void SetLastMsg(this ISession session, string key, CommandMessage msg)
+        {
+            string serialized = "";
+            Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
+            {
+                { "msg", msg.Message },
+                { "state", msg.State }
+            };
+            serialized += JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>));
+
+            session.SetString(key, serialized);
+        }
+        public static void SetMatOptions(this ISession session, string key, Dictionary<string, Dictionary<string, dynamic>> dict)
+        {
+            string serialized = "";
+            Dictionary<string, Dictionary<string, dynamic>> mats = new Dictionary<string, Dictionary<string, dynamic>>();
+            foreach (string mat in dict.Keys)
+            {
+                mats.Add(mat, new Dictionary<string, dynamic>
+                {
+                    {"seed",dict[mat]["seed"] },
+                    {"isRandom",dict[mat]["isRandom"] }
+                });
+            }
+            serialized += JsonSerializer.Serialize(mats, typeof(Dictionary<string, Dictionary<string, dynamic>>));
+
+            session.SetString(key, serialized);
+        }
 
         public static T Get<T>(this ISession session, string key)
         {
@@ -72,5 +100,34 @@ namespace MatrisAritmetik.Core
             }
             return cmds;
         }
+        public static CommandMessage GetLastMsg(this ISession session, string key)
+        {
+            string value = session.GetString(key);
+            if (value == null || value == "" || value == "{}")
+            {
+                return new CommandMessage("");
+            }
+
+            Dictionary<string, dynamic> msg = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(value);
+            return new CommandMessage(msg["msg"].ToString(), (CommandState)int.Parse(msg["state"].ToString()));
+        }
+        public static Dictionary<string, Dictionary<string, dynamic>> GetMatOptions(this ISession session, string key)
+        {
+            string value = session.GetString(key);
+            if (value == null || value == "" || value == "{}")
+            {
+                return new Dictionary<string, Dictionary<string, dynamic>>();
+            }
+
+            Dictionary<string, Dictionary<string, dynamic>> opts = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, dynamic>>>(value);
+            foreach (string mat in opts.Keys)
+            {
+                opts[mat]["seed"] = int.Parse(opts[mat]["seed"].ToString());
+                opts[mat]["isRandom"] = bool.Parse(opts[mat]["isRandom"].ToString());
+            }
+            return opts;
+        }
+
+
     }
 }

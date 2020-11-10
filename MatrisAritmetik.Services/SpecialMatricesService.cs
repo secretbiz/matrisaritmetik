@@ -11,7 +11,7 @@ namespace MatrisAritmetik.Services
         {
             if (dimension <= 0)
             {
-                throw new Exception("Dimensions of identity matrix can't be lower than 1");
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
             dimension = Math.Min(dimension, (int)MatrisLimits.forCols);
@@ -38,20 +38,28 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<dynamic>(empty);
         }
 
-        public MatrisBase<dynamic> RandIntMat(int row, int col, int min, int max, dynamic seed = null)
+        public MatrisBase<dynamic> RandIntMat(int row, int col, int min = 0, int max = 1, dynamic seed = null)
         {
             if (row <= 0 || col <= 0)
             {
-                throw new Exception("Bad dimensions for a matrix");
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
             row = Math.Min(row, (int)MatrisLimits.forRows);
             col = Math.Min(col, (int)MatrisLimits.forCols);
 
-            Random random = new Random();
+            Random random;
+            int s;
+
             if (seed != null)
             {
                 random = new Random(seed);
+                s = seed;
+            }
+            else
+            {
+                s = Environment.TickCount & int.MaxValue;
+                random = new Random(s);
             }
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
@@ -66,24 +74,33 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
+            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals, Seed = s, CreatedFromSeed = true };
         }
 
-        public MatrisBase<dynamic> RandFloatMat(int row, int col, float min, float max, dynamic seed = null)
+        public MatrisBase<dynamic> RandFloatMat(int row, int col, float min = (float)0.0, float max = (float)1.0, dynamic seed = null)
         {
             if (row <= 0 || col <= 0)
             {
-                throw new Exception("Bad dimensions for a matrix");
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
             row = Math.Min(row, (int)MatrisLimits.forRows);
             col = Math.Min(col, (int)MatrisLimits.forCols);
 
-            Random random = new Random();
+            Random random;
+            int s;
+
             if (seed != null)
             {
                 random = new Random(seed);
+                s = seed;
             }
+            else
+            {
+                s = Environment.TickCount & int.MaxValue;
+                random = new Random(s);
+            }
+
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
             float realmax = max - min;
@@ -97,7 +114,7 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
+            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals, Seed = s, CreatedFromSeed = true };
         }
     }
 }

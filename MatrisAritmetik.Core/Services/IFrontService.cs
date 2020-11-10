@@ -25,6 +25,8 @@ namespace MatrisAritmetik.Core.Services
 
         List<Token> ShuntingYardAlg(List<Token> tkns);
 
-        CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict);
+        CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory);
+
+        void CleanUp();
     }
 }

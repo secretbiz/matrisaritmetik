@@ -151,11 +151,16 @@ body {
 
 /*********** SPLITTER  **********/
 #panel_split {
-    touch-action: none;
     flex: 0 0 auto !important;
-    cursor: col-resize;
-    height: 100% !important;
-    border-left: 4px double darkgoldenrod;
+    width: 0px;
+    padding: 5px 0px 5px 0px;
+    margin: 2px 0px 2px 0px;
+    border-left: 4px solid darkgoldenrod;
+
+    /* Prevent the browser's built-in drag from interfering */
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 /********** RIGHT_PANEL *********/
 #right_panel {
@@ -219,6 +224,17 @@ body {
     background-color: #d39f5a;
     font-weight:bold;
 }
+.cmdHelpStart {
+    font-size: medium;
+    font-weight: bold;
+    color: #56da56;
+}
+.cmdHelpCommandGiven {
+    background-color: darkgoldenrod;
+    color: white;
+    border-bottom: 1px solid #56da56;
+    border-top: 1px solid #56da56;
+}
 
 .cmdoutput {
     white-space: pre-wrap;
@@ -251,22 +267,35 @@ body {
     overflow-y: scroll;
 }
 
+.outputRow {
+    border-bottom: 2px dashed #d39f5a;
+    padding: 2px 0px 2px 2px;
+}
+
 .output_cmd_info {
-    color: grey;
+    color: darkgray;
     background-color: aliceblue;
-    border: 2px double gray;
+    border: 3px solid gray;
+    padding-left:2px;
 }
 .output_cmd_warning {
     color: sandybrown;
     background-color: aliceblue;
-    border: 2px double #ff6a00;
+    border: 3px solid #ff6a00;
+    padding-left: 2px;
 }
 .output_cmd_error {
     color: red;
     background-color: aliceblue;
-    border: 2px double darkred;
+    border: 3px solid darkred;
+    padding-left: 2px;
 }
 
+.compilerHelp {
+    font-size: small;
+    font-weight: 600;
+    font-family: monospace;
+}
 .commandError{
     font-style:italic;
 }

@@ -25,7 +25,7 @@ function addMatrix(event) {
         $.ajax(
             {
                 type: 'POST',
-                url: 'Matris?handler=AddMatrix',
+                url: 'Matris?handler=AddMatrixSpecial',
                 data:
                 {
                     __RequestVerificationToken: tkn,
@@ -33,12 +33,11 @@ function addMatrix(event) {
                     "func": document.getElementById("matris_vals_special").value,
                     "args": document.getElementById("matris_special_args").value
                 },
-                success: function (data) { updateTable(tkn); },
+                success: function (_data) { updateTable(tkn); updateHistoryPanel(tkn); },
                 error: function (error) { console.log(error); }
             });
     }
 }
-
 
 //////// matris tablosu güncelleme
 function updateTable(token) {
