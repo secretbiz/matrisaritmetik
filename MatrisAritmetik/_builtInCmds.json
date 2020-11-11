@@ -197,7 +197,7 @@
             },
             {
                 "fullname": "Genelleştirilmiş Ters Matris",
-                "description": "Verilen A matrisinin verilen yönden Moore–Penrose genelleştirilmiş tersi",
+                "description": "Verilen A matrisinin verilen yönden(sol = -1, sağ = 1) Moore–Penrose genelleştirilmiş tersi",
 
                 "alias_list": [],
                 "function": "PseudoInverse",
@@ -213,7 +213,7 @@
             },
             {
                 "fullname": "Minör",
-                "description": "Verilen A matrisinin (i,j) indeksli elemanının minörü",
+                "description": "Verilen A matrisinin (i,j) indeksli(taban = base) elemanının minörü",
 
                 "alias_list": [],
                 "function": "Minor",
@@ -229,7 +229,7 @@
             },
             {
                 "fullname": "Minör Matris",
-                "description": "Verilen A matrisinin (i,j) indeksli elemanının minörünün hesaplandığı matris",
+                "description": "Verilen A matrisinin (i,j) indeksli(taban = base) elemanının minörünün hesaplandığı matris",
 
                 "alias_list": [],
                 "function": "MinorMatris",
@@ -267,7 +267,7 @@
         "Functions": [
             {
                 "fullname": "Birleştir",
-                "description": "Verilen A ve B matrislerini satır veya sütün olarak birleşmiş hali, axis=0 satır , axis=1 sütün olarak",
+                "description": "Verilen A ve B matrislerini satır(axis = 0) veya sütün(axis = 1) olarak birleşmiş hali",
 
                 "alias_list": [],
                 "function": "Concatenate",
