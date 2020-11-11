@@ -13,7 +13,30 @@ namespace MatrisAritmetik.Tests
         /// <summary>
         /// Service for command tokenization and evaluation
         /// </summary>
-        private readonly IFrontService frontService = new FrontService();
+        private static readonly IFrontService frontService = new FrontService();
+
+        public static CommandInfo InfoSetter(string func, IFrontService service)
+        { 
+            if(service.TknTryParseBuiltFunc(func, out CommandInfo cmdinfo))
+            { return cmdinfo; }
+            else
+            { throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!"); }
+        }
+
+        public static CommandInfo RankInfo = InfoSetter("Rank", frontService);
+
+        public static CommandInfo TransposeInfo = InfoSetter("Transpose", frontService);
+        /// <summary>
+        /// Example matrix that has same name with a function
+        /// Transpose = { {1, 2}, {3, 4} }
+        /// </summary>
+        public static MatrisBase<dynamic> Transpose =
+            new MatrisBase<dynamic>(new List<List<dynamic>>()
+                {
+                    new List<dynamic>(){ 1, 2 },
+                    new List<dynamic>(){ 3, 4 }
+                }
+            );
 
         /// <summary>
         /// Example matrices to use for tests
@@ -563,6 +586,41 @@ namespace MatrisAritmetik.Tests
                     },
                 }
             },
+            { "Docs" ,
+                new Dictionary<string,List<Token>>(){
+                    { "?", new List<Token>(){ new Token(){tknType=TokenType.DOCS,info="info"},
+                                              new Token(){
+                                                  tknType=TokenType.OUTPUT,
+                                                  val=CompilerMessage.COMPILER_HELP
+                                              }
+                                            }
+                    },
+                    { "???", new List<Token>(){ new Token(){tknType=TokenType.DOCS,info="info"},
+                                              new Token(){
+                                                  tknType=TokenType.OUTPUT,
+                                                  val=CompilerMessage.COMPILER_HELP
+                                              }
+                                            }
+                    },
+                    { "?Rank", new List<Token>(){ 
+                                                 new Token(){tknType=TokenType.DOCS,info=RankInfo.Info()},
+                                                 new Token(){
+                                                  tknType=TokenType.OUTPUT,
+                                                  val=RankInfo.Info()
+                                                 }
+                                                }
+                    },
+                    { "?Transpose", new List<Token>(){
+                                                 new Token(){tknType=TokenType.DOCS,info=TransposeInfo.Info()},
+                                                 new Token(){
+                                                  tknType=TokenType.OUTPUT,
+                                                  val=Transpose.Details("Transpose") +
+                                                                "\nKomut: " + "Transpose" + "\n" +TransposeInfo.Info()
+                                                 }
+                                                }
+                    }
+                }
+            }
         };
 
         private void Tokenize_And_Evaluate_Command(Dictionary<string, List<Token>> cmds, Dictionary<string, MatrisBase<dynamic>> matdict)
@@ -597,6 +655,13 @@ namespace MatrisAritmetik.Tests
                     {
                         Assert.AreEqual(cmds[cmd][tknind].symbol, tkn.symbol,
                         "\n" + cmd + "\nToken sembolleri uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].symbol + " \nAlınan:" + tkn.symbol);
+                    }
+
+                    // Check docs
+                    else if (tkn.tknType == TokenType.DOCS)
+                    {
+                        Assert.AreEqual(cmds[cmd][tknind].info, tkn.info,
+                        "\n" + cmd + "\nToken info uyuşmadı! \nBeklenen:" + cmds[cmd][tknind].info + " \nAlınan:" + tkn.info);
                     }
 
                     // Check token val
@@ -700,6 +765,17 @@ namespace MatrisAritmetik.Tests
         {
             Tokenize_And_Evaluate_Command(CMDS["Matris_Combined_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
+            );
+        }
+
+        [TestMethod]
+        public void Docs()
+        {
+            Tokenize_And_Evaluate_Command(CMDS["Docs"],
+                   new Dictionary<string, MatrisBase<dynamic>>()
+                   {
+                       {"Transpose", Transpose }
+                   }
             );
         }
     }

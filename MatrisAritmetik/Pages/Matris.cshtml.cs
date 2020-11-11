@@ -96,10 +96,27 @@ namespace MatrisAritmetik.Pages
             {
                 if (!savedMatrices.ContainsKey(DecodedRequestDict["name"]))
                 {
-                    _frontService.AddToMatrisDict(DecodedRequestDict["name"],
+                    try
+                    {
+                        Validations.ValidMatrixName(DecodedRequestDict["name"], throwOnBadName: true);
+
+                        _frontService.AddToMatrisDict(DecodedRequestDict["name"],
                         new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict["vals"])),
                         savedMatrices);
+                    }
+                    catch (Exception err)
+                    {
+                        LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
+                    }
                 }
+                else
+                {
+                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict["name"]), CommandState.WARNING);
+                }
+            }
+            else
+            {
+                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix",new string[2] {"name","vals"}), CommandState.ERROR);
             }
 
             SetSessionVariables();
@@ -117,6 +134,8 @@ namespace MatrisAritmetik.Pages
 
                 if (savedMatrices.ContainsKey(DecodedRequestDict["name"]))
                 {
+                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict["name"]), CommandState.WARNING);
+                    SetSessionVariables();
                     return;
                 }
 
@@ -124,6 +143,8 @@ namespace MatrisAritmetik.Pages
 
                 if (actualFuncName == string.Empty)
                 {
+                    LastMessage = new CommandMessage(CompilerMessage.NOT_A_(actualFuncName,"fonksiyon"), CommandState.ERROR);
+                    SetSessionVariables();
                     return;
                 }
 
@@ -145,7 +166,10 @@ namespace MatrisAritmetik.Pages
                     LastMessage = new CommandMessage("Fonksiyon adı hatalı", CommandState.ERROR);
                 }
             }
-
+            else
+            {
+                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrixSpecial", new string[3] { "name", "func", "args" }), CommandState.ERROR);
+            }
             SetSessionVariables();
         }
 

@@ -65,7 +65,14 @@ namespace MatrisAritmetik
                     }
                     catch (Exception ex)
                     {   // This solution is bad, can't debug issues easily
-                        Console.WriteLine("Can't rewind body stream. " + ex.Message);
+                        if (ex.InnerException != null)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Can't rewind body stream. " + ex.Message);
+                        }
                     }
                     using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
                     {

@@ -58,8 +58,8 @@ namespace MatrisAritmetik.Services
         }
 
         public MatrisBase<T> Conjugate(MatrisBase<T> A)
-        {
-            return A.Copy();
+        {   // Return transpose for now, since T wont be complex numbers
+            return Transpose(A);
         }
 
         public int AbsMaxOfList(List<T> lis)
@@ -113,7 +113,7 @@ namespace MatrisAritmetik.Services
             // Bad dimensions
             if (!A.IsValid())
             {
-                throw new Exception("Matris boyutları uygun değil!");
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
             // Zero matrix
@@ -254,7 +254,7 @@ namespace MatrisAritmetik.Services
             // Bad dimensions
             if (!A.IsValid())
             {
-                throw new Exception("Matris boyutları uygun değil!");
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
             // Zero matrix
@@ -317,7 +317,7 @@ namespace MatrisAritmetik.Services
         {
             if (!A.IsSquare())
             {
-                throw new Exception("Determinant hesabı için matris kare olmalı!");
+                throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
             if (A.Row == 1)
@@ -380,26 +380,86 @@ namespace MatrisAritmetik.Services
         {
             if (!A.IsSquare())
             {
-                throw new Exception("Ters matris hesabı için matris kare olmalı!");
+                throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
             if (Determinant(A) == (float)(0.0))
             {
-                throw new Exception("Determinant 0, ters matris bulunamadı");
+                throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
 
             MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row), 1);
             return new MatrisBase<T>(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
-        public MatrisBase<T> PseudeInverse(MatrisBase<T> A)
+        public MatrisBase<T> PseudoInverse(MatrisBase<T> A, int side = -1)
         {
-            return new MatrisBase<T>();
+            if (Rank(A) != Math.Min(A.Row, A.Col))
+            {
+                throw new Exception(CompilerMessage.MAT_PSEINV_NOT_FULL_RANK);
+            }
+
+            if (side != -1 && side != 1)
+            {
+                throw new Exception(CompilerMessage.MAT_PSEINV_BAD_SIDE);
+            }
+
+            string sidename = side == -1 ? "sol" : "sağ";
+
+            // Left inverse
+            if(side == -1)
+            {
+                try
+                {
+                    return MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
+                }
+                catch (Exception err)
+                {
+                    if (err.Message == CompilerMessage.MAT_DET_ZERO_NO_INV)
+                    {
+                        throw new Exception(CompilerMessage.MAT_PSEINV_DET_ZERO(sidename));
+                    }
+
+                    throw err;
+                }
+            }
+            else  // Right inverse
+            {
+                try
+                { 
+                    return MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
+                }
+                catch (Exception err)
+                {
+                    if (err.Message == CompilerMessage.MAT_DET_ZERO_NO_INV)
+                    {
+                        throw new Exception(CompilerMessage.MAT_PSEINV_DET_ZERO(sidename));
+                    }
+
+                    throw err;
+                }
+            }
         }
 
         public MatrisBase<T> Adjoint(MatrisBase<T> A)
         {
-            return new MatrisBase<T>();
+            if(!A.IsSquare())
+            {
+                throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
+            }
+
+            List<List<T>> adj = new List<List<T>>();
+            int r = A.Row;
+            int c = A.Col;
+            for(int i=0; i < r;i++ )
+            {
+                adj.Add(new List<T>());
+                for(int j = 0;j< c;j++)
+                {
+                    adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * Minor(A, i, j, 0)));
+                }
+            }
+            return Transpose(new MatrisBase<T>(adj));
         }
 
         /*
@@ -409,7 +469,7 @@ namespace MatrisAritmetik.Services
         {
             if (A.Col != B.Row)
             {
-                throw new Exception("Satır ve sütun boyutları uyuşmalı");
+                throw new Exception(CompilerMessage.MAT_MUL_BAD_SIZE);
             }
 
             List<List<T>> result = new List<List<T>>();
@@ -433,7 +493,7 @@ namespace MatrisAritmetik.Services
             {
                 if (A.Col != B.Col)
                 {
-                    throw new Exception("Satır olarak eklemek için sütun boyutları aynı olmalı!");
+                    throw new Exception(CompilerMessage.MAT_CONCAT_DIM_ERROR("Satır"));
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
@@ -453,7 +513,7 @@ namespace MatrisAritmetik.Services
             {
                 if (A.Row != B.Row)
                 {
-                    throw new Exception("Sütun olarak eklemek için satır boyutları aynı olmalı!");
+                    throw new Exception(CompilerMessage.MAT_CONCAT_DIM_ERROR("Sütun"));
                 }
 
                 List<List<T>> newvals = new List<List<T>>();
@@ -469,18 +529,67 @@ namespace MatrisAritmetik.Services
             }
             else
             {
-                throw new Exception("Axis parametresi satır eklemek için 0, sütün için 1 olmalı.");
+                throw new Exception(CompilerMessage.MAT_CONCAT_AXIS_ERROR);
             }
         }
 
-        public float Minor(MatrisBase<T> A, int row, int col)
+        public float Minor(MatrisBase<T> A, int row, int col, int based = 0)
         {
-            return (float)0.0;
+            return Determinant(MinorMatris(A,row,col,based));
         }
 
-        public MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col)
+        public MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col, int based = 0)
         {
-            return new MatrisBase<T>();
+            if (!A.IsSquare())
+            {
+                throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
+            }
+
+            List <List<T>> newlis = new List<List<T>>();
+            List<List<T>> vals = A.Values;
+            row -= based;
+            col -= based;
+
+            if (row < 0 || row >= A.Row)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - based));
+            }
+
+            if (col < 0 || col >= A.Col)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - based));
+            }
+
+            int rowindex = 0;
+            for (int i = 0; i<row;i++)
+            {
+                newlis.Add(new List<T>());
+                for(int j=0;j<col;j++)
+                {
+                    newlis[rowindex].Add(vals[i][j]);
+                }
+                for (int j = col + 1; j < A.Col; j++)
+                {
+                    newlis[rowindex].Add(vals[i][j]);
+                }
+                rowindex++;
+            }
+
+            for (int i = row + 1; i < A.Row; i++)
+            {
+                newlis.Add(new List<T>());
+                for (int j = 0; j < col; j++)
+                {
+                    newlis[rowindex].Add(vals[i][j]);
+                }
+                for (int j = col + 1; j < A.Col; j++)
+                {
+                    newlis[rowindex].Add(vals[i][j]);
+                }
+                rowindex++;
+            }
+
+            return new MatrisBase<T>(newlis);
         }
 
     }

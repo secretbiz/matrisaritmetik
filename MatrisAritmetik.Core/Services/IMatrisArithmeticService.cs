@@ -18,15 +18,15 @@
 
         MatrisBase<T> Inverse(MatrisBase<T> A);
 
-        MatrisBase<T> PseudeInverse(MatrisBase<T> A);
+        MatrisBase<T> PseudoInverse(MatrisBase<T> A, int side = -1);
 
         MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B);
 
         MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis = 0);
 
-        float Minor(MatrisBase<T> A, int row, int col);
+        float Minor(MatrisBase<T> A, int row, int col, int based = 0);
 
-        MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col);
+        MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col, int based=0);
 
 
     }

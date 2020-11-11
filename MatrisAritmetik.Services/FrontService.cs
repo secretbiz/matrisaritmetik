@@ -20,7 +20,7 @@ namespace MatrisAritmetik.Services
                 return;
             }
 
-            if (Validations.ValidMatrixName(name))
+            if (Validations.ValidMatrixName(name)) // Check again just in case
             {
                 matdict.Add(name, matris);
             }
@@ -89,7 +89,7 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        private bool TknTryParseBuiltFunc(string name, out CommandInfo cmdinfo)
+        public bool TknTryParseBuiltFunc(string name, out CommandInfo cmdinfo)
         {
             if (builtInCommands == null)
             {
@@ -116,8 +116,9 @@ namespace MatrisAritmetik.Services
         /// Current order of operations:
         ///     OPERATOR    PRIORITY(Higher first)
         ///     ----------------------------------
-        ///         u+              20
-        ///         u-              20
+        ///         u+              200
+        ///         u-              200
+        ///        FUNC             100
         ///         (               10
         ///         )               10
         ///         ./              6
@@ -516,10 +517,10 @@ namespace MatrisAritmetik.Services
                 {
                     // Started with - , unary
                     if (tkns.Count == 0)
-                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 20, 1); }
+                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
                     // Previous was a left bracet or an operator
-                    else if (tkns[^1].tknType == TokenType.LEFTBRACE || tkns[^1].tknType == TokenType.OPERATOR)
-                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 20, 1); }
+                    else if (tkns[^1].tknType == TokenType.LEFTBRACE || tkns[^1].tknType == TokenType.OPERATOR || tkns[^1].tknType == TokenType.ARGSEPERATOR)
+                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
                 }
                 tkns.Add(tkn);
             }
@@ -1008,7 +1009,7 @@ namespace MatrisAritmetik.Services
                                     }
                                     else
                                     {
-                                        throw new Exception(CompilerMessage.INVALID_MAT_NAME(operands[1].name));
+                                        throw new Exception(CompilerMessage.MAT_NAME_INVALID);
                                     }
                                 }
                             }

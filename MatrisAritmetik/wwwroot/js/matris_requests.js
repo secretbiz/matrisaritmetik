@@ -17,7 +17,7 @@ function addMatrix(event) {
                     "name": document.getElementById("matris_name").value,
                     "vals": document.getElementById("matris_vals").value
                 },
-                success: function (data) { updateTable(tkn); },
+                success: function (data) { updateTable(tkn); updateHistoryPanel(tkn);},
                 error: function (error) { console.log(error); }
             });
     }

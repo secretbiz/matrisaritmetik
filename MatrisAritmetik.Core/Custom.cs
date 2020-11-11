@@ -1,6 +1,7 @@
 ﻿/* This file is for managing smaller classes, enumerators etc.
  * Created to reduce file amount.
  */
+
 namespace MatrisAritmetik.Core
 {
     public class CommandMessage
@@ -105,29 +106,82 @@ namespace MatrisAritmetik.Core
     // Operator order
     public enum OperatorAssociativity { LEFT, RIGHT };
 
+    public class RequestMessage
+    {
+        public static string REQUEST_MISSING_KEYS(string requestDesc,string[] keys)
+        {
+            return requestDesc + " isteği başarısız! Gerekli parametrelere değer verilmedi: " + string.Join(",",keys);
+        }
+    }
+
     public class CompilerMessage
     {
-        // LIMITS
+        ////// MATRIX ERRORS
+        //// LIMITS
         public static string MAT_LIMIT = "Matris limitine(=" + (int)MatrisLimits.forMatrisCount + ") ulaşıldı, atama işlemi yapmak için bir matrisi siliniz! ";
+        public static string MAT_NAME_CHAR_LIMIT(int givenLen)
+        { 
+            return "Matris adı en fazla " + (int)MatrisLimits.forName + " karakterden oluşabilir, "+ givenLen + " karakter verildi!"; 
+        }
 
-        // MATRIX ERRORS
+        //// NAME
+        public const string MAT_NAME_EMPTY = "Matris ismi boş olamaz!";
+        public const string MAT_NAME_INVALID = "Matris ismi sadece alfabetik karakterler ve '_' içerebilir! ";
+        public static string MAT_NAME_ALREADY_EXISTS(string name)
+        {
+            return name + " adlı bir matris zaten oluşturulmuş!";
+        }
+        public static string NOT_SAVED_MATRIX(string name)
+        {
+            return "'" + name + "' adlı bir matris bulunamadı!";
+        }
+
+        //// SIZE AND DIMENSIONS
         public const string MAT_INVALID_SIZE = "Matris boyutu hatalı!";
+        public const string MAT_NOT_SQUARE = "Matris kare bir matris olmalı!";
         public static string MAT_UNEXPECTED_DIMENSIONS(string expected, string got)
         {
             return "Beklenen boyut: " + expected + ", Alınan boyut: " + got;
         }
-
         public static string MAT_UNEXPECTED_COLUMN_SIZE(string expected, string got)
         {
-            return "Sütün sayısı " + expected + "olmalı (" + got + " verildi)";
+            return "Sütün sayısı " + expected + " olmalı (" + got + " verildi)";
         }
-
         public static string MAT_UNEXPECTED_ROW_SIZE(string expected, string got)
         {
-            return "Satır sayısı " + expected + "olmalı (" + got + " verildi)";
+            return "Satır sayısı " + expected + " olmalı (" + got + " verildi)";
+        }
+        public static string MAT_OUT_OF_RANGE_INDEX(string axisName, int min, int max)
+        {
+            return min + " tabanlı " + axisName + " indeksi minimum " + min + " maksimum " + max + " olabilir!";
         }
 
-        // DOCS
+        // MATRIX MULTIPLICATION SIZE
+        public const string MAT_MUL_BAD_SIZE = "Matris çarpımı için matrisler arası satır ve sütün boyutları uyuşmalı";
+        
+        // CONCATENATION SIZE
+        public static string MAT_CONCAT_DIM_ERROR(string axis)
+        {
+            string other = axis == "Satır" ? "sütun" : " satır";
+            return axis + " olarak eklemek için " + other + " boyutları aynı olmalı!";
+        }
+
+        //// FUNCTION RELATED
+        // DETERMINANT
+        public const string MAT_DET_ZERO_NO_INV = "Matris determinantı 0, ters matris bulunamaz!";
+
+        // CONCATENATION
+        public const string MAT_CONCAT_AXIS_ERROR = "Axis parametresi satır eklemek için 0, sütün için 1 olmalı.";
+        
+        // PSEUDOINVERSE
+        public const string MAT_PSEINV_NOT_FULL_RANK = "Genelleştirilmiş ters matris oluşturulması için matris tam rank olmalı!";
+        public const string MAT_PSEINV_BAD_SIDE = "Sol genelleştirilmiş matris için side -1, sağ için 1 olmalı!";
+        public static string MAT_PSEINV_DET_ZERO(string direction)
+        { 
+            return "Verilen matrisin " + direction + " tersi bulunamadı!";
+        }
+
+        //// DOCS
         public const string DOCS_HELP = "'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.";
         public const string COMPILER_HELP = ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz (?komut)" +
                              "\n>>> Fonksiyonları kullanmak için '!' ön-ekini fonksiyon isminden önce koyunuz (!komut)" +
@@ -137,14 +191,15 @@ namespace MatrisAritmetik.Core
                              "\n\t    '.^' : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
                              "\n\t    './' : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)";
 
-        // ARGUMENTS
+        //// ARGUMENTS
         public const string ARG_COUNT_ERROR = "Argüman sayısı hatalı!";
 
-        // COMMAND FORMATS
+        //// COMMAND FORMATS
         public const string CMD_FORMAT_ERROR = "Hatalı komut formatı!";
         public const string PARANTHESIS_FORMAT_ERROR = "Parantez formatı hatalı!";
         public const string PARANTHESIS_COUNT_ERROR = "Parametre sayısı hatalı!";
 
+        //// OPERATORS
         // = OPERATOR
         public const string EQ_MULTIPLE_USE = "Atama operatörü birden fazla kez kullanılamaz!";
         public const string EQ_FORMAT = "Atama işlemi sadece 'matris = matris' formatında olabilir!";
@@ -162,24 +217,13 @@ namespace MatrisAritmetik.Core
         public const string SPECOP_MATPOWER_EXPO = " .^ operatöründe 2. argüman negatif olamaz!";
         public const string SPECOP_MATPOWER_SQUARE = "Sadece kare matrisler .^ operatörünü kullanabilir!";
 
-        // MATRIX NAME INVALID
-        public static string INVALID_MAT_NAME(string name)
-        {
-            return "Matris ismi " + name + " olamaz.";
-        }
-
-        // UNEXPECTED OBJECT OR NAME
+        //// UNEXPECTED OBJECT OR NAME
         public static string NOT_A_(string name, string expected)
         {
             return "'" + name + "' bir " + expected + " değil!";
         }
 
-        public static string NOT_SAVED_MATRIX(string name)
-        {
-            return "'" + name + "' adlı bir matris bulunamadı!";
-        }
-
-        // INVALID OPERANDS
+        //// INVALID OPERANDS
         public static string OP_BETWEEN_(string op, string between)
         {
             return op + " işlemi " + between + " arasında gerçekleştirilir!";
@@ -195,7 +239,7 @@ namespace MatrisAritmetik.Core
             return op + " operatörü tek başına kullanılamaz ";
         }
 
-        // FUNCTION ERRORS
+        //// FUNCTION ERRORS
         public static string FUNC_REQUIRES_ARGS(string name, int count)
         {
             return name + " " + count + " parametreli bir fonksiyondur. Detaylar için: ?" + name;
@@ -260,6 +304,7 @@ namespace MatrisAritmetik.Core
         {
             return "Argüman formatı hatalı, format: " + format + " olmalı!";
         }
+
     };
 
 }

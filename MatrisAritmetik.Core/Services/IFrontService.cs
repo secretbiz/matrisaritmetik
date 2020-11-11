@@ -27,6 +27,8 @@ namespace MatrisAritmetik.Core.Services
 
         CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory);
 
+        bool TknTryParseBuiltFunc(string name, out CommandInfo cmdinfo);
+
         void CleanUp();
     }
 }

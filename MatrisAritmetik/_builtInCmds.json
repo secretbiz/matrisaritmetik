@@ -194,6 +194,70 @@
                 "function_template_filled": "!Inverse(A)",
 
                 "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Genelleştirilmiş Ters Matris",
+                "description": "Verilen A matrisinin verilen yönden Moore–Penrose genelleştirilmiş tersi",
+
+                "alias_list": [],
+                "function": "PseudoInverse",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "side" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!PseudoInverse(,)",
+                "function_template_filled": "!PseudoInverse(A,side)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Minör",
+                "description": "Verilen A matrisinin (i,j) indeksli elemanının minörü",
+
+                "alias_list": [],
+                "function": "Minor",
+                "param_types": [ "Matris", "int", "int", "int" ],
+                "param_names": [ "A", "i", "j", "base" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "float",
+
+                "function_template": "!Minor(,,,)",
+                "function_template_filled": "!Minor(A,i,j,base)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Minör Matris",
+                "description": "Verilen A matrisinin (i,j) indeksli elemanının minörünün hesaplandığı matris",
+
+                "alias_list": [],
+                "function": "MinorMatris",
+                "param_types": [ "Matris", "int", "int", "int" ],
+                "param_names": [ "A", "i", "j", "base" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
+
+                "function_template": "!MinorMatris(,,,)",
+                "function_template_filled": "!MinorMatris(A,i,j,base)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Ek Matris",
+                "description": "Verilen A matrisinin ek matrisi",
+
+                "alias_list": [],
+                "function": "Adjoint",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!Adjoint()",
+                "function_template_filled": "!Adjoint(A)",
+
+                "service": "MatrisArithmeticService"
             }
         ]
     },
