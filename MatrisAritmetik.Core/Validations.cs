@@ -9,6 +9,7 @@ namespace MatrisAritmetik.Core
     {
         public static bool ValidMatrixName(string name, bool throwOnBadName=false)
         {
+            name = name.Trim();
             Regex name_regex = new Regex(@"^\w*|[0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             if (name.Replace(" ", "") == "")

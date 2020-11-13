@@ -552,6 +552,24 @@ namespace MatrisAritmetik.Services
             return false;
         }
 
+        private bool CheckMatrixAndUpdateVal(Token tkn, Dictionary<string, MatrisBase<dynamic>> matDict)
+        {
+            if (tkn.tknType == TokenType.MATRIS)
+            {
+                if (matDict.ContainsKey(tkn.name))
+                {
+                    tkn.val = matDict[tkn.name];
+                }
+                else if (!(tkn.val is MatrisBase<object>))
+                {
+                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(tkn.name));
+                }
+
+                return true;
+            }
+            return false;
+        }
+
         private Token EvalOperator(Token op, List<Token> operands, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             if (op.tknType == TokenType.OPERATOR)    // OPERATORS
@@ -560,29 +578,8 @@ namespace MatrisAritmetik.Services
                 {
                     case "+":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
-
-                            if (operands[1].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    operands[1].val = matDict[operands[1].name];
-                                }
-                                else if (!(operands[1].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
-                            }
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+                            CheckMatrixAndUpdateVal(operands[1], matDict);
 
                             operands[0].val = operands[1].val + operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
@@ -592,29 +589,8 @@ namespace MatrisAritmetik.Services
                         }
                     case "-":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
-
-                            if (operands[1].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    operands[1].val = matDict[operands[1].name];
-                                }
-                                else if (!(operands[1].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
-                            }
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+                            CheckMatrixAndUpdateVal(operands[1], matDict);
 
                             operands[0].val = operands[1].val - operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
@@ -624,31 +600,8 @@ namespace MatrisAritmetik.Services
                         }
                     case "*":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
-
-                            if (operands[1].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    operands[1].val = matDict[operands[1].name];
-                                }
-                                else if (!(operands[1].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
-
-                                operands[0].tknType = TokenType.MATRIS;
-                            }
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+                            CheckMatrixAndUpdateVal(operands[1], matDict);
 
                             operands[0].name = "";
                             operands[0].val *= operands[1].val;
@@ -658,31 +611,8 @@ namespace MatrisAritmetik.Services
                         }
                     case "/":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
-
-                            if (operands[1].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    operands[1].val = matDict[operands[1].name];
-                                }
-                                else if (!(operands[1].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
-
-                                operands[0].tknType = TokenType.MATRIS;
-                            }
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+                            CheckMatrixAndUpdateVal(operands[1], matDict);
 
                             operands[0].name = "";
                             operands[0].val = operands[1].val / operands[0].val;
@@ -691,74 +621,32 @@ namespace MatrisAritmetik.Services
                         }
                     case "%":
                         {
-                            if (operands[0].tknType == TokenType.NUMBER)
+                            if (operands[0].tknType == TokenType.NUMBER) // dynamic % number
                             {
-                                if (operands[1].tknType == TokenType.MATRIS)    // matris % number
-                                {
-                                    if (matDict.ContainsKey(operands[1].name))
-                                    {
-                                        operands[0].val = matDict[operands[1].name] % (dynamic)(int)operands[0].val;
-                                    }
-                                    else if (operands[1].val is MatrisBase<object>) // Inner matrix, not named
-                                    {
-                                        operands[0].val = operands[1].val % (dynamic)(int)operands[0].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                    }
+                                CheckMatrixAndUpdateVal(operands[1], matDict);
 
-                                    operands[0].tknType = TokenType.MATRIS;
-                                }
-                                else
+                                operands[0].val = operands[1].val % (dynamic)(int)operands[0].val;
+                                operands[0].tknType = operands[1].tknType;
+                            }
+                            else if (CheckMatrixAndUpdateVal(operands[0], matDict)) // matris % matris
+                            {
+                                // base operands[0]
+                                // term to get mod of operands[1]should be matrix
+                                if (CheckMatrixAndUpdateVal(operands[1], matDict))
                                 {
                                     operands[0].val = operands[1].val % operands[0].val;
-                                    operands[0].tknType = TokenType.NUMBER;
-                                }
-                                operands[0].name = "";
-                            }
-                            else if (operands[0].tknType == TokenType.MATRIS) // matris % matris
-                            {
-                                // base
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>)) // Not inner matrix, not named
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-
-                                // term to get mod of
-                                if (operands[1].tknType == TokenType.MATRIS)
-                                {
-                                    if (matDict.ContainsKey(operands[1].name))
-                                    {
-                                        operands[0].val = matDict[operands[1].name] % operands[0].val;
-                                    }
-                                    else if (operands[1].val is MatrisBase<object>) // Inner matrix, not named
-                                    {
-                                        operands[0].val = operands[1].val % operands[0].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                    }
-
-                                    operands[0].tknType = TokenType.MATRIS;
                                 }
                                 else
                                 {
                                     throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
                                 }
-
-                                operands[0].name = "";
                             }
                             else
                             {
                                 throw new Exception(CompilerMessage.MODULO_FORMATS);
                             }
 
+                            operands[0].name = "";
                             break;
                         }
                     case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
@@ -768,29 +656,17 @@ namespace MatrisAritmetik.Services
                                 throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
                             }
 
-                            if (operands[1].tknType == TokenType.MATRIS)
+                            if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
                             {
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    operands[0].val = matDict[operands[1].name].Power((int)operands[0].val);
-                                }
-                                else if (operands[1].val is MatrisBase<object>) // Inner matrix, not named
-                                {
-                                    operands[0].val = operands[1].val.Power((int)operands[0].val);
-                                }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
-
+                                operands[0].val = operands[1].val.Power((int)operands[0].val);
                                 operands[0].tknType = TokenType.MATRIS;
                             }
-                            else
+                            else // base is number
                             {
-                                operands[0].val = MatrisBase<dynamic>.PowerMethod(operands[1].val, operands[0].val);
+                                operands[0].val = MatrisBase<dynamic>.PowerMethod(operands[1].val, operands[0].val); // Use method inside matrisbase for now to calculate power
+                                operands[0].tknType = TokenType.NUMBER;
                             }
 
-                            operands[0].tknType = TokenType.NUMBER;
                             operands[0].name = "";
                             break;
                         }
@@ -805,48 +681,32 @@ namespace MatrisAritmetik.Services
                             {
                                 throw new Exception(CompilerMessage.SPECOP_MATPOWER_EXPO);
                             }
-
-                            if (operands[1].tknType == TokenType.MATRIS)
+                            else if(operands[0].val == 0)
                             {
-                                if (matDict.ContainsKey(operands[1].name))
+                                operands[0].val = 1;
+                                operands[0].tknType = TokenType.NUMBER;
+                                break;
+                            }
+
+                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                            {
+                                if (!operands[1].val.IsSquare())
                                 {
-                                    if (!matDict[operands[1].name].IsSquare())
-                                    {
-                                        throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
-                                    }
-
-                                    MatrisBase<dynamic> res = matDict[operands[1].name].Copy();
-                                    MatrisBase<dynamic> mat = res.Copy();
-
-                                    IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
-
-                                    for (int i = 1; i < operands[0].val; i++)
-                                    {
-                                        res = matservice.MatrisMul(res, mat);
-                                    }
-
-                                    operands[0].val = res;
-                                    operands[0].tknType = TokenType.MATRIS;
+                                    throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
                                 }
-                                else if (operands[1].val is MatrisBase<dynamic>) // Inner mat
+
+                                MatrisBase<dynamic> res = operands[1].val.Copy();
+                                MatrisBase<dynamic> mat = res.Copy();
+
+                                IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
+
+                                for (int i = 1; i < operands[0].val; i++)
                                 {
-                                    MatrisBase<dynamic> res = operands[1].val.Copy();
-                                    MatrisBase<dynamic> mat = res.Copy();
-
-                                    IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
-
-                                    for (int i = 1; i < operands[0].val; i++)
-                                    {
-                                        res = matservice.MatrisMul(res, mat);
-                                    }
-
-                                    operands[0].val = res;
-                                    operands[0].tknType = TokenType.MATRIS;
+                                    res = matservice.MatrisMul(res, mat);
                                 }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
+
+                                operands[0].val = res;
+                                operands[0].tknType = TokenType.MATRIS;
                             }
                             else
                             {
@@ -859,32 +719,18 @@ namespace MatrisAritmetik.Services
                     case ".*":
                         {
                             MatrisBase<dynamic> mat1, mat2;
-                            if (operands[0].tknType == TokenType.MATRIS)
+                            if (CheckMatrixAndUpdateVal(operands[0], matDict))
                             {
-                                if (matDict.ContainsKey(operands[0].name))
-                                { mat1 = matDict[operands[0].name].Copy(); }
-                                else if ((operands[0].val is MatrisBase<object>))
-                                { mat1 = operands[0].val; }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
+                                mat1 = operands[0].val;
                             }
                             else
                             {
                                 throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
                             }
 
-                            if (operands[1].tknType == TokenType.MATRIS)
+                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
                             {
-                                if (matDict.ContainsKey(operands[1].name))
-                                { mat2 = matDict[operands[1].name].Copy(); }
-                                else if ((operands[1].val is MatrisBase<object>))
-                                { mat2 = operands[1].val; }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
+                                mat2 = operands[1].val;
                             }
                             else
                             {
@@ -899,32 +745,18 @@ namespace MatrisAritmetik.Services
                     case "./":
                         {
                             MatrisBase<dynamic> mat1, mat2;
-                            if (operands[0].tknType == TokenType.MATRIS)
+                            if (CheckMatrixAndUpdateVal(operands[0], matDict))
                             {
-                                if (matDict.ContainsKey(operands[0].name))
-                                { mat1 = matDict[operands[0].name].Copy(); }
-                                else if ((operands[0].val is MatrisBase<object>))
-                                { mat1 = operands[0].val; }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
+                                mat1 = operands[0].val;
                             }
                             else
                             {
                                 throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
                             }
 
-                            if (operands[1].tknType == TokenType.MATRIS)
+                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
                             {
-                                if (matDict.ContainsKey(operands[1].name))
-                                { mat2 = matDict[operands[1].name].Copy(); }
-                                else if ((operands[1].val is MatrisBase<object>))
-                                { mat2 = operands[1].val; }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[1].name));
-                                }
+                                mat2 = operands[1].val;
                             }
                             else
                             {
@@ -940,18 +772,8 @@ namespace MatrisAritmetik.Services
                         }
                     case "u-":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
-
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+                            
                             operands[0].val = -operands[0].val;
 
                             operands[0].name = "";
@@ -959,17 +781,8 @@ namespace MatrisAritmetik.Services
                         }
                     case "u+":
                         {
-                            if (operands[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matDict.ContainsKey(operands[0].name))
-                                {
-                                    operands[0].val = matDict[operands[0].name];
-                                }
-                                else if (!(operands[0].val is MatrisBase<object>))
-                                {
-                                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                }
-                            }
+                            CheckMatrixAndUpdateVal(operands[0], matDict);
+
                             operands[0].name = "";
                             break;
                         }

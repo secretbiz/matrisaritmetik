@@ -64,7 +64,7 @@ namespace MatrisAritmetik
                         context.Request.Body.Seek(0, SeekOrigin.Begin);
                     }
                     catch (Exception ex)
-                    {   // This solution is bad, can't debug issues easily
+                    {   
                         if (ex.InnerException != null)
                         {
                             Console.WriteLine(ex.Message);
@@ -76,7 +76,6 @@ namespace MatrisAritmetik
                     }
                     using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
                     {
-
                         tmp = await reader.ReadToEndAsync();
                     }
 

@@ -106,7 +106,14 @@ namespace MatrisAritmetik.Pages
                     }
                     catch (Exception err)
                     {
-                        LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
+                        if (err.InnerException != null)
+                        {
+                            LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
+                        }
+                        else
+                        {
+                            LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
+                        }
                     }
                 }
                 else
@@ -152,13 +159,22 @@ namespace MatrisAritmetik.Pages
                 {
                     try
                     {
+                        Validations.ValidMatrixName(DecodedRequestDict["name"], throwOnBadName: true);
+
                         _frontService.AddToMatrisDict(DecodedRequestDict["name"],
                             _utils.SpecialStringTo2DList(DecodedRequestDict["args"], cmdinfo, savedMatrices),
                             savedMatrices);
                     }
                     catch (Exception err)
                     {
-                        LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
+                        if(err.InnerException != null)
+                        {
+                            LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
+                        }
+                        else
+                        {
+                            LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
+                        }
                     }
                 }
                 else
@@ -323,10 +339,13 @@ namespace MatrisAritmetik.Pages
         private void SetSessionVariables()
         {
             HttpContext.Session.Set<string>(SessionLastCommand, LastExecutedCommand.OriginalCommand);
+            LastExecutedCommand = null;
 
             HttpContext.Session.SetLastMsg(SessionLastMessage, LastMessage);
+            LastMessage = null;
 
             HttpContext.Session.SetCmdList(SessionOutputHistory, CommandHistory);
+            CommandHistory = null;
 
             savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
             foreach (string name in savedMatrices.Keys)
@@ -342,10 +361,16 @@ namespace MatrisAritmetik.Pages
                         { "isRandom",savedMatrices[name].CreatedFromSeed} });
                 }
             }
+            savedMatrices = null;
 
             HttpContext.Session.Set<Dictionary<string, List<List<dynamic>>>>(SessionMatrisDict, savedMatricesValDict);
+            savedMatricesValDict = null;
 
             HttpContext.Session.SetMatOptions(SessionSeedDict, savedMatricesOptionsDict);
+            savedMatricesOptionsDict = null;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
 

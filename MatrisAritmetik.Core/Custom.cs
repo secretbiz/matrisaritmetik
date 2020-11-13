@@ -79,11 +79,18 @@ namespace MatrisAritmetik.Core
     // For limiting matrix creation
     public enum MatrisLimits
     {
-        forRows = 128,
-        forCols = 128,
-        forSize = 128 * 128,
-        forMatrisCount = 8,
+        forRows = 64,
+        forCols = 64,
+        forSize = 64 * 64,
+        forMatrisCount = 16,
         forName = 64
+    };
+
+    // For limiting command history
+    public enum CompilerLimits
+    {
+        forShowOldCommands = 16,
+        forOutputCharacterLength = 128*128
     };
 
     // Token types
@@ -193,6 +200,7 @@ namespace MatrisAritmetik.Core
 
         //// ARGUMENTS
         public const string ARG_COUNT_ERROR = "Argüman sayısı hatalı!";
+        public const string MAT_MINMAX_ORDER = "max değeri min değerinden büyük olamaz!";
 
         //// COMMAND FORMATS
         public const string CMD_FORMAT_ERROR = "Hatalı komut formatı!";

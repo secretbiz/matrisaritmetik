@@ -62,6 +62,11 @@ namespace MatrisAritmetik.Services
                 random = new Random(s);
             }
 
+            if (max < min)
+            {
+                throw new Exception(CompilerMessage.MAT_MINMAX_ORDER);
+            }
+
             List<List<dynamic>> vals = new List<List<dynamic>>();
             int maxoffset = max - min + 1;
 
@@ -101,6 +106,10 @@ namespace MatrisAritmetik.Services
                 random = new Random(s);
             }
 
+            if (max < min)
+            {
+                throw new Exception(CompilerMessage.MAT_MINMAX_ORDER);
+            }
 
             List<List<dynamic>> vals = new List<List<dynamic>>();
             float realmax = max - min;

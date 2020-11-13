@@ -505,7 +505,7 @@ namespace MatrisAritmetik.Core
         {
             string seed_str = CreatedFromSeed ? Seed.ToString() : "-";
             return "Matris: " + name + ", Seed: " + seed_str +
-                ", Boyut(" + _row + "," + _col + ")" +
+                ", Boyut: " + _row + "x" + _col +
                 "\nElementler:\n" +
                 ToString();
 
