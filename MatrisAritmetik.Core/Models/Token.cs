@@ -31,7 +31,7 @@ namespace MatrisAritmetik.Core.Models
         public string service = "";
         public string returns = "";
 
-        // In case ? is used
+        // In case ? or : was used
         public string info = null;
 
         public Token() { }

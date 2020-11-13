@@ -190,13 +190,18 @@ namespace MatrisAritmetik.Core
 
         //// DOCS
         public const string DOCS_HELP = "'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.";
-        public const string COMPILER_HELP = ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz (?komut)" +
-                             "\n>>> Fonksiyonları kullanmak için '!' ön-ekini fonksiyon isminden önce koyunuz (!komut)" +
+        public const string COMPILER_HELP = 
+                             ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz (?komut_veya_matris)" +
                              "\n>>> Çıktılar veya menülerin üzerine işaretçinizi bekleterek gerekli bilgilere ulaşabilirsiniz." +
-                             "\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):" +
-                             "\n\t    '.*' : Matris çarpımı = A .* B" +
-                             "\n\t    '.^' : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
-                             "\n\t    './' : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)";
+
+                             "\n\n>>> Fonksiyonları kullanmak için '!' ön-ekini fonksiyon isminden önce koyunuz (!komut)" +
+                             "\n\to İstenen bir parametreye değer vermek için 'parametre_ismi:argüman' formatını kullanınız " +
+                             "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez." +
+
+                             "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):" +
+                             "\n\to .* : Matris çarpımı = A .* B" +
+                             "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
+                             "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)";
 
         //// ARGUMENTS
         public const string ARG_COUNT_ERROR = "Argüman sayısı hatalı!";
@@ -248,6 +253,8 @@ namespace MatrisAritmetik.Core
         }
 
         //// FUNCTION ERRORS
+        public const string ARG_GIVEN_AFTER_HINTED_PARAM = "Parametre ismi kullanıldıktan sonra pozisyonel argüman kullanılamaz!";
+
         public static string FUNC_REQUIRES_ARGS(string name, int count)
         {
             return name + " " + count + " parametreli bir fonksiyondur. Detaylar için: ?" + name;
@@ -306,6 +313,11 @@ namespace MatrisAritmetik.Core
         public static string PARAMETER_NAME_INVALID(string name)
         {
             return name + " adlı bir parametre bulunamadı!";
+        }
+
+        public static string PARAMETER_HINT_INVALID(string name)
+        {
+            return name + " bir parametre adı olarak kullanılamaz!";
         }
 
         public static string STRING_FORMAT_INVALID(string format)

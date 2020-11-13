@@ -81,7 +81,7 @@
                 "fullname": "Matris Çarpımı",
                 "description": "Verilen A ve B matrislerinin matris çarpımı",
 
-                "alias_list": [ "A .* B", "A ./ !Inverse(B)" ],
+                "alias_list": [ " A.*B ", " A./!Inverse(B) " ],
                 "function": "MatrisMul",
                 "param_types": [ "Matris", "Matris" ],
                 "param_names": [ "A", "B" ],
@@ -213,33 +213,33 @@
             },
             {
                 "fullname": "Minör",
-                "description": "Verilen A matrisinin (i,j) indeksli(taban = base) elemanının minörü",
+                "description": "Verilen A matrisinin (row,col) indeksli(taban = based) elemanının minörü",
 
                 "alias_list": [],
                 "function": "Minor",
                 "param_types": [ "Matris", "int", "int", "int" ],
-                "param_names": [ "A", "i", "j", "base" ],
+                "param_names": [ "A", "row", "col", "based" ],
                 "required_params": [ 0, 1, 2 ],
                 "returns": "float",
 
                 "function_template": "!Minor(,,,)",
-                "function_template_filled": "!Minor(A,i,j,base)",
+                "function_template_filled": "!Minor(A,row,col,based)",
 
                 "service": "MatrisArithmeticService"
             },
             {
                 "fullname": "Minör Matris",
-                "description": "Verilen A matrisinin (i,j) indeksli(taban = base) elemanının minörünün hesaplandığı matris",
+                "description": "Verilen A matrisinin (row,col) indeksli(taban = based) elemanının minörünün hesaplandığı matris",
 
                 "alias_list": [],
                 "function": "MinorMatris",
                 "param_types": [ "Matris", "int", "int", "int" ],
-                "param_names": [ "A", "i", "j", "base" ],
+                "param_names": [ "A", "row", "col", "based" ],
                 "required_params": [ 0, 1, 2 ],
                 "returns": "Matris",
 
                 "function_template": "!MinorMatris(,,,)",
-                "function_template_filled": "!MinorMatris(A,i,j,base)",
+                "function_template_filled": "!MinorMatris(A,row,col,based)",
 
                 "service": "MatrisArithmeticService"
             },

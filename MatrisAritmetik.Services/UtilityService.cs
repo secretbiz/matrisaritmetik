@@ -90,6 +90,8 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
             }
 
+            bool paramHintUsed = false;
+
             // Start checking arguments, parse them
             for (int argind = 0; argind < args.Length; argind++)
             {
@@ -98,6 +100,11 @@ namespace MatrisAritmetik.Services
                 // Positional
                 if (rowsplit.Length == 1)
                 {
+                    if(paramHintUsed)
+                    {
+                        throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
+                    }
+
                     currentArg = rowsplit[0];
                     currentParamName = funcinfo.param_names[argind];
                     currentParamType = funcinfo.param_types[argind];
@@ -110,6 +117,7 @@ namespace MatrisAritmetik.Services
                 // Parameter name given
                 else if (rowsplit.Length == 2)
                 {
+                    paramHintUsed = true;
                     currentArg = rowsplit[1];
                     currentParamName = rowsplit[0];
 
@@ -195,12 +203,8 @@ namespace MatrisAritmetik.Services
             }
 
             object[] param_arg = new object[funcinfo.param_names.Length];
+            int ind;
 
-            // Put values in order
-            for (int k = 0; k < param_dict.Count; k++)
-            {
-                param_arg[k] = param_dict[funcinfo.param_names[k]];
-            }
             // Create the service
             ConstructorInfo service = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetConstructor(Type.EmptyTypes);
             object serviceObject = service.Invoke(new object[] { });
@@ -209,13 +213,21 @@ namespace MatrisAritmetik.Services
             MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.function);
             ParameterInfo[] paraminfo = method.GetParameters();
 
-            for (int k = param_dict.Count; k < funcinfo.param_names.Length; k++)
+            // Put values in order
+            foreach(string par in param_dict.Keys)
             {
-                if (paraminfo[k].DefaultValue == null) // default value was null
+                ind = Array.IndexOf(funcinfo.param_names, par);
+                param_arg[ind] = param_dict[par];
+            }
+
+            for (int k = 0; k < funcinfo.param_names.Length; k++)
+            {
+                if(param_arg[k] != null)    // Skip already parsed values
                 {
-                    param_arg[k] = null;
+                    continue;
                 }
-                else
+
+                else if(paraminfo[k].DefaultValue != null) // default value wasn't null
                 {
                     switch (paraminfo[k].DefaultValue.GetType().ToString())
                     {

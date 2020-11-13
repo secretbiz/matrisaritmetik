@@ -112,7 +112,8 @@ namespace MatrisAritmetik.Services
         }
 
         /// <summary>
-        /// 
+        ///     Create a token from a string expression
+        /// </summary>
         /// Current order of operations:
         ///     OPERATOR    PRIORITY(Higher first)
         ///     ----------------------------------
@@ -130,10 +131,11 @@ namespace MatrisAritmetik.Services
         ///         %               4
         ///         +               3
         ///         -               3
-        ///         =               2
+        ///         :               2
         ///         ,               1
+        ///         =               0
         ///         
-        /// </summary>
+        ///
         /// <param name="exp"> String expression to tokenize </param>
         /// <returns></returns>
         private Token String2Token(string exp)
@@ -160,7 +162,7 @@ namespace MatrisAritmetik.Services
 
             else if (exp.Length > 1 && exp != ".^" && exp != ".*" && exp != "./")
             {
-                if (exp[0] == '!')
+                if (exp[0] == '!')          // A function
                 {
                     exp = exp.Replace("!", "");
                     if (TknTryParseBuiltFunc(exp, out CommandInfo cmdinfo))
@@ -178,9 +180,9 @@ namespace MatrisAritmetik.Services
                         throw new Exception(CompilerMessage.NOT_A_(exp, "fonksiyon"));
                     }
                 }
-                else if (Validations.ValidMatrixName(exp))
+                else if (Validations.ValidMatrixName(exp))          // MATRIX
                 {
-                    tkn.tknType = TokenType.MATRIS;                // MATRIX
+                    tkn.tknType = TokenType.MATRIS;                
                     tkn.name = exp;
                 }
                 else if (exp[0] == '?')                 // Information about following expression
@@ -233,11 +235,20 @@ namespace MatrisAritmetik.Services
             {                                                       // OPERATOR
                 switch (exp)
                 {
+                    case ":":
+                        {
+                            tkn.tknType = TokenType.OPERATOR;
+                            tkn.symbol = ":";
+                            tkn.priority = 2;
+                            tkn.assoc = OperatorAssociativity.RIGHT;
+                            tkn.paramCount = 2;
+                            break;
+                        }
                     case "=":
                         {
                             tkn.tknType = TokenType.OPERATOR;
                             tkn.symbol = "=";
-                            tkn.priority = 2;
+                            tkn.priority = 0;
                             tkn.assoc = OperatorAssociativity.RIGHT;
                             tkn.paramCount = 2;
                             break;
@@ -476,6 +487,7 @@ namespace MatrisAritmetik.Services
                 Replace(".^", " .^ ").
                 Replace("./", " ./ ").
                 Replace("=", " = ").
+                Replace(":", " : ").
                 Trim();
 
             if (exp.Contains(" = ")) // Matris_name = some_expression
@@ -489,7 +501,7 @@ namespace MatrisAritmetik.Services
                 {
                     if (!Validations.ValidMatrixName(expsplits[0].Trim()))
                     {
-                        throw new Exception(CompilerMessage.NOT_A_(expsplits[0].Trim(), "matris ismi"));
+                        throw new Exception(CompilerMessage.MAT_NAME_INVALID);
                     }
                     else
                     {
@@ -583,7 +595,6 @@ namespace MatrisAritmetik.Services
 
                             operands[0].val = operands[1].val + operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-                            operands[0].name = "";
 
                             break;
                         }
@@ -594,7 +605,6 @@ namespace MatrisAritmetik.Services
 
                             operands[0].val = operands[1].val - operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-                            operands[0].name = "";
 
                             break;
                         }
@@ -603,7 +613,6 @@ namespace MatrisAritmetik.Services
                             CheckMatrixAndUpdateVal(operands[0], matDict);
                             CheckMatrixAndUpdateVal(operands[1], matDict);
 
-                            operands[0].name = "";
                             operands[0].val *= operands[1].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
 
@@ -614,7 +623,6 @@ namespace MatrisAritmetik.Services
                             CheckMatrixAndUpdateVal(operands[0], matDict);
                             CheckMatrixAndUpdateVal(operands[1], matDict);
 
-                            operands[0].name = "";
                             operands[0].val = operands[1].val / operands[0].val;
                             operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
                             break;
@@ -646,7 +654,6 @@ namespace MatrisAritmetik.Services
                                 throw new Exception(CompilerMessage.MODULO_FORMATS);
                             }
 
-                            operands[0].name = "";
                             break;
                         }
                     case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
@@ -667,7 +674,6 @@ namespace MatrisAritmetik.Services
                                 operands[0].tknType = TokenType.NUMBER;
                             }
 
-                            operands[0].name = "";
                             break;
                         }
                     case ".^":      // A.^3 == A@A@A  , A kare matris
@@ -713,7 +719,6 @@ namespace MatrisAritmetik.Services
                                 throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
                             }
 
-                            operands[0].name = "";
                             break;
                         }
                     case ".*":
@@ -739,7 +744,6 @@ namespace MatrisAritmetik.Services
 
                             operands[0].val = new MatrisArithmeticService<object>().MatrisMul(mat2, mat1);
 
-                            operands[0].name = "";
                             break;
                         }
                     case "./":
@@ -767,7 +771,6 @@ namespace MatrisAritmetik.Services
 
                             operands[0].val = matservice.MatrisMul(mat2, matservice.Inverse(mat1));
 
-                            operands[0].name = "";
                             break;
                         }
                     case "u-":
@@ -776,14 +779,12 @@ namespace MatrisAritmetik.Services
                             
                             operands[0].val = -operands[0].val;
 
-                            operands[0].name = "";
                             break;
                         }
                     case "u+":
                         {
                             CheckMatrixAndUpdateVal(operands[0], matDict);
 
-                            operands[0].name = "";
                             break;
                         }
                     case "=":
@@ -826,7 +827,18 @@ namespace MatrisAritmetik.Services
                                     }
                                 }
                             }
-                            operands[0].name = "";
+                            break;
+                        }
+                    case ":":
+                        {
+                            if(Validations.ValidMatrixName(operands[1].name))   // Use the name function for parameter name validation
+                            {
+                                operands[0].info = operands[1].name;
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[0].name));
+                            }
                             break;
                         }
                     default:
@@ -840,7 +852,6 @@ namespace MatrisAritmetik.Services
                     throw new Exception(CompilerMessage.FUNC_PARAMCOUNT_EXCESS(op.name, op.paramCount, op.argCount));
                 }
 
-                //operands.Reverse();
                 object[] param_arg = new object[op.paramCount];
 
                 object serviceObject = null;
@@ -876,24 +887,57 @@ namespace MatrisAritmetik.Services
                     paraminfo = method.GetParameters();
                 }
 
-                // Put values in order
+                // param:arg dict for checking if parameters are referenced multiple times and storing args
+                Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
+
+                bool hintUsed = false;
+
+                // Check for parameter name hints, fill the param:arg dictionary
                 for (int k = 0; k < op.argCount; k++)
                 {
+                    int pind;
+                    if(operands[k].info != null)    // hint was given
+                    {
+                        hintUsed = true;
+                        pind = GetParamIndex(operands[k].info, paraminfo);
+                        if (pind == -1)
+                        {
+                            throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(operands[k].info));
+                        }
+                        else
+                        {
+                            param_dict.Add(paraminfo[pind].Name.ToString(), operands[k].val);
+                        }
+                    }
+                    else if (hintUsed)  
+                    {
+                        throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
+                    }
+                    else if(param_dict.ContainsKey(paraminfo[k].Name.ToString()))
+                    {
+                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[k].Name.ToString()));
+                    }
+                    else
+                    {
+                        param_dict.Add(paraminfo[k].Name.ToString(), operands[k].val);
+                        pind = k;
+                    }
+
                     switch (operands[k].tknType)
                     {
-                        case TokenType.NULL: param_arg[k] = null; break;
+                        case TokenType.NULL: param_arg[pind] = null; break;
 
-                        case TokenType.NUMBER: param_arg[k] = operands[k].val; break;
+                        case TokenType.NUMBER: param_arg[pind] = operands[k].val; break;
 
                         case TokenType.MATRIS:
                             {
                                 if (matDict.ContainsKey(operands[k].name))
                                 {
-                                    param_arg[k] = matDict[operands[k].name];
+                                    param_arg[pind] = matDict[operands[k].name];
                                 }
                                 else if ((operands[k].val is MatrisBase<object>))
                                 {
-                                    param_arg[k] = operands[k].val;
+                                    param_arg[pind] = operands[k].val;
                                 }
                                 else
                                 {
@@ -909,32 +953,33 @@ namespace MatrisAritmetik.Services
                             }
                     }
 
-                    if (param_arg[k] != null) // Parse given value
+                    if (param_arg[pind] != null) // Parse given value
                     {
                         try
                         {
-                            param_arg[k] = (op.paramTypes[k]) switch
+                            param_arg[pind] = (op.paramTypes[pind]) switch
                             {
-                                "int" => Convert.ToInt32(param_arg[k]),
-                                "Matris" => ((MatrisBase<dynamic>)param_arg[k]),
-                                "float" => Convert.ToSingle(param_arg[k]),
-                                _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[k])),
+                                "int" => Convert.ToInt32(param_arg[pind]),
+                                "Matris" => ((MatrisBase<dynamic>)param_arg[pind]),
+                                "float" => Convert.ToSingle(param_arg[pind]),
+                                _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[pind])),
                             };
                         }
                         catch (Exception)
                         {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_arg[k].ToString(), op.paramTypes[k]));
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_arg[pind].ToString(), op.paramTypes[pind]));
                         }
                     }
                 }
-                // Replace rest with default value
-                for (int k = op.argCount; k < op.paramCount; k++)
+
+                // Replace nulls with default values
+                for (int k = 0; k < op.paramCount; k++)
                 {
-                    if (paraminfo[k].DefaultValue == null) // default value was null
+                    if (param_arg[k] != null)    // Skip already parsed values
                     {
-                        param_arg[k] = null;
+                        continue;
                     }
-                    else
+                    else if (paraminfo[k].DefaultValue != null) // default value wasn't null
                     {
                         switch (paraminfo[k].DefaultValue.GetType().ToString())
                         {
@@ -962,6 +1007,7 @@ namespace MatrisAritmetik.Services
                         }
                     }
                 }
+
                 if (op.service == "FrontService")
                 {
                     switch (op.name)
@@ -1013,6 +1059,20 @@ namespace MatrisAritmetik.Services
             }
             operands[0].name = "";
             return operands[0];
+        }
+
+        private int GetParamIndex(string name, ParameterInfo[] paramarr)
+        {
+            int ind = 0;
+            foreach (ParameterInfo p in paramarr)
+            {
+                if (p.Name.ToString() == name)
+                {
+                    break;
+                }
+                ind++;
+            }
+            return (ind < paramarr.Length) ? ind : -1;
         }
 
         public CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory)
