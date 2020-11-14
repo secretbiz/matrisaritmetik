@@ -472,16 +472,22 @@ namespace MatrisAritmetik.Services
         {
             exp = exp.
                 Replace("+", " + ").
+                Replace("+ =", "+=").
                 Replace("-", " - ").
+                Replace("- =", "-=").
                 Replace("*", " * ").
+                Replace("* =", "*=").
                 Replace(". *", ".*").
                 Replace("/", " / ").
+                Replace("/ =", "/=").
                 Replace(". /", "./").
                 Replace("(", " ( ").
                 Replace(")", " ) ").
                 Replace(",", " , ").
                 Replace("%", " % ").
+                Replace("% =", "%=").
                 Replace("^", " ^ ").
+                Replace("^ =", "^=").
                 Replace(". ^", ".^").
                 Replace(".*", " .* ").
                 Replace(".^", " .^ ").
@@ -490,23 +496,72 @@ namespace MatrisAritmetik.Services
                 Replace(":", " : ").
                 Trim();
 
-            if (exp.Contains(" = ")) // Matris_name = some_expression
+            if (exp.Contains("=")) // Matris_name = some_expression
             {
-                string[] expsplits = exp.Split("=");
+                string[] expsplits = exp.Split("=",StringSplitOptions.RemoveEmptyEntries);
                 if (expsplits.Length != 2)
                 {
                     throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
                 }
                 else
                 {
-                    if (!Validations.ValidMatrixName(expsplits[0].Trim()))
+                    expsplits[0] = expsplits[0].Trim();
+                    expsplits[1] = expsplits[1].Trim();
+                    if (expsplits[0] == "" || expsplits[1] == "")
                     {
-                        throw new Exception(CompilerMessage.MAT_NAME_INVALID);
+                        throw new Exception(CompilerMessage.EQ_FORMAT);
                     }
-                    else
+
+                    string newPart = "";
+                    switch(expsplits[0][^1].ToString())
                     {
-                        exp = expsplits[0].Trim() + " = ( " + expsplits[1].Trim() + " )";   // Matris_name = (some_expression)
+                        case "+":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " + ";
+                                break;
+                            }
+                        case "-":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " - ";
+                                break;
+                            }
+                        case "*":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " * ";
+                                break;
+                            }
+                        case "/":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " / ";
+                                break;
+                            }
+                        case "^":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " ^ ";
+                                break;
+                            }
+                        case "%":
+                            {
+                                expsplits[0] = expsplits[0][0..^1].Trim();
+                                newPart = expsplits[0] + " % ";
+                                break;
+                            }
+                        default:
+                            {
+                                if (!Validations.ValidMatrixName(expsplits[0]))
+                                {
+                                    throw new Exception(CompilerMessage.MAT_NAME_INVALID);
+                                }
+                                break;
+                            }
                     }
+
+                    exp = expsplits[0] + " = " + newPart + "( " + expsplits[1] + " )";   // Matris_name = (some_expression)
                 }
             }
             while (exp.Contains("  "))
@@ -665,12 +720,12 @@ namespace MatrisAritmetik.Services
 
                             if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
                             {
-                                operands[0].val = operands[1].val.Power((int)operands[0].val);
+                                operands[0].val = ((MatrisBase<object>)operands[1].val).Power((dynamic)operands[0].val);
                                 operands[0].tknType = TokenType.MATRIS;
                             }
                             else // base is number
                             {
-                                operands[0].val = MatrisBase<dynamic>.PowerMethod(operands[1].val, operands[0].val); // Use method inside matrisbase for now to calculate power
+                                operands[0].val = MatrisBase<object>.PowerMethod(double.Parse(operands[1].val.ToString()), double.Parse(operands[0].val.ToString())); // Use method inside matrisbase for now to calculate power
                                 operands[0].tknType = TokenType.NUMBER;
                             }
 
@@ -837,7 +892,7 @@ namespace MatrisAritmetik.Services
                             }
                             else
                             {
-                                throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[0].name));
+                                throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
                             }
                             break;
                         }
@@ -906,6 +961,10 @@ namespace MatrisAritmetik.Services
                         }
                         else
                         {
+                            if(param_dict.ContainsKey(paraminfo[pind].Name.ToString()))
+                            {
+                                throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[pind].Name.ToString()));
+                            }
                             param_dict.Add(paraminfo[pind].Name.ToString(), operands[k].val);
                         }
                     }
@@ -1272,7 +1331,15 @@ namespace MatrisAritmetik.Services
                             else if (operandStack.Count == 0)
                             {
                                 cmd.STATE = CommandState.ERROR;
-                                cmd.STATE_MESSAGE = CompilerMessage.ARG_COUNT_ERROR;
+
+                                if (tkns.Count == 0)
+                                {
+                                    cmd.STATE_MESSAGE = CompilerMessage.OP_INVALID(cmd.TermsToEvaluate[0]);
+                                }
+                                else
+                                {
+                                    cmd.STATE_MESSAGE = CompilerMessage.ARG_COUNT_ERROR;
+                                }
                             }
                             else
                             {

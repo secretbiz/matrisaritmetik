@@ -190,7 +190,7 @@ namespace MatrisAritmetik.Core
 
         //// DOCS
         public const string DOCS_HELP = "'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.";
-        public const string COMPILER_HELP = 
+        public const string COMPILER_HELP =
                              ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz (?komut_veya_matris)" +
                              "\n>>> Çıktılar veya menülerin üzerine işaretçinizi bekleterek gerekli bilgilere ulaşabilirsiniz." +
 
@@ -201,7 +201,22 @@ namespace MatrisAritmetik.Core
                              "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):" +
                              "\n\to .* : Matris çarpımı = A .* B" +
                              "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
-                             "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)";
+                             "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)" +
+
+                             "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız" +
+                             "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir" +
+                             "\n\to Komut stilleri için ayardan önce 'name:' ön-ekini kullanınız" +
+                             "\n\to Çıktı stilleri için ayardan önce 'vals:' ön-ekini kullanınız" +
+                             "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır" +
+                             "\n\n\to CSS stilleri verilen kurallar çerçevesinde uygulanabilir" +
+                             "\n\t       Ayar       |        Açıklama         |    Beklenen değer   " +
+                             "\n\t ---------------- | ----------------------- | --------------------" +
+                             "\n\t       quiet      | Komut geçmişinde gizle  |          boş        " +
+                             "\n\t        tex       |  LaTeX formatında yaz   |          boş        " +
+                             "\n\t       color      |  Yazı rengini ayarla    | renk ismi veya #rgb " +
+                             "\n\t background-color | Arkaplan rengini ayarla | renk ismi veya #rgb " +
+
+                             "\n\n\to Örnek stilli komut: !Identity(4) ; name:quiet ; color blue ";
 
         //// ARGUMENTS
         public const string ARG_COUNT_ERROR = "Argüman sayısı hatalı!";
@@ -287,7 +302,7 @@ namespace MatrisAritmetik.Core
 
         public static string ARG_PARSE_ERROR(string val, string parseType)
         {
-            return val + " değeri " + parseType + " olarak kullanılamadı!";
+            return "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
         }
 
         public static string MISSING_ARGUMENT(string name)
@@ -312,11 +327,19 @@ namespace MatrisAritmetik.Core
 
         public static string PARAMETER_NAME_INVALID(string name)
         {
-            return name + " adlı bir parametre bulunamadı!";
+            if(name.Trim() == "")
+            {
+                return "Parametre ismi hatalı!";
+            }
+            return "'" + name + "' adlı bir parametre bulunamadı!";
         }
 
         public static string PARAMETER_HINT_INVALID(string name)
         {
+            if (name.Trim() == "")
+            {
+                return "Parametre ismi hatalı!";
+            }
             return name + " bir parametre adı olarak kullanılamaz!";
         }
 

@@ -3,6 +3,11 @@
     Layout = null;
     MatrisAritmetik.Core.Models.Command cmd;
     MatrisAritmetik.Core.CommandMessage msg;
+    MatrisAritmetik.Core.MatrisBase<string> matoutput;
+    string style = ";"; int MaxTolarableSize = 100;
+
+    MatrisAritmetik.Core.Services.IUtilityService<string> utilityService = new MatrisAritmetik.Services.UtilityService<string>();
+
     if (Model != null)
     {
         if (!Model.ContainsKey("CommandHistory"))
@@ -84,15 +89,96 @@
                 }
                 else
                 {
-                    <tr class="cmdrepeat" title='@cmd.CommandSummary()'>
+                    style = "";
+                    if (cmd.NameSettings.Count != 0)
+                    {
+                        @foreach (string sty in cmd.NameSettings.Keys)
+                        {
+                            style += sty + ":" + cmd.NameSettings[sty] + ";";
+                        }
+                    }
+                    <tr class="cmdrepeat" style='@style' title='@cmd.CommandSummary()'>
                         <td>
                             <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
                         </td>
                     </tr>
 
-                    <tr class="outputRow">
-                        <td class="cmdoutput">@cmd.Output</td>
-                    </tr>
+                    style = "";
+                    if (cmd.ValsSettings.Count != 0)
+                    {
+                        @foreach (string sty in cmd.ValsSettings.Keys)
+                        {
+                            style += sty + ":" + cmd.ValsSettings[sty] + ";";
+                        }
+                    }
+
+                    if (cmd.ValsSettings.ContainsKey("tex"))
+                    {
+                        try 
+                        { 
+                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
+                        } 
+                        catch (Exception err) 
+                        { 
+                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(0, 0, ""); 
+                        }
+                        if (matoutput.IsValid())
+                        {
+                            <tr class="outputRow" style='@style'>
+                                <td>
+                                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                        <mrow>
+                                            <mo> ( </mo>
+                                            <mtable>
+                                                @if (matoutput.ElementCount() > MaxTolarableSize)
+                                                {
+                                                    @foreach (var row in matoutput.CornerMatrix().Values)
+                                                    {
+                                                        <mtr>
+                                                            @foreach (var val in row)
+                                                            {
+                                                                <mtd>
+                                                                    <mn>@val</mn>
+                                                                </mtd>
+                                                            }
+                                                        </mtr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    @foreach (var row in matoutput.Values)
+                                                    {
+                                                        <mtr>
+                                                            @foreach (var val in row)
+                                                            {
+                                                                <mtd>
+                                                                    <mn>@val</mn>
+                                                                </mtd>
+                                                            }
+                                                        </mtr>
+                                                    }
+                                                }
+                                            </mtable>
+                                            <mo> ) </mo>
+                                        </mrow>
+                                    </math>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr class="outputRow" style='@style'>
+                                <td class="cmdoutput">@cmd.Output</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+
+                        <tr class="outputRow" style='@style'>
+                            <td class="cmdoutput">@cmd.Output</td>
+                        </tr>
+                    }
                 }
             }
             else if (cmd.STATE == Core.CommandState.ERROR)

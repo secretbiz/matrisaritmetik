@@ -35,7 +35,7 @@
                 "returns": "Matris",
 
                 "function_template": "!Identity()",
-                "function_template_filled": "!Identity(n)",
+                "function_template_filled": "!Identity(dimension)",
 
                 "service": "SpecialMatricesService"
             },

@@ -1,6 +1,16 @@
-﻿////// internal modules
-import { updateMathContent } from './mathjax_custom.js';
+﻿function updateMathContent() {
+    try {
+        var math = document.getElementById("matris_table");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
 
+        var hist = document.getElementById("output_body");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, hist]);
+        //console.log("rerendering math...");
+    }
+    catch (err) {
+        console.log(err.message);
+    }
+}
 
 //////// matris ekleme fonksiyonu
 function addMatrix(event) {
@@ -91,7 +101,7 @@ function sendCmd(event) {
                 __RequestVerificationToken: tkn,
                 "cmd": filteredcmd,
             },
-            success: function (data) { updateHistoryPanel(tkn); },
+            success: function (data) { updateHistoryPanel(tkn); updateMathContent(); },
             error: function (error) { console.log(error); }
         });
 }

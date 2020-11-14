@@ -115,6 +115,11 @@ namespace MatrisAritmetik.Core.Models
                 if (settingname.Substring(0, 5) == "name:")// add to name settings
                 {
                     settingname = settingname.Replace("name:", "");
+                    if (settingname == "quiet")
+                    {
+                        settingname = "display";
+                        param = "none";
+                    }
 
                     if (!NameSettings.ContainsKey(settingname))
                     {
@@ -130,6 +135,11 @@ namespace MatrisAritmetik.Core.Models
                 else if (settingname.Substring(0, 5) == "vals:")// add to vals settings
                 {
                     settingname = settingname.Replace("vals:", "");
+                    if (settingname == "quiet")
+                    {
+                        settingname = "display";
+                        param = "none";
+                    }
 
                     if (!ValsSettings.ContainsKey(settingname))
                     {
@@ -142,6 +152,12 @@ namespace MatrisAritmetik.Core.Models
 
                     return;
                 }
+            }
+
+            if (settingname == "quiet")
+            {
+                settingname = "display";
+                param = "none";
             }
 
             if (!NameSettings.ContainsKey(settingname))

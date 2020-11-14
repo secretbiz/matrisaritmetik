@@ -645,15 +645,16 @@ namespace MatrisAritmetik.Core
             return Col * Row;
         }
 
-        public MatrisBase<T> Power(int n)
+        public MatrisBase<T> Power(dynamic n)
         {
+            n = double.Parse(n.ToString());
             List<List<T>> newlist = new List<List<T>>();
             for (int i = 0; i < Row; i++)
             {
                 newlist.Add(new List<T>());
                 for (int j = 0; j < Col; j++)
                 {
-                    newlist[i].Add(PowerMethod((dynamic)(float.Parse(Values[i][j].ToString())), n));
+                    newlist[i].Add(Math.Pow(double.Parse(Values[i][j].ToString()), n));
                 }
             }
             return new MatrisBase<T>(newlist);
@@ -828,52 +829,40 @@ namespace MatrisAritmetik.Core
             return floatlis;
         }
         //// a^b handling
-        public static dynamic PowerMethod(dynamic a, dynamic b)
+        public static double PowerMethod(double a, double b)
         {
-            dynamic result;
-            if (b == 0)
+            double result;
+            if (b == 0.0)
             {
-                if (a == 0) // 0^0
+                if (a == 0.0) // 0^0
                 {
                     result = double.NaN;
                 }
                 else
                 {
-                    result = 1;    // x^0
+                    result = 1.0;    // x^0
                 }
             }
-            else if (b < 0)
+            else if (b < 0.0)
             {
-                if (a == 0)       // 0^(-x)
+                if (a == 0.0)       // 0^(-x)
                 {
                     result = double.PositiveInfinity;
                 }
                 else                 // y^(-x)
                 {
-                    dynamic val = 1;
-                    for (int i = 0; i < (b * -1); i++)
-                    {
-                        val *= a;
-                    }
-
-                    result = 1.0 / val;
+                    result = Math.Pow(a, b);
                 }
             }
             else
             {
-                if (a == 0)   // 0^x
+                if (a == 0.0)   // 0^x
                 {
-                    result = 0;
+                    result = 0.0;
                 }
                 else                          // y^x
                 {
-                    dynamic val = 1;
-                    for (int i = 0; i < b; i++)
-                    {
-                        val *= a;
-                    }
-
-                    result = val;
+                    result = Math.Pow(a, b);
                 }
             }
             return result;

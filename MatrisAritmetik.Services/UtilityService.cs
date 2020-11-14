@@ -25,31 +25,64 @@ namespace MatrisAritmetik.Services
             string[] rowsplit;
             List<T> temprow;
 
-            foreach (string row in filteredText.Split(newline))
+            bool typestring = typeof(T).Name == "String";
+
+            filteredText = filteredText.Trim();
+            while(filteredText[^1]=='\n')
             {
-                temprow = new List<T>();
-                rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                filteredText = filteredText[0..^1];
+            }
 
-                if (rowsplit.Length != temp && temp != -1)
+            if (typestring)
+            {
+                foreach (string row in filteredText.Split(newline))
                 {
-                    throw new Exception(CompilerMessage.MAT_UNEXPECTED_COLUMN_SIZE(temp.ToString(), rowsplit.Length.ToString()));
+                    temprow = new List<T>();
+                    rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (rowsplit.Length != temp && temp != -1)
+                    {
+                        throw new Exception(CompilerMessage.MAT_UNEXPECTED_COLUMN_SIZE(temp.ToString(), rowsplit.Length.ToString()));
+                    }
+
+                    temp = 0;
+
+                    foreach (string val in rowsplit)
+                    {
+                        temprow.Add((dynamic)val);
+                        temp += 1;
+                    }
+                    vals.Add(temprow);
                 }
-
-                temp = 0;
-
-                foreach (string val in rowsplit)
+            }
+            else
+            {
+                foreach (string row in filteredText.Split(newline))
                 {
-                    if (float.TryParse(val, out float element))
+                    temprow = new List<T>();
+                    rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (rowsplit.Length != temp && temp != -1)
                     {
-                        temprow.Add((dynamic)element);
+                        throw new Exception(CompilerMessage.MAT_UNEXPECTED_COLUMN_SIZE(temp.ToString(), rowsplit.Length.ToString()));
                     }
-                    else
+
+                    temp = 0;
+
+                    foreach (string val in rowsplit)
                     {
-                        throw new Exception(CompilerMessage.ARG_PARSE_ERROR(val, "float"));
+                        if (float.TryParse(val, out float element))
+                        {
+                            temprow.Add((dynamic)element);
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(val, "float"));
+                        }
+                        temp += 1;
                     }
-                    temp += 1;
+                    vals.Add(temprow);
                 }
-                vals.Add(temprow);
             }
 
             return vals;
