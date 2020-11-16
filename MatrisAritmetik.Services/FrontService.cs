@@ -1374,6 +1374,10 @@ namespace MatrisAritmetik.Services
                 cmdHistory.Clear();
                 state = false;
                 cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_CLEANUP;
+                if(!cmd.NameSettings.ContainsKey("display"))
+                {
+                    cmd.NameSettings.Add("display", "none");
+                }
             }
             return cmd.STATE;
         }

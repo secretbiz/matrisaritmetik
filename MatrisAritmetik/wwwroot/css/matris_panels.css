@@ -2,17 +2,20 @@
 /* BACKGROUND RELATED */
 html {
     height: 100%;
+    overflow: auto;
 }
 body {
     display: flex;
     min-height: 100%;
     background-color: palegoldenrod !important;
+    overflow: auto;
 }
 
 #panel_container {
     display: flex !important;
     flex-direction: row !important;
     overflow: hidden !important;
+    xtouch-action: none;
 }
 
 /* Options placeholder row */
@@ -23,12 +26,13 @@ body {
 
 /********** LEFT_PANEL *********/
 #left_panel {
-    transition: all 0s ease 0s;
     flex: 0 0 auto !important;
     padding: 5px;
     margin: 2px;
-    min-width: 45% !important;
-    max-width: 60% !important;
+    width: 650px;
+    min-height: 400px;
+    min-width: 525px;
+    max-width:  60%;
     background-color: palegoldenrod !important;
 }
 #matris_title_left {
@@ -153,23 +157,24 @@ body {
 #panel_split {
     flex: 0 0 auto !important;
     width: 0px;
-    padding: 5px 0px 5px 0px;
-    margin: 2px 0px 2px 0px;
-    border-left: 4px solid darkgoldenrod;
-
     /* Prevent the browser's built-in drag from interfering */
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
 }
+.ui-resizable-e {
+    width: 14px !important;
+    border-right: 7px solid darkgoldenrod;
+    margin-right: 2px;
+}
 /********** RIGHT_PANEL *********/
 #right_panel {
     background-color: #ceb56c !important;
-    border-left: 4px double darkgoldenrod;
     flex: 1 1 auto !important;
     padding: 5px;
     margin: 2px;
-    max-width: 65% !important;
+    width: 100%;
+    min-height: 200px;
 }
 #matris_title_right {
     text-align: center;
@@ -180,26 +185,62 @@ body {
 /* KOMUT PANEL */
 #matris_komut_panel {
     display: flex;
+    flex-direction: row;
+    padding: 1px;
     background-color: #eae073;
     border: 2px solid black;
 }
-#matris_komut_options{
-    flex: 15%;
+#matris_komut_satır {
+    flex-grow: 2;
     padding: 1px;
     margin: 1px;
-    min-width:20%;
+    background-color: #373738;
+    color: white;
+    overflow: auto;
 }
-#matris_komut_satır {
-    flex: 65%;
-    padding: 2px;
-    margin: 2px;
+    #matris_komut_satır:focus {
+        outline: none;
+    }
+    /*
+    #matris_komut_satır::placeholder { 
+        color: #b6b1b1;
+        font-weight:bold;
+        opacity: 1; 
+    }
+
+    #matris_komut_satır:-ms-input-placeholder { 
+        color: #b6b1b1;
+        font-weight: bold;
+    }
+
+    #matris_komut_satır::-ms-input-placeholder { 
+        color: #b6b1b1;
+        font-weight: bold;
+    }*/
+    #matris_komut_satır[contenteditable] {
+        display: inline-block;
+    }
+        #matris_komut_satır[contenteditable]:empty::before {
+            content: attr(data-placeholder);
+            color: #b6b1b1;
+            display: inline-block;
+        }
+
+        #matris_komut_satır[contenteditable]:empty:focus::before {
+            content: attr(data-focused-advice);
+            color: #b6b1b1;
+        }
+#matris_komut_button {
+    background-color: darkblue;
+    color: white;
+    font-weight: bold;
+    z-index: 2;
+}
+#matris_komut_options {
+    background-color: #d39f5a;
+    font-weight: bold;
 }
 
-#matris_komut_button {
-    flex: 20%;
-    padding: 2px;
-    margin: 1px;
-}
 
 /* OUTPUT PANEL */
 #matris_komut_output {
@@ -273,20 +314,20 @@ body {
 }
 
 .output_cmd_info {
-    color: darkgray;
-    background-color: aliceblue;
-    border: 3px solid gray;
-    padding-left:2px;
+    color: white;
+    background-color: #4553c6;
+    border: 3px solid white;
+    padding-left: 2px;
 }
 .output_cmd_warning {
-    color: sandybrown;
-    background-color: aliceblue;
+    color: #ff6a00;
+    background-color: #fbee5a;
     border: 3px solid #ff6a00;
     padding-left: 2px;
 }
 .output_cmd_error {
     color: red;
-    background-color: aliceblue;
+    background-color: #ff9c9c;
     border: 3px solid darkred;
     padding-left: 2px;
 }
@@ -298,4 +339,62 @@ body {
 }
 .commandError{
     font-style:italic;
+}
+
+/* Syntax highlighting classes*/
+/* Doc highlight */
+.docs {
+    color: #71eb71;
+    font-weight: bold;
+}
+.docs_term {
+    color: #b3f8b3;
+}
+
+/* Setting highlight */
+.settings_sep {
+    color: red ;
+    font-weight: bolder;
+}
+
+.settings_attname {
+    color: #9e97fb;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.settings_applyname {
+    color: #d295f6;
+    font-weight: bold;
+}
+
+.settings_setapplysep {
+    color: white;
+    font-weight: bolder;
+}
+
+.settings_attvalue {
+    color: #7ccfff;
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* Other token highlight */
+.operator {
+    color: #26fbd4;
+    font-weight: bolder;
+}
+
+.function{
+    color: #c569fc;
+    font-weight: bold;
+}
+
+.seperator {
+    color: greenyellow;
+    font-weight: bolder;
+}
+
+.text_or_num{
+    color: white;
 }

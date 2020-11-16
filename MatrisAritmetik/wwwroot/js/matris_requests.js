@@ -91,7 +91,10 @@ if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, 
 //////// komut gönder
 function sendCmd(event) {
     var tkn = event.currentTarget.token;
-    var filteredcmd = document.getElementById("matris_komut_satır").value.split("=").join("!__EQ!").split("./").join("!__REVMUL!");
+    var filteredcmd = document.getElementById("matris_komut_satır").textContent
+        .split("=").join("!__EQ!")
+        .split("./").join("!__REVMUL!")
+        .replace(/\u00a0/g, " ");
     $.ajax(
         {
             type: 'POST',
@@ -119,12 +122,13 @@ function placeAsCommand(event) {
     var command_row = document.getElementById("matris_komut_satır");
 
     // Empty input area
-    if (command_row.value == "")
-        command_row.value = event.currentTarget.value;
+    if (command_row.textContent == "")
+        command_row.textContent = event.currentTarget.value;
     else
-        command_row.value += event.currentTarget.value;
+        command_row.textContent += event.currentTarget.value;
 
     event.currentTarget.selectedIndex = 0;
+    colorInput();
 }
 
 // komut dropdown change event
@@ -200,3 +204,179 @@ function updateHistoryPanel(token) {
 
     );
 }
+
+
+// Token highlighting ( individual )
+function colorInput(event) {
+    var append = false;
+    var parentspan = window.getSelection();
+    var parentnode = null;
+    var ind = null;
+
+    parentnode = parentspan.baseNode.parentNode.id
+    var baseind = parentnode.split("_")[1];
+    if (parentnode.substring(0, 3) == "cmd") {
+        
+        ind = parseInt(baseind);
+        ind += parentspan.baseNode.textContent.length - 1;
+
+        parentnode = "cmd_" + ind.toString();
+
+        let chars = document.getElementById("matris_komut_satır").childNodes;
+        let lastind = parseInt(chars[chars.length - 1].id.split("_")[1]);
+
+        if (lastind > chars.length - 1) {
+            if (chars.length > 0) {
+                if (chars[0].id != "cmd_0")
+                    ind = chars[0].textContent.length - 1;
+                else if (parentspan.baseNode.textContent != parentspan.baseNode.parentElement.innerHTML) {
+                    let len = parentspan.baseNode.parentElement.innerHTML.length;
+                    for (var ch in chars) {
+                        if (chars[ch].textContent.length > 1) {
+                            ind = parseInt(ch) + len - 1;
+                            break;
+                        }
+                    }
+                }
+                else
+                    ind += 1;
+            }
+        }
+        else if ( ind != chars.length)
+        {
+            if (baseind != "0") {
+                ind += 1;
+            }
+            else if (chars.length >= 1) {
+                ind += 1;
+            }
+        }
+        else
+            append = true;
+
+    }
+    else {
+        append = true;
+    }
+
+    let inputSpan = document.getElementById("matris_komut_satır");
+    let newText = Highlight(inputSpan.textContent);
+    inputSpan.innerHTML = newText;
+    if (append)
+        setCaretPos(inputSpan);
+    else
+        setCaretPos(inputSpan, ind);
+
+}
+
+const operators = ["+", "-", "*", "/", ".", "%", "^", "="]
+const seperators = ["(", ")", ","]
+
+function Highlight(text) {
+    var htmlText = text;
+    var replacedict = new Object();
+
+    var span = "";
+    var lengthoffset = 0;
+    var length = htmlText.length;
+    var offsetindex = 0;
+    var char = "";
+    var docsStarted = false;
+    var settingsStarted = false;
+    var anySettingNameRead = false;
+    var settingattValStarted = false;
+
+    for (var i = 0; i < length; i++) {
+        offsetindex = lengthoffset;
+        if (offsetindex == htmlText.length)
+            offsetindex -= 1;
+        char = htmlText[offsetindex];
+
+        if (docsStarted) { // Docs
+            span = "<span class='docs_term' id='cmd_" + i + "'>";
+        }
+        else if (settingsStarted) { // Settings "; apply:setting value ;"
+
+            if (char == ";") {  // Start a new settings block
+                span = "<span class='settings_sep' id='cmd_" + i + "'>";
+                settingattValStarted = false;
+                anySettingNameRead = false;
+            }
+            else if (char == ":") { // Start reading the attribute value
+                span = "<span class='settings_setapplysep' id='cmd_" + i + "'>";
+            }
+            else if (char.trim() == "") {      // Attribute val starting to be read or at start
+                span = "<span id='cmd_" + i + "'>";
+                if (anySettingNameRead) {
+                    settingattValStarted = true;
+                    anySettingNameRead = false;
+                }
+            }
+            else if (settingattValStarted) {       // Attribute val is currently being read
+                span = "<span class='settings_attvalue' id='cmd_" + i + "'>";
+            }
+            else {// Attribute name is currently read
+                span = "<span class='settings_attname' id='cmd_" + i + "'>";
+                anySettingNameRead = true;
+            }
+            
+        }
+        else
+        {   // Any other operation
+            if (operators.includes(char))
+                span = "<span class='operator' id='cmd_" + i + "'>";
+            else if (seperators.includes(char))
+                span = "<span class='seperators' id='cmd_" + i + "'>";
+            else if (char == "!")
+                span = "<span class='function' id='cmd_" + i + "'>";
+            else if (char == "?") {
+                span = "<span class='docs' id='cmd_" + i + "'>";
+                docsStarted = true;
+            }
+            else if (char == ";") {
+                span = "<span class='settings_sep' id='cmd_" + i + "'>";
+                settingsStarted = true;
+            }
+            else
+                span = "<span class='text_or_num' id='cmd_" + i + "'>";
+
+        }
+        lengthoffset += span.length + 8;
+        span += char + "</span>";
+
+        htmlText = htmlText.substring(0, offsetindex) +
+            span +
+            htmlText.substring(offsetindex + 1, length + lengthoffset);
+
+    }
+    return htmlText;
+}
+
+function setCaretPos(elem,o = null) {
+    let range = document.createRange();
+   
+    if (o != null) {
+        range.setStart(elem,o);
+        range.collapse(false);
+    }
+    else {
+        range.selectNodeContents(elem);
+        range.collapse(false);
+    }
+    let selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function changeInp(event) {
+    let selection = window.getSelection();
+}
+
+// Command syntax 
+const matris_komut_satır = document.getElementById("matris_komut_satır");
+if (matris_komut_satır) { matris_komut_satır.addEventListener("input", colorInput, false); }
+if (matris_komut_satır) {
+    matris_komut_satır.addEventListener('copy', (event) => {
+        event.clipboardData.setData('text', document.getSelection());
+        event.preventDefault();
+    }); }
