@@ -20,7 +20,8 @@ namespace MatrisAritmetik.Services
             return (dynamic)(float.Parse(a.ToString()) * float.Parse(b.ToString()));
         }
 
-        private T DotProduct(List<T> a, List<T> b)
+        private T DotProduct(List<T> a,
+                             List<T> b)
         {
             if (a.Count != b.Count)
             {
@@ -58,8 +59,8 @@ namespace MatrisAritmetik.Services
         }
 
         public MatrisBase<T> Conjugate(MatrisBase<T> A)
-        {   // Return transpose for now, since T wont be complex numbers
-            return Transpose(A);
+        {
+            return ((IMatrisArithmeticService<T>)this).Transpose(A);
         }
 
         public int AbsMaxOfList(List<T> lis)
@@ -216,7 +217,7 @@ namespace MatrisAritmetik.Services
                         float x = -(float.Parse(result.Values[p + r][p].ToString()) / float.Parse(result.Values[p][p].ToString()));
                         for (int c = p; c < nc; c++)
                         {
-                            result.Values[p + r][c] = (dynamic)(float.Parse(result.Values[p][c].ToString()) * x + float.Parse(result.Values[p + r][c].ToString()));
+                            result.Values[p + r][c] = (dynamic)((float.Parse(result.Values[p][c].ToString()) * x) + float.Parse(result.Values[p + r][c].ToString()));
                         }
                     }
                 }
@@ -263,7 +264,7 @@ namespace MatrisAritmetik.Services
                 return A;
             }
 
-            MatrisBase<T> result = Echelon(A);
+            MatrisBase<T> result = ((IMatrisArithmeticService<T>)this).Echelon(A);
 
             int rowCount = A.Row;
             while (result.IsZeroRow(rowCount, 1, (float)0.0))
@@ -303,7 +304,7 @@ namespace MatrisAritmetik.Services
                     float factor = -float.Parse(result.Values[e][pivotindex].ToString());
                     for (int j = pivotindex; j < colCount; j++)
                     {
-                        result.Values[e][j] = (dynamic)(float.Parse(result.Values[e][j].ToString()) + float.Parse(result.Values[i][j].ToString()) * factor);
+                        result.Values[e][j] = (dynamic)(float.Parse(result.Values[e][j].ToString()) + (float.Parse(result.Values[i][j].ToString()) * factor));
                     }
                 }
             }
@@ -327,11 +328,11 @@ namespace MatrisAritmetik.Services
 
             if (A.Row == 2)
             {
-                return float.Parse(A.Values[0][0].ToString()) * float.Parse(A.Values[1][1].ToString())
-                       - float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString());
+                return (float.Parse(A.Values[0][0].ToString()) * float.Parse(A.Values[1][1].ToString()))
+                       - (float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString()));
             }
 
-            MatrisBase<T> ech = Echelon(A);
+            MatrisBase<T> ech = ((IMatrisArithmeticService<T>)this).Echelon(A);
 
             float det = float.Parse(ech.Values[0][0].ToString());
             if (ech.swapCount % 2 == 1)
@@ -350,7 +351,7 @@ namespace MatrisAritmetik.Services
 
         public int Rank(MatrisBase<T> A)
         {
-            MatrisBase<T> ech = Echelon(A);
+            MatrisBase<T> ech = ((IMatrisArithmeticService<T>)this).Echelon(A);
             int zeroCount = 0;
             if (A.Row <= A.Col)
             {
@@ -383,18 +384,20 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            if (Determinant(A) == (float)(0.0))
+            if (((IMatrisArithmeticService<T>)this).Determinant(A) == (float)(0.0))
             {
                 throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
 
-            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)new SpecialMatricesService().Identity(A.Row), 1);
-            return new MatrisBase<T>(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
+            MatrisBase<T> temp = ((IMatrisArithmeticService<T>)this).Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
+
+            return new MatrisBase<T>(vals: ((IMatrisArithmeticService<T>)this).RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
-        public MatrisBase<T> PseudoInverse(MatrisBase<T> A, int side = -1)
+        public MatrisBase<T> PseudoInverse(MatrisBase<T> A,
+                                           int side = -1)
         {
-            if (Rank(A) != Math.Min(A.Row, A.Col))
+            if (((IMatrisArithmeticService<T>)this).Rank(A) != Math.Min(A.Row, A.Col))
             {
                 throw new Exception(CompilerMessage.MAT_PSEINV_NOT_FULL_RANK);
             }
@@ -407,11 +410,11 @@ namespace MatrisAritmetik.Services
             string sidename = side == -1 ? "sol" : "sağ";
 
             // Left inverse
-            if(side == -1)
+            if (side == -1)
             {
                 try
                 {
-                    return MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
+                    return ((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Inverse(((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Conjugate(A), A)), ((IMatrisArithmeticService<T>)this).Conjugate(A));
                 }
                 catch (Exception err)
                 {
@@ -426,8 +429,8 @@ namespace MatrisAritmetik.Services
             else  // Right inverse
             {
                 try
-                { 
-                    return MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
+                {
+                    return ((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Conjugate(A), ((IMatrisArithmeticService<T>)this).Inverse(((IMatrisArithmeticService<T>)this).MatrisMul(A, ((IMatrisArithmeticService<T>)this).Conjugate(A))));
                 }
                 catch (Exception err)
                 {
@@ -443,7 +446,7 @@ namespace MatrisAritmetik.Services
 
         public MatrisBase<T> Adjoint(MatrisBase<T> A)
         {
-            if(!A.IsSquare())
+            if (!A.IsSquare())
             {
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
@@ -451,15 +454,15 @@ namespace MatrisAritmetik.Services
             List<List<T>> adj = new List<List<T>>();
             int r = A.Row;
             int c = A.Col;
-            for(int i=0; i < r;i++ )
+            for (int i = 0; i < r; i++)
             {
                 adj.Add(new List<T>());
-                for(int j = 0;j< c;j++)
+                for (int j = 0; j < c; j++)
                 {
-                    adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * Minor(A, i, j, 0)));
+                    adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * ((IMatrisArithmeticService<T>)this).Minor(A, i, j, 0)));
                 }
             }
-            return Transpose(new MatrisBase<T>(adj));
+            return ((IMatrisArithmeticService<T>)this).Transpose(new MatrisBase<T>(adj));
         }
 
         /*
@@ -487,7 +490,9 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public MatrisBase<T> Concatenate(MatrisBase<T> A, MatrisBase<T> B, int axis = 0)
+        public MatrisBase<T> Concatenate(MatrisBase<T> A,
+                                         MatrisBase<T> B,
+                                         int axis = 0)
         {
             if (axis == 0)
             {
@@ -533,19 +538,25 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public float Minor(MatrisBase<T> A, int row, int col, int based = 0)
+        public float Minor(MatrisBase<T> A,
+                           int row,
+                           int col,
+                           int based = 0)
         {
-            return Determinant(MinorMatris(A,row,col,based));
+            return ((IMatrisArithmeticService<T>)this).Determinant(((IMatrisArithmeticService<T>)this).MinorMatris(A, row, col, based));
         }
 
-        public MatrisBase<T> MinorMatris(MatrisBase<T> A, int row, int col, int based = 0)
+        public MatrisBase<T> MinorMatris(MatrisBase<T> A,
+                                         int row,
+                                         int col,
+                                         int based = 0)
         {
             if (!A.IsSquare())
             {
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            List <List<T>> newlis = new List<List<T>>();
+            List<List<T>> newlis = new List<List<T>>();
             List<List<T>> vals = A.Values;
             row -= based;
             col -= based;
@@ -561,10 +572,10 @@ namespace MatrisAritmetik.Services
             }
 
             int rowindex = 0;
-            for (int i = 0; i<row;i++)
+            for (int i = 0; i < row; i++)
             {
                 newlis.Add(new List<T>());
-                for(int j=0;j<col;j++)
+                for (int j = 0; j < col; j++)
                 {
                     newlis[rowindex].Add(vals[i][j]);
                 }

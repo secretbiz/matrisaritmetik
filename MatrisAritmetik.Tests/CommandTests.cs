@@ -13,19 +13,20 @@ namespace MatrisAritmetik.Tests
         /// <summary>
         /// Service for command tokenization and evaluation
         /// </summary>
-        private static readonly IFrontService frontService = new FrontService();
+        private static readonly IFrontService FrontService = new FrontService();
 
-        public static CommandInfo InfoSetter(string func, IFrontService service)
-        { 
-            if(service.TknTryParseBuiltFunc(func, out CommandInfo cmdinfo))
+        public static CommandInfo InfoSetter(string func,
+                                             IFrontService service)
+        {
+            if (service.TknTryParseBuiltFunc(func, out CommandInfo cmdinfo))
             { return cmdinfo; }
             else
             { throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!"); }
         }
 
-        public static CommandInfo RankInfo = InfoSetter("Rank", frontService);
+        public static CommandInfo RankInfo = InfoSetter("Rank", FrontService);
 
-        public static CommandInfo TransposeInfo = InfoSetter("Transpose", frontService);
+        public static CommandInfo TransposeInfo = InfoSetter("Transpose", FrontService);
         /// <summary>
         /// Example matrix that has same name with a function
         /// Transpose = { {1, 2}, {3, 4} }
@@ -602,7 +603,7 @@ namespace MatrisAritmetik.Tests
                                               }
                                             }
                     },
-                    { "?Rank", new List<Token>(){ 
+                    { "?Rank", new List<Token>(){
                                                  new Token(){tknType=TokenType.DOCS,info=RankInfo.Info()},
                                                  new Token(){
                                                   tknType=TokenType.OUTPUT,
@@ -634,7 +635,7 @@ namespace MatrisAritmetik.Tests
                 Command command = new Command(cmd);
 
                 // Tokenize 
-                command.Tokens = frontService.Tokenize(command.TermsToEvaluate[0]);
+                command.Tokens = FrontService.Tokenize(command.TermsToEvaluate[0]);
 
                 // Check tokens
                 foreach (Token tkn in command.Tokens)
@@ -677,10 +678,10 @@ namespace MatrisAritmetik.Tests
                 // If last token is output , evaluate command and check output
                 if (cmds[cmd][^1].tknType == TokenType.OUTPUT)
                 {
-                    command.Tokens = frontService.ShuntingYardAlg(command.Tokens);  // Order tokens
+                    command.Tokens = FrontService.ShuntingYardAlg(command.Tokens);  // Order tokens
 
                     // Check evaluating state
-                    Assert.AreEqual(frontService.EvaluateCommand(command, matdict, new List<Command>()), CommandState.SUCCESS,
+                    Assert.AreEqual(FrontService.EvaluateCommand(command, matdict, new List<Command>()), CommandState.SUCCESS,
                         "\n" + cmd + "\nÇözümleme başarısız! \n" + command.CommandSummary());
 
                     // Check output

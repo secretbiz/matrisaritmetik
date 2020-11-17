@@ -32,7 +32,7 @@
                         <mrow>
                             <mo> ( </mo>
                             <mtable>
-                                @if (Model[name].ElementCount() > MaxTolarableSize)
+                                @if (Model[name].ElementCount > MaxTolarableSize)
                                 {
                                     @foreach (var row in Model[name].CornerMatrix().Values)
                                     {

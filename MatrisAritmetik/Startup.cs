@@ -28,10 +28,10 @@ namespace MatrisAritmetik
             services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
+              {
+                  options.Cookie.HttpOnly = true;
+                  options.Cookie.IsEssential = true;
+              });
 
             services.AddScoped<IFrontService, FrontService>();
             services.AddScoped<IUtilityService<dynamic>, UtilityService<dynamic>>();
@@ -54,41 +54,41 @@ namespace MatrisAritmetik
             }
 
             app.UseExceptionHandler(errorApp =>
-            {
-                errorApp.Run(async context =>
-                {
-                    Console.WriteLine("Content-Length: " + context.Request.Headers["Content-Length"]);
-                    string tmp;
-                    try
-                    {
-                        context.Request.Body.Seek(0, SeekOrigin.Begin);
-                    }
-                    catch (Exception ex)
-                    {   
-                        if (ex.InnerException != null)
-                        {
-                            Console.WriteLine(ex.Message);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Can't rewind body stream. " + ex.Message);
-                        }
-                    }
-                    using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
-                    {
-                        tmp = await reader.ReadToEndAsync();
-                    }
+              {
+                  errorApp.Run(async context =>
+                  {
+                      Console.WriteLine("Content-Length: " + context.Request.Headers["Content-Length"]);
+                      string tmp;
+                      try
+                      {
+                          context.Request.Body.Seek(0, SeekOrigin.Begin);
+                      }
+                      catch (Exception ex)
+                      {
+                          if (ex.InnerException != null)
+                          {
+                              Console.WriteLine(ex.Message);
+                          }
+                          else
+                          {
+                              Console.WriteLine("Can't rewind body stream. " + ex.Message);
+                          }
+                      }
+                      using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
+                      {
+                          tmp = await reader.ReadToEndAsync();
+                      }
 
-                    Console.WriteLine("Body: " + tmp);
+                      Console.WriteLine("Body: " + tmp);
 
-                });
-            });
+                  });
+              });
 
             app.Use((context, next) =>
-            {
-                context.Request.EnableBuffering();
-                return next();
-            });
+              {
+                  context.Request.EnableBuffering();
+                  return next();
+              });
 
             app.UseDefaultFiles();
 
@@ -103,9 +103,9 @@ namespace MatrisAritmetik
             app.UseSession();
 
             app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-            });
+              {
+                  endpoints.MapRazorPages();
+              });
 
         }
     }

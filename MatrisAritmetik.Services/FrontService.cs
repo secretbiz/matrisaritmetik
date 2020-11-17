@@ -96,17 +96,15 @@ namespace MatrisAritmetik.Services
                 ReadCommandInformation();
             }
 
-            foreach (CommandLabel _lbl in builtInCommands)
+            foreach (CommandInfo _cmdinfo in from CommandLabel _lbl in builtInCommands
+                                             from CommandInfo _cmdinfo in _lbl.Functions
+                                             where _cmdinfo.function == name
+                                             select _cmdinfo)
             {
-                foreach (CommandInfo _cmdinfo in _lbl.Functions)
-                {
-                    if (_cmdinfo.function == name)
-                    {
-                        cmdinfo = _cmdinfo;
-                        return true;
-                    }
-                }
+                cmdinfo = _cmdinfo;
+                return true;
             }
+
             cmdinfo = null;
             return false;
         }
@@ -160,7 +158,10 @@ namespace MatrisAritmetik.Services
                 tkn.priority = 10;
             }
 
-            else if (exp.Length > 1 && exp != ".^" && exp != ".*" && exp != "./")
+            else if (exp.Length > 1
+                     && exp != ".^"
+                     && exp != ".*"
+                     && exp != "./")
             {
                 if (exp[0] == '!')          // A function
                 {
@@ -182,7 +183,7 @@ namespace MatrisAritmetik.Services
                 }
                 else if (Validations.ValidMatrixName(exp))          // MATRIX
                 {
-                    tkn.tknType = TokenType.MATRIS;                
+                    tkn.tknType = TokenType.MATRIS;
                     tkn.name = exp;
                 }
                 else if (exp[0] == '?')                 // Information about following expression
@@ -498,7 +499,7 @@ namespace MatrisAritmetik.Services
 
             if (exp.Contains("=")) // Matris_name = some_expression
             {
-                string[] expsplits = exp.Split("=",StringSplitOptions.RemoveEmptyEntries);
+                string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
                 if (expsplits.Length != 2)
                 {
                     throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
@@ -513,7 +514,7 @@ namespace MatrisAritmetik.Services
                     }
 
                     string newPart = "";
-                    switch(expsplits[0][^1].ToString())
+                    switch (expsplits[0][^1].ToString())
                     {
                         case "+":
                             {
@@ -561,7 +562,7 @@ namespace MatrisAritmetik.Services
                             }
                     }
 
-                    exp = expsplits[0] + " = " + newPart + "( " + expsplits[1] + " )";   // Matris_name = (some_expression)
+                    exp = $"{expsplits[0]} = {newPart}( {expsplits[1]} )";   // Matris_name = (some_expression)
                 }
             }
             while (exp.Contains("  "))
@@ -604,517 +605,531 @@ namespace MatrisAritmetik.Services
                 cmdLabelList = GetCommandLabelList();
             }
 
-            foreach (CommandLabel lbl in cmdLabelList)
+            foreach (CommandInfo _cmdinfo in from CommandLabel lbl in cmdLabelList
+                                             from CommandInfo _cmdinfo in lbl.Functions
+                                             where _cmdinfo.function == name
+                                             select _cmdinfo)
             {
-                foreach (CommandInfo _cmdinfo in lbl.Functions)
-                {
-                    if (_cmdinfo.function == name)
-                    {
-                        cmdinfo = _cmdinfo;
-                        return true;
-                    }
-                }
+                cmdinfo = _cmdinfo;
+                return true;
             }
+
             cmdinfo = null;
             return false;
         }
 
         private bool CheckMatrixAndUpdateVal(Token tkn, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
-            if (tkn.tknType == TokenType.MATRIS)
+            switch (tkn.tknType)
             {
-                if (matDict.ContainsKey(tkn.name))
-                {
-                    tkn.val = matDict[tkn.name];
-                }
-                else if (!(tkn.val is MatrisBase<object>))
-                {
-                    throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(tkn.name));
-                }
+                case TokenType.MATRIS:
+                    if (matDict.ContainsKey(tkn.name))
+                    {
+                        tkn.val = matDict[tkn.name];
+                    }
+                    else if (!(tkn.val is MatrisBase<object>))
+                    {
+                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(tkn.name));
+                    }
 
-                return true;
+                    return true;
+                default:
+                    return false;
             }
-            return false;
         }
 
         private Token EvalOperator(Token op, List<Token> operands, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
-            if (op.tknType == TokenType.OPERATOR)    // OPERATORS
+            switch (op.tknType)    
             {
-                switch (op.symbol)
-                {
-                    case "+":
+                case TokenType.OPERATOR: // OPERATORS
+                    {
+                        switch (op.symbol)
                         {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-                            CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                            operands[0].val = operands[1].val + operands[0].val;
-                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-
-                            break;
-                        }
-                    case "-":
-                        {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-                            CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                            operands[0].val = operands[1].val - operands[0].val;
-                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-
-                            break;
-                        }
-                    case "*":
-                        {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-                            CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                            operands[0].val *= operands[1].val;
-                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-
-                            break;
-                        }
-                    case "/":
-                        {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-                            CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                            operands[0].val = operands[1].val / operands[0].val;
-                            operands[0].tknType = (operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType);
-                            break;
-                        }
-                    case "%":
-                        {
-                            if (operands[0].tknType == TokenType.NUMBER) // dynamic % number
-                            {
-                                CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                                operands[0].val = operands[1].val % (dynamic)(int)operands[0].val;
-                                operands[0].tknType = operands[1].tknType;
-                            }
-                            else if (CheckMatrixAndUpdateVal(operands[0], matDict)) // matris % matris
-                            {
-                                // base operands[0]
-                                // term to get mod of operands[1]should be matrix
-                                if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                            case "+":
                                 {
-                                    operands[0].val = operands[1].val % operands[0].val;
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+                                    CheckMatrixAndUpdateVal(operands[1], matDict);
+
+                                    operands[0].val = operands[1].val + operands[0].val;
+                                    operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
+
+                                    break;
                                 }
-                                else
+                            case "-":
                                 {
-                                    throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+                                    CheckMatrixAndUpdateVal(operands[1], matDict);
+
+                                    operands[0].val = operands[1].val - operands[0].val;
+                                    operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
+
+                                    break;
                                 }
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.MODULO_FORMATS);
-                            }
-
-                            break;
-                        }
-                    case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
-                        {
-                            if (operands[0].tknType != TokenType.NUMBER)
-                            {
-                                throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
-                            }
-
-                            if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
-                            {
-                                operands[0].val = ((MatrisBase<object>)operands[1].val).Power((dynamic)operands[0].val);
-                                operands[0].tknType = TokenType.MATRIS;
-                            }
-                            else // base is number
-                            {
-                                operands[0].val = MatrisBase<object>.PowerMethod(double.Parse(operands[1].val.ToString()), double.Parse(operands[0].val.ToString())); // Use method inside matrisbase for now to calculate power
-                                operands[0].tknType = TokenType.NUMBER;
-                            }
-
-                            break;
-                        }
-                    case ".^":      // A.^3 == A@A@A  , A kare matris
-                        {
-                            if (operands[0].tknType != TokenType.NUMBER)
-                            {
-                                throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
-                            }
-
-                            if (operands[0].val < 0)
-                            {
-                                throw new Exception(CompilerMessage.SPECOP_MATPOWER_EXPO);
-                            }
-                            else if(operands[0].val == 0)
-                            {
-                                operands[0].val = 1;
-                                operands[0].tknType = TokenType.NUMBER;
-                                break;
-                            }
-
-                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                            {
-                                if (!operands[1].val.IsSquare())
+                            case "*":
                                 {
-                                    throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+                                    CheckMatrixAndUpdateVal(operands[1], matDict);
+
+                                    operands[0].val *= operands[1].val;
+                                    operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
+
+                                    break;
                                 }
-
-                                MatrisBase<dynamic> res = operands[1].val.Copy();
-                                MatrisBase<dynamic> mat = res.Copy();
-
-                                IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
-
-                                for (int i = 1; i < operands[0].val; i++)
+                            case "/":
                                 {
-                                    res = matservice.MatrisMul(res, mat);
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+                                    CheckMatrixAndUpdateVal(operands[1], matDict);
+
+                                    operands[0].val = operands[1].val / operands[0].val;
+                                    operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
+                                    break;
                                 }
-
-                                operands[0].val = res;
-                                operands[0].tknType = TokenType.MATRIS;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
-                            }
-
-                            break;
-                        }
-                    case ".*":
-                        {
-                            MatrisBase<dynamic> mat1, mat2;
-                            if (CheckMatrixAndUpdateVal(operands[0], matDict))
-                            {
-                                mat1 = operands[0].val;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-                            }
-
-                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                            {
-                                mat2 = operands[1].val;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-                            }
-
-                            operands[0].val = new MatrisArithmeticService<object>().MatrisMul(mat2, mat1);
-
-                            break;
-                        }
-                    case "./":
-                        {
-                            MatrisBase<dynamic> mat1, mat2;
-                            if (CheckMatrixAndUpdateVal(operands[0], matDict))
-                            {
-                                mat1 = operands[0].val;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-                            }
-
-                            if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                            {
-                                mat2 = operands[1].val;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-                            }
-
-                            IMatrisArithmeticService<object> matservice = new MatrisArithmeticService<object>();
-
-                            operands[0].val = matservice.MatrisMul(mat2, matservice.Inverse(mat1));
-
-                            break;
-                        }
-                    case "u-":
-                        {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-                            
-                            operands[0].val = -operands[0].val;
-
-                            break;
-                        }
-                    case "u+":
-                        {
-                            CheckMatrixAndUpdateVal(operands[0], matDict);
-
-                            break;
-                        }
-                    case "=":
-                        {
-                            if (operands[0].tknType != TokenType.MATRIS || operands[1].tknType != TokenType.MATRIS)
-                            {
-                                throw new Exception(CompilerMessage.EQ_FORMAT);
-                            }
-                            else
-                            {
-                                if (!(operands[0].val is MatrisBase<object>))
+                            case "%":
                                 {
-                                    throw new Exception(CompilerMessage.EQ_FAILED);
-                                }
-
-                                if (matDict.ContainsKey(operands[1].name))
-                                {
-                                    matDict[operands[1].name] = operands[0].val;
-                                }
-                                else if (Validations.ValidMatrixName(operands[1].name))
-                                {
-                                    if (matDict.Count < (int)MatrisLimits.forMatrisCount)
+                                    if (operands[0].tknType == TokenType.NUMBER) // dynamic % number
                                     {
-                                        matDict.Add(operands[1].name, operands[0].val);
+                                        CheckMatrixAndUpdateVal(operands[1], matDict);
+
+                                        operands[0].val = operands[1].val % (dynamic)(int)operands[0].val;
+                                        operands[0].tknType = operands[1].tknType;
+                                    }
+                                    else if (CheckMatrixAndUpdateVal(operands[0], matDict)) // matris % matris
+                                    {
+                                        // base operands[0]
+                                        // term to get mod of operands[1]should be matrix
+                                        if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                                        {
+                                            operands[0].val = operands[1].val % operands[0].val;
+                                        }
+                                        else
+                                        {
+                                            throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
+                                        }
                                     }
                                     else
                                     {
-                                        throw new Exception(CompilerMessage.MAT_LIMIT);
+                                        throw new Exception(CompilerMessage.MODULO_FORMATS);
                                     }
+
+                                    break;
                                 }
-                                else
+                            case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
                                 {
-                                    if (operands[1].name == "")
+                                    if (operands[0].tknType != TokenType.NUMBER)
+                                    {
+                                        throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
+                                    }
+
+                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
+                                    {
+                                        operands[0].val = ((MatrisBase<object>)operands[1].val).Power((dynamic)operands[0].val);
+                                        operands[0].tknType = TokenType.MATRIS;
+                                    }
+                                    else // base is number
+                                    {
+                                        operands[0].val = MatrisBase<object>.PowerMethod(double.Parse(operands[1].val.ToString()), double.Parse(operands[0].val.ToString())); // Use method inside matrisbase for now to calculate power
+                                        operands[0].tknType = TokenType.NUMBER;
+                                    }
+
+                                    break;
+                                }
+                            case ".^":      // A.^3 == A@A@A  , A kare matris
+                                {
+                                    if (operands[0].tknType != TokenType.NUMBER)
+                                    {
+                                        throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
+                                    }
+
+                                    if (operands[0].val < 0)
+                                    {
+                                        throw new Exception(CompilerMessage.SPECOP_MATPOWER_EXPO);
+                                    }
+                                    else if (operands[0].val == 0)
+                                    {
+                                        operands[0].val = 1;
+                                        operands[0].tknType = TokenType.NUMBER;
+                                        break;
+                                    }
+
+                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                                    {
+                                        if (!operands[1].val.IsSquare())
+                                        {
+                                            throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
+                                        }
+
+                                        MatrisBase<dynamic> res = operands[1].val.Copy();
+                                        MatrisBase<dynamic> mat = res.Copy();
+
+                                        IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
+
+                                        for (int i = 1; i < operands[0].val; i++)
+                                        {
+                                            res = matservice.MatrisMul(res, mat);
+                                        }
+
+                                        operands[0].val = res;
+                                        operands[0].tknType = TokenType.MATRIS;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
+                                    }
+
+                                    break;
+                                }
+                            case ".*":
+                                {
+                                    MatrisBase<dynamic> mat1, mat2;
+                                    if (CheckMatrixAndUpdateVal(operands[0], matDict))
+                                    {
+                                        mat1 = operands[0].val;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
+                                    }
+
+                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                                    {
+                                        mat2 = operands[1].val;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
+                                    }
+
+                                    operands[0].val = ((IMatrisArithmeticService<dynamic>)new MatrisArithmeticService<object>()).MatrisMul(mat2, mat1);
+
+                                    break;
+                                }
+                            case "./":
+                                {
+                                    MatrisBase<dynamic> mat1, mat2;
+                                    if (CheckMatrixAndUpdateVal(operands[0], matDict))
+                                    {
+                                        mat1 = operands[0].val;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
+                                    }
+
+                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                                    {
+                                        mat2 = operands[1].val;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
+                                    }
+
+                                    IMatrisArithmeticService<object> matservice = new MatrisArithmeticService<object>();
+
+                                    operands[0].val = matservice.MatrisMul(mat2, matservice.Inverse(mat1));
+
+                                    break;
+                                }
+                            case "u-":
+                                {
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+
+                                    operands[0].val = -operands[0].val;
+
+                                    break;
+                                }
+                            case "u+":
+                                {
+                                    CheckMatrixAndUpdateVal(operands[0], matDict);
+
+                                    break;
+                                }
+                            case "=":
+                                {
+                                    if (operands[0].tknType != TokenType.MATRIS || operands[1].tknType != TokenType.MATRIS)
                                     {
                                         throw new Exception(CompilerMessage.EQ_FORMAT);
                                     }
                                     else
                                     {
-                                        throw new Exception(CompilerMessage.MAT_NAME_INVALID);
+                                        if (!(operands[0].val is MatrisBase<object>))
+                                        {
+                                            throw new Exception(CompilerMessage.EQ_FAILED);
+                                        }
+
+                                        if (matDict.ContainsKey(operands[1].name))
+                                        {
+                                            matDict[operands[1].name] = operands[0].val;
+                                        }
+                                        else if (Validations.ValidMatrixName(operands[1].name))
+                                        {
+                                            if (matDict.Count < (int)MatrisLimits.forMatrisCount)
+                                            {
+                                                matDict.Add(operands[1].name, operands[0].val);
+                                            }
+                                            else
+                                            {
+                                                throw new Exception(CompilerMessage.MAT_LIMIT);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (operands[1].name == "")
+                                            {
+                                                throw new Exception(CompilerMessage.EQ_FORMAT);
+                                            }
+                                            else
+                                            {
+                                                throw new Exception(CompilerMessage.MAT_NAME_INVALID);
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                            break;
-                        }
-                    case ":":
-                        {
-                            if(Validations.ValidMatrixName(operands[1].name))   // Use the name function for parameter name validation
-                            {
-                                operands[0].info = operands[1].name;
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
-                            }
-                            break;
-                        }
-                    default:
-                        throw new Exception(CompilerMessage.OP_INVALID(op.symbol));
-                }
-            }
-            else                             // FUNCTIONS
-            {
-                if (op.argCount > op.paramCount)
-                {
-                    throw new Exception(CompilerMessage.FUNC_PARAMCOUNT_EXCESS(op.name, op.paramCount, op.argCount));
-                }
-
-                object[] param_arg = new object[op.paramCount];
-
-                object serviceObject = null;
-                MethodInfo method = null;
-                ParameterInfo[] paraminfo = null;
-
-                operands.Reverse();
-
-                if (op.tknType == TokenType.DOCS)
-                {
-                    throw new Exception(CompilerMessage.DOCS_HELP);
-                }
-
-                if (operands.Count == 0 && op.argCount != 0)
-                {
-                    throw new Exception(CompilerMessage.PARANTHESIS_COUNT_ERROR);
-                }
-
-                if (op.service != "" && op.service != "FrontService")
-                {
-                    Type serviceType = op.service switch
-                    {
-                        "MatrisArithmeticService" => typeof(MatrisArithmeticService<object>),
-                        "SpecialMatricesService" => typeof(SpecialMatricesService),
-                        _ => throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service))
-                    };
-
-                    // Construct service
-                    serviceObject = serviceType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-
-                    // Get the method
-                    method = serviceType.GetMethod(op.name);
-                    paraminfo = method.GetParameters();
-                }
-
-                // param:arg dict for checking if parameters are referenced multiple times and storing args
-                Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
-
-                bool hintUsed = false;
-
-                // Check for parameter name hints, fill the param:arg dictionary
-                for (int k = 0; k < op.argCount; k++)
-                {
-                    int pind;
-                    if(operands[k].info != null)    // hint was given
-                    {
-                        hintUsed = true;
-                        pind = GetParamIndex(operands[k].info, paraminfo);
-                        if (pind == -1)
-                        {
-                            throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(operands[k].info));
-                        }
-                        else
-                        {
-                            if(param_dict.ContainsKey(paraminfo[pind].Name.ToString()))
-                            {
-                                throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[pind].Name.ToString()));
-                            }
-                            param_dict.Add(paraminfo[pind].Name.ToString(), operands[k].val);
-                        }
-                    }
-                    else if (hintUsed)  
-                    {
-                        throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
-                    }
-                    else if(param_dict.ContainsKey(paraminfo[k].Name.ToString()))
-                    {
-                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[k].Name.ToString()));
-                    }
-                    else
-                    {
-                        param_dict.Add(paraminfo[k].Name.ToString(), operands[k].val);
-                        pind = k;
-                    }
-
-                    switch (operands[k].tknType)
-                    {
-                        case TokenType.NULL: param_arg[pind] = null; break;
-
-                        case TokenType.NUMBER: param_arg[pind] = operands[k].val; break;
-
-                        case TokenType.MATRIS:
-                            {
-                                if (matDict.ContainsKey(operands[k].name))
-                                {
-                                    param_arg[pind] = matDict[operands[k].name];
-                                }
-                                else if ((operands[k].val is MatrisBase<object>))
-                                {
-                                    param_arg[pind] = operands[k].val;
-                                }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operands[k].name));
-                                }
-
-                                break;
-                            }
-
-                        default:
-                            {
-                                throw new Exception(CompilerMessage.UNKNOWN_ARGUMENT_TYPE(op.name, k + 1));
-                            }
-                    }
-
-                    if (param_arg[pind] != null) // Parse given value
-                    {
-                        try
-                        {
-                            param_arg[pind] = (op.paramTypes[pind]) switch
-                            {
-                                "int" => Convert.ToInt32(param_arg[pind]),
-                                "Matris" => ((MatrisBase<dynamic>)param_arg[pind]),
-                                "float" => Convert.ToSingle(param_arg[pind]),
-                                _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[pind])),
-                            };
-                        }
-                        catch (Exception)
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_arg[pind].ToString(), op.paramTypes[pind]));
-                        }
-                    }
-                }
-
-                // Replace nulls with default values
-                for (int k = 0; k < op.paramCount; k++)
-                {
-                    if (param_arg[k] != null)    // Skip already parsed values
-                    {
-                        continue;
-                    }
-                    else if (paraminfo[k].DefaultValue != null) // default value wasn't null
-                    {
-                        switch (paraminfo[k].DefaultValue.GetType().ToString())
-                        {
-                            case "System.DBNull":
-                                {
-                                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(paraminfo[k].Name));
-                                }
-                            case "System.Int32":
-                                {
-                                    param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue);
                                     break;
                                 }
-                            case "System.Single":
+                            case ":":
                                 {
-                                    param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue);
-                                    break;
-                                }
-                            case "System.Double":
-                                {
-                                    param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue);
+                                    if (Validations.ValidMatrixName(operands[1].name))   // Use the name function for parameter name validation
+                                    {
+                                        operands[0].info = operands[1].name;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
+                                    }
                                     break;
                                 }
                             default:
-                                throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(paraminfo[k].Name, paraminfo[k].ParameterType.Name));
+                                throw new Exception(CompilerMessage.OP_INVALID(op.symbol));
                         }
-                    }
-                }
 
-                if (op.service == "FrontService")
-                {
-                    switch (op.name)
+                        break;
+                    }
+
+                default:
                     {
-                        case "CleanUp":
+                        if (op.argCount > op.paramCount)
+                        {
+                            throw new Exception(CompilerMessage.FUNC_PARAMCOUNT_EXCESS(op.name, op.paramCount, op.argCount));
+                        }
+
+                        object[] param_arg = new object[op.paramCount];
+
+                        object serviceObject = null;
+                        MethodInfo method = null;
+                        ParameterInfo[] paraminfo = null;
+
+                        operands.Reverse();
+
+                        if (op.tknType == TokenType.DOCS)
+                        {
+                            throw new Exception(CompilerMessage.DOCS_HELP);
+                        }
+
+                        if (operands.Count == 0 && op.argCount != 0)
+                        {
+                            throw new Exception(CompilerMessage.PARANTHESIS_COUNT_ERROR);
+                        }
+
+                        if (op.service != "" && op.service != "FrontService")
+                        {
+                            Type serviceType = op.service switch
                             {
-                                CleanUp();
-                                operands.Add(new Token() { val = null, tknType = TokenType.VOID });
-                                break;
+                                "MatrisArithmeticService" => typeof(MatrisArithmeticService<object>),
+                                "SpecialMatricesService" => typeof(SpecialMatricesService),
+                                _ => throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service))
+                            };
+
+                            // Construct service
+                            serviceObject = serviceType.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
+
+                            // Get the method
+                            method = serviceType.GetMethod(op.name);
+                            paraminfo = method.GetParameters();
+                        }
+
+                        // param:arg dict for checking if parameters are referenced multiple times and storing args
+                        Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
+
+                        bool hintUsed = false;
+
+                        // Check for parameter name hints, fill the param:arg dictionary
+                        for (int k = 0; k < op.argCount; k++)
+                        {
+                            int pind;
+                            if (operands[k].info != null)    // hint was given
+                            {
+                                hintUsed = true;
+                                pind = GetParamIndex(operands[k].info, paraminfo);
+                                if (pind == -1)
+                                {
+                                    throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(operands[k].info));
+                                }
+                                else
+                                {
+                                    if (param_dict.ContainsKey(paraminfo[pind].Name.ToString()))
+                                    {
+                                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[pind].Name.ToString()));
+                                    }
+                                    param_dict.Add(paraminfo[pind].Name.ToString(), operands[k].val);
+                                }
                             }
-                        default: throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
-                    }
-                }
-                else if (op.service != "")
-                {
-                    try
-                    {
-                        // Invoke the method
-                        // No parameters
-                        if (param_arg.Length == 0)
-                        {
-                            method.Invoke(serviceObject, null);
-                            operands.Add(new Token() { val = null, tknType = TokenType.VOID });
-                        }
-                        else
-                        {
-                            operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
-                        }
-                    }
-                    catch (Exception err)
-                    {
-                        if (err.InnerException != null)
-                        {
-                            throw new Exception(err.InnerException.Message);
+                            else if (hintUsed)
+                            {
+                                throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
+                            }
+                            else if (param_dict.ContainsKey(paraminfo[k].Name.ToString()))
+                            {
+                                throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(paraminfo[k].Name.ToString()));
+                            }
+                            else
+                            {
+                                param_dict.Add(paraminfo[k].Name.ToString(), operands[k].val);
+                                pind = k;
+                            }
+
+                            switch (operands[k].tknType)
+                            {
+                                case TokenType.NULL: param_arg[pind] = null; break;
+
+                                case TokenType.NUMBER: param_arg[pind] = operands[k].val; break;
+
+                                case TokenType.MATRIS:
+                                    {
+                                        if (matDict.ContainsKey(operands[k].name))
+                                        {
+                                            param_arg[pind] = matDict[operands[k].name];
+                                        }
+                                        else if (operands[k].val is MatrisBase<object>)
+                                        {
+                                            param_arg[pind] = operands[k].val;
+                                        }
+                                        else
+                                        {
+                                            throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operands[k].name));
+                                        }
+
+                                        break;
+                                    }
+
+                                default:
+                                    {
+                                        throw new Exception(CompilerMessage.UNKNOWN_ARGUMENT_TYPE(op.name, k + 1));
+                                    }
+                            }
+
+                            if (param_arg[pind] != null) // Parse given value
+                            {
+                                try
+                                {
+                                    param_arg[pind] = (op.paramTypes[pind]) switch
+                                    {
+                                        "int" => Convert.ToInt32(param_arg[pind]),
+                                        "Matris" => (MatrisBase<dynamic>)param_arg[pind],
+                                        "float" => Convert.ToSingle(param_arg[pind]),
+                                        _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[pind])),
+                                    };
+                                }
+                                catch (Exception)
+                                {
+                                    throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_arg[pind].ToString(), op.paramTypes[pind]));
+                                }
+                            }
                         }
 
-                        throw err;
-                    }
+                        // Replace nulls with default values
+                        for (int k = 0; k < op.paramCount; k++)
+                        {
+                            if (param_arg[k] != null)    // Skip already parsed values
+                            {
+                                continue;
+                            }
+                            else if (paraminfo[k].DefaultValue != null) // default value wasn't null
+                            {
+                                switch (paraminfo[k].DefaultValue.GetType().ToString())
+                                {
+                                    case "System.DBNull":
+                                        {
+                                            throw new Exception(CompilerMessage.MISSING_ARGUMENT(paraminfo[k].Name));
+                                        }
+                                    case "System.Int32":
+                                        {
+                                            param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue);
+                                            break;
+                                        }
+                                    case "System.Single":
+                                        {
+                                            param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue);
+                                            break;
+                                        }
+                                    case "System.Double":
+                                        {
+                                            param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue);
+                                            break;
+                                        }
+                                    default:
+                                        throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(paraminfo[k].Name, paraminfo[k].ParameterType.Name));
+                                }
+                            }
+                        }
 
-                    operands[0].tknType = op.returns switch
-                    {
-                        "Matris" => TokenType.MATRIS,
-                        "int" => TokenType.NUMBER,
-                        "float" => TokenType.NUMBER,
-                        "void" => TokenType.VOID,
-                        _ => TokenType.NULL,
-                    };
-                }
+                        switch (op.service)
+                        {
+                            case "FrontService":
+                                switch (op.name)
+                                {
+                                    case "CleanUp":
+                                        {
+                                            CleanUp();
+                                            operands.Add(new Token() { val = null, tknType = TokenType.VOID });
+                                            break;
+                                        }
+                                    default: throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
+                                }
+                                break;
+
+                            default:
+                                if (op.service != "")
+                                {
+                                    try
+                                    {
+                                        // Invoke the method
+                                        // No parameters
+                                        if (param_arg.Length == 0)
+                                        {
+                                            method.Invoke(serviceObject, null);
+                                            operands.Add(new Token() { val = null, tknType = TokenType.VOID });
+                                        }
+                                        else
+                                        {
+                                            operands[0].val = (dynamic)method.Invoke(serviceObject, param_arg);
+                                        }
+                                    }
+                                    catch (Exception err)
+                                    {
+                                        if (err.InnerException != null)
+                                        {
+                                            throw new Exception(err.InnerException.Message);
+                                        }
+
+                                        throw err;
+                                    }
+
+                                    operands[0].tknType = op.returns switch
+                                    {
+                                        "Matris" => TokenType.MATRIS,
+                                        "int" => TokenType.NUMBER,
+                                        "float" => TokenType.NUMBER,
+                                        "void" => TokenType.VOID,
+                                        _ => TokenType.NULL,
+                                    };
+                                }
+
+                                break;
+                        }
+
+                        break;
+                    }
             }
             operands[0].name = "";
             return operands[0];
@@ -1374,7 +1389,7 @@ namespace MatrisAritmetik.Services
                 cmdHistory.Clear();
                 state = false;
                 cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_CLEANUP;
-                if(!cmd.NameSettings.ContainsKey("display"))
+                if (!cmd.NameSettings.ContainsKey("display"))
                 {
                     cmd.NameSettings.Add("display", "none");
                 }

@@ -457,7 +457,8 @@ namespace MatrisAritmetik.Core
         ////
 
         // Sütunu yeni bir liste olarak döner. 1-based
-        public List<T> RowList(int r, int based = 1)
+        public List<T> RowList(int r,
+                               int based = 1)
         {
             List<T> listrow = new List<T>();
             for (int j = 0; j < Col; j++)
@@ -468,7 +469,8 @@ namespace MatrisAritmetik.Core
         }
 
         // Satırı yeni bir matris olarak döner. 1-based
-        public MatrisBase<T> RowMat(int r, int based = 1)
+        public MatrisBase<T> RowMat(int r,
+                                    int based = 1)
         {
             List<List<T>> listrow = new List<List<T>>() { new List<T>() };
             for (int j = 0; j < Col; j++)
@@ -479,7 +481,8 @@ namespace MatrisAritmetik.Core
         }
 
         // Sütunu yeni bir matris olarak döner. 1-based
-        public MatrisBase<T> ColMat(int c, int based = 1)
+        public MatrisBase<T> ColMat(int c,
+                                    int based = 1)
         {
             List<List<T>> listcol = new List<List<T>>();
             for (int i = 0; i < Row; i++)
@@ -490,7 +493,8 @@ namespace MatrisAritmetik.Core
         }
 
         // Sütunu yeni bir liste olarak döner. 1-based
-        public List<T> ColList(int c, int based = 1)
+        public List<T> ColList(int c,
+                               int based = 1)
         {
             List<T> listrow = new List<T>();
             for (int i = 0; i < Row; i++)
@@ -512,7 +516,9 @@ namespace MatrisAritmetik.Core
         }
         // Matrisin köşelerindeki değerleri içeren string matris döner
         // Matrisin boyutu yüksekse kullanılabilir
-        public dynamic CornerMatrix(int rowEachCorner = -1, int colEachCorner = -1, string filler = "...")
+        public dynamic CornerMatrix(int rowEachCorner = -1,
+                                    int colEachCorner = -1,
+                                    string filler = "...")
         {
             if (Row == 0 || Col == 0)
             {
@@ -533,12 +539,12 @@ namespace MatrisAritmetik.Core
             }
 
             // No reduction
-            if ((((float)rowEachCorner) * 2.0 + 1.0 > (float)Row) && (((float)colEachCorner) * 2.0 + 1.0 > (float)Col))
+            if (((((float)rowEachCorner) * 2.0) + 1.0 > (float)Row) && ((((float)colEachCorner) * 2.0) + 1.0 > (float)Col))
             {
                 return new MatrisBase<T>() { Row = Row, Col = Col, Values = Values };
             }
             // Only reduce columns
-            else if (((float)rowEachCorner) * 2.0 + 1.0 > (float)Row)
+            else if ((((float)rowEachCorner) * 2.0) + 1.0 > (float)Row)
             {
                 // Start reducing columns
                 for (int i = 0; i < Row; i++)
@@ -557,10 +563,10 @@ namespace MatrisAritmetik.Core
                     }
                 }
 
-                return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
+                return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
             }
             // Only reduce rows
-            else if (((float)colEachCorner) * 2.0 + 1.0 > (float)Col)
+            else if ((((float)colEachCorner) * 2.0) + 1.0 > (float)Col)
             {
                 // Start reducing rows
                 // Upper half
@@ -591,7 +597,7 @@ namespace MatrisAritmetik.Core
                     rrowind++;
                 }
 
-                return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
+                return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
             }
 
             // Reduce both rows and columns
@@ -613,7 +619,7 @@ namespace MatrisAritmetik.Core
             }
 
             smallerList.Add(new List<string>());
-            for (int j = 0; j < colEachCorner * 2 + 1; j++)
+            for (int j = 0; j < (colEachCorner * 2) + 1; j++)
             {
                 smallerList[rowEachCorner].Add(filler);
             }
@@ -637,13 +643,10 @@ namespace MatrisAritmetik.Core
                 rowind++;
             }
 
-            return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
+            return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
         }
 
-        public int ElementCount()
-        {
-            return Col * Row;
-        }
+        public int ElementCount => Col * Row;
 
         public MatrisBase<T> Power(dynamic n)
         {
@@ -660,7 +663,9 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<T>(newlist);
         }
 
-        public void MulRow(int row, float factor, int based = 1)
+        public void MulRow(int row,
+                           float factor,
+                           int based = 1)
         {
             for (int j = 0; j < Col; j++)
             {
@@ -668,7 +673,8 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        public void SwapToEnd(int a, int based = 1)
+        public void SwapToEnd(int a,
+                              int based = 1)
         {
             a -= based;
             // Row swap
@@ -678,7 +684,10 @@ namespace MatrisAritmetik.Core
             _values.Add(new List<T>(temp));
         }
 
-        public void Swap(int a, int b, int axis = 0, int based = 1)
+        public void Swap(int a,
+                         int b,
+                         int axis = 0,
+                         int based = 1)
         {
             if (a == b)
             {
@@ -775,11 +784,15 @@ namespace MatrisAritmetik.Core
             }
             return isZero;
         }
-        public bool IsZeroCol(int col_index, int based = 1, float tolerance = (float)0.00001)
+        public bool IsZeroCol(int col_index,
+                              int based = 1,
+                              float tolerance = (float)0.00001)
         {
             return ColMat(col_index, based).IsZero(tolerance);
         }
-        public bool IsZeroRow(int row_index, int based = 1, float tolerance = (float)0.00001)
+        public bool IsZeroRow(int row_index,
+                              int based = 1,
+                              float tolerance = (float)0.00001)
         {
             return RowMat(row_index, based).IsZero(tolerance);
         }

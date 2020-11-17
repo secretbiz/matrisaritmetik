@@ -14,11 +14,19 @@ namespace MatrisAritmetik.Pages
 {
     public class MatrisModel : PageModel
     {
-        public const string SessionMatrisDict = "_MatDictVals";
-        public const string SessionSeedDict = "_MatDictSeed";
-        public const string SessionLastCommand = "_LastCmd";
-        public const string SessionLastMessage = "_lastMsg";
-        public const string SessionOutputHistory = "_outputHistory";
+        private const string SessionMatrisDict = "_MatDictVals";
+        private const string SessionSeedDict = "_MatDictSeed";
+        private const string SessionLastCommand = "_LastCmd";
+        private const string SessionLastMessage = "_lastMsg";
+        private const string SessionOutputHistory = "_outputHistory";
+
+        private const string MatrisNameParam = "name";
+        private const string MatrisValsParam = "vals";
+        private const string MatrisSpecialFuncParam = "func";
+        private const string MatrisSpecialArgsParam = "args";
+
+        private const string LastMessageKey = "LastMessage";
+        private const string CommandHistoryKey = "CommandHistory";
 
         private readonly ILogger<MatrisModel> _logger;
         private readonly IUtilityService<dynamic> _utils;                   // string işleme fonksiyonları
@@ -61,6 +69,7 @@ namespace MatrisAritmetik.Pages
 
         public Dictionary<string, dynamic> OutputHistory = new Dictionary<string, dynamic>();
 
+
         // Sayfa kökü GET ile istendiğinde
         public void OnGet()
         {
@@ -92,16 +101,16 @@ namespace MatrisAritmetik.Pages
 
             await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-            if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("vals"))
+            if (DecodedRequestDict.ContainsKey(MatrisNameParam) && DecodedRequestDict.ContainsKey(MatrisValsParam))
             {
-                if (!savedMatrices.ContainsKey(DecodedRequestDict["name"]))
+                if (!savedMatrices.ContainsKey(DecodedRequestDict[MatrisNameParam]))
                 {
                     try
                     {
-                        Validations.ValidMatrixName(DecodedRequestDict["name"], throwOnBadName: true);
+                        Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
 
-                        _frontService.AddToMatrisDict(DecodedRequestDict["name"],
-                        new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict["vals"])),
+                        _frontService.AddToMatrisDict(DecodedRequestDict[MatrisNameParam],
+                        new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict[MatrisValsParam])),
                         savedMatrices);
                     }
                     catch (Exception err)
@@ -118,12 +127,12 @@ namespace MatrisAritmetik.Pages
                 }
                 else
                 {
-                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict["name"]), CommandState.WARNING);
+                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict[MatrisNameParam]), CommandState.WARNING);
                 }
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix",new string[2] {"name","vals"}), CommandState.ERROR);
+                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix", new string[2] { MatrisNameParam, MatrisValsParam }), CommandState.ERROR);
             }
 
             SetSessionVariables();
@@ -136,21 +145,21 @@ namespace MatrisAritmetik.Pages
 
             await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-            if (DecodedRequestDict.ContainsKey("name") && DecodedRequestDict.ContainsKey("func") && DecodedRequestDict.ContainsKey("args"))
+            if (DecodedRequestDict.ContainsKey(MatrisNameParam) && DecodedRequestDict.ContainsKey(MatrisSpecialFuncParam) && DecodedRequestDict.ContainsKey(MatrisSpecialArgsParam))
             {
 
-                if (savedMatrices.ContainsKey(DecodedRequestDict["name"]))
+                if (savedMatrices.ContainsKey(DecodedRequestDict[MatrisNameParam]))
                 {
-                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict["name"]), CommandState.WARNING);
+                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict[MatrisNameParam]), CommandState.WARNING);
                     SetSessionVariables();
                     return;
                 }
 
-                string actualFuncName = DecodedRequestDict["func"][1..DecodedRequestDict["func"].IndexOf("(")];
+                string actualFuncName = DecodedRequestDict[MatrisSpecialFuncParam][1..DecodedRequestDict[MatrisSpecialFuncParam].IndexOf("(")];
 
                 if (actualFuncName == string.Empty)
                 {
-                    LastMessage = new CommandMessage(CompilerMessage.NOT_A_(actualFuncName,"fonksiyon"), CommandState.ERROR);
+                    LastMessage = new CommandMessage(CompilerMessage.NOT_A_(actualFuncName, "fonksiyon"), CommandState.ERROR);
                     SetSessionVariables();
                     return;
                 }
@@ -159,15 +168,15 @@ namespace MatrisAritmetik.Pages
                 {
                     try
                     {
-                        Validations.ValidMatrixName(DecodedRequestDict["name"], throwOnBadName: true);
+                        Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
 
-                        _frontService.AddToMatrisDict(DecodedRequestDict["name"],
-                            _utils.SpecialStringTo2DList(DecodedRequestDict["args"], cmdinfo, savedMatrices),
+                        _frontService.AddToMatrisDict(DecodedRequestDict[MatrisNameParam],
+                            _utils.SpecialStringTo2DList(DecodedRequestDict[MatrisSpecialArgsParam], cmdinfo, savedMatrices),
                             savedMatrices);
                     }
                     catch (Exception err)
                     {
-                        if(err.InnerException != null)
+                        if (err.InnerException != null)
                         {
                             LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
                         }
@@ -184,7 +193,7 @@ namespace MatrisAritmetik.Pages
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrixSpecial", new string[3] { "name", "func", "args" }), CommandState.ERROR);
+                LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrixSpecial", new string[3] { MatrisNameParam, MatrisSpecialFuncParam, MatrisSpecialArgsParam }), CommandState.ERROR);
             }
             SetSessionVariables();
         }
@@ -196,9 +205,9 @@ namespace MatrisAritmetik.Pages
 
             await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-            if (DecodedRequestDict.ContainsKey("name"))
+            if (DecodedRequestDict.ContainsKey(MatrisNameParam))
             {
-                _frontService.DeleteFromMatrisDict(DecodedRequestDict["name"].Replace("matris_table_delbutton_", ""), savedMatrices);
+                _frontService.DeleteFromMatrisDict(DecodedRequestDict[MatrisNameParam].Replace("matris_table_delbutton_", ""), savedMatrices);
             }
 
             SetSessionVariables();
@@ -261,22 +270,22 @@ namespace MatrisAritmetik.Pages
                     OutputHistory = new Dictionary<string, dynamic>();
                 }
 
-                if (OutputHistory.ContainsKey("CommandHistory"))
+                if (OutputHistory.ContainsKey(CommandHistoryKey))
                 {
-                    OutputHistory["CommandHistory"].Add(LastExecutedCommand);
+                    OutputHistory[CommandHistoryKey].Add(LastExecutedCommand);
                 }
                 else
                 {
-                    OutputHistory.Add("CommandHistory", new List<Command>() { LastExecutedCommand });
+                    OutputHistory.Add(CommandHistoryKey, new List<Command>() { LastExecutedCommand });
                 }
 
-                if (OutputHistory.ContainsKey("LastMessage"))
+                if (OutputHistory.ContainsKey(LastMessageKey))
                 {
-                    OutputHistory["LastMessage"] = LastMessage;
+                    OutputHistory[LastMessageKey] = LastMessage;
                 }
                 else
                 {
-                    OutputHistory.Add("LastMessage", LastMessage);
+                    OutputHistory.Add(LastMessageKey, LastMessage);
                 }
             }
 
@@ -331,8 +340,8 @@ namespace MatrisAritmetik.Pages
                 CommandHistory = HttpContext.Session.GetCmdList(SessionOutputHistory);
             }
 
-            OutputHistory.Add("CommandHistory", CommandHistory);
-            OutputHistory.Add("LastMessage", LastMessage);
+            OutputHistory.Add(CommandHistoryKey, CommandHistory);
+            OutputHistory.Add(LastMessageKey, LastMessage);
         }
 
         // Session değişkenlerini güncelle, istek işleme fonksiyonlarının sonunda kullanılmalı

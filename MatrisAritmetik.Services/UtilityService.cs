@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -13,25 +14,31 @@ namespace MatrisAritmetik.Services
 {
     public class UtilityService<T> : IUtilityService<T>
     {
-        public List<List<T>> StringTo2DList(string text, char delimiter = ' ', char newline = '\n', bool removeliterals = true)
+        private const string EQSignSpecial = "!__EQ!";
+        private const string ReverMatMulSpecial = "!__REVMUL!";
+
+        public List<List<T>> StringTo2DList(string text,
+                                            char delimiter = ' ',
+                                            char newline = '\n',
+                                            bool removeliterals = true)
         {
             string filteredText = text;
             if (removeliterals)
             {
                 filteredText = filteredText.Replace('\t', delimiter).Replace('\r', ' ');
             }
+
+            filteredText = filteredText.Trim();
+            while (filteredText[^1] == '\n')
+            {
+                filteredText = filteredText[0..^1];
+            }
+
             List<List<T>> vals = new List<List<T>>();
             int temp = -1;
             string[] rowsplit;
             List<T> temprow;
-
             bool typestring = typeof(T).Name == "String";
-
-            filteredText = filteredText.Trim();
-            while(filteredText[^1]=='\n')
-            {
-                filteredText = filteredText[0..^1];
-            }
 
             if (typestring)
             {
@@ -89,11 +96,11 @@ namespace MatrisAritmetik.Services
         }
 
         public MatrisBase<T> SpecialStringTo2DList(string text,
-                                                    CommandInfo funcinfo,
-                                                    Dictionary<string, MatrisBase<dynamic>> matdict,
-                                                    char argseperator = ',',
-                                                    char argnamevalseperator = ':',
-                                                    bool removeliterals = true)
+                                                   CommandInfo funcinfo,
+                                                   Dictionary<string, MatrisBase<dynamic>> matdict,
+                                                   char argseperator = ',',
+                                                   char argnamevalseperator = ':',
+                                                   bool removeliterals = true)
         {
             string filteredText = text;
             if (removeliterals)
@@ -133,7 +140,7 @@ namespace MatrisAritmetik.Services
                 // Positional
                 if (rowsplit.Length == 1)
                 {
-                    if(paramHintUsed)
+                    if (paramHintUsed)
                     {
                         throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
                     }
@@ -227,12 +234,12 @@ namespace MatrisAritmetik.Services
             }
 
             // Check if all required parameters had values
-            foreach (int reqindex in funcinfo.required_params)
+            foreach (int reqindex in
+                     from int reqindex in funcinfo.required_params
+                     where !param_dict.ContainsKey(funcinfo.param_names[reqindex])
+                     select reqindex)
             {
-                if (!param_dict.ContainsKey(funcinfo.param_names[reqindex]))
-                {
-                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.param_names[reqindex]));
-                }
+                throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.param_names[reqindex]));
             }
 
             object[] param_arg = new object[funcinfo.param_names.Length];
@@ -247,7 +254,7 @@ namespace MatrisAritmetik.Services
             ParameterInfo[] paraminfo = method.GetParameters();
 
             // Put values in order
-            foreach(string par in param_dict.Keys)
+            foreach (string par in param_dict.Keys)
             {
                 ind = Array.IndexOf(funcinfo.param_names, par);
                 param_arg[ind] = param_dict[par];
@@ -255,12 +262,12 @@ namespace MatrisAritmetik.Services
 
             for (int k = 0; k < funcinfo.param_names.Length; k++)
             {
-                if(param_arg[k] != null)    // Skip already parsed values
+                if (param_arg[k] != null)    // Skip already parsed values
                 {
                     continue;
                 }
 
-                else if(paraminfo[k].DefaultValue != null) // default value wasn't null
+                else if (paraminfo[k].DefaultValue != null) // default value wasn't null
                 {
                     switch (paraminfo[k].DefaultValue.GetType().ToString())
                     {
@@ -293,7 +300,10 @@ namespace MatrisAritmetik.Services
             return result;
         }
 
-        public async Task ReadAndDecodeRequest(Stream reqbody, Encoding enc, List<string> ignoredparams, Dictionary<string, string> decodedRequestDict)
+        public async Task ReadAndDecodeRequest(Stream reqbody,
+                                               Encoding enc,
+                                               List<string> ignoredparams,
+                                               Dictionary<string, string> decodedRequestDict)
         {
             using StreamReader reader = new StreamReader(reqbody, enc);
             string url = await reader.ReadToEndAsync();
@@ -314,7 +324,7 @@ namespace MatrisAritmetik.Services
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
                 {
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace("!__EQ!", "=").Replace("!__REVMUL!", "./"));
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace(EQSignSpecial, "=").Replace(ReverMatMulSpecial, "./"));
                 }
             }
 

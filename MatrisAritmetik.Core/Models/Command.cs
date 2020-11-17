@@ -77,6 +77,9 @@ namespace MatrisAritmetik.Core.Models
      */
     public class Command
     {
+        private const string ApplyName = "name:";
+        private const string ApplyVals = "vals:";
+
         public string[] TermsToEvaluate;
 
         public List<Token> Tokens = new List<Token>();
@@ -112,45 +115,48 @@ namespace MatrisAritmetik.Core.Models
         {
             if (settingname.Length > 5)
             {
-                if (settingname.Substring(0, 5) == "name:")// add to name settings
+                switch (settingname.Substring(0, 5))// add to name settings
                 {
-                    settingname = settingname.Replace("name:", "");
-                    if (settingname == "quiet")
-                    {
-                        settingname = "display";
-                        param = "none";
-                    }
+                    case ApplyName:
+                        settingname = settingname.Replace(ApplyName, "");
+                        if (settingname == "quiet")
+                        {
+                            settingname = "display";
+                            param = "none";
+                        }
 
-                    if (!NameSettings.ContainsKey(settingname))
-                    {
-                        NameSettings.Add(settingname, param);
-                    }
-                    else
-                    {
-                        NameSettings[settingname] = param;
-                    }
+                        if (!NameSettings.ContainsKey(settingname))
+                        {
+                            NameSettings.Add(settingname, param);
+                        }
+                        else
+                        {
+                            NameSettings[settingname] = param;
+                        }
 
-                    return;
-                }
-                else if (settingname.Substring(0, 5) == "vals:")// add to vals settings
-                {
-                    settingname = settingname.Replace("vals:", "");
-                    if (settingname == "quiet")
-                    {
-                        settingname = "display";
-                        param = "none";
-                    }
+                        return;
 
-                    if (!ValsSettings.ContainsKey(settingname))
-                    {
-                        ValsSettings.Add(settingname, param);
-                    }
-                    else
-                    {
-                        ValsSettings[settingname] = param;
-                    }
+                    case ApplyVals:
+                        settingname = settingname.Replace(ApplyVals, "");
+                        if (settingname == "quiet")
+                        {
+                            settingname = "display";
+                            param = "none";
+                        }
 
-                    return;
+                        if (!ValsSettings.ContainsKey(settingname))
+                        {
+                            ValsSettings.Add(settingname, param);
+                        }
+                        else
+                        {
+                            ValsSettings[settingname] = param;
+                        }
+
+                        return;
+
+                    default:
+                        break;
                 }
             }
 
@@ -179,7 +185,12 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
-        public Command(string org, Dictionary<string, string> nset, Dictionary<string, string> vset, int stat, string statmsg, string output)
+        public Command(string org,
+                       Dictionary<string, string> nset,
+                       Dictionary<string, string> vset,
+                       int stat,
+                       string statmsg,
+                       string output)
         {
             OriginalCommand = org;
             NameSettings = nset;
@@ -274,6 +285,7 @@ namespace MatrisAritmetik.Core.Models
                 CommandState.WARNING => throw new NotImplementedException("Komut işlenemedi"),
                 _ => "---",
             };
+
             return "Komut: " + OriginalCommand + @"
 Ek ayarlar(Komut):" + nset + @"
 Ek ayarlar(Çıktı):" + vset + @"

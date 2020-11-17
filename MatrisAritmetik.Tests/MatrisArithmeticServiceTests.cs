@@ -13,8 +13,8 @@ namespace MatrisAritmetik.Tests
         /// <summary>
         /// Service for matrix algebric-arithmetic and special matrices
         /// </summary>
-        private readonly IMatrisArithmeticService<dynamic> matrisArithmeticService = new MatrisArithmeticService<dynamic>();
-        private readonly ISpecialMatricesService specialMatricesService = new SpecialMatricesService();
+        private readonly IMatrisArithmeticService<dynamic> MatrisArithmeticService = new MatrisArithmeticService<dynamic>();
+        private readonly ISpecialMatricesService SpecialMatricesService = new SpecialMatricesService();
 
         /// <summary>
         /// Example matrices to use for tests
@@ -54,22 +54,22 @@ namespace MatrisAritmetik.Tests
                 }
             );
 
-            MatrisBase<dynamic> matmul_A_B_Result = matrisArithmeticService.MatrisMul(A, B);
+            MatrisBase<dynamic> matmul_A_B_Result = MatrisArithmeticService.MatrisMul(A, B);
             Assert.AreEqual(matmul_A_B_Result.ToString(),
                             matmul_A_B.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + matmul_A_B.ToString() + "\nAlınan:\n" + matmul_A_B_Result.ToString());
 
-            MatrisBase<dynamic> matmul_B_A_Result = matrisArithmeticService.MatrisMul(B, A);
+            MatrisBase<dynamic> matmul_B_A_Result = MatrisArithmeticService.MatrisMul(B, A);
             Assert.AreEqual(matmul_B_A_Result.ToString(),
                             matmul_B_A.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + matmul_B_A.ToString() + "\nAlınan:\n" + matmul_B_A_Result.ToString());
 
-            MatrisBase<dynamic> matmul_A_ID = matrisArithmeticService.MatrisMul(A, specialMatricesService.Identity(2));
+            MatrisBase<dynamic> matmul_A_ID = MatrisArithmeticService.MatrisMul(A, SpecialMatricesService.Identity(2));
             Assert.AreEqual(A.ToString(),
                             matmul_A_ID.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + A.ToString() + "\nAlınan:\n" + matmul_A_ID.ToString());
 
-            MatrisBase<dynamic> matmul_ID_A = matrisArithmeticService.MatrisMul(specialMatricesService.Identity(2), A);
+            MatrisBase<dynamic> matmul_ID_A = MatrisArithmeticService.MatrisMul(SpecialMatricesService.Identity(2), A);
             Assert.AreEqual(A.ToString(),
                             matmul_ID_A.ToString(),
                             "\nMatris çarpımı hatalı! \nBeklenen:\n" + A.ToString() + "\nAlınan:\n" + matmul_ID_A.ToString());
@@ -94,12 +94,12 @@ namespace MatrisAritmetik.Tests
                 }
             );
 
-            MatrisBase<dynamic> transpose_A = matrisArithmeticService.Transpose(A);
+            MatrisBase<dynamic> transpose_A = MatrisArithmeticService.Transpose(A);
             Assert.AreEqual(transpose_A.ToString(),
                             A_T.ToString(),
                             "\nMatris transpozu hatalı! \nBeklenen:\n" + A_T.ToString() + "\nAlınan:\n" + transpose_A.ToString());
 
-            MatrisBase<dynamic> transpose_B = matrisArithmeticService.Transpose(B);
+            MatrisBase<dynamic> transpose_B = MatrisArithmeticService.Transpose(B);
             Assert.AreEqual(transpose_B.ToString(),
                             B_T.ToString(),
                             "\nMatris transpozu hatalı! \nBeklenen:\n" + B_T.ToString() + "\nAlınan:\n" + transpose_B.ToString());

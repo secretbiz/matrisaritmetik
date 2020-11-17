@@ -8,7 +8,10 @@ namespace MatrisAritmetik.Core.Models
         // Type of token
         public TokenType tknType = TokenType.NULL;
 
-        public void SetValues(string _symbol, OperatorAssociativity _assoc, int _priority, int _paramCount)
+        public void SetValues(string _symbol,
+                              OperatorAssociativity _assoc,
+                              int _priority,
+                              int _paramCount)
         {
             symbol = _symbol;
             assoc = _assoc;

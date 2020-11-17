@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using MatrisAritmetik.Core.Models;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,9 @@ namespace MatrisAritmetik.Core
     // Session stuff
     public static class SessionExtensions
     {
-        public static void Set<T>(this ISession session, string key, T value)
-        {
-            string serialized = JsonSerializer.Serialize(value, typeof(T));
-            session.SetString(key, serialized);
-        }
+        public static void Set<T>(this ISession session,
+                                  string key,
+                                  T value) => session.SetString(key, JsonSerializer.Serialize(value, typeof(T)));
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
         {
             string serialized = "[";
@@ -40,7 +39,9 @@ namespace MatrisAritmetik.Core
             serialized += "]";
             session.SetString(key, serialized);
         }
-        public static void SetLastMsg(this ISession session, string key, CommandMessage msg)
+        public static void SetLastMsg(this ISession session,
+                                      string key,
+                                      CommandMessage msg)
         {
             string serialized = "";
             Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
@@ -52,9 +53,10 @@ namespace MatrisAritmetik.Core
 
             session.SetString(key, serialized);
         }
-        public static void SetMatOptions(this ISession session, string key, Dictionary<string, Dictionary<string, dynamic>> dict)
+        public static void SetMatOptions(this ISession session,
+                                         string key,
+                                         Dictionary<string, Dictionary<string, dynamic>> dict)
         {
-            string serialized = "";
             Dictionary<string, Dictionary<string, dynamic>> mats = new Dictionary<string, Dictionary<string, dynamic>>();
             foreach (string mat in dict.Keys)
             {
@@ -64,18 +66,21 @@ namespace MatrisAritmetik.Core
                     {"isRandom",dict[mat]["isRandom"] }
                 });
             }
+            string serialized = "";
             serialized += JsonSerializer.Serialize(mats, typeof(Dictionary<string, Dictionary<string, dynamic>>));
 
-            session.SetString(key, serialized);
+            session.SetString(key, value: serialized);
         }
 
-        public static T Get<T>(this ISession session, string key)
+        public static T Get<T>(this ISession session,
+                               string key)
         {
             string value = session.GetString(key);
             T t = default;
             return value == null ? t : JsonSerializer.Deserialize<T>(value);
         }
-        public static List<Command> GetCmdList(this ISession session, string key)
+        public static List<Command> GetCmdList(this ISession session,
+                                               string key)
         {
             string value = session.GetString(key);
             if (value == null || value == "" || value == "[]")
@@ -83,24 +88,19 @@ namespace MatrisAritmetik.Core
                 return new List<Command>();
             }
 
-            List<Command> cmds = new List<Command>();
-            foreach (Dictionary<string, dynamic> cmd in JsonSerializer.Deserialize<List<Dictionary<string, dynamic>>>(value))
-            {
-                int st = int.Parse(cmd["statid"].ToString());
-
-                Dictionary<string, string> nset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["nset"].ToString());
-                Dictionary<string, string> vset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["vset"].ToString());
-
-                cmds.Add(new Command((string)(cmd["org"].ToString()),
-                                     nset,
-                                     vset,
-                                     st,
-                                     (string)(cmd["statmsg"].ToString()),
-                                     (string)(cmd["output"].ToString())));
-            }
-            return cmds;
+            return (from Dictionary<string, dynamic> cmd in JsonSerializer.Deserialize<List<Dictionary<string, dynamic>>>(value)
+                    let st = int.Parse(cmd["statid"].ToString())
+                    let nset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["nset"].ToString())
+                    let vset = JsonSerializer.Deserialize<Dictionary<string, string>>(cmd["vset"].ToString())
+                    select new Command(org: (string)(cmd["org"].ToString()),
+                                       nset: nset,
+                                       vset: vset,
+                                       stat: st,
+                                       statmsg: (string)(cmd["statmsg"].ToString()),
+                                       output: (string)(cmd["output"].ToString()))).ToList();
         }
-        public static CommandMessage GetLastMsg(this ISession session, string key)
+        public static CommandMessage GetLastMsg(this ISession session,
+                                                string key)
         {
             string value = session.GetString(key);
             if (value == null || value == "" || value == "{}")
@@ -109,9 +109,11 @@ namespace MatrisAritmetik.Core
             }
 
             Dictionary<string, dynamic> msg = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(value);
-            return new CommandMessage(msg["msg"].ToString(), (CommandState)int.Parse(msg["state"].ToString()));
+            return new CommandMessage(msg: msg["msg"].ToString(),
+                                      s: (CommandState)int.Parse(msg["state"].ToString()));
         }
-        public static Dictionary<string, Dictionary<string, dynamic>> GetMatOptions(this ISession session, string key)
+        public static Dictionary<string, Dictionary<string, dynamic>> GetMatOptions(this ISession session,
+                                                                                    string key)
         {
             string value = session.GetString(key);
             if (value == null || value == "" || value == "{}")

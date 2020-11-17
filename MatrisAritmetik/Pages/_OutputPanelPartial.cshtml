@@ -118,7 +118,7 @@
                         { 
                             matoutput = new MatrisAritmetik.Core.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
                         } 
-                        catch (Exception err) 
+                        catch (Exception) 
                         { 
                             matoutput = new MatrisAritmetik.Core.MatrisBase<string>(0, 0, ""); 
                         }
@@ -130,7 +130,7 @@
                                         <mrow>
                                             <mo> ( </mo>
                                             <mtable>
-                                                @if (matoutput.ElementCount() > MaxTolarableSize)
+                                                @if (matoutput.ElementCount > MaxTolarableSize)
                                                 {
                                                     @foreach (var row in matoutput.CornerMatrix().Values)
                                                     {

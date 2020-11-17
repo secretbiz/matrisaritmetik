@@ -90,7 +90,7 @@ namespace MatrisAritmetik.Core
     public enum CompilerLimits
     {
         forShowOldCommands = 16,
-        forOutputCharacterLength = 128*128
+        forOutputCharacterLength = 128 * 128
     };
 
     // Token types
@@ -115,9 +115,9 @@ namespace MatrisAritmetik.Core
 
     public class RequestMessage
     {
-        public static string REQUEST_MISSING_KEYS(string requestDesc,string[] keys)
+        public static string REQUEST_MISSING_KEYS(string requestDesc, string[] keys)
         {
-            return requestDesc + " isteği başarısız! Gerekli parametrelere değer verilmedi: " + string.Join(",",keys);
+            return requestDesc + " isteği başarısız! Gerekli parametrelere değer verilmedi: " + string.Join(",", keys);
         }
     }
 
@@ -127,8 +127,8 @@ namespace MatrisAritmetik.Core
         //// LIMITS
         public static string MAT_LIMIT = "Matris limitine(=" + (int)MatrisLimits.forMatrisCount + ") ulaşıldı, atama işlemi yapmak için bir matrisi siliniz! ";
         public static string MAT_NAME_CHAR_LIMIT(int givenLen)
-        { 
-            return "Matris adı en fazla " + (int)MatrisLimits.forName + " karakterden oluşabilir, "+ givenLen + " karakter verildi!"; 
+        {
+            return "Matris adı en fazla " + (int)MatrisLimits.forName + " karakterden oluşabilir, " + givenLen + " karakter verildi!";
         }
 
         //// NAME
@@ -165,7 +165,7 @@ namespace MatrisAritmetik.Core
 
         // MATRIX MULTIPLICATION SIZE
         public const string MAT_MUL_BAD_SIZE = "Matris çarpımı için matrisler arası satır ve sütün boyutları uyuşmalı";
-        
+
         // CONCATENATION SIZE
         public static string MAT_CONCAT_DIM_ERROR(string axis)
         {
@@ -179,12 +179,12 @@ namespace MatrisAritmetik.Core
 
         // CONCATENATION
         public const string MAT_CONCAT_AXIS_ERROR = "Axis parametresi satır eklemek için 0, sütün için 1 olmalı.";
-        
+
         // PSEUDOINVERSE
         public const string MAT_PSEINV_NOT_FULL_RANK = "Genelleştirilmiş ters matris oluşturulması için matris tam rank olmalı!";
         public const string MAT_PSEINV_BAD_SIDE = "Sol genelleştirilmiş matris için side -1, sağ için 1 olmalı!";
         public static string MAT_PSEINV_DET_ZERO(string direction)
-        { 
+        {
             return "Verilen matrisin " + direction + " tersi bulunamadı!";
         }
 
@@ -327,7 +327,7 @@ namespace MatrisAritmetik.Core
 
         public static string PARAMETER_NAME_INVALID(string name)
         {
-            if(name.Trim() == "")
+            if (name.Trim() == "")
             {
                 return "Parametre ismi hatalı!";
             }
