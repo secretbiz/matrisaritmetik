@@ -12,29 +12,40 @@ using Microsoft.Extensions.Logging;
 
 namespace MatrisAritmetik.Pages
 {
+    /// <summary>
+    /// Page for matrix related operations
+    /// </summary>
     public class MatrisModel : PageModel
     {
+        #region Session Variable Names
         private const string SessionMatrisDict = "_MatDictVals";
         private const string SessionSeedDict = "_MatDictSeed";
         private const string SessionLastCommand = "_LastCmd";
         private const string SessionLastMessage = "_lastMsg";
         private const string SessionOutputHistory = "_outputHistory";
+        #endregion
 
+        #region Expected Request Parameter Names
         private const string MatrisNameParam = "name";
         private const string MatrisValsParam = "vals";
         private const string MatrisSpecialFuncParam = "func";
         private const string MatrisSpecialArgsParam = "args";
+        #endregion
 
+        #region ViewData Keys
         private const string LastMessageKey = "LastMessage";
         private const string CommandHistoryKey = "CommandHistory";
+        #endregion
 
+        #region Service Interface Instances
         private readonly ILogger<MatrisModel> _logger;
         private readonly IUtilityService<dynamic> _utils;                   // string işleme fonksiyonları
         private readonly IMatrisArithmeticService<dynamic> _matrisService;  // matris fonksiyonları
         private readonly IFrontService _frontService;                     // önyüzde gösterilecek bilgi ile ilgili fonksiyonlar
         private readonly ISpecialMatricesService _specialMatricesService; // özel matris oluşturma fonksiyonları
+        #endregion
 
-        // Page constructor
+        #region Page Constructor
         public MatrisModel(ILogger<MatrisModel> logger,
                            IUtilityService<dynamic> utilityService,
                            IMatrisArithmeticService<dynamic> matrisService,
@@ -47,29 +58,52 @@ namespace MatrisAritmetik.Pages
             _matrisService = matrisService;
             _specialMatricesService = specialMatricesService;
         }
+        #endregion
 
-        // Anlık erişim için değişkenler
+        #region Temporary Variables 
+        /// <summary>
+        /// Saved matrices <see cref="MatrisBase{T}"/> dictionary
+        /// </summary>
         public Dictionary<string, MatrisBase<dynamic>> savedMatrices = new Dictionary<string, MatrisBase<dynamic>>();
-
+        /// <summary>
+        /// Saved matrices' values dictionary
+        /// </summary>
         public Dictionary<string, List<List<dynamic>>> savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
-
+        /// <summary>
+        /// Saved matrices' options dictionary
+        /// </summary>
         public Dictionary<string, Dictionary<string, dynamic>> savedMatricesOptionsDict = new Dictionary<string, Dictionary<string, dynamic>>();
-
+        /// <summary>
+        /// List of parameters that should be ignored while reading the request body
+        /// </summary>
         private readonly List<string> IgnoredParams = new List<string>() { "__RequestVerificationToken" };
-
+        /// <summary>
+        /// List of special labels used for special matrices
+        /// </summary>
         private readonly List<string> SpecialsLabels = new List<string>() { "Özel Matris" };
-
+        /// <summary>
+        /// Dictionary to store request parameters and values
+        /// </summary>
         public Dictionary<string, string> DecodedRequestDict = new Dictionary<string, string>();
-
+        /// <summary>
+        /// Last processed command
+        /// </summary>
         public Command LastExecutedCommand = new Command("");
-
+        /// <summary>
+        /// History of processed commands
+        /// </summary>
         public List<Command> CommandHistory = new List<Command>();
-
-        public CommandMessage LastMessage = new CommandMessage("", CommandState.IDLE);
-
+        /// <summary>
+        /// History of processed commands' outputs
+        /// </summary>
         public Dictionary<string, dynamic> OutputHistory = new Dictionary<string, dynamic>();
+        /// <summary>
+        /// Last message from the last command processed
+        /// </summary>
+        public CommandMessage LastMessage = new CommandMessage("", CommandState.IDLE);
+        #endregion
 
-
+        #region GET Actions
         // Sayfa kökü GET ile istendiğinde
         public void OnGet()
         {
@@ -86,12 +120,13 @@ namespace MatrisAritmetik.Pages
 
             SetSessionVariables();
         }
+        #endregion
 
-        // Sayfadaki bir form'dan POST isteği gönderildiğinde
-        // Sayfayı refreshler
+        #region POST Actions
+        // Sayfadaki bir form'dan default POST isteği gönderildiğinde
         public void OnPost()
         {
-            string debug = ""; debug += "test"; // Buraya düşmemeli
+            Console.WriteLine("OnPost called...");
         }
 
         // Matris tablosuna matris ekleme isteği
@@ -213,18 +248,6 @@ namespace MatrisAritmetik.Pages
             SetSessionVariables();
         }
 
-        // Matris tablosunu güncelleme, rerenderlama
-        public PartialViewResult OnPostUpdateMatrisTable()
-        {
-            GetSessionVariables();
-
-            PartialViewResult mpart = Partial("_MatrisTablePartial", savedMatrices);
-
-            SetSessionVariables();
-
-            return mpart;
-        }
-
         // Komut gönderme isteği
         public async Task OnPostSendCmd()
         {
@@ -291,6 +314,20 @@ namespace MatrisAritmetik.Pages
 
             SetSessionVariables();
         }
+        #endregion
+
+        #region POST Action Partials
+        // Matris tablosunu güncelleme, rerenderlama
+        public PartialViewResult OnPostUpdateMatrisTable()
+        {
+            GetSessionVariables();
+
+            PartialViewResult mpart = Partial("_MatrisTablePartial", savedMatrices);
+
+            SetSessionVariables();
+
+            return mpart;
+        }
 
         // Komut panelini güncelleme, rerenderlama
         public PartialViewResult OnPostUpdateHistoryPanel()
@@ -303,7 +340,9 @@ namespace MatrisAritmetik.Pages
 
             return mpart;
         }
+        #endregion
 
+        #region Session Methods
         // Session değişkenlerini al, istek işleme fonksiyonlarının başında kullanılmalı
         private void GetSessionVariables()
         {
@@ -381,7 +420,7 @@ namespace MatrisAritmetik.Pages
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
-
+        #endregion
 
     }
 }

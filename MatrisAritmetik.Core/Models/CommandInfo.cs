@@ -2,35 +2,70 @@
 
 namespace MatrisAritmetik.Core.Models
 {
+    /// <summary>
+    /// Command information class which hold information about built-in functions
+    /// </summary>
     public class CommandInfo
     {
+        #region Public Fields
+        /// <summary>
+        /// Function name or a short description
+        /// </summary>
         public string fullname;
-
+        /// <summary>
+        /// Full description of the command
+        /// </summary>
         public string description;
-
+        /// <summary>
+        /// A list of alternative operators and functions that can achieve the same goal as this command
+        /// </summary>
         public List<string> alias_list;
-
+        /// <summary>
+        /// Real command name
+        /// </summary>
         public string function;
-
+        /// <summary>
+        /// Parameter type names
+        /// </summary>
         public string[] param_types;
-
+        /// <summary>
+        /// Parameter names
+        /// </summary>
         public string[] param_names;
-
+        /// <summary>
+        /// Indices of which parameters are required
+        /// </summary>
         public int[] required_params;
-
+        /// <summary>
+        /// Type name of what the "function" returns
+        /// </summary>
         public string returns;
-
+        /// <summary>
+        /// Unfilled command template, no arguments only commas 
+        /// </summary>
         public string function_template;
-
+        /// <summary>
+        /// Filled command template, parameter names and commas
+        /// </summary>
         public string function_template_filled;
-
+        /// <summary>
+        /// Name of the service the "function" is declared in
+        /// </summary>
         public string service;
+        #endregion
 
+        #region Constructors
         public CommandInfo()
         {
 
         }
+        #endregion
 
+        #region Public Methods
+        /// <summary>
+        /// Creates a string which shows an example of the current command with it's required parameters filled 
+        /// </summary>
+        /// <returns>An example call of the command</returns>
         public string MinimalFormat()
         {
             string reqparams = "";
@@ -53,6 +88,10 @@ namespace MatrisAritmetik.Core.Models
             return reqparams;
         }
 
+        /// <summary>
+        /// Creates an info string about the command
+        /// </summary>
+        /// <returns>Function templates, description, settings and an example call</returns>
         public string Info()
         {
 
@@ -63,5 +102,6 @@ namespace MatrisAritmetik.Core.Models
         Örnek: !" + function + "(" + string.Join(",", param_types) + ")";
 
         }
+        #endregion
     }
 }

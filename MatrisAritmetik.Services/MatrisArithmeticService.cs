@@ -7,19 +7,36 @@ namespace MatrisAritmetik.Services
 {
     public class MatrisArithmeticService<T> : IMatrisArithmeticService<T>
     {
-        /*
-         * Operations for generics
-         */
+        #region Private Generic Operations
+        /// <summary>
+        /// Parses <paramref name="a"/> and <paramref name="b"/> as <see cref="float"/>s and adds them together
+        /// </summary>
+        /// <param name="a">Any numerically parsable value</param>
+        /// <param name="b">Any numerically parsable value</param>
+        /// <returns>Result of <paramref name="a"/>+<paramref name="b"/> parsed as <see cref="float"/>s</returns>
         private T Add(T a, T b)
         {
             return (dynamic)(float.Parse(a.ToString()) + float.Parse(b.ToString()));
         }
 
+        /// <summary>
+        /// Parses <paramref name="a"/> and <paramref name="b"/> as <see cref="float"/>s and multiplies them together
+        /// </summary>
+        /// <param name="a">Any numerically parsable value</param>
+        /// <param name="b">Any numerically parsable value</param>
+        /// <returns>Result of <paramref name="a"/>*<paramref name="b"/> parsed as <see cref="float"/>s</returns>
         private T Mul(T a, T b)
         {
             return (dynamic)(float.Parse(a.ToString()) * float.Parse(b.ToString()));
         }
 
+        /// <summary>
+        /// Dot product of given lists <paramref name="a"/> and <paramref name="b"/>
+        /// <para>Values in <paramref name="a"/> and <paramref name="b"/> are parsed as <see cref="float"/>s during calculation</para>
+        /// </summary>
+        /// <param name="a">List of numerically parsable values</param>
+        /// <param name="b">List of numerically parsable values</param>
+        /// <returns>Dot product casted as <typeparamref name="T"/></returns>
         private T DotProduct(List<T> a,
                              List<T> b)
         {
@@ -42,7 +59,9 @@ namespace MatrisAritmetik.Services
 
             return res;
         }
+        #endregion
 
+        #region MatrisArithmeticService Methods
         /*
          * Functions with single MatrisBase param
          */
@@ -61,52 +80,6 @@ namespace MatrisAritmetik.Services
         public MatrisBase<T> Conjugate(MatrisBase<T> A)
         {
             return ((IMatrisArithmeticService<T>)this).Transpose(A);
-        }
-
-        public int AbsMaxOfList(List<T> lis)
-        {
-            if (lis.Count == 0)
-            {
-                throw new Exception("Liste boş!");
-            }
-
-            if (lis.Count == 1)
-            {
-                return 0;
-            }
-
-            int currentmax = 0;
-            for (int i = 1; i < lis.Count; i++)
-            {
-                if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
-                {
-                    currentmax = i;
-                }
-            }
-            return currentmax;
-        }
-
-        public T MinOfList(List<T> lis)
-        {
-            if (lis.Count == 0)
-            {
-                throw new Exception("Liste boş!");
-            }
-
-            if (lis.Count == 1)
-            {
-                return lis[0];
-            }
-
-            T currentmin = lis[0];
-            foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
-            {
-                if ((float.Parse(val.ToString()) < (float.Parse(currentmin.ToString()))))
-                {
-                    currentmin = val;
-                }
-            }
-            return currentmin;
         }
 
         public MatrisBase<T> Echelon(MatrisBase<T> A)
@@ -603,5 +576,6 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>(newlis);
         }
 
+        #endregion
     }
 }

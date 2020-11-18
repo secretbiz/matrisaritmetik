@@ -7,6 +7,7 @@ namespace MatrisAritmetik.Services
 {
     public class SpecialMatricesService : ISpecialMatricesService
     {
+        #region SpecialMatricesService Methods
         public MatrisBase<dynamic> Identity(int dimension)
         {
             if (dimension <= 0)
@@ -133,5 +134,6 @@ namespace MatrisAritmetik.Services
 
             return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals, Seed = s, CreatedFromSeed = true };
         }
+        #endregion
     }
 }

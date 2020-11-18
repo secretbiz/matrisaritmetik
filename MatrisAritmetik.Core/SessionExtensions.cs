@@ -4,17 +4,34 @@ using System.Text.Json;
 using MatrisAritmetik.Core.Models;
 using Microsoft.AspNetCore.Http;
 
-/* This file is for managing smaller classes, enumerators etc.
- * Created to reduce file amount.
- */
 namespace MatrisAritmetik.Core
 {
-    // Session stuff
+    /// <summary>
+    /// Class for setting and getting session variables
+    /// </summary>
     public static class SessionExtensions
     {
+        #region Variable Setters
+        /// <summary>
+        /// Default session variable setter
+        /// </summary>
+        /// <typeparam name="T">Type of the <paramref name="value"/> to use while serializing</typeparam>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Session variable key name</param>
+        /// <param name="value">Session variable value</param>
         public static void Set<T>(this ISession session,
                                   string key,
-                                  T value) => session.SetString(key, JsonSerializer.Serialize(value, typeof(T)));
+                                  T value)
+        {
+            session.SetString(key, JsonSerializer.Serialize(value, typeof(T)));
+        }
+
+        /// <summary>
+        /// Set the command history variable
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Command history key</param>
+        /// <param name="lis">Command history list to store</param>
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
         {
             string serialized = "[";
@@ -39,6 +56,13 @@ namespace MatrisAritmetik.Core
             serialized += "]";
             session.SetString(key, serialized);
         }
+
+        /// <summary>
+        /// Set the last message variable
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Last message variable key</param>
+        /// <param name="msg">Last message</param>
         public static void SetLastMsg(this ISession session,
                                       string key,
                                       CommandMessage msg)
@@ -53,6 +77,13 @@ namespace MatrisAritmetik.Core
 
             session.SetString(key, serialized);
         }
+
+        /// <summary>
+        /// Set matrix options variable
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Key for matrix options</param>
+        /// <param name="dict">Dictionary of matrix names and their options</param>
         public static void SetMatOptions(this ISession session,
                                          string key,
                                          Dictionary<string, Dictionary<string, dynamic>> dict)
@@ -71,7 +102,16 @@ namespace MatrisAritmetik.Core
 
             session.SetString(key, value: serialized);
         }
+        #endregion
 
+        #region Variable Getters
+        /// <summary>
+        /// Default session variable getter
+        /// </summary>
+        /// <typeparam name="T">Expected type of the <paramref name="key"/>'s value to use while deserializing</typeparam>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Variable key name</param>
+        /// <returns>Session variable named <paramref name="key"/> casted as <typeparamref name="T"/></returns>
         public static T Get<T>(this ISession session,
                                string key)
         {
@@ -79,6 +119,13 @@ namespace MatrisAritmetik.Core
             T t = default;
             return value == null ? t : JsonSerializer.Deserialize<T>(value);
         }
+
+        /// <summary>
+        /// Gets the previous command history
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Command history key name</param>
+        /// <returns>Command history from the previous session</returns>
         public static List<Command> GetCmdList(this ISession session,
                                                string key)
         {
@@ -99,6 +146,13 @@ namespace MatrisAritmetik.Core
                                        statmsg: (string)(cmd["statmsg"].ToString()),
                                        output: (string)(cmd["output"].ToString()))).ToList();
         }
+
+        /// <summary>
+        /// Gets the last message
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Last message key name</param>
+        /// <returns>Last message from the previous session</returns>
         public static CommandMessage GetLastMsg(this ISession session,
                                                 string key)
         {
@@ -112,6 +166,13 @@ namespace MatrisAritmetik.Core
             return new CommandMessage(msg: msg["msg"].ToString(),
                                       s: (CommandState)int.Parse(msg["state"].ToString()));
         }
+
+        /// <summary>
+        /// Gets the matrix options
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Matrix options key name</param>
+        /// <returns>Dictionary of matrix names and options</returns>
         public static Dictionary<string, Dictionary<string, dynamic>> GetMatOptions(this ISession session,
                                                                                     string key)
         {
@@ -129,7 +190,7 @@ namespace MatrisAritmetik.Core
             }
             return opts;
         }
-
+        #endregion
 
     }
 }

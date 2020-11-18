@@ -12,130 +12,20 @@ namespace MatrisAritmetik.Services
 {
     public class FrontService : IFrontService
     {
-        public bool state = false;
-        public void AddToMatrisDict(string name, MatrisBase<dynamic> matris, Dictionary<string, MatrisBase<dynamic>> matdict)
-        {
-            if (matdict.Count >= (int)MatrisLimits.forMatrisCount)
-            {
-                return;
-            }
+        #region Private Fields
+        /// <summary>
+        /// Hold state of command history clean-up
+        /// </summary>
+        private bool state = false;
+        #endregion
 
-            if (Validations.ValidMatrixName(name)) // Check again just in case
-            {
-                matdict.Add(name, matris);
-            }
-        }
-
-        public void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict)
-        {
-            if (matdict.ContainsKey(name))
-            {
-                matdict[name].Values = null;
-                matdict.Remove(name);
-            }
-        }
-
-        public Command CreateCommand(string cmd)
-        {
-            return new Command(cmd);
-        }
-
-        public List<CommandLabel> builtInCommands;
-
-        public void ReadCommandInformation()
-        {
-            using StreamReader r = new StreamReader("_builtInCmds.json");
-            string json = r.ReadToEnd();
-            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
-        }
-
-        public List<CommandLabel> GetCommandLabelList(List<string> filter = null)
-        {
-            if (filter == null)
-            {
-                return builtInCommands;
-            }
-
-            List<CommandLabel> filtered = new List<CommandLabel>();
-            foreach (CommandLabel lbl in builtInCommands)
-            {
-                if (filter.Contains(lbl.Label))
-                {
-                    filtered.Add(lbl);
-                }
-            }
-            return filtered;
-        }
-
-        public void AddToCommandLabelList(string label, CommandInfo[] commandInfos)
-        {
-            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
-            if (labelIndex == -1)
-            {
-                builtInCommands.Append(new CommandLabel() { Functions = commandInfos, Label = label });
-            }
-            else
-            {   // TO-DO : Check aliasing
-                builtInCommands[labelIndex].Functions.Concat(commandInfos);
-            }
-        }
-
-        public void ClearCommandLabel(string label)
-        {
-            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
-            if (labelIndex != -1)
-            {
-                builtInCommands[labelIndex] = new CommandLabel() { Label = label };
-            }
-        }
-
-        public bool TknTryParseBuiltFunc(string name, out CommandInfo cmdinfo)
-        {
-            if (builtInCommands == null)
-            {
-                ReadCommandInformation();
-            }
-
-            foreach (CommandInfo _cmdinfo in from CommandLabel _lbl in builtInCommands
-                                             from CommandInfo _cmdinfo in _lbl.Functions
-                                             where _cmdinfo.function == name
-                                             select _cmdinfo)
-            {
-                cmdinfo = _cmdinfo;
-                return true;
-            }
-
-            cmdinfo = null;
-            return false;
-        }
+        #region Private Methods
 
         /// <summary>
-        ///     Create a token from a string expression
+        /// Create a token from a string expression
         /// </summary>
-        /// Current order of operations:
-        ///     OPERATOR    PRIORITY(Higher first)
-        ///     ----------------------------------
-        ///         u+              200
-        ///         u-              200
-        ///        FUNC             100
-        ///         (               10
-        ///         )               10
-        ///         ./              6
-        ///         .*              5
-        ///         .^              5
-        ///         ^               5
-        ///         *               4
-        ///         /               4
-        ///         %               4
-        ///         +               3
-        ///         -               3
-        ///         :               2
-        ///         ,               1
-        ///         =               0
-        ///         
-        ///
         /// <param name="exp"> String expression to tokenize </param>
-        /// <returns></returns>
+        /// <returns>Token created from the expression</returns>
         private Token String2Token(string exp)
         {
             Token tkn = new Token();
@@ -166,7 +56,7 @@ namespace MatrisAritmetik.Services
                 if (exp[0] == '!')          // A function
                 {
                     exp = exp.Replace("!", "");
-                    if (TknTryParseBuiltFunc(exp, out CommandInfo cmdinfo))
+                    if (TryParseBuiltFunc(exp, out CommandInfo cmdinfo))
                     {
                         tkn.paramCount = cmdinfo.param_names.Length;
                         tkn.service = cmdinfo.service;
@@ -190,7 +80,7 @@ namespace MatrisAritmetik.Services
                 {
                     exp = exp.Replace("?", "").Trim();
                     tkn.tknType = TokenType.DOCS;
-                    if (TknTryParseBuiltFunc(exp, out CommandInfo cmdinfo))
+                    if (TryParseBuiltFunc(exp, out CommandInfo cmdinfo))
                     {   // VALID FUNCTION
                         tkn.name = exp;
                         tkn.info = cmdinfo.Info();
@@ -345,130 +235,11 @@ namespace MatrisAritmetik.Services
             return tkn;
         }
 
-        public List<Token> ShuntingYardAlg(List<Token> tkns)
-        {
-            Queue<Token> outputQueue = new Queue<Token>();
-            Stack<Token> operatorStack = new Stack<Token>();
-            Stack<bool> valtracker = new Stack<bool>();
-            Stack<int> argcounter = new Stack<int>();
-
-            int ind = 0;
-            while (ind < tkns.Count)
-            {
-                Token tkn = tkns[ind];
-                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.DOCS)        // NUMBER | MATRIX | INFORMATION
-                {
-                    outputQueue.Enqueue(tkn);
-
-                    if (valtracker.Count > 0)
-                    {
-                        valtracker.Pop();
-                        valtracker.Push(true);
-                    }
-                }
-
-                else if (tkn.tknType == TokenType.FUNCTION)   // FUNCTION
-                {
-                    operatorStack.Push(tkn);
-                    argcounter.Push(0);
-                    if (valtracker.Count > 0)
-                    {
-                        valtracker.Pop();
-                        valtracker.Push(true);
-                    }
-                    valtracker.Push(false);
-
-                }
-                else if (tkn.tknType == TokenType.ARGSEPERATOR)     // ARGUMENT SEPERATOR
-                {
-                    while (operatorStack.Peek().tknType != TokenType.LEFTBRACE)
-                    {
-                        outputQueue.Enqueue(operatorStack.Pop());
-                        if (operatorStack.Count == 0)
-                        {
-                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
-                        }
-                    }
-                    if (valtracker.Pop())
-                    {
-                        int a = argcounter.Pop();
-                        a++;
-                        argcounter.Push(a);
-                    }
-                    valtracker.Push(false);
-                }
-
-                else if (tkn.tknType == TokenType.OPERATOR)  // OPERATOR
-                {
-                    while (operatorStack.Count != 0)
-                    {
-                        Token o2 = operatorStack.Peek();
-                        if (o2.tknType != TokenType.OPERATOR)
-                        {
-                            break;
-                        }
-                        else if ((tkn.assoc == OperatorAssociativity.LEFT && tkn.priority == o2.priority) || (tkn.priority < o2.priority))
-                        {
-                            outputQueue.Enqueue(operatorStack.Pop());
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    operatorStack.Push(tkn);
-                }
-
-                else if (tkn.tknType == TokenType.LEFTBRACE)    // LEFT BRACE
-                {
-                    operatorStack.Push(tkn);
-                }
-                else if (tkn.tknType == TokenType.RIGHTBRACE)   // RIGHT BRACE
-                {
-                    while (operatorStack.Peek().tknType != TokenType.LEFTBRACE)
-                    {
-                        outputQueue.Enqueue(operatorStack.Pop());
-                        if (operatorStack.Count == 0)
-                        {
-                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
-                        }
-                    }
-                    operatorStack.Pop();
-
-                    if (operatorStack.Count > 0)
-                    {
-                        if (operatorStack.Peek().tknType == TokenType.FUNCTION)
-                        {
-                            Token functkn = operatorStack.Pop();
-                            int args = argcounter.Pop();
-                            if (valtracker.Pop())
-                            {
-                                args++;
-                            }
-
-                            functkn.argCount = args;
-                            outputQueue.Enqueue(functkn);
-                        }
-                    }
-
-
-                }
-                ind++;
-            }
-
-            while (operatorStack.Count != 0)
-            {
-                if ((operatorStack.Peek().tknType == TokenType.LEFTBRACE) || (operatorStack.Peek().tknType == TokenType.RIGHTBRACE))
-                {
-                    throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
-                }
-
-                outputQueue.Enqueue(operatorStack.Pop());
-            }
-
-            return new List<Token>(outputQueue.ToArray());
-        }
-
+        /// <summary>
+        /// Split a string expression to tokenizable elements
+        /// </summary>
+        /// <param name="exp">String expression to split</param>
+        /// <returns>Array of tokenizable string expressions</returns>
         private string[] TokenizeSplit(string exp)
         {
             exp = exp.
@@ -572,52 +343,32 @@ namespace MatrisAritmetik.Services
             return exp.Split(" ");
         }
 
-        public List<Token> Tokenize(string exp)
+        /// <summary>
+        /// Get the index of parameter <paramref name="name"/> in the parameter array
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <param name="paramarr">Parameter array</param>
+        /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
+        private int GetParamIndex(string name, ParameterInfo[] paramarr)
         {
-            string[] explist = TokenizeSplit(exp);
-            List<Token> tkns = new List<Token>();
-
-            foreach (string e in explist)
+            int ind = 0;
+            foreach (ParameterInfo p in paramarr)
             {
-                Token tkn = String2Token(e);
-                // Decide for unary or binary
-                if (e == "-" || e == "+")
+                if (p.Name.ToString() == name)
                 {
-                    // Started with - , unary
-                    if (tkns.Count == 0)
-                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
-                    // Previous was a left bracet or an operator
-                    else if (tkns[^1].tknType == TokenType.LEFTBRACE || tkns[^1].tknType == TokenType.OPERATOR || tkns[^1].tknType == TokenType.ARGSEPERATOR)
-                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
+                    break;
                 }
-                tkns.Add(tkn);
+                ind++;
             }
-            return tkns;
-
+            return (ind < paramarr.Length) ? ind : -1;
         }
 
-        public bool TryParseBuiltFunc(string name, out CommandInfo cmdinfo)
-        {
-            List<CommandLabel> cmdLabelList = GetCommandLabelList();
-            if (cmdLabelList == null)
-            {
-                ReadCommandInformation();
-                cmdLabelList = GetCommandLabelList();
-            }
-
-            foreach (CommandInfo _cmdinfo in from CommandLabel lbl in cmdLabelList
-                                             from CommandInfo _cmdinfo in lbl.Functions
-                                             where _cmdinfo.function == name
-                                             select _cmdinfo)
-            {
-                cmdinfo = _cmdinfo;
-                return true;
-            }
-
-            cmdinfo = null;
-            return false;
-        }
-
+        /// <summary>
+        /// Check if given token <paramref name="tkn"/> is a <see cref="MatrisBase{object}"/>
+        /// </summary>
+        /// <param name="tkn">Token to check</param>
+        /// <param name="matDict">Matrix dictionary to reference to</param>
+        /// <returns>True if given token holds a <see cref="MatrisBase{object}"/></returns>
         private bool CheckMatrixAndUpdateVal(Token tkn, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (tkn.tknType)
@@ -638,9 +389,16 @@ namespace MatrisAritmetik.Services
             }
         }
 
+        /// <summary>
+        /// Evaluate <paramref name="operands"/> with operator/function <paramref name="op"/>
+        /// </summary>
+        /// <param name="op">Operator or function token</param>
+        /// <param name="operands">Operands to be used</param>
+        /// <param name="matDict">Matrix dictionary to be used for matrix references</param>
+        /// <returns>A token storing the result of the evaluation</returns>
         private Token EvalOperator(Token op, List<Token> operands, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
-            switch (op.tknType)    
+            switch (op.tknType)
             {
                 case TokenType.OPERATOR: // OPERATORS
                     {
@@ -1135,18 +893,251 @@ namespace MatrisAritmetik.Services
             return operands[0];
         }
 
-        private int GetParamIndex(string name, ParameterInfo[] paramarr)
+        #endregion
+
+        #region FrontService Methods
+        public void AddToMatrisDict(string name, MatrisBase<dynamic> matris, Dictionary<string, MatrisBase<dynamic>> matdict)
         {
-            int ind = 0;
-            foreach (ParameterInfo p in paramarr)
+            if (matdict.Count >= (int)MatrisLimits.forMatrisCount)
             {
-                if (p.Name.ToString() == name)
+                return;
+            }
+
+            if (Validations.ValidMatrixName(name)) // Check again just in case
+            {
+                matdict.Add(name, matris);
+            }
+        }
+
+        public void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict)
+        {
+            if (matdict.ContainsKey(name))
+            {
+                matdict[name].Values = null;
+                matdict.Remove(name);
+            }
+        }
+
+        public Command CreateCommand(string cmd)
+        {
+            return new Command(cmd);
+        }
+
+        public List<CommandLabel> builtInCommands;
+
+        public void ReadCommandInformation()
+        {
+            using StreamReader r = new StreamReader("_builtInCmds.json");
+            string json = r.ReadToEnd();
+            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
+        }
+
+        public List<CommandLabel> GetCommandLabelList(List<string> filter = null)
+        {
+            if (filter == null)
+            {
+                return builtInCommands;
+            }
+
+            List<CommandLabel> filtered = new List<CommandLabel>();
+            foreach (CommandLabel lbl in builtInCommands)
+            {
+                if (filter.Contains(lbl.Label))
                 {
-                    break;
+                    filtered.Add(lbl);
+                }
+            }
+            return filtered;
+        }
+
+        public void AddToCommandLabelList(string label, CommandInfo[] commandInfos)
+        {
+            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
+            if (labelIndex == -1)
+            {
+                builtInCommands.Append(new CommandLabel() { Functions = commandInfos, Label = label });
+            }
+            else
+            {   // TO-DO : Check aliasing
+                builtInCommands[labelIndex].Functions.Concat(commandInfos);
+            }
+        }
+
+        public void ClearCommandLabel(string label)
+        {
+            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
+            if (labelIndex != -1)
+            {
+                builtInCommands[labelIndex] = new CommandLabel() { Label = label };
+            }
+        }
+
+        public List<Token> ShuntingYardAlg(List<Token> tkns)
+        {
+            Queue<Token> outputQueue = new Queue<Token>();
+            Stack<Token> operatorStack = new Stack<Token>();
+            Stack<bool> valtracker = new Stack<bool>();
+            Stack<int> argcounter = new Stack<int>();
+
+            int ind = 0;
+            while (ind < tkns.Count)
+            {
+                Token tkn = tkns[ind];
+                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.DOCS)        // NUMBER | MATRIX | INFORMATION
+                {
+                    outputQueue.Enqueue(tkn);
+
+                    if (valtracker.Count > 0)
+                    {
+                        valtracker.Pop();
+                        valtracker.Push(true);
+                    }
+                }
+
+                else if (tkn.tknType == TokenType.FUNCTION)   // FUNCTION
+                {
+                    operatorStack.Push(tkn);
+                    argcounter.Push(0);
+                    if (valtracker.Count > 0)
+                    {
+                        valtracker.Pop();
+                        valtracker.Push(true);
+                    }
+                    valtracker.Push(false);
+
+                }
+                else if (tkn.tknType == TokenType.ARGSEPERATOR)     // ARGUMENT SEPERATOR
+                {
+                    while (operatorStack.Peek().tknType != TokenType.LEFTBRACE)
+                    {
+                        outputQueue.Enqueue(operatorStack.Pop());
+                        if (operatorStack.Count == 0)
+                        {
+                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
+                        }
+                    }
+                    if (valtracker.Pop())
+                    {
+                        int a = argcounter.Pop();
+                        a++;
+                        argcounter.Push(a);
+                    }
+                    valtracker.Push(false);
+                }
+
+                else if (tkn.tknType == TokenType.OPERATOR)  // OPERATOR
+                {
+                    while (operatorStack.Count != 0)
+                    {
+                        Token o2 = operatorStack.Peek();
+                        if (o2.tknType != TokenType.OPERATOR)
+                        {
+                            break;
+                        }
+                        else if ((tkn.assoc == OperatorAssociativity.LEFT && tkn.priority == o2.priority) || (tkn.priority < o2.priority))
+                        {
+                            outputQueue.Enqueue(operatorStack.Pop());
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    operatorStack.Push(tkn);
+                }
+
+                else if (tkn.tknType == TokenType.LEFTBRACE)    // LEFT BRACE
+                {
+                    operatorStack.Push(tkn);
+                }
+                else if (tkn.tknType == TokenType.RIGHTBRACE)   // RIGHT BRACE
+                {
+                    while (operatorStack.Peek().tknType != TokenType.LEFTBRACE)
+                    {
+                        outputQueue.Enqueue(operatorStack.Pop());
+                        if (operatorStack.Count == 0)
+                        {
+                            throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
+                        }
+                    }
+                    operatorStack.Pop();
+
+                    if (operatorStack.Count > 0)
+                    {
+                        if (operatorStack.Peek().tknType == TokenType.FUNCTION)
+                        {
+                            Token functkn = operatorStack.Pop();
+                            int args = argcounter.Pop();
+                            if (valtracker.Pop())
+                            {
+                                args++;
+                            }
+
+                            functkn.argCount = args;
+                            outputQueue.Enqueue(functkn);
+                        }
+                    }
+
+
                 }
                 ind++;
             }
-            return (ind < paramarr.Length) ? ind : -1;
+
+            while (operatorStack.Count != 0)
+            {
+                if ((operatorStack.Peek().tknType == TokenType.LEFTBRACE) || (operatorStack.Peek().tknType == TokenType.RIGHTBRACE))
+                {
+                    throw new Exception(CompilerMessage.PARANTHESIS_FORMAT_ERROR);
+                }
+
+                outputQueue.Enqueue(operatorStack.Pop());
+            }
+
+            return new List<Token>(outputQueue.ToArray());
+        }
+
+        public List<Token> Tokenize(string exp)
+        {
+            string[] explist = TokenizeSplit(exp);
+            List<Token> tkns = new List<Token>();
+
+            foreach (string e in explist)
+            {
+                Token tkn = String2Token(e);
+                // Decide for unary or binary
+                if (e == "-" || e == "+")
+                {
+                    // Started with - , unary
+                    if (tkns.Count == 0)
+                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
+                    // Previous was a left bracet or an operator
+                    else if (tkns[^1].tknType == TokenType.LEFTBRACE || tkns[^1].tknType == TokenType.OPERATOR || tkns[^1].tknType == TokenType.ARGSEPERATOR)
+                    { tkn.SetValues("u" + e, OperatorAssociativity.RIGHT, 200, 1); }
+                }
+                tkns.Add(tkn);
+            }
+            return tkns;
+
+        }
+
+        public bool TryParseBuiltFunc(string name, out CommandInfo cmdinfo)
+        {
+            if (builtInCommands == null)
+            {
+                ReadCommandInformation();
+            }
+
+            foreach (CommandInfo _cmdinfo in from CommandLabel _lbl in builtInCommands
+                                             from CommandInfo _cmdinfo in _lbl.Functions
+                                             where _cmdinfo.function == name
+                                             select _cmdinfo)
+            {
+                cmdinfo = _cmdinfo;
+                return true;
+            }
+
+            cmdinfo = null;
+            return false;
         }
 
         public CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory)
@@ -1401,5 +1392,6 @@ namespace MatrisAritmetik.Services
         {
             state = true;
         }
+        #endregion
     }
 }

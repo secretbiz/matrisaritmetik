@@ -14,9 +14,19 @@ namespace MatrisAritmetik.Services
 {
     public class UtilityService<T> : IUtilityService<T>
     {
+        #region Const Strings
+        /// <summary>
+        /// Encoded version of "=" sign from the body
+        /// </summary>
         private const string EQSignSpecial = "!__EQ!";
-        private const string ReverMatMulSpecial = "!__REVMUL!";
 
+        /// <summary>
+        /// Encoded version of "./" sign from the body
+        /// </summary>
+        private const string ReverMatMulSpecial = "!__REVMUL!";
+        #endregion
+
+        #region UtilityService Methods
         public List<List<T>> StringTo2DList(string text,
                                             char delimiter = ' ',
                                             char newline = '\n',
@@ -330,5 +340,53 @@ namespace MatrisAritmetik.Services
 
         }
 
+
+        public int IndexOfAbsMax(List<T> lis)
+        {
+            if (lis.Count == 0)
+            {
+                throw new Exception("Liste boş!");
+            }
+
+            if (lis.Count == 1)
+            {
+                return 0;
+            }
+
+            int currentmax = 0;
+            for (int i = 1; i < lis.Count; i++)
+            {
+                if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
+                {
+                    currentmax = i;
+                }
+            }
+            return currentmax;
+        }
+
+        public T MinOfList(List<T> lis)
+        {
+            if (lis.Count == 0)
+            {
+                throw new Exception("Liste boş!");
+            }
+
+            if (lis.Count == 1)
+            {
+                return lis[0];
+            }
+
+            T currentmin = lis[0];
+            foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
+            {
+                if ((float.Parse(val.ToString()) < (float.Parse(currentmin.ToString()))))
+                {
+                    currentmin = val;
+                }
+            }
+            return currentmin;
+        }
+
+        #endregion
     }
 }

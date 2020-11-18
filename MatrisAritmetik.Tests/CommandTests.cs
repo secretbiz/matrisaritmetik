@@ -18,7 +18,7 @@ namespace MatrisAritmetik.Tests
         public static CommandInfo InfoSetter(string func,
                                              IFrontService service)
         {
-            if (service.TknTryParseBuiltFunc(func, out CommandInfo cmdinfo))
+            if (service.TryParseBuiltFunc(func, out CommandInfo cmdinfo))
             { return cmdinfo; }
             else
             { throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!"); }

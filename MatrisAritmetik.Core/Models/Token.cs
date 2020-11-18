@@ -2,43 +2,121 @@
 
 namespace MatrisAritmetik.Core.Models
 {
-    // Represent a token
+    /// <summary>
+    /// Class for using and storing string characters as tokens
+    /// <para>Current order of operations:</para>
+    /// <para>OPERATOR :  PRIORITY(Higher first)</para>
+    /// <para>----------------------------------</para>
+    /// <para>  u+      :       200</para>
+    /// <para>  u-      :       200</para>
+    /// <para> FUNC     :       100</para>
+    /// <para>  (       :       10</para>
+    /// <para>  )       :       10</para>
+    /// <para>  ./      :       6</para>
+    /// <para>  .*      :       5</para>
+    /// <para>  .^      :       5</para>
+    /// <para>  ^       :       5</para>
+    /// <para>  *       :       4</para>
+    /// <para>  /       :       4</para>
+    /// <para>  %       :       4</para>
+    /// <para>  +       :       3</para>
+    /// <para>  -       :       3</para>
+    /// <para>  :       :       2</para>
+    /// <para>  ,       :       1</para>
+    /// <para>  =       :       0</para>
+    /// 
+    /// </summary>
     public class Token
     {
-        // Type of token
+        #region Common Fields For Every Token
+        /// <summary>
+        /// Token type, see <see cref="TokenType"/>
+        /// </summary>
         public TokenType tknType = TokenType.NULL;
 
-        public void SetValues(string _symbol,
-                              OperatorAssociativity _assoc,
-                              int _priority,
-                              int _paramCount)
-        {
-            symbol = _symbol;
-            assoc = _assoc;
-            priority = _priority;
-            paramCount = _paramCount;
-        }
-        // Number
+        /// <summary>
+        /// Priority of this token over other tokens, see <see cref="Token"/>
+        /// </summary>
+        public int priority = 0;
+        #endregion
+
+        #region Number, Matrix or Function Token Fields
+        /// <summary>
+        /// Value if token is a <see cref="MatrisBase{object}"/> or a number
+        /// </summary>
         public dynamic val = 0.0;
 
-        // Operator
-        public string symbol = " ";
-        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
-        public int priority = 0;
-        public int paramCount = 0;
-        public int argCount = 0;
-
-        // Matrix or function
+        /// <summary>
+        /// Matrix or function name
+        /// </summary>
         public string name = " ";
+
+        /// <summary>
+        /// Function parameter type names
+        /// </summary>
         public List<string> paramTypes = new List<string>();
+
+        /// <summary>
+        /// Function's service
+        /// </summary>
         public string service = "";
+
+        /// <summary>
+        /// Type name of the function returns
+        /// </summary>
         public string returns = "";
+        #endregion
 
-        // In case ? or : was used
+        #region Operator Tokens
+        /// <summary>
+        /// Symbol of the operator
+        /// </summary>
+        public string symbol = " ";
+
+        /// <summary>
+        /// Associativity of this operator, see <see cref="OperatorAssociativity"/>
+        /// </summary>
+        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
+        #endregion
+
+        #region Operator and Function Tokens
+        /// <summary>
+        /// Amount of parameters this token requires
+        /// </summary>
+        public int paramCount = 0;
+
+        /// <summary>
+        /// Amount of arguments passed to be used with this token
+        /// </summary>
+        public int argCount = 0;
+        #endregion
+
+        #region Docs Token
+        /// <summary>
+        /// Information about the <see cref="Token.name"/> named matrix or function 
+        /// </summary>
         public string info = null;
+        #endregion
 
+        #region Constructors
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public Token() { }
 
+        /// <summary>
+        /// Create a token with given arguments
+        /// </summary>
+        /// <param name="tknType">Token type</param>
+        /// <param name="val">Stored value</param>
+        /// <param name="symbol">Operator symbol</param>
+        /// <param name="assoc">Associativity</param>
+        /// <param name="priority">Priority</param>
+        /// <param name="paramCount">Parameter count</param>
+        /// <param name="name">Matrix or function name</param>
+        /// <param name="paramTypes">Parameter type names</param>
+        /// <param name="service">Function service name</param>
+        /// <param name="returns">Return type name</param>
         public Token(TokenType tknType,
                      dynamic val,
                      string symbol,
@@ -61,8 +139,33 @@ namespace MatrisAritmetik.Core.Models
             this.service = service;
             this.returns = returns;
         }
+        #endregion
 
-        // For easier debugging
+        #region Public Methods
+        /// <summary>
+        /// Update token's priorty, symbol, associativity and parameter count
+        /// </summary>
+        /// <param name="_symbol">New operator symbol</param>
+        /// <param name="_assoc">New associativity</param>
+        /// <param name="_priority">New priority</param>
+        /// <param name="_paramCount">New parameter count</param>
+        public void SetValues(string _symbol,
+                              OperatorAssociativity _assoc,
+                              int _priority,
+                              int _paramCount)
+        {
+            symbol = _symbol;
+            assoc = _assoc;
+            priority = _priority;
+            paramCount = _paramCount;
+        }
+        #endregion
+
+        #region Overriding Methods
+        /// <summary>
+        /// Return a short info about the token for easier debugging-watching
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return tknType switch
@@ -78,6 +181,7 @@ namespace MatrisAritmetik.Core.Models
                 _ => tknType.ToString(),
             };
         }
+        #endregion
     }
 
 }

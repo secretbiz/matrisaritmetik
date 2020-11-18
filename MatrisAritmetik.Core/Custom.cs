@@ -2,30 +2,199 @@
  * Created to reduce file amount.
  */
 
+using MatrisAritmetik.Core.Models;
+
 namespace MatrisAritmetik.Core
 {
+    #region Enum Classes
+    /// <summary>
+    /// Enumerated <see cref="Command"/> states
+    /// </summary>
+    public enum CommandState
+    {
+        /// <summary>
+        /// Command was created but was not processed
+        /// </summary>
+        IDLE,
+
+        /// <summary>
+        /// Command is currently being proccessed or had an unknown issue during a process
+        /// </summary>
+        UNAVAILABLE,
+
+        /// <summary>
+        /// Command was successfully processed
+        /// </summary>
+        SUCCESS,
+
+        /// <summary>
+        /// Command returned/threw a warning message
+        /// </summary>
+        WARNING,
+
+        /// <summary>
+        /// Command threw an error message
+        /// </summary>
+        ERROR
+    };
+
+    /// <summary>
+    /// Enumerated <see cref="MatrisBase{T}"/> limitations
+    /// </summary>
+    public enum MatrisLimits
+    {
+        /// <summary>
+        /// Limit row dimension
+        /// </summary>
+        forRows = 64,
+
+        /// <summary>
+        /// Limit column dimension
+        /// </summary>
+        forCols = 64,
+
+        /// <summary>
+        /// Limit matrix size
+        /// </summary>
+        forSize = 64 * 64,
+
+        /// <summary>
+        /// Limit how many matrices can be stored in a dictionary
+        /// </summary>
+        forMatrisCount = 16,
+
+        /// <summary>
+        /// Character limit for a matrix name
+        /// </summary>
+        forName = 64
+    };
+
+    /// <summary>
+    /// Enumerated limits for command history
+    /// </summary>
+    public enum CompilerLimits
+    {
+        /// <summary>
+        /// Limit how many command can be shown each command history page
+        /// </summary>
+        forShowOldCommands = 16,
+
+        /// <summary>
+        /// Limit how many characters can be shown for each output string
+        /// </summary>
+        forOutputCharacterLength = 128 * 128
+    };
+
+    /// <summary>
+    /// Enumerated <see cref="Token"/> types
+    /// </summary>
+    public enum TokenType
+    {
+        /// <summary>
+        /// Unknown token
+        /// </summary>
+        NULL,
+
+        /// <summary>
+        /// Number token
+        /// </summary>
+        NUMBER,
+
+        /// <summary>
+        /// Matrix token
+        /// </summary>
+        MATRIS,
+
+        /// <summary>
+        /// Function token
+        /// </summary>
+        FUNCTION,
+
+        /// <summary>
+        /// Function argument seperator token
+        /// </summary>
+        ARGSEPERATOR,
+
+        /// <summary>
+        /// Operator with a symbol token
+        /// </summary>
+        OPERATOR,
+
+        /// <summary>
+        /// Left brace token
+        /// </summary>
+        LEFTBRACE,
+
+        /// <summary>
+        /// Right brace token
+        /// </summary>
+        RIGHTBRACE,
+
+        /// <summary>
+        /// Token for "?" character
+        /// </summary>
+        DOCS,
+
+        /// <summary>
+        /// Output type for tests
+        /// </summary>
+        OUTPUT,
+
+        /// <summary>
+        /// Error type for tests
+        /// </summary>
+        ERROR,
+
+        /// <summary>
+        /// Void function return token, 
+        /// </summary>
+        VOID
+    };
+
+    /// <summary>
+    /// Enumerated operator associativity sides
+    /// </summary>
+    public enum OperatorAssociativity
+    {
+        LEFT,
+        RIGHT
+    };
+    #endregion
+
+    #region Custom Error-Warning Message Classes
+    /// <summary>
+    /// Class for storing a <see cref="Command"/>'s <see cref="CommandStateMessage"/> and <see cref="CommandState"/> in a single instance
+    /// </summary>
     public class CommandMessage
     {
+        #region Public Fields
+        /// <summary>
+        /// Command's current state
+        /// </summary>
         public CommandState State = CommandState.IDLE;
+        /// <summary>
+        /// Last message
+        /// </summary>
         public string Message = "";
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Creates a basic <see cref="CommandMessage"/> instance
+        /// </summary>
+        /// <param name="msg">Message to store</param>
+        /// <param name="s"><see cref="Command"/>'s state to store</param>
         public CommandMessage(string msg, CommandState s = CommandState.IDLE)
         {
             Message = msg;
             State = s;
         }
+        #endregion
     }
 
-    // ENUM CLASSES
-    // Command's states
-    public enum CommandState
-    {
-        IDLE,
-        UNAVAILABLE,
-        SUCCESS,
-        WARNING,
-        ERROR
-    };
-
+    /// <summary>
+    /// Const strings and static string methods for storing custom command state messages
+    /// </summary>
     public class CommandStateMessage
     {
         // CLEANUP
@@ -76,42 +245,6 @@ namespace MatrisAritmetik.Core
         }
     }
 
-    // For limiting matrix creation
-    public enum MatrisLimits
-    {
-        forRows = 64,
-        forCols = 64,
-        forSize = 64 * 64,
-        forMatrisCount = 16,
-        forName = 64
-    };
-
-    // For limiting command history
-    public enum CompilerLimits
-    {
-        forShowOldCommands = 16,
-        forOutputCharacterLength = 128 * 128
-    };
-
-    // Token types
-    public enum TokenType
-    {
-        NULL,
-        NUMBER,
-        MATRIS,
-        FUNCTION,
-        ARGSEPERATOR,
-        OPERATOR,
-        LEFTBRACE,
-        RIGHTBRACE,
-        DOCS,
-        OUTPUT,
-        ERROR,
-        VOID
-    };
-
-    // Operator order
-    public enum OperatorAssociativity { LEFT, RIGHT };
 
     public class RequestMessage
     {
@@ -349,5 +482,5 @@ namespace MatrisAritmetik.Core
         }
 
     };
-
+    #endregion
 }

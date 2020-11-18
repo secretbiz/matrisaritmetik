@@ -4,13 +4,27 @@ using System.Linq;
 
 namespace MatrisAritmetik.Core
 {
+    /// <summary>
+    /// Base class for matrices
+    /// </summary>
+    /// <typeparam name="T">Type of the values matrix will store, use "object" or "dynamic" if unknown</typeparam>
     public class MatrisBase<T>
     {
-        public int swapCount = 0;
+        #region Private Encapsulated Fields
         private int _seed;
         private int _row = -1;
         private int _col = -1;
         private List<List<T>> _values = null;
+        #endregion
+
+        #region Public Properties
+        /// <summary>
+        /// For storing how many times row's were swapped during echelon form process
+        /// </summary>
+        public int swapCount = 0;
+        /// <summary>
+        /// Gets or sets the row dimension, limit at <see cref="MatrisLimits.forRows"/>
+        /// </summary>
         public int Row
         {
             get => _row;
@@ -30,6 +44,9 @@ namespace MatrisAritmetik.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the column dimension, limit at <see cref="MatrisLimits.forCols"/>
+        /// </summary>
         public int Col
         {
             get => _col;
@@ -48,9 +65,16 @@ namespace MatrisAritmetik.Core
                 }
             }
         }
+        /// <summary>
+        /// Manually sets the column dimension, only used during echelon form process
+        /// </summary>
+        /// <param name="c">New column dimension</param>
         public void SetCol(int c)
         { _col = c; }
 
+        /// <summary>
+        /// List of lists to hold matrix values, limits and removes if list count's are higher than <see cref="MatrisLimits"/>
+        /// </summary>
         public List<List<T>> Values
         {
             get
@@ -127,40 +151,63 @@ namespace MatrisAritmetik.Core
             }
         }
 
+        /// <summary>
+        /// Gets or sets the seed used with <see cref="Random"/> while filling <see cref="MatrisBase{T}.Values"/>
+        /// </summary>
         public int Seed
         {
             get => _seed;
             set => _seed = value;
         }
-
+        /// <summary>
+        /// Delimiter to use while printing the matrix values
+        /// </summary>
         public string Delimiter = " ";
+        /// <summary>
+        /// New-line character to use while printing the matrix
+        /// </summary>
         public string NewLine = "\n";
+        /// <summary>
+        /// Amount of digits to round to while printing
+        /// </summary>
         public int Digits = 6;
+        /// <summary>
+        /// Wheter the matrix was filled with random values
+        /// </summary>
         public bool CreatedFromSeed = false;
+        #endregion
 
-        // Emtpy 3x3 constructor
+        #region Constructors
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public MatrisBase() { }
 
-        // Constructor with row, column, fill
-        public MatrisBase(int r, int c, T fill)
+        /// <summary>
+        /// Creates a matrix with given dimensions, filled with given value 
+        /// </summary>
+        /// <param name="rowDim">Row dimension</param>
+        /// <param name="colDim">Column dimension</param>
+        /// <param name="fill">Value to fill the matrix with</param>
+        public MatrisBase(int rowDim, int colDim, T fill)
         {
-            if (r > (int)MatrisLimits.forRows)
+            if (rowDim > (int)MatrisLimits.forRows)
             {
-                r = (int)MatrisLimits.forRows;
+                rowDim = (int)MatrisLimits.forRows;
             }
 
-            if (c > (int)MatrisLimits.forCols)
+            if (colDim > (int)MatrisLimits.forCols)
             {
-                c = (int)MatrisLimits.forCols;
+                colDim = (int)MatrisLimits.forCols;
             }
 
-            _row = r; _col = c;
+            _row = rowDim; _col = colDim;
 
             List<List<T>> vals = new List<List<T>>();
-            for (int i = 0; i < r; i++)
+            for (int i = 0; i < rowDim; i++)
             {
                 vals.Add(new List<T>());
-                for (int j = 0; j < c; j++)
+                for (int j = 0; j < colDim; j++)
                 {
                     vals[i].Add(fill);
                 }
@@ -168,7 +215,10 @@ namespace MatrisAritmetik.Core
             _values = vals;
         }
 
-        // Constructor with given list of list of values
+        /// <summary>
+        /// Creates a matrix from the given 2D List
+        /// </summary>
+        /// <param name="vals">A list with same length lists</param>
         public MatrisBase(List<List<T>> vals)
         {
             _row = vals.Count;
@@ -182,23 +232,14 @@ namespace MatrisAritmetik.Core
 
             _values = vals;
         }
+        #endregion
 
-        // Matris kopyası
-        public MatrisBase<T> Copy()
-        {
-            List<List<T>> lis = new List<List<T>>();
-            for (int i = 0; i < Row; i++)
-            {
-                lis.Add(new List<T>());
-                for (int j = 0; j < Col; j++)
-                {
-                    lis[i].Add(Values[i][j]);
-                }
-            }
-            return new MatrisBase<T>(lis);
-        }
-
-        // Sütun genişliklerini bütün elemanlara bakarak int[] olarak döner 
+        #region Private Methods
+        /// <summary>
+        /// Finds the longest values in columns and returns their widths in an array
+        /// </summary>
+        /// <param name="mat">Matrix to get column widths of</param>
+        /// <returns>Array of column widths</returns>
         private int[] GetColumnWidths(MatrisBase<T> mat)
         {
             int[] longest_in_col = new int[mat.Col];
@@ -219,8 +260,31 @@ namespace MatrisAritmetik.Core
             return longest_in_col;
 
         }
+        #endregion
 
-        // Matrisi string olarak döner
+        #region Public Methods
+        /// <summary>
+        /// Creates a deep copy of the matrix
+        /// </summary>
+        /// <returns>A new matrix with the same values</returns>
+        public MatrisBase<T> Copy()
+        {
+            List<List<T>> lis = new List<List<T>>();
+            for (int i = 0; i < Row; i++)
+            {
+                lis.Add(new List<T>());
+                for (int j = 0; j < Col; j++)
+                {
+                    lis[i].Add(Values[i][j]);
+                }
+            }
+            return new MatrisBase<T>(lis);
+        }
+
+        /// <summary>
+        /// Creates a printable string using <see cref="MatrisBase{T}.Delimiter"/> and <see cref="MatrisBase{T}.NewLine"/>
+        /// </summary>
+        /// <returns>A string with values in columns left-aligned</returns>
         public string Printstr()
         {
             bool stringmat = typeof(T) == typeof(string);
@@ -257,13 +321,16 @@ namespace MatrisAritmetik.Core
 
                     colno++;
                 }
-                str += "\n";
+                str += NewLine;
             }
 
             return str;
         }
 
-        // Matris değerlerinin sütün genişliklerine göre padlenmiş hallerini matris olarak döner
+        /// <summary>
+        /// Creates a matrix with current matrix's values padded from left depending on the column widths 
+        /// </summary>
+        /// <returns>A string matrix with values padded with spaces on left</returns>
         public MatrisBase<string> PrintStrMaxtrisForm()
         {
             if (Row == 0 || Col == 0)
@@ -286,9 +353,14 @@ namespace MatrisAritmetik.Core
 
             return strmat;
         }
+        #endregion
 
-        //// Indexers, base 0
-        // Rows
+        #region Indexers, 0-based
+        /// <summary>
+        /// Get or set the rows in the given range
+        /// </summary>
+        /// <param name="r">Range for rows</param>
+        /// <returns>A shallow copy of the values in range</returns>
         public List<List<T>> this[Range r]
         {
             get
@@ -330,7 +402,11 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        // Row
+        /// <summary>
+        /// Get or set a row of the matrix, 0-based index
+        /// </summary>
+        /// <param name="index">Index of the row</param>
+        /// <returns>Stored instance of the values in the given row</returns>
         public List<T> this[int index]
         {
 
@@ -354,7 +430,12 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        // Single value
+        /// <summary>
+        /// Get or set a value in the matrix, 0-based indices
+        /// </summary>
+        /// <param name="r">Row index</param>
+        /// <param name="c">Column index</param>
+        /// <returns>The instance stored in the given index</returns>
         public T this[int r, int c]
         {
             get
@@ -387,7 +468,12 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        // Cols and rows
+        /// <summary>
+        /// Get or set the given range columns in the given range of rows
+        /// </summary>
+        /// <param name="r">Row range</param>
+        /// <param name="c">Column range</param>
+        /// <returns>A deep copy of the values in range</returns>
         public List<List<T>> this[Range r, Range c]
         {
             get
@@ -454,9 +540,15 @@ namespace MatrisAritmetik.Core
 
             }
         }
-        ////
+        #endregion
 
-        // Sütunu yeni bir liste olarak döner. 1-based
+        #region Public Indexing Methods
+        /// <summary>
+        /// Get a deep copy of the row with given index <paramref name="r"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="r">Row index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>Deep copy of values in a row</returns>
         public List<T> RowList(int r,
                                int based = 1)
         {
@@ -468,7 +560,12 @@ namespace MatrisAritmetik.Core
             return listrow;
         }
 
-        // Satırı yeni bir matris olarak döner. 1-based
+        /// <summary>
+        /// Get a new row-Matrix from given row index <paramref name="r"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="r">Row index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>New row-Matrix</returns>
         public MatrisBase<T> RowMat(int r,
                                     int based = 1)
         {
@@ -480,19 +577,12 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<T>() { Row = 1, Col = Col, Values = listrow };
         }
 
-        // Sütunu yeni bir matris olarak döner. 1-based
-        public MatrisBase<T> ColMat(int c,
-                                    int based = 1)
-        {
-            List<List<T>> listcol = new List<List<T>>();
-            for (int i = 0; i < Row; i++)
-            {
-                listcol.Add(new List<T>() { Values[i][c - based] });
-            }
-            return new MatrisBase<T>() { Row = Row, Col = 1, Values = listcol };
-        }
-
-        // Sütunu yeni bir liste olarak döner. 1-based
+        /// <summary>
+        /// Get a deep copy of the column with given index <paramref name="c"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="c">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>Deep copy of values in a column as 1D list</returns>
         public List<T> ColList(int c,
                                int based = 1)
         {
@@ -504,7 +594,35 @@ namespace MatrisAritmetik.Core
             return listrow;
         }
 
-        // Detaylı bilgi
+        /// <summary>
+        /// Get a new column-Matrix from given column index <paramref name="c"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="c">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>New column-Matrix</returns>
+        public MatrisBase<T> ColMat(int c,
+                                    int based = 1)
+        {
+            List<List<T>> listcol = new List<List<T>>();
+            for (int i = 0; i < Row; i++)
+            {
+                listcol.Add(new List<T>() { Values[i][c - based] });
+            }
+            return new MatrisBase<T>() { Row = Row, Col = 1, Values = listcol };
+        }
+        #endregion
+
+        #region Other Public Methods
+        /// <summary>
+        /// Returns the size of the matrix
+        /// </summary>
+        public int ElementCount => Col * Row;
+
+        /// <summary>
+        /// Creates a matrix detail summary
+        /// </summary>
+        /// <param name="name">Name given for this matrix</param>
+        /// <returns>A string with matrix name, seed, dimensions and values</returns>
         public string Details(string name = "")
         {
             string seed_str = CreatedFromSeed ? Seed.ToString() : "-";
@@ -514,8 +632,14 @@ namespace MatrisAritmetik.Core
                 ToString();
 
         }
-        // Matrisin köşelerindeki değerleri içeren string matris döner
-        // Matrisin boyutu yüksekse kullanılabilir
+
+        /// <summary>
+        /// Creates a smaller printable matrix for larger matrices, using only values in the corners
+        /// </summary>
+        /// <param name="rowEachCorner">Amount of rows for each corner</param>
+        /// <param name="colEachCorner">Amount of columns for each corner</param>
+        /// <param name="filler">Value to be used between corners</param>
+        /// <returns>A smaller matrix with <paramref name="filler"/> dividing it to 4 smaller matrices</returns>
         public dynamic CornerMatrix(int rowEachCorner = -1,
                                     int colEachCorner = -1,
                                     string filler = "...")
@@ -646,8 +770,11 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
         }
 
-        public int ElementCount => Col * Row;
-
+        /// <summary>
+        /// Apply exponentiation operation over each value in the matrix
+        /// </summary>
+        /// <param name="n">Exponential value</param>
+        /// <returns>A new matrix raised to the power of <paramref name="n"/></returns>
         public MatrisBase<T> Power(dynamic n)
         {
             n = double.Parse(n.ToString());
@@ -663,6 +790,12 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<T>(newlist);
         }
 
+        /// <summary>
+        /// Multiply a row with given <paramref name="factor"/>
+        /// </summary>
+        /// <param name="row">Row index</param>
+        /// <param name="factor">Factor to multiply with</param>
+        /// <param name="based">Index base</param>
         public void MulRow(int row,
                            float factor,
                            int based = 1)
@@ -673,6 +806,11 @@ namespace MatrisAritmetik.Core
             }
         }
 
+        /// <summary>
+        /// Moves a row to the end of the rows
+        /// </summary>
+        /// <param name="a">Row index</param>
+        /// <param name="based">Index base</param>
         public void SwapToEnd(int a,
                               int based = 1)
         {
@@ -684,6 +822,13 @@ namespace MatrisAritmetik.Core
             _values.Add(new List<T>(temp));
         }
 
+        /// <summary>
+        /// Swap rows or columns
+        /// </summary>
+        /// <param name="a">Index 1</param>
+        /// <param name="b">Index 2</param>
+        /// <param name="axis">Swap rows = 0, swap columns = 1</param>
+        /// <param name="based">Index base</param>
         public void Swap(int a,
                          int b,
                          int axis = 0,
@@ -717,13 +862,17 @@ namespace MatrisAritmetik.Core
             }
         }
 
-        public void FixMinusZero()
+        /// <summary>
+        /// Change values that are too small, if value smaller than <paramref name="tolerance"/> then value = 0.0
+        /// </summary>
+        /// <param name="tolerance">Upper limit for a value to be consider zero</param>
+        public void FixMinusZero(double tolerance = 1e-6)
         {
             for (int i = 0; i < _row; i++)
             {
                 for (int j = 0; j < _col; j++)
                 {
-                    if (_values[i][j].ToString() == "-0" || Math.Abs(float.Parse(_values[i][j].ToString())) < 1e-6)
+                    if (_values[i][j].ToString() == "-0" || Math.Abs(float.Parse(_values[i][j].ToString())) < tolerance)
                     {
                         _values[i][j] = (dynamic)(float)0.0;
                     }
@@ -731,6 +880,11 @@ namespace MatrisAritmetik.Core
             }
         }
 
+        /// <summary>
+        /// Round values in the matrix to given amount of <paramref name="decimals"/>
+        /// </summary>
+        /// <param name="decimals">Amount of decimal places to round to</param>
+        /// <returns>A new matrix with rounded values</returns>
         public MatrisBase<T> Round(int decimals = 5)
         {
             for (int i = 0; i < _row; i++)
@@ -743,91 +897,14 @@ namespace MatrisAritmetik.Core
             return this;
         }
 
-        //// Matrix features
-        // Valid ?
-        public bool IsValid()
-        {
-            return (Row > 0) && (Col > 0);
-        }
+        #endregion
 
-        // Square ?
-        public bool IsSquare()
-        {
-            return Row == Col;
-        }
-
-        // Zero matrix ?
-        public bool IsZero(float tolerance = (float)0.00001)
-        {
-            static bool inRange(float num, float tol)
-            {
-                return (num <= tol) && (num >= -tol);
-            }
-
-            bool isZero = true;
-            List<List<T>> vals1 = Values;
-            for (int i = 0; i < Row; i++)
-            {
-                if (!isZero)
-                {
-                    break;
-                }
-
-                for (int j = 0; j < Col; j++)
-                {
-                    if (!inRange(float.Parse(vals1[i][j].ToString()), tolerance))
-                    {
-                        isZero = false;
-                        break;
-                    }
-                }
-            }
-            return isZero;
-        }
-        public bool IsZeroCol(int col_index,
-                              int based = 1,
-                              float tolerance = (float)0.00001)
-        {
-            return ColMat(col_index, based).IsZero(tolerance);
-        }
-        public bool IsZeroRow(int row_index,
-                              int based = 1,
-                              float tolerance = (float)0.00001)
-        {
-            return RowMat(row_index, based).IsZero(tolerance);
-        }
-
-        public bool IsSameSize(MatrisBase<T> other)
-        {
-            return (Row == other.Row) && (Col == other.Col);
-        }
-
-        // Overloads
-        public IEnumerator<List<T>> GetEnumerator()
-        {
-            return Values.GetEnumerator();
-        }
-        public override string ToString()
-        {
-            try
-            {
-                return Round(Digits).PrintStrMaxtrisForm().Printstr();
-            }
-            catch (Exception)
-            {
-                return PrintStrMaxtrisForm().Printstr();
-            }
-        }
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-        ////// Static stuff
-        //// Parse as float matrix
+        #region Public Static Methods
+        /// <summary>
+        /// Parse matrix values as floats
+        /// </summary>
+        /// <param name="mat">Matrix to parse values of</param>
+        /// <returns>A 2D List of values of <paramref name="mat"/> parsed as <see cref="float"/>s </returns>
         public static List<List<float>> FloatListParse(MatrisBase<T> mat)
         {
             List<List<float>> floatlis = new List<List<float>>();
@@ -841,7 +918,12 @@ namespace MatrisAritmetik.Core
             }
             return floatlis;
         }
-        //// a^b handling
+        /// <summary>
+        /// Handle exponentiation operations
+        /// </summary>
+        /// <param name="a">Base value</param>
+        /// <param name="b">Exponential</param>
+        /// <returns>Result of <paramref name="a"/> raised to the power of <paramref name="b"/> as <see cref="double"/></returns>
         public static double PowerMethod(double a, double b)
         {
             double result;
@@ -880,8 +962,141 @@ namespace MatrisAritmetik.Core
             }
             return result;
         }
+        #endregion
 
-        ////// Operator overloads
+        #region Matrix Features
+        /// <summary>
+        /// Check dimensions to validate the matrix
+        /// </summary>
+        /// <returns>True if matrix is valid (<see cref="MatrisBase{T}.Row"/> > 0 and <see cref="MatrisBase{T}.Col"/> > 0)</returns>
+        public bool IsValid()
+        {
+            return (Row > 0) && (Col > 0);
+        }
+
+        /// <summary>
+        /// Check if matrix is square
+        /// </summary>
+        /// <returns>True if matrix is square (<see cref="MatrisBase{T}.Row"/> == <see cref="MatrisBase{T}.Col"/>)</returns>
+        public bool IsSquare()
+        {
+            return Row == Col;
+        }
+
+        /// <summary>
+        /// Check if matrix is filled with zeros (absolute values are less than <paramref name="tolerance"/>)
+        /// </summary>
+        /// <param name="tolerance">Upper limit for a value to be consider zero</param>
+        /// <returns>True if all values are in the range of <paramref name="tolerance"/></returns>
+        public bool IsZero(float tolerance = (float)0.00001)
+        {
+            static bool inRange(float num, float tol)
+            {
+                return (num <= tol) && (num >= -tol);
+            }
+
+            bool isZero = true;
+            List<List<T>> vals1 = Values;
+            for (int i = 0; i < Row; i++)
+            {
+                if (!isZero)
+                {
+                    break;
+                }
+
+                for (int j = 0; j < Col; j++)
+                {
+                    if (!inRange(float.Parse(vals1[i][j].ToString()), tolerance))
+                    {
+                        isZero = false;
+                        break;
+                    }
+                }
+            }
+            return isZero;
+        }
+
+        /// <summary>
+        /// Check if a column is filled with zeros (absolute values are less than <paramref name="tolerance"/>) 
+        /// </summary>
+        /// <param name="col_index">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <param name="tolerance">Upper limit for a value to be consider zero</param>
+        /// <returns>True if all values in the column is in the range of <paramref name="tolerance"/></returns>
+        public bool IsZeroCol(int col_index,
+                              int based = 1,
+                              float tolerance = (float)0.00001)
+        {
+            return ColMat(col_index, based).IsZero(tolerance);
+        }
+
+        /// <summary>
+        /// Check if a row is filled with zeros (absolute values are less than <paramref name="tolerance"/>) 
+        /// </summary>
+        /// <param name="row_index">Row index</param>
+        /// <param name="based">Index base</param>
+        /// <param name="tolerance">Upper limit for a value to be consider zero</param>
+        /// <returns>True if all values in the row is in the range of <paramref name="tolerance"/></returns>
+        public bool IsZeroRow(int row_index,
+                              int based = 1,
+                              float tolerance = (float)0.00001)
+        {
+            return RowMat(row_index, based).IsZero(tolerance);
+        }
+
+        /// <summary>
+        /// Compare the size of the matrix with another matrix
+        /// </summary>
+        /// <param name="other">Other matrix to compare sizes to</param>
+        /// <returns>True if row and column dimensions match</returns>
+        public bool IsSameSize(MatrisBase<T> other)
+        {
+            return (Row == other.Row) && (Col == other.Col);
+        }
+        #endregion
+
+        #region Overriding Object Methods
+        /// <summary>
+        /// Creates an <see cref="IEnumerable{List{T}}"/> over the values
+        /// </summary>
+        /// <returns>An <see cref="IEnumerable{List{T}}"/> over the values</returns>
+        public IEnumerator<List<T>> GetEnumerator()
+        {
+            return Values.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Create a printable, aligned string form of the matrix
+        /// </summary>
+        /// <returns> A string with left-aligned values</returns>
+        public override string ToString()
+        {
+            try
+            {
+                return Round(Digits).PrintStrMaxtrisForm().Printstr();
+            }
+            catch (Exception)
+            {
+                return PrintStrMaxtrisForm().Printstr();
+            }
+        }
+        /// <summary>
+        /// Overrides <see cref="object.Equals(object?)"/> method
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns>True if <paramref name="obj"/> is the same as the base</returns>
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        #endregion
+
+        #region Operator Overloads
         //// Equals
         // Mat == Mat
         public static bool operator ==(MatrisBase<T> mat, MatrisBase<T> mat2)
@@ -1347,5 +1562,6 @@ namespace MatrisAritmetik.Core
         {
             throw new Exception("Matris mod olarak kullanılamaz!");
         }
+        #endregion
     }
 }

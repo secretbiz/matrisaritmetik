@@ -75,28 +75,62 @@ namespace MatrisAritmetik.Core.Models
      *      >>>  birim1 = myMatrix./myMatrix ; quiet
      * 
      */
+    /// <summary>
+    /// Command class which hold information about a command's current state, output etc.
+    /// </summary>
     public class Command
     {
+        #region Const Strings
+        /// <summary>
+        /// String to look for when applying settings to command row
+        /// </summary>
         private const string ApplyName = "name:";
+        /// <summary>
+        /// String to look for when applying settings to output row
+        /// </summary>
         private const string ApplyVals = "vals:";
+        #endregion
 
+        #region Public Fields
+        /// <summary>
+        /// List of commands and settings to evaluate, first one hold the command, rest are settings
+        /// </summary>
         public string[] TermsToEvaluate;
-
+        /// <summary>
+        /// Tokens of the command
+        /// </summary>
         public List<Token> Tokens = new List<Token>();
-
+        /// <summary>
+        /// Output of the command, generally a string
+        /// </summary>
         public dynamic Output = "";
-
+        /// <summary>
+        /// Given command, unprocessed
+        /// </summary>
         public string OriginalCommand = "";
-
+        /// <summary>
+        /// Cleaned command, with expected spacing
+        /// </summary>
         public string CleanedCommand = "";
-
+        /// <summary>
+        /// Given settings, unprocessed
+        /// </summary>
         public string OriginalSettings = "";
-
+        /// <summary>
+        /// Dictionary of settings and their values to be applied to command row
+        /// </summary>
         public Dictionary<string, string> NameSettings = new Dictionary<string, string>();
-
+        /// <summary>
+        /// Dictionary of settings and their values to be applied to output row
+        /// </summary>
         public Dictionary<string, string> ValsSettings = new Dictionary<string, string>();
+        #endregion
 
+        #region Command State Fields and Properties
         private CommandState _state = CommandState.IDLE;
+        /// <summary>
+        /// Current <see cref="CommandState"/> of the command
+        /// </summary>
         public CommandState STATE
         {
             get => _state;
@@ -106,85 +140,26 @@ namespace MatrisAritmetik.Core.Models
                 STATEID = (int)value;
             }
         }
-
+        /// <summary>
+        /// Command's <see cref="CommandState"/> as an integer 
+        /// </summary>
         public int STATEID = -1;
-
+        /// <summary>
+        /// Current message about the state of the command
+        /// </summary>
         public string STATE_MESSAGE = "";
+        #endregion
 
-        private void SettingDecider(string settingname, string param)
-        {
-            if (settingname.Length > 5)
-            {
-                switch (settingname.Substring(0, 5))// add to name settings
-                {
-                    case ApplyName:
-                        settingname = settingname.Replace(ApplyName, "");
-                        if (settingname == "quiet")
-                        {
-                            settingname = "display";
-                            param = "none";
-                        }
-
-                        if (!NameSettings.ContainsKey(settingname))
-                        {
-                            NameSettings.Add(settingname, param);
-                        }
-                        else
-                        {
-                            NameSettings[settingname] = param;
-                        }
-
-                        return;
-
-                    case ApplyVals:
-                        settingname = settingname.Replace(ApplyVals, "");
-                        if (settingname == "quiet")
-                        {
-                            settingname = "display";
-                            param = "none";
-                        }
-
-                        if (!ValsSettings.ContainsKey(settingname))
-                        {
-                            ValsSettings.Add(settingname, param);
-                        }
-                        else
-                        {
-                            ValsSettings[settingname] = param;
-                        }
-
-                        return;
-
-                    default:
-                        break;
-                }
-            }
-
-            if (settingname == "quiet")
-            {
-                settingname = "display";
-                param = "none";
-            }
-
-            if (!NameSettings.ContainsKey(settingname))
-            {
-                NameSettings.Add(settingname, param);
-            }
-            else
-            {
-                NameSettings[settingname] = param;
-            }
-
-            if (!ValsSettings.ContainsKey(settingname))
-            {
-                ValsSettings.Add(settingname, param);
-            }
-            else
-            {
-                ValsSettings[settingname] = param;
-            }
-        }
-
+        #region Constructors
+        /// <summary>
+        /// Creates a command with given state, used only in session variable setting process
+        /// </summary>
+        /// <param name="org">Original command string</param>
+        /// <param name="nset">Setting dictionary for command row</param>
+        /// <param name="vset">Setting dictionary for output row</param>
+        /// <param name="stat">State of the command</param>
+        /// <param name="statmsg">State message of the command</param>
+        /// <param name="output">Output of the command</param>
         public Command(string org,
                        Dictionary<string, string> nset,
                        Dictionary<string, string> vset,
@@ -200,6 +175,10 @@ namespace MatrisAritmetik.Core.Models
             Output = output;
         }
 
+        /// <summary>
+        /// Create a command and get it ready for processing
+        /// </summary>
+        /// <param name="cmd">Command string</param>
         public Command(string cmd)
         {
             if (cmd == "")
@@ -261,7 +240,94 @@ namespace MatrisAritmetik.Core.Models
             // At this point command should be ready to be examined and settings should all be done
             CleanedCommand = TermsToEvaluate[0];
         }
+        #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Places given setting an value to <see cref="Command.NameSettings"/> or <see cref="Command.ValsSettings"/> dictionaries
+        /// </summary>
+        /// <param name="settingname">Name of the setting</param>
+        /// <param name="valueofsetting">Value of the setting</param>
+        private void SettingDecider(string settingname, string valueofsetting)
+        {
+            if (settingname.Length > 5)
+            {
+                switch (settingname.Substring(0, 5))// add to name settings
+                {
+                    case ApplyName:
+                        settingname = settingname.Replace(ApplyName, "");
+                        if (settingname == "quiet")
+                        {
+                            settingname = "display";
+                            valueofsetting = "none";
+                        }
+
+                        if (!NameSettings.ContainsKey(settingname))
+                        {
+                            NameSettings.Add(settingname, valueofsetting);
+                        }
+                        else
+                        {
+                            NameSettings[settingname] = valueofsetting;
+                        }
+
+                        return;
+
+                    case ApplyVals:
+                        settingname = settingname.Replace(ApplyVals, "");
+                        if (settingname == "quiet")
+                        {
+                            settingname = "display";
+                            valueofsetting = "none";
+                        }
+
+                        if (!ValsSettings.ContainsKey(settingname))
+                        {
+                            ValsSettings.Add(settingname, valueofsetting);
+                        }
+                        else
+                        {
+                            ValsSettings[settingname] = valueofsetting;
+                        }
+
+                        return;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (settingname == "quiet")
+            {
+                settingname = "display";
+                valueofsetting = "none";
+            }
+
+            if (!NameSettings.ContainsKey(settingname))
+            {
+                NameSettings.Add(settingname, valueofsetting);
+            }
+            else
+            {
+                NameSettings[settingname] = valueofsetting;
+            }
+
+            if (!ValsSettings.ContainsKey(settingname))
+            {
+                ValsSettings.Add(settingname, valueofsetting);
+            }
+            else
+            {
+                ValsSettings[settingname] = valueofsetting;
+            }
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Summarizes the command's current state
+        /// </summary>
+        /// <returns>A string with original command string, settings, state and the output</returns>
         public string CommandSummary()
         {
             string nset = "";
@@ -294,6 +360,7 @@ Ek ayarlar(Çıktı):" + vset + @"
 Durum: " + state;
 
         }
+        #endregion
     }
 
 }
