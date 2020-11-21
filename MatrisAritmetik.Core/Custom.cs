@@ -369,8 +369,8 @@ namespace MatrisAritmetik.Core
         //// OPERATORS
         // = OPERATOR
         public const string EQ_MULTIPLE_USE = "Atama operatörü birden fazla kez kullanılamaz!";
-        public const string EQ_FORMAT = "Atama işlemi sadece 'matris = matris' formatında olabilir!";
-        public const string EQ_FAILED = "Atama işlemi başarısız. Atanan değer bir matris olmalı!";
+        public const string EQ_FORMAT = "Atama işlemi sadece 'matris = matris_veya_skaler' formatında olabilir!";
+        public const string EQ_FAILED = "Atama işlemi başarısız. Atanan değer bir matris veya skaler olmalı!";
 
         // % OPERATOR
         public const string MOD_MAT_THEN_BASE_MAT = "Mod matris ise diğer terim de matris olmalı!";

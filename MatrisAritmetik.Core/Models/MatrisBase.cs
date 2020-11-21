@@ -32,14 +32,7 @@ namespace MatrisAritmetik.Core
             {
                 if (_row == -1) // Only set if first time
                 {
-                    if (value > (int)MatrisLimits.forRows)
-                    {
-                        _row = (int)MatrisLimits.forRows;
-                    }
-                    else
-                    {
-                        _row = value;
-                    }
+                    _row = value > (int)MatrisLimits.forRows ? (int)MatrisLimits.forRows : value;
                 }
             }
         }
@@ -54,14 +47,7 @@ namespace MatrisAritmetik.Core
             {
                 if (_col == -1) // Only set if first time
                 {
-                    if (value > (int)MatrisLimits.forCols)
-                    {
-                        _col = (int)MatrisLimits.forCols;
-                    }
-                    else
-                    {
-                        _col = value;
-                    }
+                    _col = value > (int)MatrisLimits.forCols ? (int)MatrisLimits.forCols : value;
                 }
             }
         }
@@ -940,25 +926,11 @@ namespace MatrisAritmetik.Core
             }
             else if (b < 0.0)
             {
-                if (a == 0.0)       // 0^(-x)
-                {
-                    result = double.PositiveInfinity;
-                }
-                else                 // y^(-x)
-                {
-                    result = Math.Pow(a, b);
-                }
+                result = a == 0.0 ? double.PositiveInfinity : Math.Pow(a, b);
             }
             else
             {
-                if (a == 0.0)   // 0^x
-                {
-                    result = 0.0;
-                }
-                else                          // y^x
-                {
-                    result = Math.Pow(a, b);
-                }
+                result = a == 0.0 ? 0.0 : Math.Pow(a, b);
             }
             return result;
         }
@@ -1637,9 +1609,13 @@ namespace MatrisAritmetik.Core
         {
             if (mat.IsScalar())
             {
-                return new MatrisBase<dynamic>() { Row = 1, Col = 1,
-                    Values = new List<List<dynamic>>() 
-                    { new List<dynamic>() { val % (dynamic)(float.Parse(mat.Values[0][0].ToString())) } } };
+                return new MatrisBase<dynamic>()
+                {
+                    Row = 1,
+                    Col = 1,
+                    Values = new List<List<dynamic>>()
+                    { new List<dynamic>() { val % (dynamic)(float.Parse(mat.Values[0][0].ToString())) } }
+                };
             }
             throw new Exception("Matris mod olarak kullanılamaz!");
         }

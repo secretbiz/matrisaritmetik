@@ -150,14 +150,9 @@ namespace MatrisAritmetik.Pages
                     }
                     catch (Exception err)
                     {
-                        if (err.InnerException != null)
-                        {
-                            LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
-                        }
-                        else
-                        {
-                            LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
-                        }
+                        LastMessage = err.InnerException != null
+                            ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                            : new CommandMessage(err.Message, CommandState.ERROR);
                     }
                 }
                 else
@@ -211,14 +206,9 @@ namespace MatrisAritmetik.Pages
                     }
                     catch (Exception err)
                     {
-                        if (err.InnerException != null)
-                        {
-                            LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
-                        }
-                        else
-                        {
-                            LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
-                        }
+                        LastMessage = err.InnerException != null
+                            ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                            : new CommandMessage(err.Message, CommandState.ERROR);
                     }
                 }
                 else
@@ -274,18 +264,11 @@ namespace MatrisAritmetik.Pages
                 }
                 catch (Exception err)
                 {
-                    if (err.InnerException != null)
-                    {
-                        LastMessage = new CommandMessage(err.InnerException.Message, CommandState.ERROR);
-                    }
-                    else if (err.Message == "Stack empty.")
-                    {
-                        LastMessage = new CommandMessage(CompilerMessage.PARANTHESIS_COUNT_ERROR, CommandState.ERROR);
-                    }
-                    else
-                    {
-                        LastMessage = new CommandMessage(err.Message, CommandState.ERROR);
-                    }
+                    LastMessage = err.InnerException != null
+                        ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                        : err.Message == "Stack empty."
+                            ? new CommandMessage(CompilerMessage.PARANTHESIS_COUNT_ERROR, CommandState.ERROR)
+                            : new CommandMessage(err.Message, CommandState.ERROR);
                 }
 
                 if (OutputHistory == null)

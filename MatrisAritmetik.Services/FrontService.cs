@@ -456,14 +456,9 @@ namespace MatrisAritmetik.Services
                                     {
                                         // base operands[0]
                                         // term to get mod of operands[1]should be matrix
-                                        if (CheckMatrixAndUpdateVal(operands[1], matDict) || ((MatrisBase<dynamic>)operands[0].val).IsScalar())
-                                        {
-                                            operands[0].val = operands[1].val % operands[0].val;
-                                        }
-                                        else
-                                        {
-                                            throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
-                                        }
+                                        operands[0].val = CheckMatrixAndUpdateVal(operands[1], matDict) || ((MatrisBase<dynamic>)operands[0].val).IsScalar()
+                                            ? operands[1].val % operands[0].val
+                                            : throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
                                     }
                                     else
                                     {
@@ -540,23 +535,13 @@ namespace MatrisAritmetik.Services
                             case ".*":
                                 {
                                     MatrisBase<dynamic> mat1, mat2;
-                                    if (CheckMatrixAndUpdateVal(operands[0], matDict))
-                                    {
-                                        mat1 = operands[0].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-                                    }
+                                    mat1 = CheckMatrixAndUpdateVal(operands[0], matDict)
+                                        ? (MatrisBase<dynamic>)operands[0].val
+                                        : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
-                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                                    {
-                                        mat2 = operands[1].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-                                    }
+                                    mat2 = CheckMatrixAndUpdateVal(operands[1], matDict)
+                                        ? (MatrisBase<dynamic>)operands[1].val
+                                        : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
                                     operands[0].val = ((IMatrisArithmeticService<dynamic>)new MatrisArithmeticService<object>()).MatrisMul(mat2, mat1);
 
@@ -565,23 +550,13 @@ namespace MatrisAritmetik.Services
                             case "./":
                                 {
                                     MatrisBase<dynamic> mat1, mat2;
-                                    if (CheckMatrixAndUpdateVal(operands[0], matDict))
-                                    {
-                                        mat1 = operands[0].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-                                    }
+                                    mat1 = CheckMatrixAndUpdateVal(operands[0], matDict)
+                                        ? (MatrisBase<dynamic>)operands[0].val
+                                        : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
 
-                                    if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                                    {
-                                        mat2 = operands[1].val;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-                                    }
+                                    mat2 = CheckMatrixAndUpdateVal(operands[1], matDict)
+                                        ? (MatrisBase<dynamic>)operands[1].val
+                                        : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
 
                                     IMatrisArithmeticService<object> matservice = new MatrisArithmeticService<object>();
 
@@ -605,17 +580,39 @@ namespace MatrisAritmetik.Services
                                 }
                             case "=":
                                 {
-                                    if (operands[0].tknType != TokenType.MATRIS || operands[1].tknType != TokenType.MATRIS)
+                                    if (operands[1].tknType != TokenType.MATRIS) // LHS should just be a valid name for a matrix
                                     {
                                         throw new Exception(CompilerMessage.EQ_FORMAT);
                                     }
                                     else
                                     {
-                                        if (!(operands[0].val is MatrisBase<object>))
+                                        switch (operands[0].tknType)
                                         {
-                                            throw new Exception(CompilerMessage.EQ_FAILED);
+                                            case TokenType.NUMBER:  // RHS is scalar
+                                                {
+                                                    operands[0].val = new MatrisBase<dynamic>(1, 1, operands[0].val);
+                                                    break;
+                                                }
+                                            case TokenType.MATRIS:   // RHS is possibly a matrix
+                                                {
+                                                    operands[0].val = matDict.ContainsKey(operands[0].name)
+                                                        ? (dynamic)matDict[operands[0].name]
+                                                        : operands[0].val is MatrisBase<object>
+                                                            ? operands[0].val
+                                                            : throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
+                                                    break;
+                                                }
+                                            default:
+                                                {
+                                                    if (!(operands[0].val is MatrisBase<object>))  // If RHS is not even a matrix, throw 
+                                                    {
+                                                        throw new Exception(CompilerMessage.EQ_FAILED);
+                                                    }
+                                                    break;
+                                                }
                                         }
 
+                                        // Update the matrix table accordingly
                                         if (matDict.ContainsKey(operands[1].name))
                                         {
                                             matDict[operands[1].name] = operands[0].val;
@@ -631,7 +628,7 @@ namespace MatrisAritmetik.Services
                                                 throw new Exception(CompilerMessage.MAT_LIMIT);
                                             }
                                         }
-                                        else
+                                        else // LHS was invalid
                                         {
                                             if (operands[1].name == "")
                                             {
@@ -647,14 +644,9 @@ namespace MatrisAritmetik.Services
                                 }
                             case ":":
                                 {
-                                    if (Validations.ValidMatrixName(operands[1].name))   // Use the name function for parameter name validation
-                                    {
-                                        operands[0].info = operands[1].name;
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
-                                    }
+                                    operands[0].info = Validations.ValidMatrixName(operands[1].name)
+                                        ? operands[1].name
+                                        : throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
                                     break;
                                 }
                             default:
@@ -754,18 +746,11 @@ namespace MatrisAritmetik.Services
 
                                 case TokenType.MATRIS:
                                     {
-                                        if (matDict.ContainsKey(operands[k].name))
-                                        {
-                                            param_arg[pind] = matDict[operands[k].name];
-                                        }
-                                        else if (operands[k].val is MatrisBase<object>)
-                                        {
-                                            param_arg[pind] = operands[k].val;
-                                        }
-                                        else
-                                        {
-                                            throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operands[k].name));
-                                        }
+                                        param_arg[pind] = matDict.ContainsKey(operands[k].name)
+                                            ? matDict[operands[k].name]
+                                            : operands[k].val is MatrisBase<object>
+                                                ? (object)operands[k].val
+                                                : throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operands[k].name));
 
                                         break;
                                     }
@@ -780,13 +765,56 @@ namespace MatrisAritmetik.Services
                             {
                                 try
                                 {
-                                    param_arg[pind] = (op.paramTypes[pind]) switch
+                                    switch (op.paramTypes[pind])
                                     {
-                                        "int" => Convert.ToInt32(param_arg[pind]),
-                                        "Matris" => (MatrisBase<dynamic>)param_arg[pind],
-                                        "float" => Convert.ToSingle(param_arg[pind]),
-                                        _ => throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[pind])),
-                                    };
+                                        case "int":
+                                            {
+                                                if (operands[k].tknType == TokenType.MATRIS) // Try parsing scalar matrix as an integer
+                                                {
+                                                    if (!((MatrisBase<dynamic>)param_arg[pind]).IsScalar())
+                                                    {
+                                                        throw new Exception();
+                                                    }
+                                                    else
+                                                    {
+                                                        param_arg[pind] = Convert.ToInt32((string)((MatrisBase<dynamic>)param_arg[pind])[0, 0].ToString());
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    param_arg[pind] = Convert.ToInt32(param_arg[pind]);
+                                                }
+                                                break;
+                                            }
+                                        case "float":
+                                            {
+                                                if (operands[k].tknType == TokenType.MATRIS)  // Try parsing scalar matrix as a float
+                                                {
+                                                    if (!((MatrisBase<dynamic>)param_arg[pind]).IsScalar())
+                                                    {
+                                                        throw new Exception();
+                                                    }
+                                                    else
+                                                    {
+                                                        param_arg[pind] = Convert.ToSingle((string)((MatrisBase<dynamic>)param_arg[pind])[0, 0].ToString());
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    param_arg[pind] = Convert.ToSingle(param_arg[pind]);
+                                                }
+                                                break;
+                                            }
+                                        case "Matris":
+                                            {
+                                                param_arg[pind] = (MatrisBase<dynamic>)param_arg[pind];
+                                                break;
+                                            }
+                                        default:
+                                            {
+                                                throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(op.paramTypes[pind]));
+                                            }
+                                    }
                                 }
                                 catch (Exception)
                                 {
@@ -1210,18 +1238,11 @@ namespace MatrisAritmetik.Services
                                                 case "null":    // nothing found
                                                     {
                                                         cmd.STATE = CommandState.ERROR;
-                                                        if (tkns[0].name.Trim() != "")
-                                                        {
-                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NOT_MAT_FUNC(tkns[0].name);
-                                                        }
-                                                        else if (tkns[0].symbol.Trim() != "")
-                                                        {
-                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NONE_FOUND(tkns[0].symbol);
-                                                        }
-                                                        else
-                                                        {
-                                                            cmd.STATE_MESSAGE = CommandStateMessage.DOCS_NONE_FOUND(tkns[0].val);
-                                                        }
+                                                        cmd.STATE_MESSAGE = tkns[0].name.Trim() != ""
+                                                            ? CommandStateMessage.DOCS_NOT_MAT_FUNC(tkns[0].name)
+                                                            : tkns[0].symbol.Trim() != ""
+                                                                ? CommandStateMessage.DOCS_NONE_FOUND(tkns[0].symbol)
+                                                                : (string)CommandStateMessage.DOCS_NONE_FOUND(tkns[0].val);
 
                                                         break;
                                                     }
@@ -1338,14 +1359,7 @@ namespace MatrisAritmetik.Services
                             {
                                 cmd.STATE = CommandState.ERROR;
 
-                                if (tkns.Count == 0)
-                                {
-                                    cmd.STATE_MESSAGE = CompilerMessage.OP_INVALID(cmd.TermsToEvaluate[0]);
-                                }
-                                else
-                                {
-                                    cmd.STATE_MESSAGE = CompilerMessage.ARG_COUNT_ERROR;
-                                }
+                                cmd.STATE_MESSAGE = tkns.Count == 0 ? CompilerMessage.OP_INVALID(cmd.TermsToEvaluate[0]) : CompilerMessage.ARG_COUNT_ERROR;
                             }
                             else
                             {
