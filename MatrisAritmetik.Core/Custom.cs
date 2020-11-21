@@ -245,7 +245,9 @@ namespace MatrisAritmetik.Core
         }
     }
 
-
+    /// <summary>
+    /// Messages related to request warnings and errors
+    /// </summary>
     public class RequestMessage
     {
         public static string REQUEST_MISSING_KEYS(string requestDesc, string[] keys)
@@ -254,6 +256,10 @@ namespace MatrisAritmetik.Core
         }
     }
 
+    /// <summary>
+    /// Collection of strings and functions to create warning, error and information messages
+    /// 
+    /// </summary>
     public class CompilerMessage
     {
         ////// MATRIX ERRORS

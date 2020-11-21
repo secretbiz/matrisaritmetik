@@ -975,6 +975,15 @@ namespace MatrisAritmetik.Core
         }
 
         /// <summary>
+        /// Check if matrix dimensions are equal to 1, meaning matrix can be consider as a scalar value
+        /// </summary>
+        /// <returns>True if <see cref="MatrisBase{T}.Row"/> == <see cref="MatrisBase{T}.Col"/> == 1</returns>
+        public bool IsScalar()
+        {
+            return (Row == 1) && (Col == 1);
+        }
+
+        /// <summary>
         /// Check if matrix is square
         /// </summary>
         /// <returns>True if matrix is square (<see cref="MatrisBase{T}.Row"/> == <see cref="MatrisBase{T}.Col"/>)</returns>
@@ -1097,7 +1106,8 @@ namespace MatrisAritmetik.Core
         #endregion
 
         #region Operator Overloads
-        //// Equals
+
+        #region Equals
         // Mat == Mat
         public static bool operator ==(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
@@ -1193,7 +1203,9 @@ namespace MatrisAritmetik.Core
             }
             return isEqual;
         }
-        //// Not Equals
+        #endregion
+
+        #region Not Equals
         // Mat != Mat
         public static bool operator !=(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
@@ -1289,7 +1301,9 @@ namespace MatrisAritmetik.Core
             }
             return isNotEqual;
         }
-        //// Addition
+        #endregion
+
+        #region Addition
         // Unary
         public static MatrisBase<T> operator +(MatrisBase<T> mat)
         {
@@ -1299,6 +1313,16 @@ namespace MatrisAritmetik.Core
         // Mat + Mat
         public static MatrisBase<dynamic> operator +(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+            if (mat.IsScalar())
+            {
+                return mat[0, 0] + mat2;
+            }
+
+            if (mat2.IsScalar())
+            {
+                return mat + mat2[0,0];
+            }
+
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
             {
                 throw new Exception("Matris boyutları toplama işlemi için aynı olmalı");
@@ -1345,8 +1369,9 @@ namespace MatrisAritmetik.Core
             }
             return new MatrisBase<dynamic>(newlis);
         }
+        #endregion
 
-        //// Subtraction
+        #region Subtraction
         // Unary
         public static MatrisBase<dynamic> operator -(MatrisBase<T> mat)
         {
@@ -1362,9 +1387,20 @@ namespace MatrisAritmetik.Core
             }
             return new MatrisBase<dynamic>(newlis);
         }
+
         // Mat - Mat
         public static MatrisBase<dynamic> operator -(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+            if (mat.IsScalar())
+            {
+                return mat[0, 0] - mat2;
+            }
+
+            if (mat2.IsScalar())
+            {
+                return mat - mat2[0, 0];
+            }
+
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
             {
                 throw new Exception("Matris boyutları çıkarma işlemi için aynı olmalı");
@@ -1414,10 +1450,22 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<dynamic>(newlis);
         }
 
-        //// Multiplication
+        #endregion
+
+        #region Multiplication
         // Mat * Mat
         public static MatrisBase<dynamic> operator *(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+            if (mat.IsScalar())
+            {
+                return mat[0, 0] * mat2;
+            }
+
+            if (mat2.IsScalar())
+            {
+                return mat * mat2[0, 0];
+            }
+
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
             {
                 throw new Exception("Matris boyutları çarpma işlemi için aynı olmalı");
@@ -1467,10 +1515,22 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<dynamic>(newlis);
         }
 
-        //// Division
+        #endregion
+
+        #region Division
         // Mat / Mat
         public static MatrisBase<dynamic> operator /(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+            if (mat.IsScalar())
+            {
+                return mat[0, 0] / mat2;
+            }
+
+            if (mat2.IsScalar())
+            {
+                return mat / mat2[0, 0];
+            }
+
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
             {
                 throw new Exception("Matris boyutları bölme işlemi için aynı olmalı");
@@ -1520,10 +1580,22 @@ namespace MatrisAritmetik.Core
             return new MatrisBase<dynamic>(newlis);
         }
 
-        //// Modulo
+        #endregion
+
+        #region Modulo
         // Mat % Mat
         public static MatrisBase<dynamic> operator %(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+            if (mat.IsScalar())
+            {
+                return mat[0, 0] % mat2;
+            }
+
+            if (mat2.IsScalar())
+            {
+                return mat % mat2[0, 0];
+            }
+
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
             {
                 throw new Exception("Matris boyutları bölme işlemi için aynı olmalı");
@@ -1562,6 +1634,8 @@ namespace MatrisAritmetik.Core
         {
             throw new Exception("Matris mod olarak kullanılamaz!");
         }
+        #endregion
+
         #endregion
     }
 }
