@@ -1315,12 +1315,12 @@ namespace MatrisAritmetik.Core
         {
             if (mat.IsScalar())
             {
-                return mat[0, 0] + mat2;
+                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) + mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat + mat2[0,0];
+                return mat + (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1391,14 +1391,15 @@ namespace MatrisAritmetik.Core
         // Mat - Mat
         public static MatrisBase<dynamic> operator -(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+
             if (mat.IsScalar())
             {
-                return mat[0, 0] - mat2;
+                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) - mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat - mat2[0, 0];
+                return mat - (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1456,14 +1457,15 @@ namespace MatrisAritmetik.Core
         // Mat * Mat
         public static MatrisBase<dynamic> operator *(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+
             if (mat.IsScalar())
             {
-                return mat[0, 0] * mat2;
+                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) * mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat * mat2[0, 0];
+                return mat * (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1521,14 +1523,15 @@ namespace MatrisAritmetik.Core
         // Mat / Mat
         public static MatrisBase<dynamic> operator /(MatrisBase<T> mat, MatrisBase<T> mat2)
         {
+
             if (mat.IsScalar())
             {
-                return mat[0, 0] / mat2;
+                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) / mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat / mat2[0, 0];
+                return mat / (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1588,12 +1591,12 @@ namespace MatrisAritmetik.Core
         {
             if (mat.IsScalar())
             {
-                return mat[0, 0] % mat2;
+                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) % mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat % mat2[0, 0];
+                return mat % (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1632,6 +1635,12 @@ namespace MatrisAritmetik.Core
         // val % Mat
         public static MatrisBase<dynamic> operator %(dynamic val, MatrisBase<T> mat)
         {
+            if (mat.IsScalar())
+            {
+                return new MatrisBase<dynamic>() { Row = 1, Col = 1,
+                    Values = new List<List<dynamic>>() 
+                    { new List<dynamic>() { val % (dynamic)(float.Parse(mat.Values[0][0].ToString())) } } };
+            }
             throw new Exception("Matris mod olarak kullanılamaz!");
         }
         #endregion

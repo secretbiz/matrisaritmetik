@@ -456,7 +456,7 @@ namespace MatrisAritmetik.Services
                                     {
                                         // base operands[0]
                                         // term to get mod of operands[1]should be matrix
-                                        if (CheckMatrixAndUpdateVal(operands[1], matDict))
+                                        if (CheckMatrixAndUpdateVal(operands[1], matDict) || ((MatrisBase<dynamic>)operands[0].val).IsScalar())
                                         {
                                             operands[0].val = operands[1].val % operands[0].val;
                                         }
