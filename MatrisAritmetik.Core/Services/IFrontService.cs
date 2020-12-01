@@ -96,6 +96,10 @@ namespace MatrisAritmetik.Core.Services
         /// </summary>
         void CleanUp();
 
+        /// <summary>
+        /// Returns compiler documentation
+        /// </summary>
+        string Help();
         #endregion
     }
 }

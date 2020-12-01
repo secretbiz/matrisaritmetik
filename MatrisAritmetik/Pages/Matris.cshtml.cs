@@ -39,10 +39,22 @@ namespace MatrisAritmetik.Pages
 
         #region Service Interface Instances
         private readonly ILogger<MatrisModel> _logger;
-        private readonly IUtilityService<dynamic> _utils;                   // string işleme fonksiyonları
-        private readonly IMatrisArithmeticService<dynamic> _matrisService;  // matris fonksiyonları
-        private readonly IFrontService _frontService;                     // önyüzde gösterilecek bilgi ile ilgili fonksiyonlar
-        private readonly ISpecialMatricesService _specialMatricesService; // özel matris oluşturma fonksiyonları
+        /// <summary>
+        /// Front-end related methods
+        /// </summary>
+        private readonly IFrontService _frontService;
+        /// <summary>
+        /// String manipulation methods
+        /// </summary>
+        private readonly IUtilityService<dynamic> _utils;                 
+        /// <summary>
+        /// Matrix arithmetic methods
+        /// </summary>
+        private readonly IMatrisArithmeticService<dynamic> _matrisService;
+        /// <summary>
+        /// Special matrix creating methods
+        /// </summary>
+        private readonly ISpecialMatricesService _specialMatricesService;
         #endregion
 
         #region Page Constructor
@@ -104,7 +116,9 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region GET Actions
-        // Sayfa kökü GET ile istendiğinde
+        /// <summary>
+        /// Default GET action
+        /// </summary>
         public void OnGet()
         {
             GetSessionVariables();
@@ -123,13 +137,18 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region POST Actions
-        // Sayfadaki bir form'dan default POST isteği gönderildiğinde
+        /// <summary>
+        /// Default post action
+        /// </summary>
         public void OnPost()
         {
             Console.WriteLine("OnPost called...");
         }
 
-        // Matris tablosuna matris ekleme isteği
+        /// <summary>
+        /// Create and save a matrix with given name and values from text
+        /// </summary>
+        /// <returns></returns>
         public async Task OnPostAddMatrix()
         {
             GetSessionVariables();
@@ -168,7 +187,10 @@ namespace MatrisAritmetik.Pages
             SetSessionVariables();
         }
 
-        // Matris tablosuna özel matris ekleme isteği
+        /// <summary>
+        /// Create and save a matrix from given special class with given arguments and name
+        /// </summary>
+        /// <returns></returns>
         public async Task OnPostAddMatrixSpecial()
         {
             GetSessionVariables();
@@ -223,7 +245,10 @@ namespace MatrisAritmetik.Pages
             SetSessionVariables();
         }
 
-        // Matris tablosundan matris silme isteği
+        /// <summary>
+        /// Remove a matrix from the table
+        /// </summary>
+        /// <returns></returns>
         public async Task OnPostDeleteMatrix()
         {
             GetSessionVariables();
@@ -238,7 +263,10 @@ namespace MatrisAritmetik.Pages
             SetSessionVariables();
         }
 
-        // Komut gönderme isteği
+        /// <summary>
+        /// Create and evaluate a command
+        /// </summary>
+        /// <returns></returns>
         public async Task OnPostSendCmd()
         {
             GetSessionVariables();
@@ -300,7 +328,10 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region POST Action Partials
-        // Matris tablosunu güncelleme, rerenderlama
+        /// <summary>
+        /// Matrix table partial view re-rendering
+        /// </summary>
+        /// <returns></returns>
         public PartialViewResult OnPostUpdateMatrisTable()
         {
             GetSessionVariables();
@@ -312,7 +343,10 @@ namespace MatrisAritmetik.Pages
             return mpart;
         }
 
-        // Komut panelini güncelleme, rerenderlama
+        /// <summary>
+        /// Command history panel partial view re-rendering
+        /// </summary>
+        /// <returns></returns>
         public PartialViewResult OnPostUpdateHistoryPanel()
         {
             GetSessionVariables();
@@ -326,7 +360,10 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region Session Methods
-        // Session değişkenlerini al, istek işleme fonksiyonlarının başında kullanılmalı
+        /// <summary>
+        /// Gets the current session variables and puts them into temporary variables
+        /// <para>Must be used at the beginning of the functions used by POST actions</para>
+        /// </summary>
         private void GetSessionVariables()
         {
             // Matrix dictionaries
@@ -366,7 +403,10 @@ namespace MatrisAritmetik.Pages
             OutputHistory.Add(LastMessageKey, LastMessage);
         }
 
-        // Session değişkenlerini güncelle, istek işleme fonksiyonlarının sonunda kullanılmalı
+        /// <summary>
+        /// Sets the current temporary variables as session variables
+        /// <para>Must be used at the end of the functions used by POST actions</para>
+        /// </summary>
         private void SetSessionVariables()
         {
             HttpContext.Session.Set<string>(SessionLastCommand, LastExecutedCommand.OriginalCommand);

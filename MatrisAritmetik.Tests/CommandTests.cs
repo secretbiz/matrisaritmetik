@@ -462,6 +462,15 @@ namespace MatrisAritmetik.Tests
                                                          new Token(){tknType=TokenType.RIGHTBRACE}
                                                        }
                     },
+                    { "!Help()", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="Help"},
+                                                    new Token(){tknType=TokenType.LEFTBRACE},
+                                                    new Token(){tknType=TokenType.RIGHTBRACE},
+                                                    new Token(){
+                                                        tknType=TokenType.OUTPUT,
+                                                        val=CompilerMessage.COMPILER_HELP
+                                                    }
+                                                  }
+                    },
                 }
             },
 
@@ -594,13 +603,13 @@ namespace MatrisAritmetik.Tests
                                                   tknType=TokenType.OUTPUT,
                                                   val=CompilerMessage.COMPILER_HELP
                                               }
-                                            }
+                                          }
                     },
                     { "???", new List<Token>(){ new Token(){tknType=TokenType.DOCS,info="info"},
-                                              new Token(){
+                                                new Token(){
                                                   tknType=TokenType.OUTPUT,
                                                   val=CompilerMessage.COMPILER_HELP
-                                              }
+                                                }
                                             }
                     },
                     { "?Rank", new List<Token>(){
@@ -609,7 +618,7 @@ namespace MatrisAritmetik.Tests
                                                   tknType=TokenType.OUTPUT,
                                                   val=RankInfo.Info()
                                                  }
-                                                }
+                                            }
                     },
                     { "?Transpose", new List<Token>(){
                                                  new Token(){tknType=TokenType.DOCS,info=TransposeInfo.Info()},
@@ -618,7 +627,7 @@ namespace MatrisAritmetik.Tests
                                                   val=Transpose.Details("Transpose") +
                                                                 "\nKomut: " + "Transpose" + "\n" +TransposeInfo.Info()
                                                  }
-                                                }
+                                            }
                     }
                 }
             }

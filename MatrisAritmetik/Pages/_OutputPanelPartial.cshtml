@@ -38,11 +38,14 @@
     }
     else if (msg.State == Core.CommandState.SUCCESS)
     {
-        <tr>
-            <td class="output_cmd_info">
-                <span style="font-weight:bold"> @msg.Message</span>
-            </td>
-        </tr>
+        if (msg.Message != "")
+        {
+            <tr>
+                <td class="output_cmd_info">
+                    <span style="font-weight:bold"> @msg.Message</span>
+                </td>
+            </tr>
+        }
     }
     else
     {
@@ -83,7 +86,7 @@
                         </td>
                     </tr>
 
-                    <tr class="outputRow">
+                    <tr class="outputRow" title='@cmd.CommandSummary()'>
                         <td class="cmdoutput compilerHelp">@cmd.Output</td>
                     </tr>
                 }
@@ -114,17 +117,17 @@
 
                     if (cmd.ValsSettings.ContainsKey("tex"))
                     {
-                        try 
-                        { 
+                        try
+                        {
                             matoutput = new MatrisAritmetik.Core.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
-                        } 
-                        catch (Exception) 
-                        { 
-                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(0, 0, ""); 
+                        }
+                        catch (Exception)
+                        {
+                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(0, 0, "");
                         }
                         if (matoutput.IsValid())
                         {
-                            <tr class="outputRow" style='@style'>
+                            <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
                                 <td>
                                     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                         <mrow>
@@ -167,7 +170,7 @@
                         }
                         else
                         {
-                            <tr class="outputRow" style='@style'>
+                            <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
                                 <td class="cmdoutput">@cmd.Output</td>
                             </tr>
                         }
@@ -175,7 +178,7 @@
                     else
                     {
 
-                        <tr class="outputRow" style='@style'>
+                        <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
                             <td class="cmdoutput">@cmd.Output</td>
                         </tr>
                     }
@@ -189,7 +192,7 @@
                     </td>
                 </tr>
                 <tr class="outputRow">
-                    <td class="cmdoutput" style="white-space:unset !important;">
+                    <td class="cmdoutput" style="white-space:unset !important;" title='@cmd.CommandSummary()'>
                         <span style="color:red;font-size:16px;font-weight:bolder">[HATA]</span> @cmd.STATE_MESSAGE
                     </td>
                 </tr>

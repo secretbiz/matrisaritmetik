@@ -3,6 +3,22 @@
         "Label": "Derleyici",
         "Functions": [
             {
+                "fullname": "Yardım",
+                "description": "Derleyici hakkında bilgi döner",
+
+                "alias_list": ["?"],
+                "function": "Help",
+                "param_types": [],
+                "param_names": [],
+                "required_params": [],
+                "returns": "string",
+
+                "function_template": "!Help()",
+                "function_template_filled": "!Help()",
+
+                "service": "FrontService"
+            },
+            {
                 "fullname": "Geçmişi sil",
                 "description": "Komut ve çıktı geçmişini siler",
 

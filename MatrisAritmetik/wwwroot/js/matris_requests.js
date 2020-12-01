@@ -216,7 +216,7 @@ function colorInput(event) {
     parentnode = parentspan.baseNode.parentNode.id
     var baseind = parentnode.split("_")[1];
     if (parentnode.substring(0, 3) == "cmd") {
-        
+
         ind = parseInt(baseind);
         ind += parentspan.baseNode.textContent.length - 1;
 
@@ -326,7 +326,7 @@ function Highlight(text) {
             if (operators.includes(char))
                 span = "<span class='operator' id='cmd_" + i + "'>";
             else if (seperators.includes(char))
-                span = "<span class='seperators' id='cmd_" + i + "'>";
+                span = "<span class='seperator' id='cmd_" + i + "'>";
             else if (char == "!")
                 span = "<span class='function' id='cmd_" + i + "'>";
             else if (char == "?") {

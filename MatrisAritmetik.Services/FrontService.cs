@@ -16,7 +16,7 @@ namespace MatrisAritmetik.Services
         /// <summary>
         /// Hold state of command history clean-up
         /// </summary>
-        private bool state = false;
+        private bool CleanUp_state = false;
         #endregion
 
         #region Private Methods
@@ -870,6 +870,10 @@ namespace MatrisAritmetik.Services
                                             operands.Add(new Token() { val = null, tknType = TokenType.VOID });
                                             break;
                                         }
+                                    case "Help":
+                                        {
+                                            return new Token() { name = "", val = Help(), tknType = TokenType.STRING };
+                                        }
                                     default: throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
                                 }
                                 break;
@@ -1389,10 +1393,10 @@ namespace MatrisAritmetik.Services
                     }
 
             }
-            if (state && cmd.STATE == CommandState.SUCCESS)
+            if (CleanUp_state && cmd.STATE == CommandState.SUCCESS)
             {
                 cmdHistory.Clear();
-                state = false;
+                CleanUp_state = false;
                 cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_CLEANUP;
                 if (!cmd.NameSettings.ContainsKey("display"))
                 {
@@ -1404,7 +1408,12 @@ namespace MatrisAritmetik.Services
 
         public void CleanUp()
         {
-            state = true;
+            CleanUp_state = true;
+        }
+
+        public string Help()
+        {
+            return CompilerMessage.COMPILER_HELP;
         }
         #endregion
     }
