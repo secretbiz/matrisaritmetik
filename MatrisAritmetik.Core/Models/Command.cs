@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -30,8 +31,8 @@ namespace MatrisAritmetik.Core.Models
      *          
      *          TeX | tex         Çıktıyı TeX formatında gösterir (Diğer birçok ayarı yoksayar)
      *          
-     *      // Ayardan önce "name:" veya "vals:" ile isim ve element bloğuna özel uygulanabilir
-     *      // HTML tag attribute syntax'ine benzer çalışır
+     *      // Ayardan önce "cmd:" veya "out:" ile isim ve element bloğuna özel uygulanabilir
+     *      // CSS stilleri gibi çalışır
      ****   Parametreli: 
      *          
      *          color   {color}                     Font rengi
@@ -62,12 +63,12 @@ namespace MatrisAritmetik.Core.Models
      * 
      *      Örnek (A matrisi, sadece elementleri görüntüle):
      *  
-     *      >>>  A ; noname
+     *      >>>  A ; cmd:quiet
      * 
      * 
      *      Örnek (a1 ve b matris çarpımı, elementlerin arka plan gri, tüm font'lar kalın, element rengi mavi):
      * 
-     *      >>>  a1 .* b ; vals:background-color gray ; font-weight bold ; vals:color blue 
+     *      >>>  a1 .* b ; out:background-color gray ; font-weight bold ; out:color blue 
      * 
      * 
      *      Örnek ( myMatrix'i tersi ile çarp, birim1 olarak kaydet, ama birim1 matrisini print'leme):
@@ -84,11 +85,11 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// String to look for when applying settings to command row
         /// </summary>
-        private const string ApplyName = "name:";
+        private const string ApplyCmd = "cmd:";
         /// <summary>
         /// String to look for when applying settings to output row
         /// </summary>
-        private const string ApplyVals = "vals:";
+        private const string ApplyOut = "out:";
         #endregion
 
         #region Public Fields
@@ -226,11 +227,14 @@ namespace MatrisAritmetik.Core.Models
                                 // ex:
                                 //      from    string "border 2px solid black" 
                                 //      to      Key-Value {"border":"2px solid black"}
-                                string combinedsetting = "";
+                                StringBuilder combinedsetting = new StringBuilder();
                                 for (int j = 1; j < currentsetting.Length; j++)
-                                { combinedsetting += " " + currentsetting[j]; }
+                                {
+                                    combinedsetting.Append(" ");
+                                    combinedsetting.Append(currentsetting[j]);
+                                }
 
-                                SettingDecider(currentsetting[0], combinedsetting);
+                                SettingDecider(currentsetting[0], combinedsetting.ToString());
 
                                 break;
                             }
@@ -254,8 +258,8 @@ namespace MatrisAritmetik.Core.Models
             {
                 switch (settingname.Substring(0, 5))// add to name settings
                 {
-                    case ApplyName:
-                        settingname = settingname.Replace(ApplyName, "");
+                    case ApplyCmd:
+                        settingname = settingname.Replace(ApplyCmd, "");
                         if (settingname == "quiet")
                         {
                             settingname = "display";
@@ -273,8 +277,8 @@ namespace MatrisAritmetik.Core.Models
 
                         return;
 
-                    case ApplyVals:
-                        settingname = settingname.Replace(ApplyVals, "");
+                    case ApplyOut:
+                        settingname = settingname.Replace(ApplyOut, "");
                         if (settingname == "quiet")
                         {
                             settingname = "display";
@@ -330,16 +334,22 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>A string with original command string, settings, state and the output</returns>
         public string CommandSummary()
         {
-            string nset = "";
-            string vset = "";
+            StringBuilder cmdset = new StringBuilder();
+            StringBuilder outset = new StringBuilder();
             foreach (string setting in NameSettings.Keys)
             {
-                nset += setting + ":" + NameSettings[setting] + "\t";
+                cmdset.Append(setting);
+                cmdset.Append(":");
+                cmdset.Append(NameSettings[setting]);
+                cmdset.Append("\t");
             }
 
             foreach (string setting in ValsSettings.Keys)
             {
-                vset += setting + ":" + ValsSettings[setting] + "\t";
+                outset.Append(setting);
+                outset.Append(":");
+                outset.Append(ValsSettings[setting]);
+                outset.Append("\t");
             }
 
             string state = STATE switch
@@ -353,8 +363,8 @@ namespace MatrisAritmetik.Core.Models
             };
 
             return "Komut: " + OriginalCommand + @"
-Ek ayarlar(Komut):" + nset + @"
-Ek ayarlar(Çıktı):" + vset + @"
+Ek ayarlar(Komut):" + cmdset + @"
+Ek ayarlar(Çıktı):" + outset + @"
 Çıktı:
 " + Output.ToString() + @"
 Durum: " + state;

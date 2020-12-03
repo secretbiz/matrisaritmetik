@@ -62,9 +62,7 @@ namespace MatrisAritmetik.Services
         #endregion
 
         #region MatrisArithmeticService Methods
-        /*
-         * Functions with single MatrisBase param
-         */
+
         public MatrisBase<T> Transpose(MatrisBase<T> A)
         {
             List<List<T>> result = new List<List<T>>();
@@ -79,7 +77,7 @@ namespace MatrisAritmetik.Services
 
         public MatrisBase<T> Conjugate(MatrisBase<T> A)
         {
-            return ((IMatrisArithmeticService<T>)this).Transpose(A);
+            return Transpose(A);
         }
 
         public MatrisBase<T> Echelon(MatrisBase<T> A)
@@ -237,7 +235,7 @@ namespace MatrisAritmetik.Services
                 return A;
             }
 
-            MatrisBase<T> result = ((IMatrisArithmeticService<T>)this).Echelon(A);
+            MatrisBase<T> result = Echelon(A);
 
             int rowCount = A.Row;
             while (result.IsZeroRow(rowCount, 1, (float)0.0))
@@ -305,7 +303,7 @@ namespace MatrisAritmetik.Services
                        - (float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString()));
             }
 
-            MatrisBase<T> ech = ((IMatrisArithmeticService<T>)this).Echelon(A);
+            MatrisBase<T> ech = Echelon(A);
 
             float det = float.Parse(ech.Values[0][0].ToString());
             if (ech.swapCount % 2 == 1)
@@ -324,7 +322,7 @@ namespace MatrisAritmetik.Services
 
         public int Rank(MatrisBase<T> A)
         {
-            MatrisBase<T> ech = ((IMatrisArithmeticService<T>)this).Echelon(A);
+            MatrisBase<T> ech = Echelon(A);
             int zeroCount = 0;
             if (A.Row <= A.Col)
             {
@@ -357,20 +355,20 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            if (((IMatrisArithmeticService<T>)this).Determinant(A) == (float)(0.0))
+            if (Determinant(A) == (float)(0.0))
             {
                 throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
 
-            MatrisBase<T> temp = ((IMatrisArithmeticService<T>)this).Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
+            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
 
-            return new MatrisBase<T>(vals: ((IMatrisArithmeticService<T>)this).RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
+            return new MatrisBase<T>(vals: RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
         public MatrisBase<T> PseudoInverse(MatrisBase<T> A,
                                            int side = -1)
         {
-            if (((IMatrisArithmeticService<T>)this).Rank(A) != Math.Min(A.Row, A.Col))
+            if (Rank(A) != Math.Min(A.Row, A.Col))
             {
                 throw new Exception(CompilerMessage.MAT_PSEINV_NOT_FULL_RANK);
             }
@@ -387,7 +385,7 @@ namespace MatrisAritmetik.Services
             {
                 try
                 {
-                    return ((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Inverse(((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Conjugate(A), A)), ((IMatrisArithmeticService<T>)this).Conjugate(A));
+                    return MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
                 }
                 catch (Exception err)
                 {
@@ -403,7 +401,7 @@ namespace MatrisAritmetik.Services
             {
                 try
                 {
-                    return ((IMatrisArithmeticService<T>)this).MatrisMul(((IMatrisArithmeticService<T>)this).Conjugate(A), ((IMatrisArithmeticService<T>)this).Inverse(((IMatrisArithmeticService<T>)this).MatrisMul(A, ((IMatrisArithmeticService<T>)this).Conjugate(A))));
+                    return MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
                 }
                 catch (Exception err)
                 {
@@ -432,15 +430,12 @@ namespace MatrisAritmetik.Services
                 adj.Add(new List<T>());
                 for (int j = 0; j < c; j++)
                 {
-                    adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * ((IMatrisArithmeticService<T>)this).Minor(A, i, j, 0)));
+                    adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * Minor(A, i, j, 0)));
                 }
             }
-            return ((IMatrisArithmeticService<T>)this).Transpose(new MatrisBase<T>(adj));
+            return Transpose(new MatrisBase<T>(adj));
         }
 
-        /*
-         * Functions with multiple parameters
-         */
         public MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B)
         {
             if (A.Col != B.Row)
@@ -516,7 +511,7 @@ namespace MatrisAritmetik.Services
                            int col,
                            int based = 0)
         {
-            return ((IMatrisArithmeticService<T>)this).Determinant(((IMatrisArithmeticService<T>)this).MinorMatris(A, row, col, based));
+            return Determinant(MinorMatris(A, row, col, based));
         }
 
         public MatrisBase<T> MinorMatris(MatrisBase<T> A,

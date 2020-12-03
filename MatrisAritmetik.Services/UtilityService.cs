@@ -120,13 +120,6 @@ namespace MatrisAritmetik.Services
 
             string[] rowsplit;
 
-            // Check required parameters and if they are referenced more than once
-            Dictionary<string, bool> parameterRequired = new Dictionary<string, bool>();
-            for (int i = 0; i < funcinfo.param_names.Length; i++)
-            {
-                parameterRequired.Add(funcinfo.param_names[i], (Array.IndexOf(funcinfo.required_params, i) != -1));
-            }
-
             // Store given arguments
             Dictionary<string, object> param_dict = new Dictionary<string, object>();
 

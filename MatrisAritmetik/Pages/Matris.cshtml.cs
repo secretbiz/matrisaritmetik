@@ -419,6 +419,7 @@ namespace MatrisAritmetik.Pages
             CommandHistory = null;
 
             savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
+            savedMatricesOptionsDict = new Dictionary<string, Dictionary<string, dynamic>>(); 
             foreach (string name in savedMatrices.Keys)
             {
                 if (!savedMatricesValDict.ContainsKey(name))

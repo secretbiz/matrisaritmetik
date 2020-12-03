@@ -667,7 +667,7 @@ namespace MatrisAritmetik.Services
 
                         object serviceObject = null;
                         MethodInfo method = null;
-                        ParameterInfo[] paraminfo = null;
+                        ParameterInfo[] paraminfo = new ParameterInfo[op.paramCount];
 
                         operands.Reverse();
 
@@ -872,7 +872,7 @@ namespace MatrisAritmetik.Services
                                         }
                                     case "Help":
                                         {
-                                            return new Token() { name = "", val = Help(), tknType = TokenType.STRING };
+                                            return new Token() { name = "", val = Help(), tknType = TokenType.DOCS };
                                         }
                                     default: throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
                                 }
@@ -883,6 +883,10 @@ namespace MatrisAritmetik.Services
                                 {
                                     try
                                     {
+                                        if(method == null)
+                                        {
+                                            throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service));
+                                        }
                                         // Invoke the method
                                         // No parameters
                                         if (param_arg.Length == 0)

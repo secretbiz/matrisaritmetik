@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -68,24 +69,27 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>An example call of the command</returns>
         public string MinimalFormat()
         {
-            string reqparams = "";
+            StringBuilder req = new StringBuilder();
             List<int> paraminds = new List<int>(required_params);
             for (int i = 0; i < param_types.Length; i++)
             {
                 if (paraminds.Contains(i))
                 {
-                    reqparams += param_names[i] + ":" + param_types[i];
+                    req.Append(param_names[i]);
+                    req.Append(":");
+                    req.Append(param_types[i]);
                     if (i != param_types.Length - 1)
                     {
                         if (paraminds.Contains(i + 1))
                         {
-                            reqparams += ", ";
+
+                            req.Append(", ");
                         }
                     }
                 }
 
             }
-            return reqparams;
+            return req.ToString();
         }
 
         /// <summary>

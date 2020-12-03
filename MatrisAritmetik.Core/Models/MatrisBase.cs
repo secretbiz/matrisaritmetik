@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MatrisAritmetik.Core
 {
@@ -275,13 +276,12 @@ namespace MatrisAritmetik.Core
         {
             bool stringmat = typeof(T) == typeof(string);
 
-            if (Row == 0 || Col == 0)
+            if (!IsValid())
             {
                 return "";
             }
 
-            string str = "";
-
+            StringBuilder res = new StringBuilder();
             // Column sizes
             int[] longest_in_col = GetColumnWidths(this);
 
@@ -293,24 +293,25 @@ namespace MatrisAritmetik.Core
                 {
                     if (stringmat)
                     {
-                        str += element.ToString();
+                        res.Append(element.ToString());
                     }
                     else
                     {
-                        str += new string(' ', (longest_in_col[colno] - element.ToString().Length)) + element.ToString();
+                        res.Append(new string(' ', (longest_in_col[colno] - element.ToString().Length)));
+                        res.Append(element.ToString());
                     }
 
                     if (colno != Col - 1)
                     {
-                        str += Delimiter;
+                        res.Append(Delimiter);
                     }
 
                     colno++;
                 }
-                str += NewLine;
+                res.Append(NewLine);
             }
 
-            return str;
+            return res.ToString();
         }
 
         /// <summary>

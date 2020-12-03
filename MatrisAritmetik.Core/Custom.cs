@@ -447,8 +447,8 @@ namespace MatrisAritmetik.Core
 
                              "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız" +
                              "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir" +
-                             "\n\to Komut stilleri için ayardan önce 'name:' ön-ekini kullanınız" +
-                             "\n\to Çıktı stilleri için ayardan önce 'vals:' ön-ekini kullanınız" +
+                             "\n\to Komut stilleri için ayardan önce 'cmd:' ön-ekini kullanınız" +
+                             "\n\to Çıktı stilleri için ayardan önce 'out:' ön-ekini kullanınız" +
                              "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır" +
                              "\n\n\to CSS stilleri verilen kurallar çerçevesinde uygulanabilir" +
                              "\n\t       Ayar       |        Açıklama         |    Beklenen değer   " +
@@ -460,7 +460,7 @@ namespace MatrisAritmetik.Core
                              "\n\t    font-weight   |     Yazı kalınlığı      | 0-900, bold, lighter" +
 
                              "\n\n\to Örnek stilli komutlar:" +
-                             "\n\t\t!Identity(4) ; name:quiet ; color blue" +
+                             "\n\t\t!Identity(4) ; cmd:quiet ; out:font-weigth bolder ; color blue" +
                              "\n\t\t!RandFloatMat(4,4,2,3,1); background-color #d233c1; color white; tex\n\n" +
                              MAT_LIMITS_HELP;
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using MatrisAritmetik.Core.Models;
 using Microsoft.AspNetCore.Http;
@@ -34,7 +35,8 @@ namespace MatrisAritmetik.Core
         /// <param name="lis">Command history list to store</param>
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
         {
-            string serialized = "[";
+            StringBuilder serialized = new StringBuilder();
+            serialized.Append("[");
             for (int i = 0; i < lis.Count; i++)
             {
                 Command cmd = lis[i];
@@ -47,14 +49,14 @@ namespace MatrisAritmetik.Core
                     { "statid", (int)cmd.STATE },
                     { "statmsg", cmd.STATE_MESSAGE }
                 };
-                serialized += JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>));
+                serialized.Append(JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>)));
                 if (i != lis.Count - 1)
                 {
-                    serialized += ",";
+                    serialized.Append(",");
                 }
             }
-            serialized += "]";
-            session.SetString(key, serialized);
+            serialized.Append("]");
+            session.SetString(key, serialized.ToString());
         }
 
         /// <summary>

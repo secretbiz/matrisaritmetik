@@ -213,14 +213,12 @@ function colorInput(event) {
     var parentnode = null;
     var ind = null;
 
-    parentnode = parentspan.baseNode.parentNode.id
+    parentnode = parentspan.baseNode.parentNode.id;
     var baseind = parentnode.split("_")[1];
     if (parentnode.substring(0, 3) == "cmd") {
 
         ind = parseInt(baseind);
         ind += parentspan.baseNode.textContent.length - 1;
-
-        parentnode = "cmd_" + ind.toString();
 
         let chars = document.getElementById("matris_komut_satır").childNodes;
         let lastind = parseInt(chars[chars.length - 1].id.split("_")[1]);
@@ -274,7 +272,6 @@ const seperators = ["(", ")", ","]
 
 function Highlight(text) {
     var htmlText = text;
-    var replacedict = new Object();
 
     var span = "";
     var lengthoffset = 0;
@@ -366,10 +363,6 @@ function setCaretPos(elem,o = null) {
     let selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
-}
-
-function changeInp(event) {
-    let selection = window.getSelection();
 }
 
 // Command syntax 
