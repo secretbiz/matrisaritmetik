@@ -17,26 +17,22 @@ namespace MatrisAritmetik.Services
 
             dimension = Math.Min(dimension, (int)MatrisLimits.forCols);
 
-            List<List<dynamic>> empty = new List<List<dynamic>>(dimension);
+            List<List<dynamic>> values = new List<List<dynamic>>(dimension);
             List<dynamic> temprow;
             for (int i = 0; i < dimension; i++)
             {
                 temprow = new List<dynamic>();
                 for (int j = 0; j < dimension; j++)
                 {
-                    if (i == j)
-                    {
-                        temprow.Add((float)1.0);
-                    }
-                    else
-                    {
-                        temprow.Add((float)0.0);
-                    }
+                    temprow.Add((float)0.0);
                 }
-                empty.Add(temprow);
+                values.Add(temprow);
             }
-
-            return new MatrisBase<dynamic>(empty);
+            for (int n = 0; n < dimension; n++)
+            {
+                values[n][n] += 1;
+            }
+            return new MatrisBase<dynamic>(values);
         }
 
         public MatrisBase<dynamic> RandIntMat(int row,
