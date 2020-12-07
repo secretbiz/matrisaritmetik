@@ -254,9 +254,9 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="valueofsetting">Value of the setting</param>
         private void SettingDecider(string settingname, string valueofsetting)
         {
-            if (settingname.Length > 5)
+            if (settingname.Length > ApplyCmd.Length)
             {
-                switch (settingname.Substring(0, 5))// add to name settings
+                switch (settingname.Substring(0, ApplyCmd.Length))// add to name settings
                 {
                     case ApplyCmd:
                         settingname = settingname.Replace(ApplyCmd, "");
