@@ -90,7 +90,106 @@
                     int row,
                     int col,
                     int based = 0);
+
+        /// <summary>
+        /// Row dimension of matrix <paramref name="A"/>
+        /// </summary>
+        /// <param name="A">Matrix to get row dimension of</param>
+        /// <returns>Row dimension of <paramref name="A"/> or 0 if <paramref name="A"/> is invalid</returns>
+        int RowDim(MatrisBase<T> A);
+
+        /// <summary>
+        /// Column dimension of matrix <paramref name="A"/>
+        /// </summary>
+        /// <param name="A">Matrix to get column dimension of</param>
+        /// <returns>Column dimension of <paramref name="A"/> or 0 if <paramref name="A"/> is invalid</returns>
+        int ColDim(MatrisBase<T> A);
+
+        /// <summary>
+        /// Gets the element at index(base=<paramref name="based"/>) (<paramref name="i"/>,<paramref name="j"/>) of <paramref name="A"/> as a scalar matrix
+        /// </summary>
+        /// <param name="A">Matrix to index over</param>
+        /// <param name="i">Row index</param>
+        /// <param name="j">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>Scalar matrix with value at <paramref name="A"/>[<paramref name="i"/>-<paramref name="based"/>, <paramref name="j"/>-<paramref name="based"/>]</returns>
+        MatrisBase<T> El(MatrisBase<T> A,
+                         int i,
+                         int j,
+                         int based = 0);
+
+        /// <summary>
+        /// Gets <paramref name="i"/>th row of matrix <paramref name="A"/> with index base <paramref name="based"/>
+        /// </summary>
+        /// <param name="A">Matrix to get row of</param>
+        /// <param name="i">Row index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>A deep copy of the <paramref name="i"/>th row of <paramref name="A"/></returns>
+        MatrisBase<T> Row(MatrisBase<T> A,
+                          int i,
+                          int based = 0);
+
+        /// <summary>
+        /// Gets <paramref name="i"/>th column of matrix <paramref name="A"/> with index base <paramref name="based"/>
+        /// </summary>
+        /// <param name="A">Matrix to get column of</param>
+        /// <param name="i">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>A deep copy of the <paramref name="i"/>th column of <paramref name="A"/></returns>
+        MatrisBase<T> Col(MatrisBase<T> A,
+                          int j,
+                          int based = 0);
+
+        /// <summary>
+        /// Gets the rows and column with given indices, <paramref name="r2"/> and <paramref name="c2"/> exclusive, index base <paramref name="based"/>
+        /// </summary>
+        /// <param name="A">Matrix to get a sub-matrix from</param>
+        /// <param name="r1">Starting row index</param>
+        /// <param name="r2">Ending row index, exclusive</param>
+        /// <param name="c1">Starting column index</param>
+        /// <param name="c2">Ending column index, exclusive</param>
+        /// <param name="based">Index base</param>
+        /// <returns>Deep copy of elements within given indices from matrix <paramref name="A"/></returns>
+        MatrisBase<T> Sub(MatrisBase<T> A,
+                          int r1,
+                          int r2,
+                          int c1,
+                          int c2,
+                          int based = 0);
+
+        /// <summary>
+        /// Signs of the elements of matrix <paramref name="A"/>
+        /// </summary>
+        /// <param name="A">Matrix to get signs of values from</param>
+        /// <returns>A new matrix with 1's for values>=0 and -1's otherwise</returns>
+        MatrisBase<T> Signs(MatrisBase<T> A);
+
+        /// <summary>
+        /// Absolute values of the elements of matrix <paramref name="A"/>
+        /// </summary>
+        /// <param name="A">Matrix to get absolute values of</param>
+        /// <returns>A new matrix with absolute values</returns>
+        MatrisBase<T> AbsMat(MatrisBase<T> A);
+
+        /// <summary>
+        /// Round values in matrix <paramref name="A"/> after <paramref name="n"/> decimal places
+        /// </summary>
+        /// <param name="A">Matrix to round values of</param>
+        /// <param name="n">Decimal places to rount to</param>
+        /// <returns>A new matrix with rounded values</returns>
+        MatrisBase<T> RoundMat(MatrisBase<T> A, int n = 0);
+
+        /// <summary>
+        /// Replace <paramref name="old"/> values within range [<paramref name="old"/>-<paramref name="TOL"/>, <paramref name="old"/>+<paramref name="TOL"/>] with '<paramref name="with"/>'
+        /// </summary>
+        /// <param name="A">Matrix to replace values of</param>
+        /// <param name="old">Value to replace</param>
+        /// <param name="with">New value to replace <paramref name="old"/> with</param>
+        /// <param name="TOL">Tolerance for <paramref name="old"/></param>
+        /// <returns>A new matrix with replaced values</returns>
+        MatrisBase<T> ReplaceMat(MatrisBase<T> A, float old, float with, float TOL = (float)1e-6);
         #endregion
+
 
         #region Multiple Matrix Parameter Methods
         /// <summary>

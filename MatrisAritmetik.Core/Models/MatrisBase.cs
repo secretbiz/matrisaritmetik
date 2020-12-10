@@ -872,16 +872,18 @@ namespace MatrisAritmetik.Core
         /// </summary>
         /// <param name="decimals">Amount of decimal places to round to</param>
         /// <returns>A new matrix with rounded values</returns>
-        public MatrisBase<T> Round(int decimals = 5)
+        public MatrisBase<T> Round(int decimals = 5, MidpointRounding midpointRounding = MidpointRounding.ToEven)
         {
+            List<List<T>> newvals = new List<List<T>>();
             for (int i = 0; i < _row; i++)
             {
+                newvals.Add(new List<T>());
                 for (int j = 0; j < _col; j++)
                 {
-                    _values[i][j] = (dynamic)(float)Math.Round(float.Parse(_values[i][j].ToString()), decimals);
+                    newvals[i].Add((dynamic)(float)Math.Round(float.Parse(_values[i][j].ToString()), decimals, midpointRounding));
                 }
             }
-            return this;
+            return new MatrisBase<T>(newvals);
         }
 
         #endregion

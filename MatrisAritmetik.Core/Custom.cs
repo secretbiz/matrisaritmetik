@@ -305,6 +305,11 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string MAT_NAME_INVALID = "Matris ismi sadece alfabetik karakterler ve '_' içerebilir! ";
         /// <summary>
+        /// Matrix was invalid somehow
+        /// </summary>
+        public const string MAT_INVALID = "Matris kullanılamaz durumda!";
+
+        /// <summary>
         /// Given matrix name already exists
         /// </summary>
         /// <param name="name">Name given</param>
@@ -373,6 +378,14 @@ namespace MatrisAritmetik.Core
         {
             return min + " tabanlı " + axisName + " indeksi minimum " + min + " maksimum " + max + " olabilir!";
         }
+        /// <summary>
+        /// Given row indices were invalid
+        /// </summary>
+        public const string MAT_INVALID_ROW_INDICES = "Satır indeks aralığı hatalı!";
+        /// <summary>
+        /// Given column indices were invalid
+        /// </summary>
+        public const string MAT_INVALID_COL_INDICES = "Sütun indeks aralığı hatalı!";
 
         //// FUNCTION RELATED
         // MATRIX MULTIPLICATION SIZE
@@ -658,6 +671,17 @@ namespace MatrisAritmetik.Core
         public static string ARG_PARSE_ERROR(string val, string parseType)
         {
             return "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
+        }
+
+        /// <summary>
+        /// Given value to parameter <paramref name="name"/> was not valid
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <param name="msg">Extra message</param>
+        /// <returns>Message telling given argument to parameter <paramref name="name"/> is not valid</returns>
+        public static string ARG_INVALID_VALUE(string name, string msg)
+        {
+            return name + " parametresi değeri hatalı. " + msg;
         }
 
         /// <summary>

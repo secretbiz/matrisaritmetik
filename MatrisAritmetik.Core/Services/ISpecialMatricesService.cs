@@ -14,6 +14,16 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="dimension">Row and column dimension</param>
         /// <returns>A <see cref="MatrisBase{dynamic}"/> with 1's in diagonal, 0's anywhere else</returns>
         MatrisBase<dynamic> Identity(int dimension);
+
+        /// <summary>
+        /// Create a matrix filled with <paramref name="fill"/>
+        /// </summary>
+        /// <param name="row">Row dimension</param>
+        /// <param name="col">Column dimension</param>
+        /// <param name="fill">Value to fill the matrix with</param>
+        /// <returns>A <paramref name="row"/>x<paramref name="col"/> matrix filled with <paramref name="fill"/></returns>
+        MatrisBase<dynamic> FilledMat(int row, int col, float fill);
+
         #endregion
 
         #region Random Matrices

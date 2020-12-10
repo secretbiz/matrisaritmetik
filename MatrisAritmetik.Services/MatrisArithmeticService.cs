@@ -65,6 +65,11 @@ namespace MatrisAritmetik.Services
 
         public MatrisBase<T> Transpose(MatrisBase<T> A)
         {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
             List<List<T>> result = new List<List<T>>();
 
             for (int j = 0; j < A.Col; j++)
@@ -571,6 +576,208 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>(newlis);
         }
 
+        public int RowDim(MatrisBase<T> A)
+        {
+            return A.IsValid() ? A.Row : 0;
+        }
+
+        public int ColDim(MatrisBase<T> A)
+        {
+            return A.IsValid() ? A.Col : 0;
+        }
+
+        public MatrisBase<T> El(MatrisBase<T> A, int i, int j, int based = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+            if (i - based < 0 || i - based >= A.Row)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
+            }
+            if (j - based < 0 || j - based >= A.Col)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
+            }
+            return new MatrisBase<T>() { Row = 1, Col = 1, Values = new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } } };
+        }
+
+        public MatrisBase<T> Row(MatrisBase<T> A, int i, int based = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+            if (i - based < 0 || i - based >= A.Row)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
+            }
+            return A.RowMat(i, based);
+        }
+
+        public MatrisBase<T> Col(MatrisBase<T> A, int j, int based = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+            if (j - based < 0 || j - based >= A.Col)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
+            }
+            return A.ColMat(j, based);
+        }
+
+        public MatrisBase<T> Sub(MatrisBase<T> A, int r1, int r2, int c1, int c2, int based = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            r1 -= based;
+            r2 -= based;
+            if (r2 <= r1)
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_ROW_INDICES);
+            }
+
+            c1 -= based;
+            c2 -= based;
+            if (c2 <= c1)
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_COL_INDICES);
+            }
+
+            int i = 0;
+            foreach (int index in new List<int>() { r1, r2, c1, c2 })
+            {
+                if (index < 0 || index >= A.Col)
+                {
+                    throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX(i < 2 ? "satır" : "sütun", based, (i < 2 ? A.Row : A.Col) - 1));
+                }
+                i++;
+            }
+
+            return new MatrisBase<T>(A[new Range(r1, r2), new Range(c1, c2)]);
+        }
+
+        public MatrisBase<T> Signs(MatrisBase<T> A)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            int m = A.Row;
+            int n = A.Col;
+            List<List<T>> vals = A.Values;
+            List<List<T>> newvals = new List<List<T>>();
+            dynamic val;
+            for (int i = 0; i < m; i++)
+            {
+                newvals.Add(new List<T>());
+                for (int j = 0; j < n; j++)
+                {
+                    val = float.Parse(vals[i][j].ToString());
+                    if (val < 0)
+                    {
+                        newvals[i].Add((dynamic)(-1));
+                    }
+                    else
+                    {
+                        newvals[i].Add((dynamic)(1));
+                    }
+                }
+            }
+            return new MatrisBase<T>(newvals);
+        }
+
+        public MatrisBase<T> AbsMat(MatrisBase<T> A)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            int m = A.Row;
+            int n = A.Col;
+            List<List<T>> vals = A.Values;
+            List<List<T>> newvals = new List<List<T>>();
+
+            for (int i = 0; i < m; i++)
+            {
+                newvals.Add(new List<T>());
+                for (int j = 0; j < n; j++)
+                {
+                    newvals[i].Add((dynamic)Math.Abs(float.Parse(vals[i][j].ToString())));
+                }
+            }
+            return new MatrisBase<T>(newvals);
+        }
+
+        public MatrisBase<T> RoundMat(MatrisBase<T> A, int n = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            if (n < 0)
+            {
+                throw new Exception(CompilerMessage.ARG_INVALID_VALUE("n", " Sıfırdan büyük olmalı."));
+            }
+
+            return A.Round(n);
+        }
+
+        public MatrisBase<T> ReplaceMat(MatrisBase<T> A, float old, float with, float TOL = (float)1e-6)
+        {
+            static bool inRange(float num, float min, float max)
+            {
+                return (num <= max) && (num >= min);
+            }
+
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            if (TOL < 0)
+            {
+                throw new Exception(CompilerMessage.ARG_INVALID_VALUE("TOL", " Sıfırdan büyük-eşit olmalı."));
+            }
+
+            List<List<T>> newVals = new List<List<T>>();
+
+            int m = A.Row;
+            int n = A.Col;
+            List<List<T>> vals = A.Values;
+
+            dynamic val;
+            float max = old + TOL;
+            float min = old - TOL;
+
+            for (int i = 0; i < m; i++)
+            {
+                newVals.Add(new List<T>());
+                for (int j = 0; j < n; j++)
+                {
+                    val = (dynamic)float.Parse(vals[i][j].ToString());
+                    if (inRange(val, min, max))
+                    {
+                        newVals[i].Add((dynamic)with);
+                    }
+                    else
+                    {
+                        newVals[i].Add(val);
+                    }
+                }
+            }
+
+            return new MatrisBase<T>(newVals);
+        }
         #endregion
     }
 }

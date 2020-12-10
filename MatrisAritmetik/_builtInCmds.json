@@ -6,7 +6,7 @@
                 "fullname": "Yardım",
                 "description": "Derleyici hakkında bilgi döner",
 
-                "alias_list": ["?"],
+                "alias_list": [ "?" ],
                 "function": "Help",
                 "param_types": [],
                 "param_names": [],
@@ -86,6 +86,22 @@
                 "function_template_filled": "!RandFloatMat(row,col,min,max,seed)",
 
                 "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Doldur",
+                "description": "Verilen sayı ile doldurulmuş matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "FilledMat",
+                "param_types": [ "int", "int", "float" ],
+                "param_names": [ "row", "col", "fill" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
+
+                "function_template": "!FilledMat(,,)",
+                "function_template_filled": "!FilledMat(row,col,fill)",
+
+                "service": "SpecialMatricesService"
             }
         ]
     },
@@ -105,10 +121,81 @@
                 "returns": "Matris",
 
                 "function_template": "!MatrisMul(,)",
-                "function_template_filled": "!MatrisMul(A, B)",
+                "function_template_filled": "!MatrisMul(A,B)",
 
                 "service": "MatrisArithmeticService"
             }
+        ]
+    },
+
+    {
+        "Label": "Elementer",
+        "Functions": [
+            {
+                "fullname": "İşaretler",
+                "description": "Verilen A matrisindeki değerlerin, negatifse -1, sıfır/pozitif ise 1 ile değiştirilmiş hali",
+
+                "alias_list": [],
+                "function": "Signs",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!Signs()",
+                "function_template_filled": "!Signs(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Mutlak değer",
+                "description": "Verilen A matrisindeki değerlerin mutlak değerleri",
+
+                "alias_list": [],
+                "function": "AbsMat",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!AbsMat()",
+                "function_template_filled": "!AbsMat(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Yuvarla",
+                "description": "Verilen A matrisindeki değerleri n. basamak sonrasını verilen en yakına yuvarla",
+
+                "alias_list": [],
+                "function": "RoundMat",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "n" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!RoundMat(,)",
+                "function_template_filled": "!RoundMat(A,n)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Değiştir",
+                "description": "Verilen A matrisindeki bulunan 'old' değerlerini 'with' değeri ile değiştir.\n\t\t 'old' değerinin aralığı: [old-TOL, old+TOL]",
+
+                "alias_list": [],
+                "function": "ReplaceMat",
+                "param_types": [ "Matris", "float", "float", "float" ],
+                "param_names": [ "A", "old", "with", "TOL" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
+
+                "function_template": "!ReplaceMat(,,,)",
+                "function_template_filled": "!ReplaceMat(A,old,with,TOL)",
+
+                "service": "MatrisArithmeticService"
+            }
+
         ]
     },
 
@@ -281,6 +368,126 @@
     {
         "Label": "Boyutsal",
         "Functions": [
+            {
+                "fullname": "Satır Boyutu",
+                "description": "Verilen A matrisinin satır boyutu/sayısı",
+
+                "alias_list": [],
+                "function": "RowDim",
+                "param_types": [
+                    "Matris"
+                ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "int",
+
+                "function_template": "!RowDim()",
+                "function_template_filled": "!RowDim(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Sütun Boyutu",
+                "description": "Verilen A matrisinin sütun boyutu/sayısı",
+
+                "alias_list": [],
+                "function": "ColDim",
+                "param_types": [
+                    "Matris"
+                ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "int",
+
+                "function_template": "!ColDim()",
+                "function_template_filled": "!ColDim(A)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Element",
+                "description": "Verilen A matrisinin 'based' tabanlı (i,j) indeksli elementi",
+
+                "alias_list": [],
+                "function": "El",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int",
+                    "int"
+                ],
+                "param_names": [ "A", "i", "j", "based" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
+
+                "function_template": "!El(,,,)",
+                "function_template_filled": "!El(A,i,j,0)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Satır",
+                "description": "Verilen A matrisinin 'based' tabanlı i. satırı",
+
+                "alias_list": [],
+                "function": "Row",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int"
+                ],
+                "param_names": [ "A", "i", "based" ],
+                "required_params": [ 0, 1 ],
+                "returns": "Matris",
+
+                "function_template": "!Row(,,)",
+                "function_template_filled": "!Row(A,i,0)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Sütun",
+                "description": "Verilen A matrisinin 'based' tabanlı j. sütunu",
+
+                "alias_list": [],
+                "function": "Col",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int"
+                ],
+                "param_names": [ "A", "j", "based" ],
+                "required_params": [ 0, 1 ],
+                "returns": "Matris",
+
+                "function_template": "!Col(,,)",
+                "function_template_filled": "!Col(A,j,0)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Alt matris",
+                "description": "Verilen A matrisinin istenilen aralıktaki 'based' tabanlı satır [r1,r2)  ve sütünları [c1,c2)",
+
+                "alias_list": [],
+                "function": "Sub",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int",
+                    "int",
+                    "int",
+                    "int"
+                ],
+                "param_names": [ "A", "r1", "r2", "c1", "c2", "based" ],
+                "required_params": [ 0, 1, 2, 3, 4 ],
+                "returns": "Matris",
+
+                "function_template": "!Sub(,,,,,)",
+                "function_template_filled": "!Sub(A,r1,r2,c1,c2,based)",
+
+                "service": "MatrisArithmeticService"
+            },
             {
                 "fullname": "Birleştir",
                 "description": "Verilen A ve B matrislerini satır(axis = 0) veya sütün(axis = 1) olarak birleşmiş hali",

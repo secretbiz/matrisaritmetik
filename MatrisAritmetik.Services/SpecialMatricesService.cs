@@ -35,6 +35,29 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<dynamic>(values);
         }
 
+        public MatrisBase<dynamic> FilledMat(int row, int col, float fill)
+        {
+            if (row <= 0 || col <= 0)
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            row = Math.Min(row, (int)MatrisLimits.forRows);
+            col = Math.Min(col, (int)MatrisLimits.forCols);
+
+            List<List<dynamic>> vals = new List<List<dynamic>>();
+            for (int i = 0; i < row; i++)
+            {
+                vals.Add(new List<dynamic>());
+                for (int j = 0; j < col; j++)
+                {
+                    vals[i].Add(fill);
+                }
+            }
+
+            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
+        }
+
         public MatrisBase<dynamic> RandIntMat(int row,
                                               int col,
                                               int min = 0,
