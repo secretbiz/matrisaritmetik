@@ -55,7 +55,7 @@ namespace MatrisAritmetik.Tests
         /// No errors should be thrown from these
         /// {Topic : { command, expected_tokens_and_output } }
         /// </summary>
-        public Dictionary<string, Dictionary<string, List<Token>>> CMDS = new Dictionary<string, Dictionary<string, List<Token>>>()
+        public Dictionary<string, Dictionary<string, List<Token>>> SUCCESS_CMDS = new Dictionary<string, Dictionary<string, List<Token>>>()
         {
             { "Basit_Aritmetik" ,
                 new Dictionary<string,List<Token>>(){
@@ -703,7 +703,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Basit_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Basit_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Basit_Aritmetik"],
                 new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -711,7 +711,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Unary_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Unary_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Unary_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -719,7 +719,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Extreme_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Extreme_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Extreme_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -727,7 +727,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Priority_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Priority_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Priority_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -735,7 +735,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Associative_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Associative_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Associative_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -743,7 +743,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Matris_Basit_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Matris_Basit_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Matris_Basit_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
                    {
                         {"A", A}
@@ -754,7 +754,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Matris_Custom_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Matris_Custom_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Matris_Custom_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
                    {
                         {"A", A}
@@ -765,7 +765,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Matris_Special_Service()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Matris_Special_Service"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Matris_Special_Service"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -773,7 +773,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Matris_Combined_Aritmetik()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Matris_Combined_Aritmetik"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Matris_Combined_Aritmetik"],
                    new Dictionary<string, MatrisBase<dynamic>>()
             );
         }
@@ -781,7 +781,7 @@ namespace MatrisAritmetik.Tests
         [TestMethod]
         public void Docs()
         {
-            Tokenize_And_Evaluate_Command(CMDS["Docs"],
+            Tokenize_And_Evaluate_Command(SUCCESS_CMDS["Docs"],
                    new Dictionary<string, MatrisBase<dynamic>>()
                    {
                        {"Transpose", Transpose }
