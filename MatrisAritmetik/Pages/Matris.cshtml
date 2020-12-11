@@ -60,22 +60,51 @@
             </div>
 
             @* Matris ekleme bilgileri satırı *@
-            <div id="matris_add_table">
+        <div id="matris_add_table">
 
-                <input type="text" id="matris_name" placeholder="Matris ismi" />
-                <span id="matris_add_eqsign">=</span>
+            <input type="text" id="matris_name" placeholder="Matris ismi" />
+            <span id="matris_add_eqsign">=</span>
 
-                @* Özel matris ekleme inputları*@
-                <textarea name="matris_vals_special" id="matris_vals_special" style="display:none" readonly="readonly"></textarea>
-                <input type="text" id="matris_special_args" style="display:none" placeholder="Parametre:Değer" />
-                @**@
-                @* Text ile matris ekleme inputları*@
-                <textarea name="matris_vals" id="matris_vals" placeholder="Değerleri boşluk bırakarak girin..."></textarea>
-                @**@
+            @* Özel matris ekleme inputları*@
+            <textarea name="matris_vals_special" id="matris_vals_special" style="display:none" readonly="readonly"></textarea>
+            <input type="text" id="matris_special_args" style="display:none" placeholder="Parametre:Değer" />
+            @**@
 
-                <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" currenttab="text" />
+            @* Text ile matris ekleme inputları*@
+            <textarea name="matris_vals" id="matris_vals" placeholder="Elementler"></textarea>
+            @* Ayraçlar *@
+            <div id="matris_options_column" class="custom_delim_newline">
+
+                <select class="custom_spacer_select"
+                        onchange="document.getElementById('displaySelectedSpacer').value=this.options[this.selectedIndex].text.split(' ')[1]==undefined?' ':this.options[this.selectedIndex].text.split(' ')[1]; document.getElementById('selectedSpacer').value=this.options[this.selectedIndex].value;">
+                    <option style="background-color:grey;color:white"value="default">Değer_ayracı  </option>
+                    <option value="space">Boşluk  </option>
+                    <option value="tab">Tab \t</option>
+                    <option value="comma">Virgül ,</option>
+                </select>
+                <input type="text" name="displaySelectedSpacer" id="displaySelectedSpacer"
+                       placeholder='Değer_ayracı  ' onfocus="this.select()"
+                       class="custom_spacer_displayer">
+                <input name="selectedSpacer" id="selectedSpacer" type="hidden">
+
+
+                <select class="custom_newliner_select"
+                        onchange="document.getElementById('displaySelectedLiner').value=this.options[this.selectedIndex].text.split(' ')[1]==undefined?' ':this.options[this.selectedIndex].text.split(' ')[1]; document.getElementById('selectedLiner').value=this.options[this.selectedIndex].value;">
+                    <option style="background-color:grey;color:white" value="default">Satır_ayracı \n</option>
+                    <option value="newline">Yeni_satır \n</option>
+                    <option value="semicolon">Notkalı_virgül ;</option>
+                </select>
+                <input type="text" name="displaySelectedLiner" id="displaySelectedLiner"
+                       placeholder='Satır_ayracı \n' onfocus="this.select()"
+                       class="custom_newliner_displayer">
+                <input name="selectedLiner" id="selectedLiner" type="hidden">
 
             </div>
+            @**@
+
+            <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" currenttab="text" />
+
+        </div>
 
             @* Kayıtlı matris tablosu *@
             <table id="matris_table_base">

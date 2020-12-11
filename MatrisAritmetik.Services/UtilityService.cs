@@ -27,18 +27,41 @@ namespace MatrisAritmetik.Services
         #endregion
 
         #region UtilityService Methods
+        public string FixLiterals(string old)
+        {
+            string[] literals = new string[10] { "\n", "\t", "\r", "\\", "\"", "\'", "\f", "\v", "\a", "\b" };
+            string[] literalsBad = new string[10] { "\\n", "\\t", "\\r", "\\\\", "\"", "\'", "\\f", "\\v", "\\a", "\\b" };
+            for (int i = 0; i < 9; i++)
+            {
+                old = old.Replace(literalsBad[i], literals[i]);
+            }
+            return old;
+        }
+
         public List<List<T>> StringTo2DList(string text,
-                                            char delimiter = ' ',
-                                            char newline = '\n',
+                                            string delimiter = " ",
+                                            string newline = "\n",
                                             bool removeliterals = true)
         {
             string filteredText = text;
+            string[] literals = new string[9] { "\t", "\r", "\\", "\"", "\'", "\f", "\v", "\a", "\b" };
             if (removeliterals)
             {
-                filteredText = filteredText.Replace('\t', delimiter).Replace('\r', ' ');
+                foreach (string lit in literals)
+                {
+                    if (delimiter.IndexOf(lit) != -1 && newline.IndexOf(lit) != -1)
+                    {
+                        filteredText = filteredText.Replace(lit, delimiter);
+                    }
+                }
             }
 
             filteredText = filteredText.Trim();
+            if (filteredText == "")
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID);
+            }
+
             while (filteredText[^1] == '\n')
             {
                 filteredText = filteredText[0..^1];

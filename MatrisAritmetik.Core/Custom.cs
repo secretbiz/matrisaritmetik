@@ -305,9 +305,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string MAT_NAME_INVALID = "Matris ismi sadece alfabetik karakterler ve '_' içerebilir! ";
         /// <summary>
-        /// Matrix was invalid somehow
+        /// Matrix values were invalid/empty
         /// </summary>
-        public const string MAT_INVALID = "Matris kullanılamaz durumda!";
+        public const string MAT_INVALID = "Matris değerleri boş olamaz!";
 
         /// <summary>
         /// Given matrix name already exists
@@ -337,6 +337,11 @@ namespace MatrisAritmetik.Core
         /// Matrix is not a square matrix
         /// </summary>
         public const string MAT_NOT_SQUARE = "Matris kare bir matris olmalı!";
+        /// <summary>
+        /// Resizing process was not processable with given dimensions
+        /// </summary>
+        public const string MAT_INVALID_RESIZE = "Matris yeni boyutları uygun değil!";
+
         /// <summary>
         /// Given dimensions didn't match expected dimensions
         /// </summary>
@@ -446,11 +451,13 @@ namespace MatrisAritmetik.Core
         /// Short and detailed documentation about the matrix compiler
         /// </summary>
         public static string COMPILER_HELP =
-                             ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz (?komut_veya_matris)" +
+                             ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz. (örnek: ?komut_veya_matris)" +
                              "\n>>> Çıktılar veya menülerin üzerine işaretçinizi bekleterek gerekli bilgilere ulaşabilirsiniz." +
 
-                             "\n\n>>> Fonksiyonları kullanmak için '!' ön-ekini fonksiyon isminden önce koyunuz (!komut)" +
-                             "\n\to İstenen bir parametreye değer vermek için 'parametre_ismi:argüman' formatını kullanınız " +
+                             "\n\n>>> '!' bir ön-ektir:" +
+                             "\n\to Komutları kullanmak için komut isminden önce '!' koyunuz. (örnek: !komut)" +
+                             "\n\to Özel değerleri kullanmak için isimden önce '!' koyunuz. (örnek: !null) " +
+                             "\n\to İstenen bir parametreye değer vermek için 'parametre_ismi:argüman' formatını kullanınız." +
                              "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez." +
 
                              "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):" +
@@ -458,11 +465,11 @@ namespace MatrisAritmetik.Core
                              "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
                              "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)" +
 
-                             "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız" +
-                             "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir" +
-                             "\n\to Komut stilleri için ayardan önce 'cmd:' ön-ekini kullanınız" +
-                             "\n\to Çıktı stilleri için ayardan önce 'out:' ön-ekini kullanınız" +
-                             "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır" +
+                             "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız." +
+                             "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir." +
+                             "\n\to Komut stilleri için ayardan önce 'cmd:' ön-ekini kullanınız." +
+                             "\n\to Çıktı stilleri için ayardan önce 'out:' ön-ekini kullanınız." +
+                             "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır." +
                              "\n\n\to CSS stilleri verilen kurallar çerçevesinde uygulanabilir" +
                              "\n\t       Ayar       |        Açıklama         |    Beklenen değer   " +
                              "\n\t ---------------- | ----------------------- | --------------------" +
@@ -486,6 +493,18 @@ namespace MatrisAritmetik.Core
         /// Minimum value was bigger than the maximum value
         /// </summary>
         public const string MAT_MINMAX_ORDER = "max değeri min değerinden büyük olamaz!";
+        /// <summary>
+        /// Starting value was bigger than the ending value
+        /// </summary>
+        public const string MAT_START_END_ORDER = "start değeri end değerinden büyük olamaz!";
+        /// <summary>
+        /// Given interval was not usable
+        /// </summary>
+        public const string MAT_INTERVAL_INVALID = "Verilen alt-aralık değeri geçersiz";
+        /// <summary>
+        /// Too many values would be created from given interval
+        /// </summary>
+        public const string MAT_INTERVAL_EXCESS = "Verilen alt-aralık değeri aralığı tanımlanan limitten fazla değere böldü";
 
         //// COMMAND FORMATS
         /// <summary>
@@ -589,6 +608,11 @@ namespace MatrisAritmetik.Core
         {
             return op + " operatörü tek başına kullanılamaz ";
         }
+
+        /// <summary>
+        /// 'null' can't be used with operators
+        /// </summary>
+        public const string OP_WITH_NULL = "İşlemlerde null değeri kullanılamaz!";
 
         //// FUNCTION ERRORS
         /// <summary>

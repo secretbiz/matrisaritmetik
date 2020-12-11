@@ -28,6 +28,8 @@ namespace MatrisAritmetik.Pages
         #region Expected Request Parameter Names
         private const string MatrisNameParam = "name";
         private const string MatrisValsParam = "vals";
+        private const string MatrisDelimParam = "delimiter";
+        private const string MatrisNewLineParam = "newline";
         private const string MatrisSpecialFuncParam = "func";
         private const string MatrisSpecialArgsParam = "args";
         #endregion
@@ -155,7 +157,11 @@ namespace MatrisAritmetik.Pages
 
             await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
 
-            if (DecodedRequestDict.ContainsKey(MatrisNameParam) && DecodedRequestDict.ContainsKey(MatrisValsParam))
+            if (DecodedRequestDict.ContainsKey(MatrisNameParam)
+                && DecodedRequestDict.ContainsKey(MatrisValsParam)
+                && DecodedRequestDict.ContainsKey(MatrisDelimParam)
+                && DecodedRequestDict.ContainsKey(MatrisNewLineParam)
+               )
             {
                 if (!savedMatrices.ContainsKey(DecodedRequestDict[MatrisNameParam]))
                 {
@@ -163,9 +169,26 @@ namespace MatrisAritmetik.Pages
                     {
                         Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
 
-                        _frontService.AddToMatrisDict(DecodedRequestDict[MatrisNameParam],
-                        new MatrisBase<dynamic>(_utils.StringTo2DList(DecodedRequestDict[MatrisValsParam])),
-                        savedMatrices);
+                        DecodedRequestDict[MatrisDelimParam] = _utils.FixLiterals(DecodedRequestDict[MatrisDelimParam]);
+                        DecodedRequestDict[MatrisNewLineParam] = _utils.FixLiterals(DecodedRequestDict[MatrisNewLineParam]);
+                        DecodedRequestDict[MatrisValsParam] = _utils.FixLiterals(DecodedRequestDict[MatrisValsParam]);
+
+                        _frontService.AddToMatrisDict
+                        (
+                            DecodedRequestDict[MatrisNameParam],
+                            new MatrisBase<dynamic>
+                            (
+                                _utils.StringTo2DList
+                                (
+                                    DecodedRequestDict[MatrisValsParam],
+                                    DecodedRequestDict[MatrisDelimParam],
+                                    DecodedRequestDict[MatrisNewLineParam]
+                                ),
+                                DecodedRequestDict[MatrisDelimParam],
+                                DecodedRequestDict[MatrisNewLineParam]
+                            ),
+                            savedMatrices
+                        );
                     }
                     catch (Exception err)
                     {
@@ -222,9 +245,17 @@ namespace MatrisAritmetik.Pages
                     {
                         Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
 
-                        _frontService.AddToMatrisDict(DecodedRequestDict[MatrisNameParam],
-                            _utils.SpecialStringTo2DList(DecodedRequestDict[MatrisSpecialArgsParam], cmdinfo, savedMatrices),
-                            savedMatrices);
+                        _frontService.AddToMatrisDict
+                        (
+                            DecodedRequestDict[MatrisNameParam],
+                            _utils.SpecialStringTo2DList
+                            (
+                                DecodedRequestDict[MatrisSpecialArgsParam],
+                                cmdinfo,
+                                savedMatrices
+                            ),
+                            savedMatrices
+                        );
                     }
                     catch (Exception err)
                     {

@@ -70,6 +70,7 @@ body {
     display: flex;
     background-color: #eae073;
     border: 2px solid black;
+    min-height: 65px;
 }
 
 #matris_name {
@@ -89,14 +90,62 @@ body {
 
 /* Standard panel */
 #matris_vals {
-    min-height: 34px;
-    height: 34px;
+    min-height: 57px;
     flex: 70%;
     padding: 2px;
     margin: 2px;
     min-width: 22%;
 }
 
+/* Spacer and new-liner*/
+.custom_delim_newline {
+    font-weight: bold;
+    width: 145px;
+    height: 25px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.custom_spacer_select {
+    position: relative;
+    top: 2px;
+    left: 0px;
+    width: 145px;
+    height: 25px;
+    line-height: 20px;
+    margin: 0;
+    padding: 0;
+}
+.custom_spacer_displayer {
+    position: relative;
+    top: -23px;
+    left: 0px;
+    width: 125px;
+    height: 25px;
+    border: 1px solid #556;
+}
+
+.custom_newliner_select {
+    position: relative;
+    top: -16px;
+    left: 0px;
+    width: 145px;
+    height: 25px;
+    line-height: 20px;
+    margin: 0;
+    padding: 0;
+}
+.custom_newliner_displayer {
+    position: relative;
+    top: -41px;
+    left: 0px;
+    width: 125px;
+    height: 25px;
+    border: 1px solid #556;
+}
+
+/* Add button */
 #matris_add_button {
     flex: 15%;
     padding: 2px;
@@ -107,8 +156,7 @@ body {
 /* Özel matris ekleme panel */
 
 #matris_vals_special {
-    min-height: 34px;
-    height: 34px;
+    min-height: 57px;
     flex: 35%;
     padding: 2px;
     margin: 2px;

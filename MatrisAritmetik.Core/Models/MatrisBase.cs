@@ -206,7 +206,9 @@ namespace MatrisAritmetik.Core
         /// Creates a matrix from the given 2D List
         /// </summary>
         /// <param name="vals">A list with same length lists</param>
-        public MatrisBase(List<List<T>> vals)
+        /// <param name="delim">Delimiter to seperate values</param>
+        /// <param name="newline">Newline character to create a new row</param>
+        public MatrisBase(List<List<T>> vals, string delim = " ", string newline = "\n")
         {
             _row = vals.Count;
             if (_row == 0)
@@ -218,7 +220,11 @@ namespace MatrisAritmetik.Core
             _col = vals.ElementAt(0).Count;
 
             _values = vals;
+
+            Delimiter = delim;
+            NewLine = newline;
         }
+
         #endregion
 
         #region Private Methods

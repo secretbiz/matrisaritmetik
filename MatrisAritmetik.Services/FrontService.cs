@@ -6,6 +6,7 @@ using System.Reflection;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
+using MatrisAritmetik.Models.Core;
 using Newtonsoft.Json;
 
 namespace MatrisAritmetik.Services
@@ -174,7 +175,12 @@ namespace MatrisAritmetik.Services
                 if (exp[0] == '!')          // A function
                 {
                     exp = exp.Replace("!", "");
-                    if (TryParseBuiltFunc(exp, out CommandInfo cmdinfo))
+                    if (exp == "null")
+                    {
+                        tkn.val = new None();
+                        tkn.tknType = TokenType.NULL;
+                    }
+                    else if (TryParseBuiltFunc(exp, out CommandInfo cmdinfo))
                     {
                         tkn.paramCount = cmdinfo.param_names.Length;
                         tkn.service = cmdinfo.service;
@@ -220,6 +226,7 @@ namespace MatrisAritmetik.Services
                 }
                 else
                 {
+                    tkn.val = new None();
                     tkn.tknType = TokenType.NULL;       // SHOULDN'T ENT UP HERE
                 }
             }
@@ -534,10 +541,10 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to if needed</param>
         /// <returns>Parsed <paramref name="arguments"/></returns>
         private object[] CheckAndParseArgumentsAndHints(Token op,
-                                                    List<Token> operands,
-                                                    object[] arguments,
-                                                    ParameterInfo[] paraminfo,
-                                                    Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                        List<Token> operands,
+                                                        object[] arguments,
+                                                        ParameterInfo[] paraminfo,
+                                                        Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
             bool hintUsed = false;
@@ -1216,7 +1223,7 @@ namespace MatrisAritmetik.Services
             while (ind < tkns.Count)
             {
                 Token tkn = tkns[ind];
-                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.DOCS)        // NUMBER | MATRIX | INFORMATION
+                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.DOCS || tkn.tknType == TokenType.NULL)        // NUMBER | MATRIX | INFORMATION
                 {
                     outputQueue.Enqueue(tkn);
 
@@ -1414,6 +1421,13 @@ namespace MatrisAritmetik.Services
                                             cmd.Output = tkns[0].val.ToString();
                                             return CommandState.SUCCESS;
                                         }
+                                    case TokenType.NULL:
+                                        {
+                                            cmd.STATE = CommandState.SUCCESS;
+                                            cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_RET_NULL;
+                                            cmd.Output = "null";
+                                            return CommandState.SUCCESS;
+                                        }
                                     case TokenType.DOCS:
                                         {
                                             cmd = SetDocsCommand(cmd, tkns[0], matdict);
@@ -1455,7 +1469,7 @@ namespace MatrisAritmetik.Services
                             while (ind < tkns.Count)
                             {
                                 Token tkn = tkns[ind];
-                                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS)
+                                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.NULL)
                                 {
                                     operandStack.Push(tkn);
                                 }

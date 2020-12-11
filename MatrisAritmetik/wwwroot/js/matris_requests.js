@@ -15,6 +15,14 @@
 //////// matris ekleme fonksiyonu
 function addMatrix(event) {
     var tkn = event.currentTarget.token;
+    var delim = document.getElementById("displaySelectedSpacer").value;
+    var newline = document.getElementById("displaySelectedLiner").value;
+
+    if (delim == "")
+        delim = " ";
+    if (newline == "")
+        newline = "\n";
+
     // From text
     if (event.currentTarget.getAttribute("currentTab") == "text") {
         $.ajax(
@@ -25,7 +33,9 @@ function addMatrix(event) {
                 {
                     __RequestVerificationToken: tkn,
                     "name": document.getElementById("matris_name").value,
-                    "vals": document.getElementById("matris_vals").value
+                    "vals": document.getElementById("matris_vals").value,
+                    "delimiter": delim,
+                    "newline": newline
                 },
                 success: function (data) { updateTable(tkn); updateHistoryPanel(tkn);},
                 error: function (error) { console.log(error); }
@@ -150,6 +160,7 @@ function specialMatrisPick(event) {
 
     // Hide standard panel
     document.getElementById("matris_vals").style.display = "none";
+    document.getElementById("matris_options_column").style.display = "none";
 
     // Update "active" classes and styles
     document.getElementById("special_matris_options").style.backgroundColor = "white";
@@ -181,6 +192,7 @@ function textMatrisPick(event) {
 
     // Show standard panel
     document.getElementById("matris_vals").style.display = "inherit";
+    document.getElementById("matris_options_column").style.display = "block";
 
     // Update "active" classes and styles
     document.getElementById("matris_create_bytext_parent").classList.add("active");

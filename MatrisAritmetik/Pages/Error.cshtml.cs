@@ -22,6 +22,7 @@ namespace MatrisAritmetik.Pages
         public void OnGet()
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            _logger.LogError(RequestId, null);
         }
     }
 }

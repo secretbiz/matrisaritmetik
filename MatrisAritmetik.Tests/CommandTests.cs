@@ -394,7 +394,7 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "!RandIntMat(2,2,0,4,0)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                    { "!RandInt(2,2,0,4,0)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -416,7 +416,7 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "!RandIntMat(2,2,0,4)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                    { "!RandInt(2,2,0,4)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -428,7 +428,7 @@ namespace MatrisAritmetik.Tests
                                                          new Token(){tknType=TokenType.RIGHTBRACE}
                                                        }
                     },
-                    { "!RandFloatMat(2,2,0,4,0)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandFloatMat"},
+                    { "!RandFloat(2,2,0,4,0)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandFloat"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -450,7 +450,7 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "!RandFloatMat(2,2,0,4)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandFloatMat"},
+                    { "!RandFloat(2,2,0,4)", new List<Token>(){ new Token(){tknType=TokenType.FUNCTION,name="RandFloat"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -476,8 +476,8 @@ namespace MatrisAritmetik.Tests
 
             { "Matris_Combined_Aritmetik" ,
                 new Dictionary<string,List<Token>>(){
-                    { "!RandIntMat(2,2,0,4,0)^3", new List<Token>(){
-                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                    { "!RandInt(2,2,0,4,0)^3", new List<Token>(){
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -501,10 +501,10 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "2*!RandIntMat(2,2,0,4,0)^-2", new List<Token>(){
+                    { "2*!RandInt(2,2,0,4,0)^-2", new List<Token>(){
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.OPERATOR,symbol="*"},
-                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -529,11 +529,11 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "(2*!RandIntMat(2,2,0,4,0))^-2", new List<Token>(){
+                    { "(2*!RandInt(2,2,0,4,0))^-2", new List<Token>(){
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.OPERATOR,symbol="*"},
-                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},
@@ -559,7 +559,7 @@ namespace MatrisAritmetik.Tests
                                                          }
                                                        }
                     },
-                    { "(!Identity(2)+1.5).*!RandIntMat(2,2,0,4,0)%2", new List<Token>(){
+                    { "(!Identity(2)+1.5).*!RandInt(2,2,0,4,0)%2", new List<Token>(){
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.FUNCTION,name="Identity"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
@@ -569,7 +569,7 @@ namespace MatrisAritmetik.Tests
                                                          new Token(){tknType=TokenType.NUMBER,val=1.5},
                                                          new Token(){tknType=TokenType.RIGHTBRACE},
                                                          new Token(){tknType=TokenType.OPERATOR,symbol=".*"},
-                                                         new Token(){tknType=TokenType.FUNCTION,name="RandIntMat"},
+                                                         new Token(){tknType=TokenType.FUNCTION,name="RandInt"},
                                                          new Token(){tknType=TokenType.LEFTBRACE},
                                                          new Token(){tknType=TokenType.NUMBER,val=2},
                                                          new Token(){tknType=TokenType.ARGSEPERATOR},

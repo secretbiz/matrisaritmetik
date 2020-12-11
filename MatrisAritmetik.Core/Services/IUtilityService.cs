@@ -23,9 +23,16 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="removeliterals">Wheter to remove string literals('\t', '\r', ...)</param>
         /// <returns>2D list of values found in the given <paramref name="text"/></returns>
         List<List<T>> StringTo2DList(string text,
-                                     char delimiter = ' ',
-                                     char newline = '\n',
+                                     string delimiter = " ",
+                                     string newline = "\n",
                                      bool removeliterals = true);
+
+        /// <summary>
+        /// Fix \\ characters in literals
+        /// </summary>
+        /// <param name="old">String to be fixed</param>
+        /// <returns>Fixed string, i.e "\\n" -> "\n" </returns>
+        string FixLiterals(string old);
 
         /// <summary>
         /// Create a special matrix from given args in <paramref name="text"/> and function <paramref name="funcinfo"/>

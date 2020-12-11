@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Services;
 
@@ -586,7 +587,10 @@ namespace MatrisAritmetik.Services
             return A.IsValid() ? A.Col : 0;
         }
 
-        public MatrisBase<T> El(MatrisBase<T> A, int i, int j, int based = 0)
+        public MatrisBase<T> Get(MatrisBase<T> A,
+                                 int i,
+                                 int j,
+                                 int based = 0)
         {
             if (!A.IsValid())
             {
@@ -603,7 +607,9 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>() { Row = 1, Col = 1, Values = new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } } };
         }
 
-        public MatrisBase<T> Row(MatrisBase<T> A, int i, int based = 0)
+        public MatrisBase<T> Row(MatrisBase<T> A,
+                                 int i,
+                                 int based = 0)
         {
             if (!A.IsValid())
             {
@@ -616,7 +622,9 @@ namespace MatrisAritmetik.Services
             return A.RowMat(i, based);
         }
 
-        public MatrisBase<T> Col(MatrisBase<T> A, int j, int based = 0)
+        public MatrisBase<T> Col(MatrisBase<T> A,
+                                 int j,
+                                 int based = 0)
         {
             if (!A.IsValid())
             {
@@ -629,7 +637,12 @@ namespace MatrisAritmetik.Services
             return A.ColMat(j, based);
         }
 
-        public MatrisBase<T> Sub(MatrisBase<T> A, int r1, int r2, int c1, int c2, int based = 0)
+        public MatrisBase<T> Sub(MatrisBase<T> A,
+                                 int r1,
+                                 int r2,
+                                 int c1,
+                                 int c2,
+                                 int based = 0)
         {
             if (!A.IsValid())
             {
@@ -663,7 +676,45 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>(A[new Range(r1, r2), new Range(c1, c2)]);
         }
 
-        public MatrisBase<T> Signs(MatrisBase<T> A)
+        public MatrisBase<T> Resize(MatrisBase<T> A,
+                                    int row,
+                                    int col)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            if (A.ElementCount != row * col)
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_RESIZE);
+            }
+
+            int m = A.Row;
+            int n = A.Col;
+            List<List<T>> vals = A.Values;
+
+            List<List<T>> newlis = new List<List<T>>();
+
+            dynamic val;
+            for (int r = 0; r < row; r++)
+            {
+                newlis.Add(new List<T>());
+            }
+
+            for (int r = 0; r < m; r++)
+            {
+                for (int c = 0; c < n; c++)
+                {
+                    val = vals[r][c];
+                    newlis[(r * n + c) / col].Add(val);
+                }
+            }
+
+            return new MatrisBase<T>(newlis);
+        }
+
+        public MatrisBase<T> Sign(MatrisBase<T> A)
         {
             if (!A.IsValid())
             {
@@ -694,7 +745,7 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>(newvals);
         }
 
-        public MatrisBase<T> AbsMat(MatrisBase<T> A)
+        public MatrisBase<T> Abs(MatrisBase<T> A)
         {
             if (!A.IsValid())
             {
@@ -717,7 +768,8 @@ namespace MatrisAritmetik.Services
             return new MatrisBase<T>(newvals);
         }
 
-        public MatrisBase<T> RoundMat(MatrisBase<T> A, int n = 0)
+        public MatrisBase<T> Round(MatrisBase<T> A,
+                                   int n = 0)
         {
             if (!A.IsValid())
             {
@@ -732,7 +784,128 @@ namespace MatrisAritmetik.Services
             return A.Round(n);
         }
 
-        public MatrisBase<T> ReplaceMat(MatrisBase<T> A, float old, float with, float TOL = (float)1e-6)
+        public MatrisBase<T> Shuffle(MatrisBase<T> A,
+                                     int axis = 2)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            int m = A.Row;
+            int n = A.Col;
+
+            if (m == 1 && n == 1)
+            {
+                return A.Copy();
+            }
+
+            if (axis == 0)
+            {
+                if (m == 1)
+                {
+                    return A.Copy();
+                }
+
+                List<int> indices = new List<int>();
+                for (int c = 0; c < m; c++)
+                {
+                    indices.Add(c);
+                }
+
+                indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
+                List<List<T>> newvals = new List<List<T>>();
+                List<List<T>> vals = A.Values;
+
+                int i = 0;
+                foreach (int k in indices)
+                {
+                    newvals.Add(new List<T>());
+                    for (int j = 0; j < n; j++)
+                    {
+                        newvals[i].Add(vals[k][j]);
+                    }
+                    i++;
+                }
+
+                return new MatrisBase<T>(newvals);
+            }
+            else if (axis == 1)
+            {
+                if (n == 1)
+                {
+                    return A.Copy();
+                }
+
+                List<int> indices = new List<int>();
+                for (int c = 0; c < n; c++)
+                {
+                    indices.Add(c);
+                }
+
+                indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
+                List<List<T>> newvals = new List<List<T>>();
+                List<List<T>> vals = A.Values;
+
+                for (int i = 0; i < m; i++)
+                {
+                    newvals.Add(new List<T>());
+                    foreach (int k in indices)
+                    {
+                        newvals[i].Add(vals[i][k]);
+                    }
+                }
+
+                return new MatrisBase<T>(newvals);
+            }
+            else if (axis == 2)
+            {
+                if (m == 1)
+                {
+                    return Shuffle(A, 1);
+                }
+                else if (n == 1)
+                {
+                    return Shuffle(A, 0);
+                }
+
+                List<int> indices = new List<int>();
+                for (int k = 0; k < n * m; k++)
+                {
+                    indices.Add(k);
+                }
+
+                indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
+                List<List<T>> newvals = new List<List<T>>();
+                List<List<T>> vals = A.Values;
+
+                int c = 0;
+                int r = -1;
+                foreach (int k in indices)
+                {
+                    if (c % n == 0)
+                    {
+                        newvals.Add(new List<T>());
+                        r++;
+                    }
+
+                    newvals[r].Add(vals[k / n][k % n]);
+                    c++;
+                }
+
+                return new MatrisBase<T>(newvals);
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.ARG_INVALID_VALUE("axis", "Satır: 0, Sütun: 1, Rastgele:2 olmalı"));
+            }
+
+        }
+
+        public MatrisBase<T> Replace(MatrisBase<T> A,
+                                     float old,
+                                     float with,
+                                     float TOL = (float)1e-6)
         {
             static bool inRange(float num, float min, float max)
             {

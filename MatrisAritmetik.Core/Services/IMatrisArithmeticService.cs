@@ -113,10 +113,10 @@
         /// <param name="j">Column index</param>
         /// <param name="based">Index base</param>
         /// <returns>Scalar matrix with value at <paramref name="A"/>[<paramref name="i"/>-<paramref name="based"/>, <paramref name="j"/>-<paramref name="based"/>]</returns>
-        MatrisBase<T> El(MatrisBase<T> A,
-                         int i,
-                         int j,
-                         int based = 0);
+        MatrisBase<T> Get(MatrisBase<T> A,
+                          int i,
+                          int j,
+                          int based = 0);
 
         /// <summary>
         /// Gets <paramref name="i"/>th row of matrix <paramref name="A"/> with index base <paramref name="based"/>
@@ -158,18 +158,29 @@
                           int based = 0);
 
         /// <summary>
+        /// Resize matrix <paramref name="A"/> with new dimensions <paramref name="row"/>x<paramref name="col"/>
+        /// </summary>
+        /// <param name="A">Matrix to resize</param>
+        /// <param name="row">New row dimension</param>
+        /// <param name="col">New column dimension</param>
+        /// <returns>Copy of elements in a new matrix with dimensions <paramref name="row"/>x<paramref name="col"/></returns>
+        MatrisBase<T> Resize(MatrisBase<T> A,
+                             int row,
+                             int col);
+
+        /// <summary>
         /// Signs of the elements of matrix <paramref name="A"/>
         /// </summary>
         /// <param name="A">Matrix to get signs of values from</param>
         /// <returns>A new matrix with 1's for values>=0 and -1's otherwise</returns>
-        MatrisBase<T> Signs(MatrisBase<T> A);
+        MatrisBase<T> Sign(MatrisBase<T> A);
 
         /// <summary>
         /// Absolute values of the elements of matrix <paramref name="A"/>
         /// </summary>
         /// <param name="A">Matrix to get absolute values of</param>
         /// <returns>A new matrix with absolute values</returns>
-        MatrisBase<T> AbsMat(MatrisBase<T> A);
+        MatrisBase<T> Abs(MatrisBase<T> A);
 
         /// <summary>
         /// Round values in matrix <paramref name="A"/> after <paramref name="n"/> decimal places
@@ -177,7 +188,7 @@
         /// <param name="A">Matrix to round values of</param>
         /// <param name="n">Decimal places to rount to</param>
         /// <returns>A new matrix with rounded values</returns>
-        MatrisBase<T> RoundMat(MatrisBase<T> A, int n = 0);
+        MatrisBase<T> Round(MatrisBase<T> A, int n = 0);
 
         /// <summary>
         /// Replace <paramref name="old"/> values within range [<paramref name="old"/>-<paramref name="TOL"/>, <paramref name="old"/>+<paramref name="TOL"/>] with '<paramref name="with"/>'
@@ -187,9 +198,20 @@
         /// <param name="with">New value to replace <paramref name="old"/> with</param>
         /// <param name="TOL">Tolerance for <paramref name="old"/></param>
         /// <returns>A new matrix with replaced values</returns>
-        MatrisBase<T> ReplaceMat(MatrisBase<T> A, float old, float with, float TOL = (float)1e-6);
-        #endregion
+        MatrisBase<T> Replace(MatrisBase<T> A,
+                              float old,
+                              float with,
+                              float TOL = (float)1e-6);
 
+        /// <summary>
+        /// Shuffle matrix <paramref name="A"/> along given <paramref name="axis"/>; 0 = rows , 1 = cols , 2 = both axis
+        /// </summary>
+        /// <param name="A">Matrix to shuffle values of</param>
+        /// <param name="axis">0 = row shuffle, 1 = column shuffle, 2 = shuffle both</param>
+        /// <returns>Copies of values in <paramref name="A"/> shuffled</returns>
+        MatrisBase<T> Shuffle(MatrisBase<T> A,
+                              int axis = 2);
+        #endregion
 
         #region Multiple Matrix Parameter Methods
         /// <summary>

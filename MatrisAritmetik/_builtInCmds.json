@@ -60,14 +60,30 @@
                 "description": "Rastgele tamsayılar ile matris oluşturma fonksiyonu",
 
                 "alias_list": [],
-                "function": "RandIntMat",
+                "function": "RandInt",
                 "param_types": [ "int", "int", "int", "int", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
                 "required_params": [ 0, 1 ],
                 "returns": "Matris",
 
-                "function_template": "!RandIntMat(,,,,)",
-                "function_template_filled": "!RandIntMat(row,col,min,max,seed)",
+                "function_template": "!RandInt(,,,,)",
+                "function_template_filled": "!RandInt(row,col,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Tamsayı Simetrik",
+                "description": "Rastgele tamsayılar ile simetrik matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "SymInt",
+                "param_types": [ "int", "int", "int", "int" ],
+                "param_names": [ "dimension", "min", "max", "seed" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!SymInt(,,,)",
+                "function_template_filled": "!SymInt(dimension,min:0,max:1,seed:!null)",
 
                 "service": "SpecialMatricesService"
             },
@@ -76,14 +92,30 @@
                 "description": "Rastgele rasyonel sayılar ile matris oluşturma fonksiyonu",
 
                 "alias_list": [],
-                "function": "RandFloatMat",
+                "function": "RandFloat",
                 "param_types": [ "int", "int", "float", "float", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
                 "required_params": [ 0, 1 ],
                 "returns": "Matris",
 
-                "function_template": "!RandFloatMat(,,,,)",
-                "function_template_filled": "!RandFloatMat(row,col,min,max,seed)",
+                "function_template": "!RandFloat(,,,,)",
+                "function_template_filled": "!RandFloat(row,col,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Rasyonel Simetrik",
+                "description": "Rastgele rasyonel sayılar ile simetrik matris oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "SymFloat",
+                "param_types": [ "int", "float", "float", "int" ],
+                "param_names": [ "dimension", "min", "max", "seed" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!SymFloat(,,,)",
+                "function_template_filled": "!SymFloat(dimension,min:0,max:1,seed:!null)",
 
                 "service": "SpecialMatricesService"
             },
@@ -92,14 +124,30 @@
                 "description": "Verilen sayı ile doldurulmuş matris oluşturma fonksiyonu",
 
                 "alias_list": [],
-                "function": "FilledMat",
+                "function": "Fill",
                 "param_types": [ "int", "int", "float" ],
                 "param_names": [ "row", "col", "fill" ],
                 "required_params": [ 0, 1, 2 ],
                 "returns": "Matris",
 
-                "function_template": "!FilledMat(,,)",
-                "function_template_filled": "!FilledMat(row,col,fill)",
+                "function_template": "!Fill(,,)",
+                "function_template_filled": "!Fill(row,col,fill)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Aralık",
+                "description": "Verilen aralığı verilen alt-aralıklara bölünmüş halde satır veya sütun vektörü.\n\t\t  axis:(0 = Satır matris, 1 = sütun matris)\n\t\t  digits:Kullanılacak ondalıklı basamak sayısı",
+
+                "alias_list": [],
+                "function": "Range",
+                "param_types": [ "float", "float", "float", "int", "int" ],
+                "param_names": [ "start", "end", "interval", "axis", "digits" ],
+                "required_params": [ 0, 1 ],
+                "returns": "Matris",
+
+                "function_template": "!Range(,,,)",
+                "function_template_filled": "!Range(start,end,interval:1,axis:0,digits:6)",
 
                 "service": "SpecialMatricesService"
             }
@@ -136,14 +184,14 @@
                 "description": "Verilen A matrisindeki değerlerin, negatifse -1, sıfır/pozitif ise 1 ile değiştirilmiş hali",
 
                 "alias_list": [],
-                "function": "Signs",
+                "function": "Sign",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
                 "required_params": [ 0 ],
                 "returns": "Matris",
 
-                "function_template": "!Signs()",
-                "function_template_filled": "!Signs(A)",
+                "function_template": "!Sign()",
+                "function_template_filled": "!Sign(A)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -152,14 +200,14 @@
                 "description": "Verilen A matrisindeki değerlerin mutlak değerleri",
 
                 "alias_list": [],
-                "function": "AbsMat",
+                "function": "Abs",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
                 "required_params": [ 0 ],
                 "returns": "Matris",
 
-                "function_template": "!AbsMat()",
-                "function_template_filled": "!AbsMat(A)",
+                "function_template": "!Abs()",
+                "function_template_filled": "!Abs(A)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -168,14 +216,14 @@
                 "description": "Verilen A matrisindeki değerleri n. basamak sonrasını verilen en yakına yuvarla",
 
                 "alias_list": [],
-                "function": "RoundMat",
+                "function": "Round",
                 "param_types": [ "Matris", "int" ],
                 "param_names": [ "A", "n" ],
                 "required_params": [ 0 ],
                 "returns": "Matris",
 
-                "function_template": "!RoundMat(,)",
-                "function_template_filled": "!RoundMat(A,n)",
+                "function_template": "!Round(,)",
+                "function_template_filled": "!Round(A,n:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -184,14 +232,14 @@
                 "description": "Verilen A matrisindeki bulunan 'old' değerlerini 'with' değeri ile değiştir.\n\t\t 'old' değerinin aralığı: [old-TOL, old+TOL]",
 
                 "alias_list": [],
-                "function": "ReplaceMat",
+                "function": "Replace",
                 "param_types": [ "Matris", "float", "float", "float" ],
                 "param_names": [ "A", "old", "with", "TOL" ],
                 "required_params": [ 0, 1, 2 ],
                 "returns": "Matris",
 
-                "function_template": "!ReplaceMat(,,,)",
-                "function_template_filled": "!ReplaceMat(A,old,with,TOL)",
+                "function_template": "!Replace(,,,)",
+                "function_template_filled": "!Replace(A,old,with,TOL:0.000001)",
 
                 "service": "MatrisArithmeticService"
             }
@@ -310,7 +358,7 @@
                 "returns": "Matris",
 
                 "function_template": "!PseudoInverse(,)",
-                "function_template_filled": "!PseudoInverse(A,side)",
+                "function_template_filled": "!PseudoInverse(A,side:-1)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -326,7 +374,7 @@
                 "returns": "float",
 
                 "function_template": "!Minor(,,,)",
-                "function_template_filled": "!Minor(A,row,col,based)",
+                "function_template_filled": "!Minor(A,row,col,based:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -342,7 +390,7 @@
                 "returns": "Matris",
 
                 "function_template": "!MinorMatris(,,,)",
-                "function_template_filled": "!MinorMatris(A,row,col,based)",
+                "function_template_filled": "!MinorMatris(A,row,col,based:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -409,7 +457,7 @@
                 "description": "Verilen A matrisinin 'based' tabanlı (i,j) indeksli elementi",
 
                 "alias_list": [],
-                "function": "El",
+                "function": "Get",
                 "param_types": [
                     "Matris",
                     "int",
@@ -420,8 +468,8 @@
                 "required_params": [ 0, 1, 2 ],
                 "returns": "Matris",
 
-                "function_template": "!El(,,,)",
-                "function_template_filled": "!El(A,i,j,0)",
+                "function_template": "!Get(,,,)",
+                "function_template_filled": "!Get(A,i,j,based:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -441,7 +489,7 @@
                 "returns": "Matris",
 
                 "function_template": "!Row(,,)",
-                "function_template_filled": "!Row(A,i,0)",
+                "function_template_filled": "!Row(A,i,based:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -461,7 +509,7 @@
                 "returns": "Matris",
 
                 "function_template": "!Col(,,)",
-                "function_template_filled": "!Col(A,j,0)",
+                "function_template_filled": "!Col(A,j,based:0)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -484,7 +532,46 @@
                 "returns": "Matris",
 
                 "function_template": "!Sub(,,,,,)",
-                "function_template_filled": "!Sub(A,r1,r2,c1,c2,based)",
+                "function_template_filled": "!Sub(A,r1,r2,c1,c2,based:0)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Boyutlandır",
+                "description": "Verilen A matrisini yeniden boyutlandır",
+
+                "alias_list": [],
+                "function": "Resize",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int"
+                ],
+                "param_names": [ "A", "row", "col" ],
+                "required_params": [ 0, 1, 2 ],
+                "returns": "Matris",
+
+                "function_template": "!Resize(,,)",
+                "function_template_filled": "!Resize(A,row,col)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Karıştır",
+                "description": "Verilen A matrisinin elementlerini verilen method ile karıştır.\n\t\t  method:(0 = satır , 1 = sütun , 2 = rastgele) karıştır. ",
+
+                "alias_list": [],
+                "function": "Shuffle",
+                "param_types": [
+                    "Matris",
+                    "int"
+                ],
+                "param_names": [ "A", "axis" ],
+                "required_params": [ 0 ],
+                "returns": "Matris",
+
+                "function_template": "!Shuffle(,)",
+                "function_template_filled": "!Shuffle(A,axis:2)",
 
                 "service": "MatrisArithmeticService"
             },
@@ -504,7 +591,7 @@
                 "returns": "Matris",
 
                 "function_template": "!Concatenate(,,)",
-                "function_template_filled": "!Concatenate(A,B,0)",
+                "function_template_filled": "!Concatenate(A,B,axis:0)",
 
                 "service": "MatrisArithmeticService"
             }
