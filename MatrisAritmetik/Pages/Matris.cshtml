@@ -41,8 +41,9 @@
                     @* Tablar *@
                     <ul class="nav nav-tabs" style="width:fit-content">
 
-                        <li id="matris_create_bytext_parent" class="active"><a id="matris_create_bytext">Yazı ile</a></li>
+                        <li id="matris_create_bytext_parent" class="active"><a id="matris_create_bytext">Yazıdan</a></li>
 
+                        <li id="matris_create_fromfile_parent" class=""><a id="matris_create_fromfile">Dosyadan</a></li>
                         @* Dosyadan oku
 
                             <li id="matris_create_byfile_parent"><a  id="matris_create_byfile">Dosya ile</a></li>
@@ -59,7 +60,7 @@
 
             </div>
 
-            @* Matris ekleme bilgileri satırı *@
+        @* Matris ekleme bilgileri satırı *@
         <div id="matris_add_table">
 
             <input type="text" id="matris_name" placeholder="Matris ismi" />
@@ -68,16 +69,19 @@
             @* Özel matris ekleme inputları*@
             <textarea name="matris_vals_special" id="matris_vals_special" style="display:none" readonly="readonly"></textarea>
             <input type="text" id="matris_special_args" style="display:none" placeholder="Parametre:Değer" />
-            @**@
 
             @* Text ile matris ekleme inputları*@
             <textarea name="matris_vals" id="matris_vals" placeholder="Elementler"></textarea>
+
+            @*Dosyadan*@
+            <input id="matris_file_button" name="matris_file_button" type="file" size="1" accept=".csv,.txt" />
+
             @* Ayraçlar *@
             <div id="matris_options_column" class="custom_delim_newline">
 
                 <select class="custom_spacer_select"
                         onchange="document.getElementById('displaySelectedSpacer').value=this.options[this.selectedIndex].text.split(' ')[1]==undefined?' ':this.options[this.selectedIndex].text.split(' ')[1]; document.getElementById('selectedSpacer').value=this.options[this.selectedIndex].value;">
-                    <option style="background-color:grey;color:white"value="default">Değer_ayracı  </option>
+                    <option style="background-color:grey;color:white" value="default">Değer_ayracı  </option>
                     <option value="space">Boşluk  </option>
                     <option value="tab">Tab \t</option>
                     <option value="comma">Virgül ,</option>
@@ -100,8 +104,9 @@
                 <input name="selectedLiner" id="selectedLiner" type="hidden">
 
             </div>
-            @**@
 
+            @* Ekleme butonları *@
+            <input id="matris_fromfile_create_button" type="button" class="button" value="Dosyayı oku" name="matris_fromfile_create" />
             <input id="matris_add_button" type="button" class="button" value="Oluştur" name="matris_create" currenttab="text" />
 
         </div>
@@ -135,20 +140,20 @@
             </div>
 
             @* Komut girme satırı *@
-        <div id="matris_komut_panel">
+            <div id="matris_komut_panel">
 
-            <span id="matris_komut_satır" 
-                  data-placeholder=">>> (örnek: (A+3)*5) (yardım için: ?)" 
-                  data-focused-advice="Yardım için '?' yazın" 
-                  contentEditable="true"
-                  spellcheck="false"></span>
-            <!--<input type="text" id="matris_komut_satır" placeholder=">>> (örnek: (A+3)*5) (yardım için: ?)" />-->
-            <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" data-toggle="tooltip" data-placement="top" title="İfadeyi/Komutu çözümle" />
-            <select id="matris_komut_options">
-                <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
-            </select>
+                <span id="matris_komut_satır"
+                      data-placeholder=">>> (örnek: (A+3)*5) (yardım için: ?)"
+                      data-focused-advice="Yardım için '?' yazın"
+                      contentEditable="true"
+                      spellcheck="false"></span>
+                <!--<input type="text" id="matris_komut_satır" placeholder=">>> (örnek: (A+3)*5) (yardım için: ?)" />-->
+                <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" data-toggle="tooltip" data-placement="top" title="İfadeyi/Komutu çözümle" />
+                <select id="matris_komut_options">
+                    <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
+                </select>
 
-        </div>
+            </div>
 
             @* Komut çıktısı tablosu/bölgesi *@
             <div id="matris_komut_output">
@@ -174,6 +179,7 @@
 @* Tokenlere erişim için *@
 <script>if (matris_add_button) { matris_add_button.token = "@token";}</script>
 <script>if (matris_komut_button) { matris_komut_button.token = "@token";}</script>
+<script>if (matris_fromfile_create_button) { matris_fromfile_create_button.token = "@token";}</script>
 @* Ara panel için*@
 <script>
     $("#left_panel").resizable({

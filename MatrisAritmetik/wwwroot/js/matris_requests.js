@@ -88,7 +88,7 @@ function deleteMatrix(event) {
                 __RequestVerificationToken: tkn,
                 "name": event.currentTarget.id,
             },
-            success: function (data) { updateTable(tkn); },
+            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); },
             error: function (error) { console.log(error); }
         });
 }
@@ -105,6 +105,10 @@ function sendCmd(event) {
         .split("=").join("!__EQ!")
         .split("./").join("!__REVMUL!")
         .replace(/\u00a0/g, " ");
+
+    if (filteredcmd.trim() == "")
+        return;
+
     $.ajax(
         {
             type: 'POST',
@@ -145,6 +149,173 @@ function placeAsCommand(event) {
 const matris_komut_options = document.getElementById("matris_komut_options");
 if (matris_komut_options) { matris_komut_options.addEventListener("change", placeAsCommand, false); }
 
+//////// dosya yükleme
+async function uploadFiles(event) {
+    var tkn = event.currentTarget.token;
+    var input = document.getElementById("matris_file_button");
+    var files = input.files;
+
+    if (files == null)
+        return;
+    if (files.length != 1)
+        return;
+
+    if (files[0].size > 5e+7) {
+        resetFilePanel(null);
+        alert("Dosya boyutu en fazla 5MB olabilir!");
+        return;
+    }
+
+    if (files[0].type != "text/plain" && files[0].type != "text/csv" && files[0].type != "application/vnd.ms-excel") {
+        resetFilePanel(null);
+        alert("Dosya olarak yalnızca text(.txt) ve comma-seperated-values(.csv) uzantılı dosyalar yüklenebilir!");
+        return;
+    }
+    let formData = new FormData();
+
+    formData.append("file", files[0]);
+    formData.append("type", files[0].type);
+    formData.append("name", document.getElementById("matris_name").value);
+    formData.append("delim", document.getElementById("displaySelectedSpacer").value);
+    formData.append("newline", document.getElementById("displaySelectedLiner").value);
+
+    await fetch('Matris?handler=UploadFile',
+        {
+            method: "POST",
+            body: formData,
+            headers:
+                { "RequestVerificationToken": tkn }
+        }
+    ).then(function (data) { updateTable(tkn); updateHistoryPanel(tkn); });
+    
+}
+
+function resetFilePanel(args) {
+    document.getElementById("matris_file_button").value = '';
+    document.getElementById("displaySelectedLiner").value = "";
+    document.getElementById("displaySelectedSpacer").value = "";
+    document.getElementById("matris_name").value = "";
+}
+
+function placeDefaultValues(event) {
+    var input = document.getElementById("matris_file_button");
+    var files = input.files;
+
+    if (files == null)
+        return;
+    if (files.length != 1)
+        return;
+
+    if (files[0].size > 5e+7) {
+        resetFilePanel(null);
+        alert("Dosya boyutu en fazla 5MB olabilir!");
+        return;
+    }
+
+    if (files[0].type != "text/plain" && files[0].type != "text/csv" && files[0].type != "application/vnd.ms-excel") {
+        resetFilePanel(null);
+        alert("Dosya olarak yalnızca text(.txt) ve comma-seperated-values(.csv) uzantılı dosyalar yüklenebilir!");
+        return;
+    }
+
+    let name = files[0].name;
+    document.getElementById("matris_name").value = name.substring(0, name.lastIndexOf("."))
+
+    switch (files[0].type) {
+        case "text/plain":
+            {
+                document.getElementById("displaySelectedSpacer").value = " ";
+                document.getElementById("displaySelectedLiner").value = "\\n";
+                break;
+            }
+        case "text/csv":
+            {
+                document.getElementById("displaySelectedSpacer").value = ",";
+                document.getElementById("displaySelectedLiner").value = "\\n";
+                break;
+            }
+        case "application/vnd.ms-excel": // csv?
+            {
+                document.getElementById("displaySelectedSpacer").value = ",";
+                document.getElementById("displaySelectedLiner").value = "\\n";
+                break;
+            }
+        default:
+            {
+                resetFilePanel(null);
+                alert("Dosya uzantısı .csv veya .txt olmalı!");
+                return;
+            }
+    }
+}
+
+// dosya yükleme butonu click event
+const matris_fromfile_create_button = document.getElementById("matris_fromfile_create_button");
+if (matris_fromfile_create_button) { matris_fromfile_create_button.addEventListener("click", uploadFiles, false); }
+// dosya seçme paneli change event
+const matris_file_button = document.getElementById("matris_file_button");
+if (matris_file_button) { matris_file_button.addEventListener("change", placeDefaultValues, false); }
+
+//////// Text matris panelini göster
+function textMatrisPick(event) {
+    
+    // Hide special panels
+    document.getElementById("matris_vals_special").style.display = "none";
+    document.getElementById("matris_special_args").style.display = "none";
+    document.getElementById("matris_file_button").style.display = "none";
+
+    // Show standard panel
+    document.getElementById("matris_vals").style.display = "inherit";
+    document.getElementById("matris_options_column").style.display = "block";
+
+    // Update "active" classes and styles
+    document.getElementById("matris_create_bytext_parent").classList.add("active");
+    document.getElementById("matris_create_fromfile_parent").classList.remove("active");
+    document.getElementById("special_matris_options").style.backgroundColor = "inherit";
+    document.getElementById("special_matris_options").style.border = null;
+    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
+
+    // Change add button's attribute
+    document.getElementById("matris_add_button").setAttribute("currentTab", "text");
+
+    document.getElementById("matris_fromfile_create_button").style.display = "none";
+    document.getElementById("matris_add_button").style.display = "inline-block";
+}
+
+// yazıdan matris tab click event
+const matris_create_bytext = document.getElementById("matris_create_bytext");
+if (matris_create_bytext) { matris_create_bytext.addEventListener("click", textMatrisPick, false); }
+
+//////// Dosya ile matris panelini göster
+function fileMatrisPick(event) {
+
+    // Hide other panels
+    document.getElementById("matris_vals_special").style.display = "none";
+    document.getElementById("matris_special_args").style.display = "none";
+    document.getElementById("matris_vals").style.display = "none";
+    document.getElementById("matris_options_column").style.display = "none";
+
+    // Show upload button and options
+    document.getElementById("matris_file_button").style.display = "block";
+    document.getElementById("matris_options_column").style.display = "block";
+
+    // Update "active" classes and styles
+    document.getElementById("matris_create_fromfile_parent").classList.add("active");
+    document.getElementById("matris_create_bytext_parent").classList.remove("active");
+    document.getElementById("special_matris_options").style.backgroundColor = "inherit";
+    document.getElementById("special_matris_options").style.border = null;
+    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
+
+    // Change add button's attribute
+    document.getElementById("matris_add_button").setAttribute("currentTab", "file");
+
+    document.getElementById("matris_fromfile_create_button").style.display = "inline-block";
+    document.getElementById("matris_add_button").style.display = "none";
+}
+
+// dosyadan matris tab click event
+const matris_create_fromfile = document.getElementById("matris_create_fromfile");
+if (matris_create_fromfile) { matris_create_fromfile.addEventListener("click", fileMatrisPick, false); }
 
 //////// özel matris dropdown seçeneklerinde değişim
 function specialMatrisPick(event) {
@@ -161,11 +332,13 @@ function specialMatrisPick(event) {
     // Hide standard panel
     document.getElementById("matris_vals").style.display = "none";
     document.getElementById("matris_options_column").style.display = "none";
+    document.getElementById("matris_file_button").style.display = "none";
 
     // Update "active" classes and styles
     document.getElementById("special_matris_options").style.backgroundColor = "white";
-    document.getElementById("special_matris_options").style.setProperty("border","1px solid #d6d6d6","important");
+    document.getElementById("special_matris_options").style.setProperty("border", "1px solid #d6d6d6", "important");
     document.getElementById("matris_create_bytext_parent").classList.remove("active");
+    document.getElementById("matris_create_fromfile_parent").classList.remove("active");
     //document.getElementById("matris_create_byfile_parent").classList.remove("active");
 
     // Add selected value
@@ -176,37 +349,14 @@ function specialMatrisPick(event) {
 
     // Change add button's attribute
     document.getElementById("matris_add_button").setAttribute("currentTab", "special");
+
+    document.getElementById("matris_fromfile_create_button").style.display = "none";
+    document.getElementById("matris_add_button").style.display = "inline-block";
 }
 
 // komut dropdown change event
 const special_matris_options = document.getElementById("special_matris_options");
 if (special_matris_options) { special_matris_options.addEventListener("change", specialMatrisPick, false); }
-
-
-//////// Text matris panelini göster
-function textMatrisPick(event) {
-    
-    // Hide special panels
-    document.getElementById("matris_vals_special").style.display = "none";
-    document.getElementById("matris_special_args").style.display = "none";
-
-    // Show standard panel
-    document.getElementById("matris_vals").style.display = "inherit";
-    document.getElementById("matris_options_column").style.display = "block";
-
-    // Update "active" classes and styles
-    document.getElementById("matris_create_bytext_parent").classList.add("active");
-    document.getElementById("special_matris_options").style.backgroundColor = "inherit";
-    document.getElementById("special_matris_options").style.border = null;
-    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
-
-    // Change add button's attribute
-    document.getElementById("matris_add_button").setAttribute("currentTab", "text");
-}
-
-// komut dropdown change event
-const matris_create_bytext = document.getElementById("matris_create_bytext");
-if (matris_create_bytext) { matris_create_bytext.addEventListener("click", textMatrisPick, false); }
 
 //////// komut geçmişi panelini güncelle
 function updateHistoryPanel(token) {
@@ -302,7 +452,14 @@ function Highlight(text) {
         char = htmlText[offsetindex];
 
         if (docsStarted) { // Docs
-            span = "<span class='docs_term' id='cmd_" + i + "'>";
+            if (char == ";") {
+                span = "<span class='settings_sep' id='cmd_" + i + "'>";
+                docsStarted = false;
+                settingsStarted = true;
+            }
+            else {
+                span = "<span class='docs_term' id='cmd_" + i + "'>";
+            }
         }
         else if (settingsStarted) { // Settings "; apply:setting value ;"
 
@@ -344,6 +501,7 @@ function Highlight(text) {
             }
             else if (char == ";") {
                 span = "<span class='settings_sep' id='cmd_" + i + "'>";
+                docsStarted = false;
                 settingsStarted = true;
             }
             else

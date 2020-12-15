@@ -1,33 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MatrisAritmetik.Core.Models
 {
     /// <summary>
     /// Class for using and storing string characters as tokens
     /// <para>Current order of operations:</para>
-    /// <para>OPERATOR :  PRIORITY(Higher first)</para>
-    /// <para>----------------------------------</para>
-    /// <para>  u+      :       200</para>
-    /// <para>  u-      :       200</para>
-    /// <para> FUNC     :       100</para>
-    /// <para>  (       :       10</para>
-    /// <para>  )       :       10</para>
-    /// <para>  ./      :       6</para>
-    /// <para>  .*      :       5</para>
-    /// <para>  .^      :       5</para>
-    /// <para>  ^       :       5</para>
-    /// <para>  *       :       4</para>
-    /// <para>  /       :       4</para>
-    /// <para>  %       :       4</para>
-    /// <para>  +       :       3</para>
-    /// <para>  -       :       3</para>
-    /// <para>  :       :       2</para>
-    /// <para>  ,       :       1</para>
-    /// <para>  =       :       0</para>
+    /// <code>OPERATOR :  PRIORITY(Higher first)</code>
+    /// <code>----------------------------------</code>
+    /// <code>  u+      :       200</code>
+    /// <code>  u-      :       200</code>
+    /// <code> FUNC     :       100</code>
+    /// <code>  (       :       10</code>
+    /// <code>  )       :       10</code>
+    /// <code>  ./      :       6</code>
+    /// <code>  .*      :       5</code>
+    /// <code>  .^      :       5</code>
+    /// <code>  ^       :       5</code>
+    /// <code>  *       :       4</code>
+    /// <code>  /       :       4</code>
+    /// <code>  %       :       4</code>
+    /// <code>  +       :       3</code>
+    /// <code>  -       :       3</code>
+    /// <code>  :       :       2</code>
+    /// <code>  ,       :       1</code>
+    /// <code>  =       :       0</code>
     /// 
     /// </summary>
-    public class Token
+    public class Token : IDisposable
     {
+        #region Fields
         #region Common Fields For Every Token
         /// <summary>
         /// Token type, see <see cref="TokenType"/>
@@ -96,6 +98,9 @@ namespace MatrisAritmetik.Core.Models
         /// Information about the <see cref="Token.name"/> named matrix or function 
         /// </summary>
         public string info = null;
+
+        private bool disposedValue;
+        #endregion
         #endregion
 
         #region Constructors
@@ -180,6 +185,45 @@ namespace MatrisAritmetik.Core.Models
                 TokenType.RIGHTBRACE => "RIGHTBR",
                 _ => tknType.ToString(),
             };
+        }
+
+        #endregion
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (paramTypes != null)
+                    {
+                        paramTypes.Clear();
+                        paramTypes = null;
+                    }
+                }
+
+                name = null;
+                service = null;
+                returns = null;
+                symbol = null;
+                info = null;
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~Token()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

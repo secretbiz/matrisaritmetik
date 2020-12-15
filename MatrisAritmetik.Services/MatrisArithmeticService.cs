@@ -309,7 +309,7 @@ namespace MatrisAritmetik.Services
                        - (float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString()));
             }
 
-            MatrisBase<T> ech = Echelon(A);
+            using MatrisBase<T> ech = Echelon(A);
 
             float det = float.Parse(ech.Values[0][0].ToString());
             if (ech.swapCount % 2 == 1)
@@ -328,7 +328,7 @@ namespace MatrisAritmetik.Services
 
         public int Rank(MatrisBase<T> A)
         {
-            MatrisBase<T> ech = Echelon(A);
+            using MatrisBase<T> ech = Echelon(A);
             int zeroCount = 0;
             if (A.Row <= A.Col)
             {
@@ -366,7 +366,7 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
 
-            MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
+            using MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
 
             return new MatrisBase<T>(vals: RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }

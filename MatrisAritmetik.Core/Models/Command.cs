@@ -79,7 +79,7 @@ namespace MatrisAritmetik.Core.Models
     /// <summary>
     /// Command class which hold information about a command's current state, output etc.
     /// </summary>
-    public class Command
+    public class Command : IDisposable
     {
         #region Const Strings
         /// <summary>
@@ -149,6 +149,8 @@ namespace MatrisAritmetik.Core.Models
         /// Current message about the state of the command
         /// </summary>
         public string STATE_MESSAGE = "";
+
+        private bool disposedValue;
         #endregion
 
         #region Constructors
@@ -369,6 +371,59 @@ Ek ayarlar(Çıktı):" + outset + @"
 " + Output.ToString() + @"
 Durum: " + state;
 
+        }
+        #endregion
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (NameSettings != null)
+                    {
+                        NameSettings.Clear();
+                        NameSettings = null;
+                    }
+                    if (ValsSettings != null)
+                    {
+                        ValsSettings.Clear();
+                        ValsSettings = null;
+                    }
+                    if (Tokens != null)
+                    {
+                        foreach (Token d in Tokens)
+                        {
+                            d.Dispose();
+                        }
+                        Tokens.Clear();
+                        Tokens = null;
+                    }
+                }
+
+                Output = null;
+                OriginalCommand = null;
+                CleanedCommand = null;
+                OriginalSettings = null;
+                TermsToEvaluate = null;
+                STATE_MESSAGE = null;
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~Command()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

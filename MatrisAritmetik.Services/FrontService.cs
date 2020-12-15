@@ -264,36 +264,40 @@ namespace MatrisAritmetik.Services
         /// <returns>Array of tokenizable string expressions</returns>
         private string[] TokenizeSplit(string exp)
         {
-            exp = exp.
-                Replace("+", " + ").
-                Replace("+ =", "+=").
-                Replace("-", " - ").
-                Replace("- =", "-=").
-                Replace("*", " * ").
-                Replace("* =", "*=").
-                Replace(". *", ".*").
-                Replace("/", " / ").
-                Replace("/ =", "/=").
-                Replace(". /", "./").
-                Replace("(", " ( ").
-                Replace(")", " ) ").
-                Replace(",", " , ").
-                Replace("%", " % ").
-                Replace("% =", "%=").
-                Replace("^", " ^ ").
-                Replace("^ =", "^=").
-                Replace(". ^", ".^").
-                Replace(".*", " .* ").
-                Replace(".^", " .^ ").
-                Replace("./", " ./ ").
-                Replace("=", " = ").
-                Replace(":", " : ").
-                Trim();
+            exp = exp
+                .Replace("+", " + ")
+                .Replace("+ =", "+=")
+                .Replace("-", " - ")
+                .Replace("- =", "-=")
+                .Replace("*", " * ")
+                .Replace("* =", "*=")
+                .Replace(". *", ".*")
+                .Replace("/", " / ")
+                .Replace("/ =", "/=")
+                .Replace(". /", "./")
+                .Replace("(", " ( ")
+                .Replace(")", " ) ")
+                .Replace(",", " , ")
+                .Replace("%", " % ")
+                .Replace("% =", "%=")
+                .Replace("^", " ^ ")
+                .Replace("^ =", "^=")
+                .Replace(". ^", ".^")
+                .Replace(".*", " .* ")
+                .Replace(".^", " .^ ")
+                .Replace("./", " ./ ")
+                .Replace("=", " = ")
+                .Replace(":", " : ")
+                .Trim();
 
             if (exp.Contains("=")) // Matris_name = some_expression
             {
                 string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
-                if (expsplits.Length != 2)
+                if (expsplits.Length == 0)
+                {
+                    throw new Exception(CompilerMessage.EQ_FORMAT);
+                }
+                else if (expsplits.Length != 2)
                 {
                     throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
                 }
@@ -841,7 +845,7 @@ namespace MatrisAritmetik.Services
                             }
 
                             MatrisBase<dynamic> res = operands[1].val.Copy();
-                            MatrisBase<dynamic> mat = res.Copy();
+                            using MatrisBase<dynamic> mat = res.Copy();
 
                             IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
 
@@ -1559,7 +1563,12 @@ namespace MatrisAritmetik.Services
 
             if (CleanUp_state && cmd.STATE == CommandState.SUCCESS)
             {
+                foreach (Command c in cmdHistory)
+                {
+                    c.Dispose();
+                }
                 cmdHistory.Clear();
+
                 CleanUp_state = false;
                 cmd.STATE_MESSAGE = CommandStateMessage.SUCCESS_CLEANUP;
                 if (!cmd.NameSettings.ContainsKey("display"))
@@ -1569,6 +1578,23 @@ namespace MatrisAritmetik.Services
             }
 
             return cmd.STATE;
+        }
+
+        public bool CheckCmdDate(DateTime date)
+        {
+            // First command
+            if (date == null)
+            {
+                return true;
+            }
+            else if ((DateTime.Now - date).TotalSeconds < (int)CompilerLimits.forCmdSendRateInSeconds)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         public void CleanUp()

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core.Services
@@ -90,6 +91,13 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="cmdHistory">Command history to add this command to</param>
         /// <returns>The state of the <paramref name="cmd"/></returns>
         CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory);
+
+        /// <summary>
+        /// Check if last command sent was dated old enough ( ><see cref="CompilerLimits.forCmdSendRateInSeconds"/> seconds old )
+        /// </summary>
+        /// <returns><c>true</c> if <paramref name="date"/> was null or more than <see cref="CompilerLimits.forCmdSendRateInSeconds"/> seconds old
+        /// <para> Otherwise sets current session variables and returns <c>false</c></para></returns>
+        bool CheckCmdDate(DateTime date);
 
         /// <summary>
         /// Command to clean up the command history

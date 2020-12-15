@@ -6,6 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using HttpMultipartParser;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
@@ -73,12 +74,15 @@ namespace MatrisAritmetik.Services
             List<T> temprow;
             bool typestring = typeof(T).Name == "String";
 
+            string[] rows = filteredText.Split(newline);
+            int m = Math.Min((int)MatrisLimits.forRows, rows.Length);
+
             if (typestring)
             {
-                foreach (string row in filteredText.Split(newline))
+                for (int i = 0; i < m; i++)
                 {
                     temprow = new List<T>();
-                    rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                    rowsplit = rows[i].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
 
                     if (rowsplit.Length != temp && temp != -1)
                     {
@@ -87,9 +91,9 @@ namespace MatrisAritmetik.Services
 
                     temp = 0;
 
-                    foreach (string val in rowsplit)
+                    for (int j = 0; j < Math.Min((int)MatrisLimits.forCols, rowsplit.Length); j++)
                     {
-                        temprow.Add((dynamic)val);
+                        temprow.Add((dynamic)rowsplit[j]);
                         temp += 1;
                     }
                     vals.Add(temprow);
@@ -97,10 +101,10 @@ namespace MatrisAritmetik.Services
             }
             else
             {
-                foreach (string row in filteredText.Split(newline))
+                for (int i = 0; i < m; i++)
                 {
                     temprow = new List<T>();
-                    rowsplit = row.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                    rowsplit = rows[i].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
 
                     if (rowsplit.Length != temp && temp != -1)
                     {
@@ -109,15 +113,15 @@ namespace MatrisAritmetik.Services
 
                     temp = 0;
 
-                    foreach (string val in rowsplit)
+                    for (int j = 0; j < Math.Min((int)MatrisLimits.forCols, rowsplit.Length); j++)
                     {
-                        if (float.TryParse(val, out float element))
+                        if (float.TryParse(rowsplit[j], out float element))
                         {
                             temprow.Add((dynamic)element);
                         }
                         else
                         {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(val, "float"));
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(rowsplit[j], "float"));
                         }
                         temp += 1;
                     }
@@ -326,6 +330,31 @@ namespace MatrisAritmetik.Services
             return result;
         }
 
+        public async Task ReadFileFromRequest(Stream reqbody,
+                                              Encoding enc,
+                                              Dictionary<string, string> filedata)
+        {
+            MultipartFormDataParser parser = await MultipartFormDataParser.ParseAsync(reqbody, enc).ConfigureAwait(false);
+            Stream datastream = parser.Files[0].Data;
+
+            using StreamReader reader = new StreamReader(datastream, enc);
+
+            filedata.Add("data",
+                         await reader.ReadToEndAsync());
+
+            filedata.Add("type",
+                         parser.GetParameterValue("type"));
+
+            filedata.Add("delim",
+                         FixLiterals(parser.GetParameterValue("delim")));
+
+            filedata.Add("newline",
+                         FixLiterals(parser.GetParameterValue("newline")));
+
+            filedata.Add("name",
+                         parser.GetParameterValue("name"));
+        }
+
         public async Task ReadAndDecodeRequest(Stream reqbody,
                                                Encoding enc,
                                                List<string> ignoredparams,
@@ -342,6 +371,12 @@ namespace MatrisAritmetik.Services
             foreach (string pair in body)
             {
                 pairsplit = pair.Split("="); // pairsplit[] = { key , value }
+
+                if (pairsplit.Length != 2)
+                {   // Something wasn't right
+                    decodedRequestDict.Clear();
+                    return;
+                }
 
                 if (ignoredparams.Contains(pairsplit[0]))
                 {

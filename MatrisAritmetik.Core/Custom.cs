@@ -2,6 +2,7 @@
  * Created to reduce file amount.
  */
 
+using System;
 using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core
@@ -74,6 +75,11 @@ namespace MatrisAritmetik.Core
     /// </summary>
     public enum CompilerLimits
     {
+        /// <summary>
+        /// Minimum amount of time in seconds to wait and accept command execution
+        /// </summary>
+        forCmdSendRateInSeconds = 2,
+
         /// <summary>
         /// Limit how many command can be shown each command history page
         /// </summary>
@@ -166,11 +172,11 @@ namespace MatrisAritmetik.Core
     };
     #endregion
 
-    #region Custom Error-Warning Message Classes
+    #region Custom Error-Warning-Info Message Classes
     /// <summary>
     /// Class for storing a <see cref="Command"/>'s <see cref="CommandStateMessage"/> and <see cref="CommandState"/> in a single instance
     /// </summary>
-    public class CommandMessage
+    public class CommandMessage : IDisposable
     {
         #region Public Fields
         /// <summary>
@@ -181,6 +187,8 @@ namespace MatrisAritmetik.Core
         /// Last message
         /// </summary>
         public string Message = "";
+
+        private bool disposedValue;
         #endregion
 
         #region Constructors
@@ -193,6 +201,36 @@ namespace MatrisAritmetik.Core
         {
             Message = msg;
             State = s;
+        }
+        #endregion
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                Message = null;
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~CommandMessage()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }
@@ -265,6 +303,16 @@ namespace MatrisAritmetik.Core
         {
             return requestDesc + " isteği başarısız! Gerekli parametrelere değer verilmedi: " + string.Join(",", keys);
         }
+
+        /// <summary>
+        /// Given request was being spammed / was too close to previous command
+        /// </summary>
+        /// <param name="last">Last date recieved</param>
+        /// <returns>Message telling how long to wait</returns>
+        public static string REQUEST_SPAM(DateTime last)
+        {
+            return "Yeni bir komut göndermek için " + Math.Round(((int)CompilerLimits.forCmdSendRateInSeconds - (DateTime.Now - last).TotalSeconds), 2) + " saniye bekleyiniz!";
+        }
     }
 
     /// <summary>
@@ -326,6 +374,26 @@ namespace MatrisAritmetik.Core
         public static string NOT_SAVED_MATRIX(string name)
         {
             return "'" + name + "' adlı bir matris bulunamadı!";
+        }
+
+        /// <summary>
+        /// A matrix with given <paramref name="name"/> was successfully created and added to dictionary
+        /// </summary>
+        /// <param name="name">Matrix names used</param>
+        /// <returns>Message telling matrix was created</returns>
+        public static string SAVED_MATRIX(string name)
+        {
+            return "'" + name + "' adlı bir matris oluşturuldu!";
+        }
+
+        /// <summary>
+        /// Matrix named <paramref name="name"/> was successfully deleted from the dictionary
+        /// </summary>
+        /// <param name="name">Matrix's name</param>
+        /// <returns>Message telling deletion was successful</returns>
+        public static string DELETED_MATRIX(string name)
+        {
+            return "'" + name + "' adlı matris silindi!";
         }
 
         //// SIZE AND DIMENSIONS

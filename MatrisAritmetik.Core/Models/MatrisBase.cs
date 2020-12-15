@@ -9,7 +9,7 @@ namespace MatrisAritmetik.Core
     /// Base class for matrices
     /// </summary>
     /// <typeparam name="T">Type of the values matrix will store, use "object" or "dynamic" if unknown</typeparam>
-    public class MatrisBase<T>
+    public class MatrisBase<T> : IDisposable
     {
         #region Private Encapsulated Fields
         private int _seed;
@@ -162,6 +162,10 @@ namespace MatrisAritmetik.Core
         /// Wheter the matrix was filled with random values
         /// </summary>
         public bool CreatedFromSeed = false;
+        /// <summary>
+        /// Disposal information
+        /// </summary>
+        private bool disposedValue;
         #endregion
 
         #region Constructors
@@ -280,12 +284,12 @@ namespace MatrisAritmetik.Core
         /// <returns>A string with values in columns left-aligned</returns>
         public string Printstr()
         {
-            bool stringmat = typeof(T) == typeof(string);
-
             if (!IsValid())
             {
                 return "";
             }
+
+            bool stringmat = typeof(T) == typeof(string);
 
             StringBuilder res = new StringBuilder();
             // Column sizes
@@ -320,32 +324,6 @@ namespace MatrisAritmetik.Core
             return res.ToString();
         }
 
-        /// <summary>
-        /// Creates a matrix with current matrix's values padded from left depending on the column widths 
-        /// </summary>
-        /// <returns>A string matrix with values padded with spaces on left</returns>
-        public MatrisBase<string> PrintStrMaxtrisForm()
-        {
-            if (Row == 0 || Col == 0)
-            {
-                return new MatrisBase<string>(1, 1, "");
-            }
-
-            MatrisBase<string> strmat = new MatrisBase<string>(Row, Col, "");
-
-            // Column sizes
-            int[] longest_in_col = GetColumnWidths(this);
-
-            for (int j = 0; j < Col; j++)
-            {
-                for (int i = 0; i < Row; i++)
-                {
-                    strmat.Values[i][j] = new string(' ', longest_in_col[j] - Values[i][j].ToString().Length) + Values[i][j].ToString();
-                }
-            }
-
-            return strmat;
-        }
         #endregion
 
         #region Indexers, 0-based
@@ -1063,11 +1041,11 @@ namespace MatrisAritmetik.Core
         {
             try
             {
-                return Round(Digits).PrintStrMaxtrisForm().Printstr();
+                return Round(Digits).Printstr();
             }
             catch (Exception)
             {
-                return PrintStrMaxtrisForm().Printstr();
+                return Printstr();
             }
         }
         /// <summary>
@@ -1084,6 +1062,44 @@ namespace MatrisAritmetik.Core
             return base.GetHashCode();
         }
 
+
+        #endregion
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (_values != null)
+                    {
+                        foreach (List<T> r in _values)
+                        {
+                            r.Clear();
+                        }
+                        _values.Clear();
+                        _values = null;
+                    }
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~MatrisBase()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
         #endregion
 
         #region Operator Overloads

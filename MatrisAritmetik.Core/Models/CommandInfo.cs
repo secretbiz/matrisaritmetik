@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MatrisAritmetik.Core.Models
@@ -6,7 +7,7 @@ namespace MatrisAritmetik.Core.Models
     /// <summary>
     /// Command information class which hold information about built-in functions
     /// </summary>
-    public class CommandInfo
+    public class CommandInfo : IDisposable
     {
         #region Public Fields
         /// <summary>
@@ -53,6 +54,7 @@ namespace MatrisAritmetik.Core.Models
         /// Name of the service the "function" is declared in
         /// </summary>
         public string service;
+        private bool disposedValue;
         #endregion
 
         #region Constructors
@@ -105,6 +107,47 @@ namespace MatrisAritmetik.Core.Models
         Gerekli Minimal Format: !" + function + "(" + MinimalFormat() + ")" + @"
         Örnek: !" + function + "(" + string.Join(",", param_types) + ")";
 
+        }
+        #endregion
+
+        #region Dispose
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    alias_list.Clear();
+                    alias_list = null;
+                }
+
+                fullname = null;
+                returns = null;
+                function = null;
+                description = null;
+                function_template = null;
+                function_template_filled = null;
+                service = null;
+                required_params = null;
+                param_names = null;
+                param_types = null;
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        ~CommandInfo()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

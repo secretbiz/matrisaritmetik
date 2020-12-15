@@ -2,7 +2,7 @@
 @{
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
-    int MaxTolarableSize = 100;
+    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows) / 2;
     var tkn = ViewData["tkn"];
 
 }
@@ -11,77 +11,78 @@
 {
     @foreach (var name in Model.Keys)
     {
-        <tr id='@ConcatName("matris_table_",name)'>
-            @*Name*@
-            <td colspan="3">
+    <tr id='@ConcatName("matris_table_",name)'>
+        @*Name*@
+        <td colspan="3">
+            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>@name</mi>
+            </math>
+        </td>
+
+        <td colspan="1">
+            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mo>=</mo>
+            </math>
+        </td>
+
+        @*Values*@
+        <td colspan="11">
+            <div id='@ConcatName("matris_vals_",name)' style="max-height:200px;overflow-y:auto;">
                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                    <mi>@name</mi>
-                </math>
-            </td>
-
-            <td colspan="1">
-                <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                    <mo>=</mo>
-                </math>
-            </td>
-
-            @*Values*@
-            <td colspan="11">
-                <div id='@ConcatName("matris_vals_",name)' style="max-height:200px;overflow-y:auto;">
-                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                        <mrow>
-                            <mo> ( </mo>
-                            <mtable>
-                                @if (Model[name].ElementCount > MaxTolarableSize)
+                    <mrow>
+                        <mo> ( </mo>
+                        <mtable>
+                            @if (Model[name].ElementCount > MaxTolarableSize)
+                            {
+                                @foreach (var row in Model[name].CornerMatrix().Values)
                                 {
-                                    @foreach (var row in Model[name].CornerMatrix().Values)
-                                    {
-                                        <mtr>
-                                            @foreach (var val in row)
-                                            {
-                                                <mtd>
-                                                    <mn>@val</mn>
-                                                </mtd>
-                                            }
-                                        </mtr>
-                                    }
+                                    <mtr>
+                                        @foreach (var val in row)
+                                        {
+                                            <mtd>
+                                                <mn>@val</mn>
+                                            </mtd>
+                                        }
+                                    </mtr>
                                 }
-                                else
+                            }
+                            else
+                            {
+                                @foreach (var row in Model[name].Values)
                                 {
-                                    @foreach (var row in Model[name].Values)
-                                    {
-                                        <mtr>
-                                            @foreach (var val in row)
-                                            {
-                                                <mtd>
-                                                    <mn>@val</mn>
-                                                </mtd>
-                                            }
-                                        </mtr>
-                                    }
+                                    <mtr>
+                                        @foreach (var val in row)
+                                        {
+                                            <mtd>
+                                                <mn>@val</mn>
+                                            </mtd>
+                                        }
+                                    </mtr>
                                 }
-                            </mtable>
-                            <mo> ) </mo>
-                        </mrow>
-                    </math>
-                </div>
-            </td>
+                            }
+                        </mtable>
+                        <mo> ) </mo>
+                    </mrow>
+                </math>
+            </div>
+        </td>
 
-            @*Buttons*@
+        @*Buttons*@
+        @*
             <td colspan="2" align="center">
                 <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrise özel işlemler")' />
             </td>
+        *@
+        <td colspan="3" align="center">
+            <ul class="list-inline m-0">
+                <li class="list-inline-item">
+                    <button name="matris_table_delbutton" id='@ConcatName("matris_table_delbutton_",name)' class="btn btn-danger btn-sm matdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrisi sil")'>
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </li>
+            </ul>
+        </td>
 
-            <td colspan="1" align="center">
-                <ul class="list-inline m-0">
-                    <li class="list-inline-item">
-                        <button name="matris_table_delbutton" id='@ConcatName("matris_table_delbutton_",name)' class="btn btn-danger btn-sm matdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrisi sil")'>
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </li>
-                </ul>
-            </td>
-
-        </tr>
+    </tr>
     }
 }

@@ -66,6 +66,16 @@ namespace MatrisAritmetik.Core.Services
                                   List<string> ignoredparams,
                                   Dictionary<string, string> decodedRequestDict);
 
+        /// <summary>
+        /// Read the file data from given request body
+        /// </summary>
+        /// <param name="reqbody">Request body</param>
+        /// <param name="enc">Encoding to use</param>
+        /// <param name="filedata">String object to store read data</param>
+        /// <returns>Awaitable</returns>
+        Task ReadFileFromRequest(Stream reqbody,
+                                 Encoding enc,
+                                 Dictionary<string, string> filedata);
         #endregion
 
         #region List Related Methods

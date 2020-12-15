@@ -1,10 +1,13 @@
 ﻿@model Dictionary<string, dynamic>
 @{
     Layout = null;
+
     MatrisAritmetik.Core.Models.Command cmd;
     MatrisAritmetik.Core.CommandMessage msg;
     MatrisAritmetik.Core.MatrisBase<string> matoutput;
-    string style = ";"; int MaxTolarableSize = 100;
+
+    string cmdstyle = ";"; string outstyle = ";";
+    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows) / 2;
 
     MatrisAritmetik.Core.Services.IUtilityService<string> utilityService = new MatrisAritmetik.Services.UtilityService<string>();
 
@@ -15,11 +18,30 @@
         if (!Model.ContainsKey("LastMessage"))
             Model.Add("LastMessage", new Core.CommandMessage("", Core.CommandState.IDLE));
     }
+
+    string SettingString(Dictionary<string, string> set)
+    {
+        if (set.Count != 0)
+        {
+            System.Text.StringBuilder str = new System.Text.StringBuilder();
+            foreach (string sty in set.Keys)
+            {
+                str.Append(sty); str.Append(":"); str.Append(set[sty]); str.Append(" !important;");
+            }
+            return str.ToString();
+        }
+        else
+        {
+            return ";";
+        }
+    }
 }
 
 @if (Model != null)
 {
     msg = Model["LastMessage"];
+
+    @*Last message row*@
     if (msg.State == Core.CommandState.ERROR)
     {
         <tr>
@@ -56,6 +78,7 @@
         </tr>
     }
 
+    @*Command and Output history*@
     if (Model["CommandHistory"].Count == 0)
     {
 
@@ -78,42 +101,29 @@
 
             @if (cmd.STATE == Core.CommandState.SUCCESS)
             {
+                cmdstyle = SettingString(cmd.NameSettings);
+                outstyle = SettingString(cmd.ValsSettings);
+
                 if (cmd.OriginalCommand.Contains("?"))
                 {
-                    <tr class="cmdrepeat cmdHelpCommandGiven" title='@cmd.CommandSummary()'>
-                        <td>
+                    <tr class="cmdrepeat cmdHelpCommandGiven" style='@cmdstyle' title='@cmd.CommandSummary()'>
+                        <td style='@cmdstyle'>
                             <span class="cmdHelpStart">>>></span> @cmd.OriginalCommand <span class="cmdHelpStart">=</span>
                         </td>
                     </tr>
 
-                    <tr class="outputRow" title='@cmd.CommandSummary()'>
-                        <td class="cmdoutput compilerHelp">@cmd.Output</td>
+
+                    <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
+                        <td class="cmdoutput compilerHelp" style='@outstyle'>@cmd.Output</td>
                     </tr>
                 }
                 else
                 {
-                    style = "";
-                    if (cmd.NameSettings.Count != 0)
-                    {
-                        @foreach (string sty in cmd.NameSettings.Keys)
-                        {
-                            style += sty + ":" + cmd.NameSettings[sty] + ";";
-                        }
-                    }
-                    <tr class="cmdrepeat" style='@style' title='@cmd.CommandSummary()'>
-                        <td>
+                    <tr class="cmdrepeat" style='@cmdstyle' title='@cmd.CommandSummary()'>
+                        <td style='@cmdstyle'>
                             <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
                         </td>
                     </tr>
-
-                    style = "";
-                    if (cmd.ValsSettings.Count != 0)
-                    {
-                        @foreach (string sty in cmd.ValsSettings.Keys)
-                        {
-                            style += sty + ":" + cmd.ValsSettings[sty] + ";";
-                        }
-                    }
 
                     if (cmd.ValsSettings.ContainsKey("tex"))
                     {
@@ -127,8 +137,8 @@
                         }
                         if (matoutput.IsValid())
                         {
-                            <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
-                                <td>
+                            <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
+                                <td style='@outstyle'>
                                     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                         <mrow>
                                             <mo> ( </mo>
@@ -170,16 +180,16 @@
                         }
                         else
                         {
-                            <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
-                                <td class="cmdoutput">@cmd.Output</td>
+                            <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
+                                <td class="cmdoutput" style='@outstyle'>@cmd.Output</td>
                             </tr>
                         }
                     }
                     else
                     {
 
-                        <tr class="outputRow" style='@style' title='@cmd.CommandSummary()'>
-                            <td class="cmdoutput">@cmd.Output</td>
+                        <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
+                            <td class="cmdoutput" style='@outstyle'>@cmd.Output</td>
                         </tr>
                     }
                 }
