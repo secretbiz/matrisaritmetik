@@ -71,6 +71,52 @@ namespace MatrisAritmetik.Core
     };
 
     /// <summary>
+    /// Enumerated <see cref="Dataframe"/> limitations
+    /// </summary>
+    public enum DataframeLimits
+    {
+        /// <summary>
+        /// Maximum amount of dataframes per sessions
+        /// </summary>
+        forDataframeCount = 2,
+
+        /// <summary>
+        /// Maximum row count per dataframe
+        /// </summary>
+        forRows = 512,
+
+        /// <summary>
+        /// Maximum depth level of row labels (<see cref="Dataframe"/>.RowLabels.Count)
+        /// </summary>
+        forRowLabelLevels = 2,
+
+        /// <summary>
+        /// Maximum column count per dataframe
+        /// </summary>
+        forCols = 32,
+
+        /// <summary>
+        /// Maximum depth level of column labels (<see cref="Dataframe"/>.ColumnLabels.Count)
+        /// </summary>
+        forColLabelLevels = 3,
+
+        /// <summary>
+        /// Maximum element count
+        /// </summary>
+        forSize = 512 * 32,
+
+        /// <summary>
+        /// Maximum element count including labels
+        /// </summary>
+        forTotalSize = (512 * 32) + (512 * 2) + (32 * 3),
+
+        /// <summary>
+        /// Maximum character amount for a dataframe name 
+        /// </summary>
+        forName = 64
+    }
+
+    /// <summary>
     /// Enumerated limits for command history
     /// </summary>
     public enum CompilerLimits
@@ -320,7 +366,14 @@ namespace MatrisAritmetik.Core
     /// </summary>
     public class CompilerMessage
     {
-        ////// MATRIX ERRORS
+        ////// DATAFRAME MESSAGES
+        //// SPAN
+        public static string DF_TOTALSPAN_UNMATCH(int dimension, int span)
+        {
+            return "Etiket toplam genişliği " + dimension + " olmalı, " + span + " genişlik verildi!";
+        }
+
+        ////// MATRIX MESSAGES
         //// LIMITS
         /// <summary>
         /// Matrix creation limit

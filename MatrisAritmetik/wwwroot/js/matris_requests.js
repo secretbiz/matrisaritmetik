@@ -219,7 +219,7 @@ function placeDefaultValues(event) {
     }
 
     let name = files[0].name;
-    document.getElementById("matris_name").value = name.substring(0, name.lastIndexOf("."))
+    document.getElementById("matris_name").value = name.substring(0, name.lastIndexOf("."));
 
     switch (files[0].type) {
         case "text/plain":
@@ -429,8 +429,8 @@ function colorInput(event) {
 
 }
 
-const operators = ["+", "-", "*", "/", ".", "%", "^", "="]
-const seperators = ["(", ")", ","]
+const operators = ["+", "-", "*", "/", ".", "%", "^", "="];
+const seperators = ["(", ")", ","];
 
 function Highlight(text) {
     var htmlText = text;

@@ -120,6 +120,7 @@ namespace MatrisAritmetik.Services
                     nc--;
                 }
             }
+
             result = new MatrisBase<T>(filteredResult);
 
             for (int r = 0; r < nr; r++)
@@ -298,6 +299,11 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
+            if (A.IsZero((float)0.0))
+            {
+                return (float)0.0;
+            }
+
             if (A.Row == 1)
             {
                 return float.Parse(A.Values[0][0].ToString());
@@ -309,7 +315,7 @@ namespace MatrisAritmetik.Services
                        - (float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString()));
             }
 
-            using MatrisBase<T> ech = Echelon(A);
+            using MatrisBase<T> ech = Echelon(A.Copy());
 
             float det = float.Parse(ech.Values[0][0].ToString());
             if (ech.swapCount % 2 == 1)
@@ -328,7 +334,7 @@ namespace MatrisAritmetik.Services
 
         public int Rank(MatrisBase<T> A)
         {
-            using MatrisBase<T> ech = Echelon(A);
+            using MatrisBase<T> ech = Echelon(A.Copy());
             int zeroCount = 0;
             if (A.Row <= A.Col)
             {

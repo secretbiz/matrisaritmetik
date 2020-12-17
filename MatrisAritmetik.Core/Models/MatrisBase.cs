@@ -26,7 +26,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Gets or sets the row dimension, limit at <see cref="MatrisLimits.forRows"/>
         /// </summary>
-        public int Row
+        public virtual int Row
         {
             get => _row;
             set
@@ -41,7 +41,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Gets or sets the column dimension, limit at <see cref="MatrisLimits.forCols"/>
         /// </summary>
-        public int Col
+        public virtual int Col
         {
             get => _col;
             set
@@ -62,7 +62,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// List of lists to hold matrix values, limits and removes if list count's are higher than <see cref="MatrisLimits"/>
         /// </summary>
-        public List<List<T>> Values
+        public virtual List<List<T>> Values
         {
             get
             {
@@ -132,7 +132,12 @@ namespace MatrisAritmetik.Core
                 {
                     if (_values != null)
                     {
+                        foreach (List<T> l in _values)
+                        {
+                            l.Clear();
+                        }
                         _values.Clear();
+                        _values = null;
                     }
                 }
             }
@@ -223,7 +228,7 @@ namespace MatrisAritmetik.Core
 
             _col = vals.ElementAt(0).Count;
 
-            _values = vals;
+            Values = vals;
 
             Delimiter = delim;
             NewLine = newline;
@@ -241,10 +246,13 @@ namespace MatrisAritmetik.Core
         {
             int[] longest_in_col = new int[mat.Col];
             int currentmax;
-            for (int j = 0; j < mat.Col; j++)
+            int row = mat.Row;
+            int col = mat.Col;
+
+            for (int j = 0; j < col; j++)
             {
                 currentmax = 0;
-                for (int i = 0; i < mat.Row; i++)
+                for (int i = 0; i < row; i++)
                 {
                     if (mat.Values[i][j].ToString().Length > currentmax)
                     {
@@ -266,13 +274,16 @@ namespace MatrisAritmetik.Core
         /// <returns>A new matrix with the same values</returns>
         public MatrisBase<T> Copy()
         {
+            int r = Row;
+            int c = Col;
+            List<List<T>> v = Values;
             List<List<T>> lis = new List<List<T>>();
-            for (int i = 0; i < Row; i++)
+            for (int i = 0; i < r; i++)
             {
                 lis.Add(new List<T>());
-                for (int j = 0; j < Col; j++)
+                for (int j = 0; j < c; j++)
                 {
-                    lis[i].Add(Values[i][j]);
+                    lis[i].Add((dynamic)float.Parse(v[i][j].ToString()));
                 }
             }
             return new MatrisBase<T>(lis);
