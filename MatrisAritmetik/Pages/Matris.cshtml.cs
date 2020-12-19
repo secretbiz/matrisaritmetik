@@ -201,9 +201,7 @@ namespace MatrisAritmetik.Pages
                                         DecodedRequestDict[MatrisValsParam],
                                         DecodedRequestDict[MatrisDelimParam],
                                         DecodedRequestDict[MatrisNewLineParam]
-                                    ),
-                                    DecodedRequestDict[MatrisDelimParam],
-                                    DecodedRequestDict[MatrisNewLineParam]
+                                    )
                                 ),
                                 savedMatrices
                             );
@@ -340,9 +338,7 @@ namespace MatrisAritmetik.Pages
                                     FileData["data"],
                                     FileData["delim"],
                                     FileData["newline"]
-                                ),
-                                FileData["delim"],
-                                FileData["newline"]
+                                )
                             ),
                             savedMatrices
                         );

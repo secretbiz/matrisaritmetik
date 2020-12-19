@@ -83,6 +83,7 @@ namespace MatrisAritmetik.Core.Models
                 SpanSeperator = SpanSeperator
             };
         }
+
         #region Dispose
         private bool disposedValue;
 
@@ -220,10 +221,17 @@ namespace MatrisAritmetik.Core.Models
                             List<List<dynamic>> temp = new List<List<dynamic>>();
                             int collimit = (int)DataframeLimits.forCols;
 
+                            int lastcolsize = Math.Min(value[0].Count, collimit);
+
                             for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
                             {
+                                int colsize = Math.Min(value[i].Count, collimit);
+                                if (lastcolsize != colsize)
+                                {
+                                    return;
+                                }
                                 temp.Add(new List<dynamic>());
-                                for (int j = 0; j < Math.Min(value[i].Count, collimit); j++)
+                                for (int j = 0; j < colsize; j++)
                                 {
                                     temp[i].Add(value[i][j]);
                                 }
@@ -232,8 +240,19 @@ namespace MatrisAritmetik.Core.Models
                         }
                         else
                         {
+                            int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
+                            for (int i = 0; i < value.Count; i++)
+                            {
+                                if (value[i].Count != lastcolsize)
+                                {
+                                    return;
+                                }
+                            }
                             _values = value;
                         }
+
+                        _row = _values.Count;
+                        _col = _row > 0 ? _values[0].Count : 0;
                     }
                 }
                 else
@@ -247,6 +266,9 @@ namespace MatrisAritmetik.Core.Models
                         _values.Clear();
                         _values = null;
                     }
+
+                    _row = 0;
+                    _col = 0;
                 }
             }
         }
@@ -295,10 +317,23 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (value != null)
                 {
-                    _rowlabels = null;
+                    if (_rowlabels != null)
+                    {
+                        foreach (LabelList l in _rowlabels)
+                        {
+                            l.Dispose();
+                        }
+                        _rowlabels.Clear();
+                        _rowlabels = null;
+                    }
+
                     if (value.Count > (int)DataframeLimits.forRowLabelLevels)
                     {
                         _rowlabels = value.GetRange(0, (int)DataframeLimits.forRowLabelLevels);
+                    }
+                    else
+                    {
+                        _rowlabels = value;
                     }
 
                     if (value.Count >= 1)
@@ -321,7 +356,13 @@ namespace MatrisAritmetik.Core.Models
                     }
                     else
                     {
-                        _rowlabels = value;
+                        for (int i = 0; i < _rowlabels.Count; i++)
+                        {
+                            if (_rowlabels[i].TotalSpan != _row)
+                            {
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
+                            }
+                        }
                     }
                 }
                 else
@@ -382,10 +423,23 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (value != null)
                 {
-                    _collabels = null;
+                    if (_collabels != null)
+                    {
+                        foreach (LabelList l in _collabels)
+                        {
+                            l.Dispose();
+                        }
+                        _collabels.Clear();
+                        _collabels = null;
+                    }
+
                     if (value.Count > (int)DataframeLimits.forColLabelLevels)
                     {
                         _collabels = value.GetRange(0, (int)DataframeLimits.forColLabelLevels);
+                    }
+                    else
+                    {
+                        _collabels = value;
                     }
 
                     if (value.Count >= 1)
@@ -402,6 +456,16 @@ namespace MatrisAritmetik.Core.Models
                                 if (value[i].Length > len)
                                 {
                                     _collabels[i] = value[i].GetRange(0, len);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < _collabels.Count; i++)
+                            {
+                                if (_collabels[i].TotalSpan != _col)
+                                {
+                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
                                 }
                             }
                         }
@@ -436,22 +500,29 @@ namespace MatrisAritmetik.Core.Models
         public Dataframe() { }
 
         public Dataframe(List<List<dynamic>> vals,
+                         string delim = " ",
+                         string newline = "\n",
                          List<LabelList> rowLabels = null,
                          List<LabelList> colLabels = null,
                          DataframeRowSettings rowSettings = null,
                          DataframeColSettings colSettings = null)
         {
-            // Values
+            // Values and dimensions
             Values = vals;
+
+            // Seperators
+            Delimiter = delim;
+            NewLine = newline;
 
             // Labels
             if (rowLabels == null)
             {
-                _rowlabels = new List<LabelList>() { new LabelList(_row, 1, "row_", 1) };
+                //_rowlabels = new List<LabelList>() { new LabelList(_row, 1, "row_", 1) };
             }
             else
             {
                 RowLabels = rowLabels;
+                _rowlabels.Reverse();
             }
             if (colLabels == null)
             {
@@ -459,7 +530,8 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                RowLabels = rowLabels;
+                ColLabels = colLabels;
+                _collabels.Reverse();
             }
 
             // Settings
@@ -476,12 +548,168 @@ namespace MatrisAritmetik.Core.Models
         #endregion
 
         #region Private Methods
-        private int[] GetColumnWidths(Dataframe df)
+        private MatrisBase<dynamic> Elements()
         {
-            int[] colwidths = new int[_col + RowLabels.Count];
-
-            return colwidths;
+            return new MatrisBase<dynamic>(_values);
         }
+
+        private int ArraySum(int[] arr, int start, int end)
+        {
+            int total = 0;
+            for (int i = start; i < end; i++)
+            {
+                total += arr[i];
+            }
+            return total;
+        }
+
+        private int[] GetColumnWidths()
+        {
+            // Element columns' widths
+            int[] elementwidths = GetColumnWidths(Elements());
+            int spanseplength = ColSettings.SpanSeperator.Length;
+
+            if (_collabels != null)
+            {
+                int currentlabelindex;
+                for (int j = 0; j < _col; j++)
+                {
+                    for (int k = 0; k < _collabels.Count; k++)
+                    {
+                        currentlabelindex = _collabels[k].GetLabelIndexAtSpan(j + 1);
+                        Label current_label = _collabels[k].Labels[currentlabelindex];
+                        int labellen = current_label.Value.Length + spanseplength;
+                        // Label span is a single column
+                        if (current_label.Span == 1)
+                        {
+                            // Is label name wider than values ?
+                            if (labellen > elementwidths[j])
+                            {
+                                elementwidths[j] = labellen;
+                            }
+                        }
+                        else // Spans over multiple columns
+                        {
+                            // If its shorter than current width, continue to next level
+                            if (labellen < ArraySum(elementwidths, j, current_label.Span) + (spanseplength * (current_label.Span - 1)))
+                            {
+                                continue;
+                            }
+                            else // Label name was longer than the sum of widths it spans over
+                            {
+                                int newlength = (labellen / current_label.Span) + 1;
+                                newlength = newlength == 0 ? 1 : newlength;
+                                int carryover = 0;
+                                int spanstart = 0;
+                                for (int k2 = 0; k2 < currentlabelindex; k2++)
+                                {
+                                    spanstart += _collabels[k].Labels[k2].Span;
+                                }
+                                for (int j2 = spanstart; j2 < current_label.Span + spanstart; j2++)
+                                {
+                                    if (elementwidths[j2] >= newlength)
+                                    {
+                                        carryover += (elementwidths[j2] - newlength);
+                                    }
+                                    else
+                                    {
+                                        elementwidths[j2] = newlength - carryover;
+                                        carryover = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return elementwidths;
+        }
+
+        private int[] GetRowLabelColumnWidths()
+        {
+            // Row label columns' widths
+            int lvlcount = (_rowlabels != null) ? _rowlabels.Count : 0;
+
+            int[] allwidths = new int[lvlcount];
+
+            for (int c = 0; c < lvlcount; c++)
+            {
+                List<Label> lbls = _rowlabels[c].Labels;
+                int currentmax = 0;
+                for (int l = 0; l < lbls.Count; l++)
+                {
+                    if (lbls[l].Value.Length > currentmax)
+                    {
+                        currentmax = lbls[l].Value.Length;
+                    }
+                }
+                allwidths[c] = currentmax;
+            }
+            return allwidths;
+        }
+
+        private void SetElementsWithRowLabels(StringBuilder res,
+                                              int[] rowlbl_widths,
+                                              int[] col_widths)
+        {
+            string row_level_sep = RowSettings.LevelSeperator;
+            string row_element_sep = RowSettings.LabelSeperatorFromElements;
+
+            int colno, index;
+            int rowlabellevel = _rowlabels.Count;
+            List<dynamic> row = null;
+            LabelList currentlist;
+
+            int[] lastindex = new int[rowlabellevel];
+            for (int t = 0; t < rowlabellevel; t++)
+            {
+                lastindex[t] = -1;
+            }
+
+            for (int i = 0; i < _row; i++)
+            {
+                for (int k = rowlabellevel - 1; k >= 0; k--)
+                {
+                    row = _values[i];
+                    currentlist = _rowlabels[k];
+                    index = currentlist.GetLabelIndexAtSpan(i + 1);
+                    if (index == lastindex[k]) // Don't re-write same label again
+                    {   // TO-DO: Create a placeholder for dataframes and use that here
+                        res.Append(' ', rowlbl_widths[k] + 1);
+                    }
+                    else
+                    {
+                        res.Append(' ', rowlbl_widths[k] - currentlist.Labels[index].Value.Length + 1);
+                        res.Append(currentlist.Labels[index].Value);
+                        lastindex[k] = index;
+                    }
+
+                    if (k != 0)
+                    {
+                        res.Append(row_level_sep);
+                    }
+                }
+
+                res.Append(row_element_sep);
+
+                colno = 0;
+                foreach (dynamic element in row)
+                {
+                    res.Append(' ', (col_widths[colno] - element.ToString().Length));
+                    res.Append((string)element.ToString());
+
+                    if (colno != Col - 1)
+                    {
+                        res.Append(Delimiter);
+                    }
+
+                    colno++;
+                }
+                res.Append(NewLine);
+            }
+        }
+
         private string GetDebuggerDisplay()
         {
             return "df(" + _row + "," + _col + "):" + ToString();
@@ -518,9 +746,11 @@ namespace MatrisAritmetik.Core.Models
                 colbls.Add(lbl.Copy());
             }
 
-            return new Dataframe(lis, rowlbls, colbls, RowSettings.Copy(), ColSettings.Copy());
+            return new Dataframe(lis, Delimiter.ToString(), NewLine.ToString(), rowlbls, colbls, RowSettings.Copy(), ColSettings.Copy());
         }
+        #endregion
 
+        #region Public Method Overloads
         /// <summary>
         /// Create a printable string with dataframe's labels and elements aligned   
         /// </summary>
@@ -532,10 +762,151 @@ namespace MatrisAritmetik.Core.Models
                 return "";
             }
 
-            StringBuilder res = new StringBuilder();
-            // Column sizes
-            int[] longest_in_col = GetColumnWidths(this);
+            if (_rowlabels == null && _collabels == null)
+            {
+                return Elements().ToString();
+            }
 
+            StringBuilder res = new StringBuilder();
+
+            // Column sizes
+            int[] col_widths = GetColumnWidths();
+            int[] rowlbl_widths = GetRowLabelColumnWidths();
+
+            // Column labels row(s)
+            if (_collabels != null)
+            {
+                string col_corner_sep = ColSettings.LabelSeperatorFromCorner;
+                string col_span_sep = ColSettings.SpanSeperator;
+                string col_level_sep = ColSettings.LevelSeperator;
+                int colrepeat = ArraySum(col_widths, 0, _col) + ((_col - 1) * col_span_sep.Length);
+                col_level_sep = new string(col_level_sep[0], colrepeat);
+
+                string col_element_sep = ColSettings.LabelSeperatorFromElements;
+
+                // No row labels
+                if (rowlbl_widths.Length == 0)
+                {
+                    // Column label rows first
+                    int colLabelLength = _collabels.Count;
+                    for (int i = colLabelLength - 1; i >= 0; i--)
+                    {
+                        LabelList labelList = _collabels[i];
+                        for (int j = 0; j < labelList.Length; j++)
+                        {
+                            Label lbl = labelList.Labels[j];
+
+                            int spanstart = 0;
+                            for (int k2 = 0; k2 < j; k2++)
+                            {
+                                spanstart += labelList.Labels[k2].Span;
+                            }
+
+                            int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
+
+                            res.Append(' ', space_count); // Left align for now
+                            res.Append(lbl.Value);
+
+                            if (j != labelList.Length - 1)
+                            {
+                                res.Append(col_span_sep);
+                            }
+                        }
+                        res.Append(NewLine);
+
+                        if (i != 0)
+                        {
+                            res.Append(col_level_sep);
+                            res.Append(NewLine);
+                        }
+                    }
+
+                    res.Append(col_element_sep[0], colrepeat);
+                    res.Append(NewLine);
+
+                    int colno;
+                    foreach (List<dynamic> row in _values)
+                    {
+                        colno = 0;
+                        foreach (dynamic element in row)
+                        {
+                            res.Append(' ', (col_widths[colno] - element.ToString().Length));
+                            res.Append((string)element.ToString());
+
+                            if (colno != Col - 1)
+                            {
+                                res.Append(Delimiter);
+                            }
+
+                            colno++;
+                        }
+                        res.Append(NewLine);
+                    }
+                }
+                else // Column and row labels
+                {
+                    string row_corner_sep = RowSettings.LabelSeperatorFromCorner;
+                    string row_span_sep = RowSettings.SpanSeperator;
+                    string row_element_sep = RowSettings.LabelSeperatorFromElements;
+                    int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + (rowlbl_widths.Length - 1) * (row_span_sep.Length + 1) + row_element_sep.Length + col_corner_sep.Length - 1;
+
+                    // Column label rows first
+                    int colLabelLength = _collabels.Count;
+                    for (int i = colLabelLength - 1; i >= 0; i--)
+                    {
+                        res.Append(' ', rowlabelextra);
+                        res.Append(col_corner_sep);
+
+                        LabelList labelList = _collabels[i];
+                        for (int j = 0; j < labelList.Length; j++)
+                        {
+                            Label lbl = labelList.Labels[j];
+
+                            int spanstart = 0;
+                            for (int k2 = 0; k2 < j; k2++)
+                            {
+                                spanstart += labelList.Labels[k2].Span;
+                            }
+
+                            int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
+
+                            res.Append(' ', space_count); // Left align for now
+                            res.Append(lbl.Value);
+
+                            if (j != labelList.Length - 1)
+                            {
+                                res.Append(col_span_sep);
+                            }
+                        }
+                        res.Append(NewLine);
+
+                        if (i != 0)
+                        {
+                            res.Append(' ', rowlabelextra);
+                            res.Append(col_corner_sep);
+                            res.Append(col_level_sep);
+                            res.Append(NewLine);
+                        }
+                    }
+
+                    res.Append(row_corner_sep[0], rowlabelextra + 1);
+                    res.Append(col_element_sep[0], colrepeat);
+                    res.Append(NewLine);
+
+                    SetElementsWithRowLabels(res, rowlbl_widths, col_widths);
+                }
+            }
+            else // No column labels
+            {
+                if (_rowlabels == null) // No labels at all
+                {
+                    return Elements().ToString();
+                }
+                else // Row labels only
+                {
+                    SetElementsWithRowLabels(res, rowlbl_widths, col_widths);
+                }
+            }
             return res.ToString();
         }
         #endregion

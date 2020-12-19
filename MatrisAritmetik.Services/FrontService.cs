@@ -28,7 +28,8 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn"><see cref="Token"/> to use</param>
         /// <param name="symbol">Symbol/operator to use</param>
         /// <returns>Given token with values set</returns>
-        private Token SetTokenFieldsViaSymbol(Token tkn, string symbol)
+        private Token SetTokenFieldsViaSymbol(Token tkn,
+                                              string symbol)
         {
             switch (symbol)
             {
@@ -375,7 +376,8 @@ namespace MatrisAritmetik.Services
         /// <param name="name">Parameter name</param>
         /// <param name="paramarr">Parameter array</param>
         /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
-        private int GetParamIndex(string name, ParameterInfo[] paramarr)
+        private int GetParamIndex(string name,
+                                  ParameterInfo[] paramarr)
         {
             int ind = 0;
             foreach (ParameterInfo p in paramarr)
@@ -395,7 +397,8 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to check</param>
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>True if given token holds a <see cref="MatrisBase{object}"/></returns>
-        private bool CheckMatrixAndUpdateVal(Token tkn, Dictionary<string, MatrisBase<dynamic>> matDict)
+        private bool CheckMatrixAndUpdateVal(Token tkn,
+                                             Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (tkn.tknType)
             {
@@ -424,7 +427,11 @@ namespace MatrisAritmetik.Services
         /// <param name="method">Method information object</param>
         /// <param name="arguments">Arguments to pass to <paramref name="method"/></param>
         /// <returns>Whatever the <paramref name="method"/> returns stored in a <see cref="Token"/></returns>
-        private Token InvokeMethods(Token op, List<Token> operands, object serviceObject, MethodInfo method, object[] arguments)
+        private Token InvokeMethods(Token op,
+                                    List<Token> operands,
+                                    object serviceObject,
+                                    MethodInfo method,
+                                    object[] arguments)
         {
             switch (op.service)
             {
@@ -1194,7 +1201,8 @@ namespace MatrisAritmetik.Services
             return filtered;
         }
 
-        public void AddToCommandLabelList(string label, CommandInfo[] commandInfos)
+        public void AddToCommandLabelList(string label,
+                                          CommandInfo[] commandInfos)
         {
             int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
             if (labelIndex == -1)
@@ -1364,7 +1372,8 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public bool TryParseBuiltFunc(string name, out CommandInfo cmdinfo)
+        public bool TryParseBuiltFunc(string name,
+                                      out CommandInfo cmdinfo)
         {
             if (builtInCommands == null)
             {
@@ -1384,7 +1393,9 @@ namespace MatrisAritmetik.Services
             return false;
         }
 
-        public CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory)
+        public CommandState EvaluateCommand(Command cmd,
+                                            Dictionary<string, MatrisBase<dynamic>> matdict,
+                                            List<Command> cmdHistory)
         {
             List<Token> tkns = cmd.Tokens;
 

@@ -16,6 +16,9 @@ namespace MatrisAritmetik.Core
         private int _row = -1;
         private int _col = -1;
         private List<List<T>> _values = null;
+        private string _delimiter = " ";
+        private string _newline = "\n";
+        private int _digits = 6;
         #endregion
 
         #region Public Properties
@@ -149,20 +152,32 @@ namespace MatrisAritmetik.Core
         public int Seed
         {
             get => _seed;
-            set => _seed = value;
+            set => _seed = (value >= 0) ? value : int.MaxValue + value;
         }
         /// <summary>
         /// Delimiter to use while printing the matrix values
         /// </summary>
-        public string Delimiter = " ";
+        public string Delimiter
+        {
+            get => _delimiter;
+            set => _delimiter = (value != null && value.Length > 0) ? value : " ";
+        }
         /// <summary>
         /// New-line character to use while printing the matrix
         /// </summary>
-        public string NewLine = "\n";
+        public string NewLine
+        {
+            get => _newline;
+            set => _newline = (value != null && value.Length > 0) ? value : "\n";
+        }
         /// <summary>
         /// Amount of digits to round to while printing
         /// </summary>
-        public int Digits = 6;
+        public int Digits
+        {
+            get => _digits;
+            set => _digits = (value >= 0) ? value : 0;
+        }
         /// <summary>
         /// Wheter the matrix was filled with random values
         /// </summary>
@@ -236,13 +251,13 @@ namespace MatrisAritmetik.Core
 
         #endregion
 
-        #region Private Methods
+        #region Internal Methods
         /// <summary>
         /// Finds the longest values in columns and returns their widths in an array
         /// </summary>
         /// <param name="mat">Matrix to get column widths of</param>
         /// <returns>Array of column widths</returns>
-        private int[] GetColumnWidths(MatrisBase<T> mat)
+        internal int[] GetColumnWidths(MatrisBase<T> mat)
         {
             int[] longest_in_col = new int[mat.Col];
             int currentmax;
@@ -318,7 +333,7 @@ namespace MatrisAritmetik.Core
                     }
                     else
                     {
-                        res.Append(new string(' ', (longest_in_col[colno] - element.ToString().Length)));
+                        res.Append(' ', (longest_in_col[colno] - element.ToString().Length));
                         res.Append(element.ToString());
                     }
 

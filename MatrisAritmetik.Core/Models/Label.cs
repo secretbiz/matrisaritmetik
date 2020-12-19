@@ -134,6 +134,27 @@ namespace MatrisAritmetik.Core.Models
             return new LabelList(new List<Label>(temp));
         }
 
+        public int GetLabelIndexAtSpan(int ind)
+        {
+            if (_totalspan < ind)
+            {
+                return -1;
+            }
+            if (_length == 1)
+            {
+                return 0;
+            }
+
+            int index = 0;
+            int total = _labels[0].Span;
+            while (total < ind)
+            {
+                index++;
+                total += _labels[index].Span;
+            }
+            return index;
+        }
+
         public LabelList Copy()
         {
             Label[] temp = new Label[_length];
