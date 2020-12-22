@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace MatrisAritmetik.Core.Models
@@ -7,6 +8,7 @@ namespace MatrisAritmetik.Core.Models
     /// <summary>
     /// Command information class which hold information about built-in functions
     /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class CommandInfo : IDisposable
     {
         #region Public Fields
@@ -107,6 +109,13 @@ namespace MatrisAritmetik.Core.Models
         Gerekli Minimal Format: !" + function + "(" + MinimalFormat() + ")" + @"
         Örnek: !" + function + "(" + string.Join(",", param_types) + ")";
 
+        }
+        #endregion
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return service + "." + function;
         }
         #endregion
 

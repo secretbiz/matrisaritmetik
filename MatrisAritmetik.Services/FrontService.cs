@@ -810,7 +810,11 @@ namespace MatrisAritmetik.Services
                     {
                         if (operands[0].tknType != TokenType.NUMBER)
                         {
-                            throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
+                            operands[0].val = !CheckMatrixAndUpdateVal(operands[0], matDict)
+                                              ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
+                                              : !((MatrisBase<dynamic>)operands[0].val).IsScalar()
+                                                  ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
+                                                  : ((MatrisBase<dynamic>)operands[0].val)[0, 0];
                         }
 
                         if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
@@ -830,7 +834,7 @@ namespace MatrisAritmetik.Services
                     {
                         if (operands[0].tknType != TokenType.NUMBER)
                         {
-                            throw new Exception(CompilerMessage.EXPO_NOT_NUMBER);
+                            throw new Exception(CompilerMessage.EXPO_NOT_SCALAR);
                         }
 
                         if (operands[0].val < 0)
@@ -1159,14 +1163,16 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public void DeleteFromMatrisDict(string name,
+        public bool DeleteFromMatrisDict(string name,
                                          Dictionary<string, MatrisBase<dynamic>> matdict)
         {
             if (matdict.ContainsKey(name))
             {
-                matdict[name].Values = null;
+                matdict[name].Dispose();
                 matdict.Remove(name);
+                return true;
             }
+            return false;
         }
 
         public Command CreateCommand(string cmd)
@@ -1201,26 +1207,31 @@ namespace MatrisAritmetik.Services
             return filtered;
         }
 
-        public void AddToCommandLabelList(string label,
-                                          CommandInfo[] commandInfos)
+        public void SetMatrixDicts(Dictionary<string, MatrisBase<dynamic>> dict,
+                                   Dictionary<string, List<List<object>>> vals,
+                                   Dictionary<string, Dictionary<string, dynamic>> opts)
         {
-            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
-            if (labelIndex == -1)
+            foreach (string name in dict.Keys)
             {
-                builtInCommands.Append(new CommandLabel() { Functions = commandInfos, Label = label });
-            }
-            else
-            {   // TO-DO : Check aliasing
-                builtInCommands[labelIndex].Functions.Concat(commandInfos);
-            }
-        }
+                if (vals.ContainsKey(name))
+                {
+                    vals[name].Clear();
+                    vals.Remove(name);
+                }
+                vals.Add(name, dict[name].Values);
 
-        public void ClearCommandLabel(string label)
-        {
-            int labelIndex = builtInCommands.FindIndex(0, cmdlbl => cmdlbl.Label == label);
-            if (labelIndex != -1)
-            {
-                builtInCommands[labelIndex] = new CommandLabel() { Label = label };
+                if (opts.ContainsKey(name))
+                {
+                    opts[name].Clear();
+                    opts.Remove(name);
+                }
+
+                opts.Add(name, new Dictionary<string, dynamic>
+                               {
+                                   { "seed",dict[name].Seed },
+                                   { "isRandom",dict[name].CreatedFromSeed}
+                               }
+                        );
             }
         }
 

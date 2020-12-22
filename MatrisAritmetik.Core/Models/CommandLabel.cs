@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace MatrisAritmetik.Core.Models
 {
     /// <summary>
     /// Class to hold similar functions under a label
     /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class CommandLabel : IDisposable
     {
         #region Public Fields
+        /// <summary>
+        /// Name of this label
+        /// </summary>
         public string Label = "Genel";
-
+        /// <summary>
+        /// Stored functions under <see cref="CommandLabel.Label"/>
+        /// </summary>
         public CommandInfo[] Functions;
         private bool disposedValue;
         #endregion
@@ -27,6 +34,14 @@ namespace MatrisAritmetik.Core.Models
         {
             Label = label;
             Functions = cmds;
+        }
+        #endregion
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            string f_amount = (Functions == null) ? "0" : Functions.Length.ToString();
+            return Label + " with " + f_amount + " functions";
         }
         #endregion
 

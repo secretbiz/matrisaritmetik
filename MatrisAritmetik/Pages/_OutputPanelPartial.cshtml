@@ -4,19 +4,21 @@
 
     MatrisAritmetik.Core.Models.Command cmd;
     MatrisAritmetik.Core.CommandMessage msg;
-    MatrisAritmetik.Core.MatrisBase<string> matoutput;
+    MatrisAritmetik.Core.Models.MatrisBase<string> matoutput;
 
     string cmdstyle = ";"; string outstyle = ";";
     int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows) / 2;
-
     MatrisAritmetik.Core.Services.IUtilityService<string> utilityService = new MatrisAritmetik.Services.UtilityService<string>();
+
+    string lastmsg = MatrisModel.LastMessageKey;
+    string cmdhist = MatrisModel.CommandHistoryKey;
 
     if (Model != null)
     {
-        if (!Model.ContainsKey("CommandHistory"))
-            Model.Add("CommandHistory", new List<MatrisAritmetik.Core.Models.Command>());
-        if (!Model.ContainsKey("LastMessage"))
-            Model.Add("LastMessage", new Core.CommandMessage("", Core.CommandState.IDLE));
+        if (!Model.ContainsKey(cmdhist))
+            Model.Add(cmdhist, new List<MatrisAritmetik.Core.Models.Command>());
+        if (!Model.ContainsKey(lastmsg))
+            Model.Add(lastmsg, new Core.CommandMessage("", Core.CommandState.IDLE));
     }
 
     string SettingString(Dictionary<string, string> set)
@@ -39,7 +41,7 @@
 
 @if (Model != null)
 {
-    msg = Model["LastMessage"];
+    msg = Model[lastmsg];
 
     @*Last message row*@
     if (msg.State == Core.CommandState.ERROR)
@@ -79,7 +81,7 @@
     }
 
     @*Command and Output history*@
-    if (Model["CommandHistory"].Count == 0)
+    if (Model[cmdhist].Count == 0)
     {
 
         <tr class="cmdrepeat" title='Komut ek-bilgileri burada görüntülenir'>
@@ -95,9 +97,9 @@
     }
     else
     {
-        @for (int i = Model["CommandHistory"].Count - 1; i >= 0; i--)
+        @for (int i = Model[cmdhist].Count - 1; i >= 0; i--)
         {
-            cmd = Model["CommandHistory"][i];
+            cmd = Model[cmdhist][i];
 
             @if (cmd.STATE == Core.CommandState.SUCCESS)
             {
@@ -129,11 +131,11 @@
                     {
                         try
                         {
-                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
+                            matoutput = new MatrisAritmetik.Core.Models.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
                         }
                         catch (Exception)
                         {
-                            matoutput = new MatrisAritmetik.Core.MatrisBase<string>(0, 0, "");
+                            matoutput = new MatrisAritmetik.Core.Models.MatrisBase<string>(0, 0, "");
                         }
                         if (matoutput.IsValid())
                         {
@@ -209,4 +211,14 @@
             }
         }
     }
+
+    foreach (MatrisAritmetik.Core.Models.Command c in (List<MatrisAritmetik.Core.Models.Command>)Model[cmdhist])
+    {
+        c.Dispose();
+    }
+    ((List<MatrisAritmetik.Core.Models.Command>)Model[cmdhist]).Clear();
+
+    ((MatrisAritmetik.Core.CommandMessage)Model[lastmsg]).Dispose();
+
+    Model.Clear();
 }

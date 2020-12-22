@@ -9,12 +9,16 @@
     @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
     {
         <optgroup label="@cmdlabel.Label">
+
             @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
             {
                 <option value="@cmdinfo.function_template_filled" title="@cmdinfo.Info()" style="color:white">
                     @cmdinfo.fullname
                 </option>
             }
+
         </optgroup>
     }
+
+    Model.Clear();
 }

@@ -1,4 +1,4 @@
-﻿@model Dictionary<string, MatrisAritmetik.Core.MatrisBase<dynamic>>
+﻿@model Dictionary<string, Core.Models.MatrisBase<dynamic>>
 @{
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
@@ -85,4 +85,11 @@
 
     </tr>
     }
+
+    foreach(MatrisAritmetik.Core.Models.MatrisBase<dynamic> m in Model.Values)
+    {
+        m.Dispose();
+    }
+
+    Model.Clear();
 }

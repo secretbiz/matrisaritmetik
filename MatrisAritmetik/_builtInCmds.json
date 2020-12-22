@@ -409,6 +409,22 @@
                 "function_template_filled": "!Adjoint(A)",
 
                 "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "İz",
+                "description": "Verilen A matrisinin izi",
+
+                "alias_list": [],
+                "function": "Trace",
+                "param_types": [ "Matris" ],
+                "param_names": [ "A" ],
+                "required_params": [ 0 ],
+                "returns": "float",
+
+                "function_template": "!Trace()",
+                "function_template_filled": "!Trace(A)",
+
+                "service": "MatrisArithmeticService"
             }
         ]
     },
@@ -470,6 +486,28 @@
 
                 "function_template": "!Get(,,,)",
                 "function_template_filled": "!Get(A,i,j,based:0)",
+
+                "service": "MatrisArithmeticService"
+            },
+            {
+                "fullname": "Element Değiştir",
+                "description": "Verilen A matrisinin 'based' tabanlı (i,j) indeksli elementini 'value' değeri ile değiştir",
+
+                "alias_list": [],
+                "function": "Set",
+                "param_types": [
+                    "Matris",
+                    "int",
+                    "int",
+                    "float",
+                    "int"
+                ],
+                "param_names": [ "A", "i", "j", "value", "based" ],
+                "required_params": [ 0, 1, 2, 3 ],
+                "returns": "Matris",
+
+                "function_template": "!Set(,,,,)",
+                "function_template_filled": "!Set(A,i,j,value,based:0)",
 
                 "service": "MatrisArithmeticService"
             },

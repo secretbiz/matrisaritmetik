@@ -1,380 +1,25 @@
-﻿/* This file is for managing smaller classes, enumerators etc.
- * Created to reduce file amount.
- */
-
-using System;
-using MatrisAritmetik.Core.Models;
-
-namespace MatrisAritmetik.Core
+﻿namespace MatrisAritmetik.Core
 {
-    #region Enum Classes
-    /// <summary>
-    /// Enumerated <see cref="Command"/> states
-    /// </summary>
-    public enum CommandState
-    {
-        /// <summary>
-        /// Command was created but was not processed
-        /// </summary>
-        IDLE,
-
-        /// <summary>
-        /// Command is currently being proccessed or had an unknown issue during a process
-        /// </summary>
-        UNAVAILABLE,
-
-        /// <summary>
-        /// Command was successfully processed
-        /// </summary>
-        SUCCESS,
-
-        /// <summary>
-        /// Command returned/threw a warning message
-        /// </summary>
-        WARNING,
-
-        /// <summary>
-        /// Command threw an error message
-        /// </summary>
-        ERROR
-    };
-
-    /// <summary>
-    /// Enumerated <see cref="MatrisBase{T}"/> limitations
-    /// </summary>
-    public enum MatrisLimits
-    {
-        /// <summary>
-        /// Limit row dimension
-        /// </summary>
-        forRows = 64,
-
-        /// <summary>
-        /// Limit column dimension
-        /// </summary>
-        forCols = 64,
-
-        /// <summary>
-        /// Limit matrix size
-        /// </summary>
-        forSize = 64 * 64,
-
-        /// <summary>
-        /// Limit how many matrices can be stored in a dictionary
-        /// </summary>
-        forMatrisCount = 16,
-
-        /// <summary>
-        /// Character limit for a matrix name
-        /// </summary>
-        forName = 64
-    };
-
-    /// <summary>
-    /// Enumerated <see cref="Dataframe"/> limitations
-    /// </summary>
-    public enum DataframeLimits
-    {
-        /// <summary>
-        /// Maximum amount of dataframes per sessions
-        /// </summary>
-        forDataframeCount = 2,
-
-        /// <summary>
-        /// Maximum row count per dataframe
-        /// </summary>
-        forRows = 512,
-
-        /// <summary>
-        /// Maximum depth level of row labels (<see cref="Dataframe"/>.RowLabels.Count)
-        /// </summary>
-        forRowLabelLevels = 2,
-
-        /// <summary>
-        /// Maximum column count per dataframe
-        /// </summary>
-        forCols = 32,
-
-        /// <summary>
-        /// Maximum depth level of column labels (<see cref="Dataframe"/>.ColumnLabels.Count)
-        /// </summary>
-        forColLabelLevels = 3,
-
-        /// <summary>
-        /// Maximum element count
-        /// </summary>
-        forSize = 512 * 32,
-
-        /// <summary>
-        /// Maximum element count including labels
-        /// </summary>
-        forTotalSize = (512 * 32) + (512 * 2) + (32 * 3),
-
-        /// <summary>
-        /// Maximum character amount for a dataframe name 
-        /// </summary>
-        forName = 64
-    }
-
-    /// <summary>
-    /// Enumerated limits for command history
-    /// </summary>
-    public enum CompilerLimits
-    {
-        /// <summary>
-        /// Minimum amount of time in seconds to wait and accept command execution
-        /// </summary>
-        forCmdSendRateInSeconds = 2,
-
-        /// <summary>
-        /// Limit how many command can be shown each command history page
-        /// </summary>
-        forShowOldCommands = 16,
-
-        /// <summary>
-        /// Limit how many characters can be shown for each output string
-        /// </summary>
-        forOutputCharacterLength = 128 * 128
-    };
-
-    /// <summary>
-    /// Enumerated <see cref="Token"/> types
-    /// </summary>
-    public enum TokenType
-    {
-        /// <summary>
-        /// Unknown token
-        /// </summary>
-        NULL,
-
-        /// <summary>
-        /// String token
-        /// </summary>
-        STRING,
-
-        /// <summary>
-        /// Number token
-        /// </summary>
-        NUMBER,
-
-        /// <summary>
-        /// Matrix token
-        /// </summary>
-        MATRIS,
-
-        /// <summary>
-        /// Function token
-        /// </summary>
-        FUNCTION,
-
-        /// <summary>
-        /// Function argument seperator token
-        /// </summary>
-        ARGSEPERATOR,
-
-        /// <summary>
-        /// Operator with a symbol token
-        /// </summary>
-        OPERATOR,
-
-        /// <summary>
-        /// Left brace token
-        /// </summary>
-        LEFTBRACE,
-
-        /// <summary>
-        /// Right brace token
-        /// </summary>
-        RIGHTBRACE,
-
-        /// <summary>
-        /// Token for "?" character
-        /// </summary>
-        DOCS,
-
-        /// <summary>
-        /// Output type for tests
-        /// </summary>
-        OUTPUT,
-
-        /// <summary>
-        /// Error type for tests
-        /// </summary>
-        ERROR,
-
-        /// <summary>
-        /// Void function return token, 
-        /// </summary>
-        VOID
-    };
-
-    /// <summary>
-    /// Enumerated operator associativity sides
-    /// </summary>
-    public enum OperatorAssociativity
-    {
-        LEFT,
-        RIGHT
-    };
-    #endregion
-
-    #region Custom Error-Warning-Info Message Classes
-    /// <summary>
-    /// Class for storing a <see cref="Command"/>'s <see cref="CommandStateMessage"/> and <see cref="CommandState"/> in a single instance
-    /// </summary>
-    public class CommandMessage : IDisposable
-    {
-        #region Public Fields
-        /// <summary>
-        /// Command's current state
-        /// </summary>
-        public CommandState State = CommandState.IDLE;
-        /// <summary>
-        /// Last message
-        /// </summary>
-        public string Message = "";
-
-        private bool disposedValue;
-        #endregion
-
-        #region Constructors
-        /// <summary>
-        /// Creates a basic <see cref="CommandMessage"/> instance
-        /// </summary>
-        /// <param name="msg">Message to store</param>
-        /// <param name="s"><see cref="Command"/>'s state to store</param>
-        public CommandMessage(string msg, CommandState s = CommandState.IDLE)
-        {
-            Message = msg;
-            State = s;
-        }
-        #endregion
-
-        #region Dispose
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
-
-                Message = null;
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~CommandMessage()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
-    }
-
-    /// <summary>
-    /// Const strings and static string methods for storing custom command state messages
-    /// </summary>
-    public class CommandStateMessage
-    {
-        // CLEANUP
-        public const string SUCCESS_CLEANUP = "Komut geçmişi temizlendi";
-
-        // SUCCESSFUL RETURNS
-        public const string SUCCESS_RET_NULL = "";
-        public const string SUCCESS_RET_MAT = "";
-        public const string SUCCESS_RET_NUM = "";
-
-        // DOCS
-        public const string SUCCESS_COMPILER_DOCS = "Konsol kullanma bilgisi alındı";
-        public static string DOCS_MAT_FUNC_FOUND(string name)
-        {
-            return "Matris ve komut olan " + name + " hakkında bilgi alındı";
-        }
-
-        public static string DOCS_MAT_FOUND(string name)
-        {
-            return "Matris " + name + " hakkında bilgi alındı";
-        }
-
-        public static string DOCS_FUNC_FOUND(string name)
-        {
-            return "Fonksiyon " + name + " hakkında bilgi alındı";
-        }
-
-        public static string DOCS_NOT_MAT_FUNC(string name)
-        {
-            return name + " bir matris veya komut değil!";
-        }
-
-        public static string DOCS_NONE_FOUND(string name)
-        {
-            return name + " hakkında bir bilgi bulunamadı!";
-        }
-
-        // UNAVAILABLE
-        public static string CMD_UNAVAILABLE(string org)
-        {
-            return "Komut işleme hatası-> \n" + org;
-        }
-
-        // ALREADY COMPILED
-        public static string CMD_COMPILED(CommandState st, string msg)
-        {
-            return "Komut zaten işlenmiş. Durum: " + st + " Extra message: " + msg;
-        }
-    }
-
-    /// <summary>
-    /// Messages related to request warnings and errors
-    /// </summary>
-    public class RequestMessage
-    {
-        /// <summary>
-        /// Given request didn't have required keys
-        /// </summary>
-        /// <param name="requestDesc">Short information of the request</param>
-        /// <param name="keys">Expected keys</param>
-        /// <returns>Message telling required keys</returns>
-        public static string REQUEST_MISSING_KEYS(string requestDesc, string[] keys)
-        {
-            return requestDesc + " isteği başarısız! Gerekli parametrelere değer verilmedi: " + string.Join(",", keys);
-        }
-
-        /// <summary>
-        /// Given request was being spammed / was too close to previous command
-        /// </summary>
-        /// <param name="last">Last date recieved</param>
-        /// <returns>Message telling how long to wait</returns>
-        public static string REQUEST_SPAM(DateTime last)
-        {
-            return "Yeni bir komut göndermek için " + Math.Round(((int)CompilerLimits.forCmdSendRateInSeconds - (DateTime.Now - last).TotalSeconds), 2) + " saniye bekleyiniz!";
-        }
-    }
-
     /// <summary>
     /// Collection of strings and functions to create warning, error and information messages
     /// </summary>
     public class CompilerMessage
     {
-        ////// DATAFRAME MESSAGES
+        #region DATAFRAME MESSAGES
+
+        #region SPAN
         //// SPAN
         public static string DF_TOTALSPAN_UNMATCH(int dimension, int span)
         {
             return "Etiket toplam genişliği " + dimension + " olmalı, " + span + " genişlik verildi!";
         }
+        #endregion
 
-        ////// MATRIX MESSAGES
-        //// LIMITS
+        #endregion
+
+        #region MATRIX MESSAGES
+
+        #region LIMITS
         /// <summary>
         /// Matrix creation limit
         /// </summary>
@@ -395,8 +40,9 @@ namespace MatrisAritmetik.Core
                                                "\n\tSatır:" + (int)MatrisLimits.forRows + " Sütun:" + (int)MatrisLimits.forCols +
                                                "\n\tKaydedilebilir matris sayısı:" + (int)MatrisLimits.forMatrisCount +
                                                "\n\tMatris isim uzunluğu:" + (int)MatrisLimits.forName;
+        #endregion
 
-        //// NAME
+        #region NAME
         /// <summary>
         /// Matrix name was empty
         /// </summary>
@@ -448,8 +94,9 @@ namespace MatrisAritmetik.Core
         {
             return "'" + name + "' adlı matris silindi!";
         }
+        #endregion
 
-        //// SIZE AND DIMENSIONS
+        #region SIZE AND DIMENSIONS
         /// <summary>
         /// Matrix dimensions were invalid
         /// </summary>
@@ -513,7 +160,17 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string MAT_INVALID_COL_INDICES = "Sütun indeks aralığı hatalı!";
 
-        //// FUNCTION RELATED
+        /// <summary>
+        /// Given matrix have to be a scalar matrix to be used as an operand
+        /// </summary>
+        public const string MAT_SHOULD_BE_SCALAR = "Verilen matris skaler olmalı!";
+        #endregion
+
+        #endregion
+
+        #region COMPILER RELATED
+
+        #region FUNCTION RELATED
         // MATRIX MULTIPLICATION SIZE
         /// <summary>
         /// Matrix dimensions didn't match for matrix multiplication
@@ -562,8 +219,9 @@ namespace MatrisAritmetik.Core
         {
             return "Verilen matrisin " + direction + " tersi bulunamadı!";
         }
+        #endregion
 
-        //// DOCS
+        #region DOCS
         /// <summary>
         /// Message telling how to call the docs
         /// </summary>
@@ -605,7 +263,9 @@ namespace MatrisAritmetik.Core
                              "\n\t\t!RandFloatMat(4,4,2,3,1); background-color #d233c1; color white; tex\n\n" +
                              MAT_LIMITS_HELP;
 
-        //// ARGUMENTS
+        #endregion
+
+        #region ARGUMENTS
         /// <summary>
         /// Argument count didn't match any expected count
         /// </summary>
@@ -627,7 +287,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string MAT_INTERVAL_EXCESS = "Verilen alt-aralık değeri aralığı tanımlanan limitten fazla değere böldü";
 
-        //// COMMAND FORMATS
+        #endregion
+
+        #region COMMAND FORMATS
         /// <summary>
         /// Given command was formatted wrong
         /// </summary>
@@ -641,7 +303,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string PARANTHESIS_COUNT_ERROR = "Parametre sayısı hatalı!";
 
-        //// OPERATORS
+        #endregion
+
+        #region OPERATORS
         // = OPERATOR
         /// <summary>
         /// Assignment operator was used multiple times
@@ -670,7 +334,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Exponential value was not a real number
         /// </summary>
-        public const string EXPO_NOT_NUMBER = "Üssel kısım tam sayı olmalı!";
+        public const string EXPO_NOT_SCALAR = "Üssel kısım skaler olmalı!";
 
         // .^ OPERATOR
         /// <summary>
@@ -686,7 +350,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string SPECOP_MATPOWER_SQUARE = "Sadece kare matrisler .^ operatörünü kullanabilir!";
 
-        //// UNEXPECTED OBJECT OR NAME
+        #endregion
+
+        #region UNEXPECTED OBJECT OR NAME
         /// <summary>
         /// Given <paramref name="name"/> was not a type of <paramref name="expected"/>
         /// </summary>
@@ -697,8 +363,9 @@ namespace MatrisAritmetik.Core
         {
             return "'" + name + "' bir " + expected + " değil!";
         }
+        #endregion
 
-        //// INVALID OPERANDS
+        #region INVALID OPERANDS
         /// <summary>
         /// Given operands can not be used with given operator
         /// </summary>
@@ -735,7 +402,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string OP_WITH_NULL = "İşlemlerde null değeri kullanılamaz!";
 
-        //// FUNCTION ERRORS
+        #endregion
+
+        #region FUNCTION ERRORS
         /// <summary>
         /// Positional argument was given after a parameter-hinted argument
         /// </summary>
@@ -908,7 +577,8 @@ namespace MatrisAritmetik.Core
         {
             return "Argüman formatı hatalı, format: " + format + " olmalı!";
         }
+        #endregion
 
+        #endregion
     };
-    #endregion
 }

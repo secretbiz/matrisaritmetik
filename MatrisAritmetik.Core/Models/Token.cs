@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -27,9 +28,11 @@ namespace MatrisAritmetik.Core.Models
     /// <code>  =       :       0</code>
     /// 
     /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class Token : IDisposable
     {
         #region Fields
+
         #region Common Fields For Every Token
         /// <summary>
         /// Token type, see <see cref="TokenType"/>
@@ -101,6 +104,7 @@ namespace MatrisAritmetik.Core.Models
 
         private bool disposedValue;
         #endregion
+
         #endregion
 
         #region Constructors
@@ -175,18 +179,30 @@ namespace MatrisAritmetik.Core.Models
         {
             return tknType switch
             {
-                TokenType.ARGSEPERATOR => "ARGSEPERATOR",
-                TokenType.FUNCTION => "FUNC(" + service + ")" + name + " " + paramCount.ToString() + " params",
+                TokenType.ARGSEPERATOR => "ARGSEP",
+                TokenType.FUNCTION => service + "." + name + "(" + paramCount.ToString() + ")",
                 TokenType.MATRIS => "MAT " + name + " " + val.ToString(),
                 TokenType.NUMBER => "NUM " + val.ToString(),
                 TokenType.OPERATOR => "OP '" + symbol + "'",
                 TokenType.NULL => "NULL",
                 TokenType.LEFTBRACE => "LEFTBR",
                 TokenType.RIGHTBRACE => "RIGHTBR",
+                TokenType.STRING => "STRING",
+                TokenType.DOCS => "DOCS(" + info + ")",
+                TokenType.OUTPUT => "TESTOUTPUT",
+                TokenType.ERROR => "ERROR",
+                TokenType.VOID => "VOID",
                 _ => tknType.ToString(),
             };
         }
 
+        #endregion
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return ToString();
+        }
         #endregion
 
         #region Dispose
@@ -225,6 +241,7 @@ namespace MatrisAritmetik.Core.Models
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 

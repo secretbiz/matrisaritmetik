@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MatrisAritmetik.Core;
+using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
 
 namespace MatrisAritmetik.Services

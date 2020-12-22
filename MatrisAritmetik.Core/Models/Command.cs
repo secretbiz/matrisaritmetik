@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace MatrisAritmetik.Core.Models
@@ -79,6 +80,7 @@ namespace MatrisAritmetik.Core.Models
     /// <summary>
     /// Command class which hold information about a command's current state, output etc.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class Command : IDisposable
     {
         #region Const Strings
@@ -326,6 +328,13 @@ namespace MatrisAritmetik.Core.Models
             {
                 ValsSettings[settingname] = valueofsetting;
             }
+        }
+        #endregion
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return STATE.ToString() + STATE_MESSAGE;
         }
         #endregion
 

@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace MatrisAritmetik.Core
+namespace MatrisAritmetik.Core.Models
 {
     /// <summary>
     /// Base class for matrices
     /// </summary>
     /// <typeparam name="T">Type of the values matrix will store, use "object" or "dynamic" if unknown</typeparam>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class MatrisBase<T> : IDisposable
     {
         #region Private Encapsulated Fields
@@ -152,7 +154,7 @@ namespace MatrisAritmetik.Core
         public int Seed
         {
             get => _seed;
-            set => _seed = (value >= 0) ? value : int.MaxValue + value;
+            set => _seed = value >= 0 ? value : int.MaxValue + value;
         }
         /// <summary>
         /// Delimiter to use while printing the matrix values
@@ -160,7 +162,7 @@ namespace MatrisAritmetik.Core
         public string Delimiter
         {
             get => _delimiter;
-            set => _delimiter = (value != null && value.Length > 0) ? value : " ";
+            set => _delimiter = value != null && value.Length > 0 ? value : " ";
         }
         /// <summary>
         /// New-line character to use while printing the matrix
@@ -168,7 +170,7 @@ namespace MatrisAritmetik.Core
         public string NewLine
         {
             get => _newline;
-            set => _newline = (value != null && value.Length > 0) ? value : "\n";
+            set => _newline = value != null && value.Length > 0 ? value : "\n";
         }
         /// <summary>
         /// Amount of digits to round to while printing
@@ -176,7 +178,7 @@ namespace MatrisAritmetik.Core
         public int Digits
         {
             get => _digits;
-            set => _digits = (value >= 0) ? value : 0;
+            set => _digits = value >= 0 ? value : 0;
         }
         /// <summary>
         /// Wheter the matrix was filled with random values
@@ -333,7 +335,7 @@ namespace MatrisAritmetik.Core
                     }
                     else
                     {
-                        res.Append(' ', (longest_in_col[colno] - element.ToString().Length));
+                        res.Append(' ', longest_in_col[colno] - element.ToString().Length);
                         res.Append(element.ToString());
                     }
 
@@ -651,21 +653,21 @@ namespace MatrisAritmetik.Core
             if (rowEachCorner <= 0)
             {
                 rowEachCorner = Math.Min((int)((float)Row * 0.33), 4);
-                rowEachCorner = (rowEachCorner == 0) ? Row : rowEachCorner;
+                rowEachCorner = rowEachCorner == 0 ? Row : rowEachCorner;
             }
             if (colEachCorner <= 0)
             {
                 colEachCorner = Math.Min((int)((float)Col * 0.33), 4);
-                colEachCorner = (colEachCorner == 0) ? Col : colEachCorner;
+                colEachCorner = colEachCorner == 0 ? Col : colEachCorner;
             }
 
             // No reduction
-            if (((((float)rowEachCorner) * 2.0) + 1.0 > (float)Row) && ((((float)colEachCorner) * 2.0) + 1.0 > (float)Col))
+            if ((float)rowEachCorner * 2.0 + 1.0 > (float)Row && (float)colEachCorner * 2.0 + 1.0 > (float)Col)
             {
                 return new MatrisBase<T>() { Row = Row, Col = Col, Values = Values };
             }
             // Only reduce columns
-            else if ((((float)rowEachCorner) * 2.0) + 1.0 > (float)Row)
+            else if ((float)rowEachCorner * 2.0 + 1.0 > (float)Row)
             {
                 // Start reducing columns
                 for (int i = 0; i < Row; i++)
@@ -684,10 +686,10 @@ namespace MatrisAritmetik.Core
                     }
                 }
 
-                return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
+                return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
             }
             // Only reduce rows
-            else if ((((float)colEachCorner) * 2.0) + 1.0 > (float)Col)
+            else if ((float)colEachCorner * 2.0 + 1.0 > (float)Col)
             {
                 // Start reducing rows
                 // Upper half
@@ -718,7 +720,7 @@ namespace MatrisAritmetik.Core
                     rrowind++;
                 }
 
-                return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
+                return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
             }
 
             // Reduce both rows and columns
@@ -740,7 +742,7 @@ namespace MatrisAritmetik.Core
             }
 
             smallerList.Add(new List<string>());
-            for (int j = 0; j < (colEachCorner * 2) + 1; j++)
+            for (int j = 0; j < colEachCorner * 2 + 1; j++)
             {
                 smallerList[rowEachCorner].Add(filler);
             }
@@ -764,7 +766,7 @@ namespace MatrisAritmetik.Core
                 rowind++;
             }
 
-            return new MatrisBase<string>() { Row = (rowEachCorner * 2) + 1, Col = (colEachCorner * 2) + 1, Values = smallerList };
+            return new MatrisBase<string>() { Row = rowEachCorner * 2 + 1, Col = colEachCorner * 2 + 1, Values = smallerList };
         }
 
         /// <summary>
@@ -912,7 +914,7 @@ namespace MatrisAritmetik.Core
                 floatlis.Add(new List<float>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    floatlis[i].Add((float.Parse(mat.Values[i][j].ToString())));
+                    floatlis[i].Add(float.Parse(mat.Values[i][j].ToString()));
                 }
             }
             return floatlis;
@@ -956,7 +958,7 @@ namespace MatrisAritmetik.Core
         /// <returns>True if matrix is valid (<see cref="MatrisBase{T}.Row"/> > 0 and <see cref="MatrisBase{T}.Col"/> > 0)</returns>
         public bool IsValid()
         {
-            return (Row > 0) && (Col > 0);
+            return Row > 0 && Col > 0;
         }
 
         /// <summary>
@@ -965,7 +967,7 @@ namespace MatrisAritmetik.Core
         /// <returns>True if <see cref="MatrisBase{T}.Row"/> == <see cref="MatrisBase{T}.Col"/> == 1</returns>
         public bool IsScalar()
         {
-            return (Row == 1) && (Col == 1);
+            return Row == 1 && Col == 1;
         }
 
         /// <summary>
@@ -986,7 +988,7 @@ namespace MatrisAritmetik.Core
         {
             static bool inRange(float num, float tol)
             {
-                return (num <= tol) && (num >= -tol);
+                return num <= tol && num >= -tol;
             }
 
             bool isZero = true;
@@ -1045,7 +1047,7 @@ namespace MatrisAritmetik.Core
         /// <returns>True if row and column dimensions match</returns>
         public bool IsSameSize(MatrisBase<T> other)
         {
-            return (Row == other.Row) && (Col == other.Col);
+            return Row == other.Row && Col == other.Col;
         }
         #endregion
 
@@ -1074,8 +1076,9 @@ namespace MatrisAritmetik.Core
                 return Printstr();
             }
         }
+
         /// <summary>
-        /// Overrides <see cref="object.Equals(object?)"/> method
+        /// Overrides <see cref="object.Equals(object)"/> method
         /// </summary>
         /// <param name="obj"></param>
         /// <returns>True if <paramref name="obj"/> is the same as the base</returns>
@@ -1088,7 +1091,13 @@ namespace MatrisAritmetik.Core
             return base.GetHashCode();
         }
 
+        #endregion
 
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return "mat(" + _row + "," + _col + ")" + ToString();
+        }
         #endregion
 
         #region Dispose
@@ -1100,9 +1109,10 @@ namespace MatrisAritmetik.Core
                 {
                     if (_values != null)
                     {
-                        foreach (List<T> r in _values)
+                        for (int i = 0; i < _row; i++)
                         {
-                            r.Clear();
+                            _values[i].Clear();
+                            _values[i] = null;
                         }
                         _values.Clear();
                         _values = null;
@@ -1151,7 +1161,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(vals2[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(vals2[i][j].ToString()))
                     {
                         isEqual = false;
                         break;
@@ -1184,7 +1194,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(lis[i][j].ToString()))
                     {
                         isEqual = false;
                         break;
@@ -1217,7 +1227,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(lis[i][j].ToString()))
                     {
                         isEqual = false;
                         break;
@@ -1249,7 +1259,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(vals2[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(vals2[i][j].ToString()))
                     {
                         isNotEqual = true;
                         break;
@@ -1282,7 +1292,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(lis[i][j].ToString()))
                     {
                         isNotEqual = true;
                         break;
@@ -1315,7 +1325,7 @@ namespace MatrisAritmetik.Core
 
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    if ((dynamic)(float.Parse(vals1[i][j].ToString())) != (dynamic)(float.Parse(lis[i][j].ToString())))
+                    if ((dynamic)float.Parse(vals1[i][j].ToString()) != (dynamic)float.Parse(lis[i][j].ToString()))
                     {
                         isNotEqual = true;
                         break;
@@ -1338,12 +1348,12 @@ namespace MatrisAritmetik.Core
         {
             if (mat.IsScalar())
             {
-                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) + mat2;
+                return (dynamic)float.Parse(mat.Values[0][0].ToString()) + mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat + (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
+                return mat + (dynamic)float.Parse(mat2.Values[0][0].ToString());
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1357,7 +1367,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(mat.Values[i][j].ToString())) + (dynamic)(float.Parse(mat2.Values[i][j].ToString())));
+                    newlis[i].Add((dynamic)float.Parse(mat.Values[i][j].ToString()) + (dynamic)float.Parse(mat2.Values[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1372,7 +1382,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) + val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) + val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1387,7 +1397,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) + val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) + val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1405,7 +1415,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * -1);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) * -1);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1417,12 +1427,12 @@ namespace MatrisAritmetik.Core
 
             if (mat.IsScalar())
             {
-                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) - mat2;
+                return (dynamic)float.Parse(mat.Values[0][0].ToString()) - mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat - (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
+                return mat - (dynamic)float.Parse(mat2.Values[0][0].ToString());
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1438,7 +1448,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) - (dynamic)(float.Parse(vals2[i][j].ToString())));
+                    newlis[i].Add((dynamic)float.Parse(vals1[i][j].ToString()) - (dynamic)float.Parse(vals2[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1453,7 +1463,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) - val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) - val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1468,7 +1478,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add(val - (dynamic)(float.Parse(vals[i][j].ToString())));
+                    newlis[i].Add(val - (dynamic)float.Parse(vals[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1483,12 +1493,12 @@ namespace MatrisAritmetik.Core
 
             if (mat.IsScalar())
             {
-                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) * mat2;
+                return (dynamic)float.Parse(mat.Values[0][0].ToString()) * mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat * (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
+                return mat * (dynamic)float.Parse(mat2.Values[0][0].ToString());
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1504,7 +1514,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) * (dynamic)(float.Parse(vals2[i][j].ToString())));
+                    newlis[i].Add((dynamic)float.Parse(vals1[i][j].ToString()) * (dynamic)float.Parse(vals2[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1519,7 +1529,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) * val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1534,7 +1544,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) * val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) * val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1549,12 +1559,12 @@ namespace MatrisAritmetik.Core
 
             if (mat.IsScalar())
             {
-                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) / mat2;
+                return (dynamic)float.Parse(mat.Values[0][0].ToString()) / mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat / (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
+                return mat / (dynamic)float.Parse(mat2.Values[0][0].ToString());
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1570,7 +1580,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) / (dynamic)(float.Parse(vals2[i][j].ToString())));
+                    newlis[i].Add((dynamic)float.Parse(vals1[i][j].ToString()) / (dynamic)float.Parse(vals2[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1585,7 +1595,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) / val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) / val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1600,7 +1610,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add(val / (dynamic)(float.Parse(vals[i][j].ToString())));
+                    newlis[i].Add(val / (dynamic)float.Parse(vals[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1614,12 +1624,12 @@ namespace MatrisAritmetik.Core
         {
             if (mat.IsScalar())
             {
-                return (dynamic)(float.Parse(mat.Values[0][0].ToString())) % mat2;
+                return (dynamic)float.Parse(mat.Values[0][0].ToString()) % mat2;
             }
 
             if (mat2.IsScalar())
             {
-                return mat % (dynamic)(float.Parse(mat2.Values[0][0].ToString()));
+                return mat % (dynamic)float.Parse(mat2.Values[0][0].ToString());
             }
 
             if (mat.Row != mat2.Row || mat.Col != mat2.Col)
@@ -1635,7 +1645,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals1[i][j].ToString())) % (dynamic)(float.Parse(vals2[i][j].ToString())));
+                    newlis[i].Add((dynamic)float.Parse(vals1[i][j].ToString()) % (dynamic)float.Parse(vals2[i][j].ToString()));
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1650,7 +1660,7 @@ namespace MatrisAritmetik.Core
                 newlis.Add(new List<dynamic>());
                 for (int j = 0; j < mat.Col; j++)
                 {
-                    newlis[i].Add((dynamic)(float.Parse(vals[i][j].ToString())) % val);
+                    newlis[i].Add((dynamic)float.Parse(vals[i][j].ToString()) % val);
                 }
             }
             return new MatrisBase<dynamic>(newlis);
@@ -1665,11 +1675,12 @@ namespace MatrisAritmetik.Core
                     Row = 1,
                     Col = 1,
                     Values = new List<List<dynamic>>()
-                    { new List<dynamic>() { val % (dynamic)(float.Parse(mat.Values[0][0].ToString())) } }
+                    { new List<dynamic>() { val % (dynamic)float.Parse(mat.Values[0][0].ToString()) } }
                 };
             }
             throw new Exception("Matris mod olarak kullanılamaz!");
         }
+
         #endregion
 
         #endregion

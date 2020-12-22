@@ -38,8 +38,8 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region ViewData Keys
-        private const string LastMessageKey = "LastMessage";
-        private const string CommandHistoryKey = "CommandHistory";
+        public const string LastMessageKey = "LastMessage";
+        public const string CommandHistoryKey = "CommandHistory";
         #endregion
 
         #region Service Interface Instances
@@ -79,18 +79,6 @@ namespace MatrisAritmetik.Pages
 
         #region Temporary Variables 
         /// <summary>
-        /// Saved matrices <see cref="MatrisBase{T}"/> dictionary
-        /// </summary>
-        public Dictionary<string, MatrisBase<dynamic>> savedMatrices = new Dictionary<string, MatrisBase<dynamic>>();
-        /// <summary>
-        /// Saved matrices' values dictionary
-        /// </summary>
-        public Dictionary<string, List<List<dynamic>>> savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
-        /// <summary>
-        /// Saved matrices' options dictionary
-        /// </summary>
-        public Dictionary<string, Dictionary<string, dynamic>> savedMatricesOptionsDict = new Dictionary<string, Dictionary<string, dynamic>>();
-        /// <summary>
         /// List of parameters that should be ignored while reading the request body
         /// </summary>
         private readonly List<string> IgnoredParams = new List<string>() { "__RequestVerificationToken", "RequestVerificationToken" };
@@ -99,26 +87,6 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         private readonly List<string> SpecialsLabels = new List<string>() { "Özel Matris" };
         /// <summary>
-        /// Dictionary to store request parameters and values
-        /// </summary>
-        public Dictionary<string, string> DecodedRequestDict = new Dictionary<string, string>();
-        /// <summary>
-        /// Last processed command
-        /// </summary>
-        public Command LastExecutedCommand = new Command("");
-        /// <summary>
-        /// History of processed commands
-        /// </summary>
-        public List<Command> CommandHistory = new List<Command>();
-        /// <summary>
-        /// History of processed commands' outputs
-        /// </summary>
-        public Dictionary<string, dynamic> OutputHistory = new Dictionary<string, dynamic>();
-        /// <summary>
-        /// Last message from the last command processed
-        /// </summary>
-        public CommandMessage LastMessage = new CommandMessage("", CommandState.IDLE);
-        /// <summary>
         /// Last time a command was sent
         /// </summary>
         public DateTime LastCmdDate = DateTime.Now;
@@ -126,10 +94,6 @@ namespace MatrisAritmetik.Pages
         /// Last time a command was executed and an output was generated
         /// </summary>
         public DateTime LastOutDate;
-        /// <summary>
-        /// Storing data information read from uploaded file
-        /// </summary>
-        public Dictionary<string, string> FileData = new Dictionary<string, string>();
         #endregion
 
         #region GET Actions
@@ -138,8 +102,6 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public void OnGet()
         {
-            GetSessionVariables();
-
             if (_frontService.GetCommandLabelList() == null)
             {
                 _frontService.ReadCommandInformation();
@@ -149,13 +111,20 @@ namespace MatrisAritmetik.Pages
 
             ViewData["special_opiondict"] = _frontService.GetCommandLabelList(SpecialsLabels);
 
-            SetSessionVariables();
+            ViewData["matrix_dict"] = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+
+            ViewData["output_history"] = new Dictionary<string, dynamic>()
+            {
+                {LastMessageKey, HttpContext.Session.GetLastMsg(SessionLastMessage) },
+                {CommandHistoryKey, HttpContext.Session.GetCmdList(SessionOutputHistory) }
+            };
         }
         #endregion
 
         #region POST Actions
         /// <summary>
         /// Default post action
+        /// <para> DO NOT USE </para>
         /// </summary>
         public void OnPost()
         {
@@ -167,70 +136,104 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public async Task OnPostAddMatrix()
         {
-            GetSessionVariables();
-
-            if (_frontService.CheckCmdDate(LastCmdDate))
+            if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)))
             {
                 LastCmdDate = DateTime.Now;
 
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
+                Dictionary<string, string> reqdict = new Dictionary<string, string>();
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
-                if (DecodedRequestDict.ContainsKey(MatrisNameParam)
-                    && DecodedRequestDict.ContainsKey(MatrisValsParam)
-                    && DecodedRequestDict.ContainsKey(MatrisDelimParam)
-                    && DecodedRequestDict.ContainsKey(MatrisNewLineParam)
+                if (reqdict.ContainsKey(MatrisNameParam)
+                    && reqdict.ContainsKey(MatrisValsParam)
+                    && reqdict.ContainsKey(MatrisDelimParam)
+                    && reqdict.ContainsKey(MatrisNewLineParam)
                    )
                 {
-                    if (!savedMatrices.ContainsKey(DecodedRequestDict[MatrisNameParam]))
+
+                    Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+
+                    if (!_dict.ContainsKey(reqdict[MatrisNameParam]))
                     {
                         try
                         {
-                            Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
+                            Validations.ValidMatrixName(reqdict[MatrisNameParam], throwOnBadName: true);
 
-                            DecodedRequestDict[MatrisDelimParam] = _utils.FixLiterals(DecodedRequestDict[MatrisDelimParam]);
-                            DecodedRequestDict[MatrisNewLineParam] = _utils.FixLiterals(DecodedRequestDict[MatrisNewLineParam]);
-                            DecodedRequestDict[MatrisValsParam] = _utils.FixLiterals(DecodedRequestDict[MatrisValsParam]);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
+                            Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
+
+                            reqdict[MatrisDelimParam] = _utils.FixLiterals(reqdict[MatrisDelimParam]);
+                            reqdict[MatrisNewLineParam] = _utils.FixLiterals(reqdict[MatrisNewLineParam]);
+                            reqdict[MatrisValsParam] = _utils.FixLiterals(reqdict[MatrisValsParam]);
 
                             _frontService.AddToMatrisDict
                             (
-                                DecodedRequestDict[MatrisNameParam],
+                                reqdict[MatrisNameParam],
                                 new MatrisBase<dynamic>
                                 (
                                     _utils.StringTo2DList
                                     (
-                                        DecodedRequestDict[MatrisValsParam],
-                                        DecodedRequestDict[MatrisDelimParam],
-                                        DecodedRequestDict[MatrisNewLineParam]
+                                        reqdict[MatrisValsParam],
+                                        reqdict[MatrisDelimParam],
+                                        reqdict[MatrisNewLineParam]
                                     )
                                 ),
-                                savedMatrices
+                                _dict
                             );
 
-                            LastMessage = new CommandMessage(CompilerMessage.SAVED_MATRIX(DecodedRequestDict[MatrisNameParam]), CommandState.SUCCESS);
+                            _frontService.SetMatrixDicts(_dict, vals, opts);
+
+                            HttpContext.Session.Set(SessionMatrisDict, vals);
+
+                            HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            new CommandMessage(CompilerMessage.SAVED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS)
+                                                          );
+
+                            vals.Clear();
+                            opts.Clear();
                         }
                         catch (Exception err)
                         {
-                            LastMessage = err.InnerException != null
-                                ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
-                                : new CommandMessage(err.Message, CommandState.ERROR);
+                            using CommandMessage msg = err.InnerException != null
+                                                ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                                                : new CommandMessage(err.Message, CommandState.ERROR);
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            msg
+                                                          );
                         }
                     }
                     else
                     {
-                        LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict[MatrisNameParam]), CommandState.WARNING);
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING)
+                                                      );
                     }
+
+                    _dict.Clear();
                 }
                 else
                 {
-                    LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix", new string[2] { MatrisNameParam, MatrisValsParam }), CommandState.ERROR);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix", new string[2] { MatrisNameParam, MatrisValsParam }), CommandState.ERROR)
+                                                  );
                 }
+
+                HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_SPAM(LastCmdDate), CommandState.WARNING);
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                new CommandMessage(RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)), CommandState.WARNING)
+                                              );
             }
 
-            SetSessionVariables();
         }
 
         /// <summary>
@@ -238,30 +241,36 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public async Task OnPostAddMatrixSpecial()
         {
-            GetSessionVariables();
-
-            if (_frontService.CheckCmdDate(LastCmdDate))
+            if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)))
             {
                 LastCmdDate = DateTime.Now;
 
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
+                Dictionary<string, string> reqdict = new Dictionary<string, string>();
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
-                if (DecodedRequestDict.ContainsKey(MatrisNameParam) && DecodedRequestDict.ContainsKey(MatrisSpecialFuncParam) && DecodedRequestDict.ContainsKey(MatrisSpecialArgsParam))
+                if (reqdict.ContainsKey(MatrisNameParam) && reqdict.ContainsKey(MatrisSpecialFuncParam) && reqdict.ContainsKey(MatrisSpecialArgsParam))
                 {
+                    Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
 
-                    if (savedMatrices.ContainsKey(DecodedRequestDict[MatrisNameParam]))
+                    if (_dict.ContainsKey(reqdict[MatrisNameParam]))
                     {
-                        LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(DecodedRequestDict[MatrisNameParam]), CommandState.WARNING);
-                        SetSessionVariables();
+                        HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING)
+                                                      );
                         return;
                     }
 
-                    string actualFuncName = DecodedRequestDict[MatrisSpecialFuncParam][1..DecodedRequestDict[MatrisSpecialFuncParam].IndexOf("(")];
+                    string actualFuncName = reqdict[MatrisSpecialFuncParam][1..reqdict[MatrisSpecialFuncParam].IndexOf("(")];
 
                     if (actualFuncName == string.Empty)
                     {
-                        LastMessage = new CommandMessage(CompilerMessage.NOT_A_(actualFuncName, "fonksiyon"), CommandState.ERROR);
-                        SetSessionVariables();
+                        HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage(CompilerMessage.NOT_A_(actualFuncName, "fonksiyon"), CommandState.ERROR)
+                                                      );
                         return;
                     }
 
@@ -269,45 +278,80 @@ namespace MatrisAritmetik.Pages
                     {
                         try
                         {
-                            Validations.ValidMatrixName(DecodedRequestDict[MatrisNameParam], throwOnBadName: true);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict);
+                            Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
+
+                            Validations.ValidMatrixName(reqdict[MatrisNameParam], throwOnBadName: true);
 
                             _frontService.AddToMatrisDict
                             (
-                                DecodedRequestDict[MatrisNameParam],
+                                reqdict[MatrisNameParam],
                                 _utils.SpecialStringTo2DList
                                 (
-                                    DecodedRequestDict[MatrisSpecialArgsParam],
+                                    reqdict[MatrisSpecialArgsParam],
                                     cmdinfo,
-                                    savedMatrices
+                                    _dict
                                 ),
-                                savedMatrices
+                                _dict
                             );
 
-                            LastMessage = new CommandMessage(CompilerMessage.SAVED_MATRIX(DecodedRequestDict[MatrisNameParam]), CommandState.SUCCESS);
+                            _frontService.SetMatrixDicts(_dict, vals, opts);
+
+                            HttpContext.Session.Set(SessionMatrisDict, vals);
+
+                            HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            new CommandMessage(CompilerMessage.SAVED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS)
+                                                          );
+                            vals.Clear();
+                            opts.Clear();
                         }
                         catch (Exception err)
                         {
-                            LastMessage = err.InnerException != null
-                                ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
-                                : new CommandMessage(err.Message, CommandState.ERROR);
+                            using CommandMessage msg = err.InnerException != null
+                                                ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                                                : new CommandMessage(err.Message, CommandState.ERROR);
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            msg
+                                                          );
                         }
+
+                        _dict.Clear();
                     }
                     else
                     {
-                        LastMessage = new CommandMessage(CompilerMessage.NOT_A_(actualFuncName, "fonksiyon"), CommandState.ERROR);
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage(CompilerMessage.NOT_A_(actualFuncName, "fonksiyon"), CommandState.ERROR)
+                                                      );
                     }
                 }
                 else
                 {
-                    LastMessage = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrixSpecial", new string[3] { MatrisNameParam, MatrisSpecialFuncParam, MatrisSpecialArgsParam }), CommandState.ERROR);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS(
+                                                        "AddMatrixSpecial",
+                                                        new string[3] { MatrisNameParam, MatrisSpecialFuncParam, MatrisSpecialArgsParam }),
+                                                        CommandState.ERROR)
+                                                  );
                 }
+
+                HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_SPAM(LastCmdDate), CommandState.WARNING);
+
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                new CommandMessage(RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)), CommandState.WARNING)
+                                              );
             }
 
-            SetSessionVariables();
         }
 
         /// <summary>
@@ -315,14 +359,17 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public async Task OnPostUploadFile()
         {
-            GetSessionVariables();
-
-            if (_frontService.CheckCmdDate(LastCmdDate))
+            if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)))
             {
                 LastCmdDate = DateTime.Now;
 
+                Dictionary<string, string> FileData = new Dictionary<string, string>();
+
                 await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData);
-                if (!savedMatrices.ContainsKey(FileData["name"]))
+
+                Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+
+                if (!_dict.ContainsKey(FileData["name"]))
                 {
                     try
                     {
@@ -340,29 +387,58 @@ namespace MatrisAritmetik.Pages
                                     FileData["newline"]
                                 )
                             ),
-                            savedMatrices
+                            _dict
                         );
 
-                        LastMessage = new CommandMessage(CompilerMessage.SAVED_MATRIX(FileData["name"]), CommandState.SUCCESS);
+                        Dictionary<string, List<List<object>>> vals = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict);
+                        Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
+
+                        _frontService.SetMatrixDicts(_dict, vals, opts);
+
+                        HttpContext.Session.Set(SessionMatrisDict, vals);
+
+                        HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage(CompilerMessage.SAVED_MATRIX(FileData["name"]), CommandState.SUCCESS)
+                                                      );
+
+                        vals.Clear();
+                        opts.Clear();
                     }
                     catch (Exception err)
                     {
-                        LastMessage = err.InnerException != null
-                            ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
-                            : new CommandMessage(err.Message, CommandState.ERROR);
+                        using CommandMessage msg = err.InnerException != null
+                                            ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                                            : new CommandMessage(err.Message, CommandState.ERROR);
+
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        msg
+                                                      );
                     }
                 }
                 else
                 {
-                    LastMessage = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING)
+                                                  );
                 }
+
+                _dict.Clear();
+                FileData.Clear();
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_SPAM(LastCmdDate), CommandState.WARNING);
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                new CommandMessage(RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)), CommandState.WARNING)
+                                              );
             }
 
-            SetSessionVariables();
+            HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
         }
 
         /// <summary>
@@ -370,19 +446,41 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public async Task OnPostDeleteMatrix()
         {
-            GetSessionVariables();
+            Dictionary<string, string> reqdict = new Dictionary<string, string>();
 
-            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
-            if (DecodedRequestDict.ContainsKey(MatrisNameParam))
+            if (reqdict.ContainsKey(MatrisNameParam))
             {
-                DecodedRequestDict[MatrisNameParam] = DecodedRequestDict[MatrisNameParam].Replace("matris_table_delbutton_", "");
+                reqdict[MatrisNameParam] = reqdict[MatrisNameParam].Replace("matris_table_delbutton_", "");
 
-                _frontService.DeleteFromMatrisDict(DecodedRequestDict[MatrisNameParam], savedMatrices);
-                LastMessage = new CommandMessage(CompilerMessage.DELETED_MATRIX(DecodedRequestDict[MatrisNameParam]), CommandState.SUCCESS);
+                Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
+                Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
+
+                if (_frontService.DeleteFromMatrisDict(reqdict[MatrisNameParam], _dict))
+                {
+                    vals.Remove(reqdict[MatrisNameParam]);
+                    opts.Remove(reqdict[MatrisNameParam]);
+                }
+
+                // Uncomment this if deleting matrices are made possible through compiler
+                //_frontService.SetMatrixDicts(_dict, vals, opts);
+
+                HttpContext.Session.Set(SessionMatrisDict, vals);
+                HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                new CommandMessage(CompilerMessage.DELETED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS)
+                                              );
+
+                _dict.Clear();
+                vals.Clear();
+                opts.Clear();
             }
 
-            SetSessionVariables();
+            reqdict.Clear();
         }
 
         /// <summary>
@@ -390,77 +488,98 @@ namespace MatrisAritmetik.Pages
         /// </summary>
         public async Task OnPostSendCmd()
         {
-            GetSessionVariables();
-
             LastCmdDate = DateTime.Now;
 
-            if (_frontService.CheckCmdDate(LastOutDate))
+            if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastOutputDate)))
             {
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, DecodedRequestDict);
+                Dictionary<string, string> reqdict = new Dictionary<string, string>();
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
-                if (DecodedRequestDict.ContainsKey(CommandParam))
+                if (reqdict.ContainsKey(CommandParam))
                 {
-                    if (DecodedRequestDict[CommandParam].Trim() != "")
+                    if (reqdict[CommandParam].Trim() != "")
                     {
+                        List<Command> cmdlis = HttpContext.Session.GetCmdList(SessionOutputHistory);
+                        using Command cmd = _frontService.CreateCommand(reqdict[CommandParam]);
+
                         try
                         {
-                            LastExecutedCommand = _frontService.CreateCommand(DecodedRequestDict[CommandParam]);
+                            Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
+                            Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
-                            LastExecutedCommand.Tokens = _frontService.ShuntingYardAlg(_frontService.Tokenize(LastExecutedCommand.TermsToEvaluate[0]));
 
-                            _frontService.EvaluateCommand(LastExecutedCommand, savedMatrices, CommandHistory);
+                            cmd.Tokens = _frontService.ShuntingYardAlg(_frontService.Tokenize(cmd.TermsToEvaluate[0]));
 
-                            LastMessage = new CommandMessage(LastExecutedCommand.STATE_MESSAGE, LastExecutedCommand.STATE);
+                            _frontService.EvaluateCommand(
+                                                            cmd,
+                                                            _dict,
+                                                            cmdlis
+                                                         );
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            new CommandMessage(cmd.STATE_MESSAGE, cmd.STATE)
+                                                          );
+
+                            _frontService.SetMatrixDicts(_dict, vals, opts);
+
+                            HttpContext.Session.Set(SessionMatrisDict, vals);
+
+                            HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+
+                            _dict.Clear();
+                            vals.Clear();
+                            opts.Clear();
                         }
                         catch (Exception err)
                         {
-                            LastMessage = err.InnerException != null
-                                ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
-                                : err.Message == "Stack empty."
-                                    ? new CommandMessage(CompilerMessage.PARANTHESIS_COUNT_ERROR, CommandState.ERROR)
-                                    : new CommandMessage(err.Message, CommandState.ERROR);
+                            using CommandMessage msg = err.InnerException != null
+                                                     ? new CommandMessage(err.InnerException.Message, CommandState.ERROR)
+                                                     : err.Message == "Stack empty."
+                                                         ? new CommandMessage(CompilerMessage.PARANTHESIS_COUNT_ERROR, CommandState.ERROR)
+                                                         : new CommandMessage(err.Message, CommandState.ERROR);
+
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            msg
+                                                          );
                         }
 
-                        if (OutputHistory == null)
-                        {
-                            OutputHistory = new Dictionary<string, dynamic>();
-                        }
-
-                        if (OutputHistory.ContainsKey(CommandHistoryKey))
-                        {
-                            OutputHistory[CommandHistoryKey].Add(LastExecutedCommand);
-                        }
-                        else
-                        {
-                            OutputHistory.Add(CommandHistoryKey, new List<Command>() { LastExecutedCommand });
-                        }
-
-                        if (OutputHistory.ContainsKey(LastMessageKey))
-                        {
-                            OutputHistory[LastMessageKey] = LastMessage;
-                        }
-                        else
-                        {
-                            OutputHistory.Add(LastMessageKey, LastMessage);
-                        }
+                        cmdlis.Add(cmd);
+                        HttpContext.Session.SetCmdList(SessionOutputHistory, cmdlis);
+                        cmdlis.Clear();
                     }
                     else
                     {
-                        LastMessage = new CommandMessage("", CommandState.IDLE);
+                        HttpContext.Session.SetLastMsg(
+                                                        SessionLastMessage,
+                                                        new CommandMessage("", CommandState.IDLE)
+                                                      );
                     }
                 }
                 else
                 {
-                    LastMessage = new CommandMessage("", CommandState.IDLE);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    new CommandMessage("", CommandState.IDLE)
+                                                  );
                 }
                 LastOutDate = DateTime.Now;
+                HttpContext.Session.Set(SessionLastOutputDate, LastOutDate);
+
+                reqdict.Clear();
+
             }
             else
             {
-                LastMessage = new CommandMessage(RequestMessage.REQUEST_SPAM(LastOutDate), CommandState.WARNING);
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                new CommandMessage(RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastOutputDate)), CommandState.WARNING)
+                                               );
             }
 
-            SetSessionVariables();
+            HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
         }
 
         #endregion
@@ -472,11 +591,7 @@ namespace MatrisAritmetik.Pages
         /// <returns>Partial view result of the matrix table</returns>
         public PartialViewResult OnPostUpdateMatrisTable()
         {
-            GetSessionVariables();
-
-            PartialViewResult mpart = Partial("_MatrisTablePartial", savedMatrices);
-
-            SetSessionVariables();
+            PartialViewResult mpart = Partial("_MatrisTablePartial", HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict));
 
             return mpart;
         }
@@ -487,117 +602,19 @@ namespace MatrisAritmetik.Pages
         /// <returns>Partial view result of the command and output history panel</returns>
         public PartialViewResult OnPostUpdateHistoryPanel()
         {
-            GetSessionVariables();
-
-            PartialViewResult mpart = Partial("_OutputPanelPartial", OutputHistory);
-
-            SetSessionVariables();
+            PartialViewResult mpart =
+                Partial(
+                            "_OutputPanelPartial",
+                            new Dictionary<string, dynamic>()
+                            {
+                                { CommandHistoryKey , HttpContext.Session.GetCmdList(SessionOutputHistory) },
+                                { LastMessageKey , HttpContext.Session.GetLastMsg(SessionLastMessage) }
+                            }
+                        );
 
             return mpart;
         }
-        #endregion
 
-        #region Session Methods
-        /// <summary>
-        /// Gets the current session variables and puts them into temporary variables
-        /// <para>Must be used at the beginning of the functions used by POST actions</para>
-        /// </summary>
-        private void GetSessionVariables()
-        {
-            // Matrix dictionaries
-            if (HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict) != null)
-            {
-                savedMatricesValDict = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict);
-                savedMatricesOptionsDict = HttpContext.Session.GetMatOptions(SessionSeedDict);
-
-                savedMatrices = new Dictionary<string, MatrisBase<object>>();
-                foreach (string name in savedMatricesValDict.Keys)
-                {
-                    savedMatrices.Add(name, new MatrisBase<object>(savedMatricesValDict[name]));
-                    savedMatrices[name].Seed = savedMatricesOptionsDict[name]["seed"];
-                    savedMatrices[name].CreatedFromSeed = savedMatricesOptionsDict[name]["isRandom"];
-                }
-            }
-
-            // Last Command
-            if (HttpContext.Session.Get<string>(SessionLastCommand) != null)
-            {
-                LastExecutedCommand = new Command(HttpContext.Session.Get<string>(SessionLastCommand));
-            }
-
-            // Last Message
-            if (HttpContext.Session.GetLastMsg(SessionLastMessage) != null)
-            {
-                LastMessage = HttpContext.Session.GetLastMsg(SessionLastMessage);
-            }
-
-            // Command and output history
-            if (HttpContext.Session.GetCmdList(SessionOutputHistory) != null)
-            {
-                CommandHistory = HttpContext.Session.GetCmdList(SessionOutputHistory);
-            }
-
-            // Last command date
-            if (HttpContext.Session.Get<DateTime>(SessionLastCommandDate) != null)
-            {
-                LastCmdDate = HttpContext.Session.Get<DateTime>(SessionLastCommandDate);
-            }
-            // Last output date
-            if (HttpContext.Session.Get<DateTime>(SessionLastOutputDate) != null)
-            {
-                LastOutDate = HttpContext.Session.Get<DateTime>(SessionLastOutputDate);
-            }
-            OutputHistory.Add(CommandHistoryKey, CommandHistory);
-            OutputHistory.Add(LastMessageKey, LastMessage);
-
-            HttpContext.Session.Clear();
-
-        }
-
-        /// <summary>
-        /// Sets the current temporary variables as session variables
-        /// <para>Must be used at the end of the functions used by POST actions</para>
-        /// </summary>
-        private void SetSessionVariables()
-        {
-            HttpContext.Session.Clear();
-
-            HttpContext.Session.Set<DateTime>(SessionLastCommandDate, LastCmdDate);
-            HttpContext.Session.Set<DateTime>(SessionLastOutputDate, LastOutDate);
-
-            HttpContext.Session.Set<string>(SessionLastCommand, LastExecutedCommand.OriginalCommand);
-            LastExecutedCommand = null;
-
-            HttpContext.Session.SetLastMsg(SessionLastMessage, LastMessage);
-            LastMessage = null;
-
-            HttpContext.Session.SetCmdList(SessionOutputHistory, CommandHistory);
-            CommandHistory = null;
-
-            savedMatricesValDict = new Dictionary<string, List<List<dynamic>>>();
-            savedMatricesOptionsDict = new Dictionary<string, Dictionary<string, dynamic>>();
-            foreach (string name in savedMatrices.Keys)
-            {
-                if (!savedMatricesValDict.ContainsKey(name))
-                {
-                    savedMatricesValDict.Add(name, savedMatrices[name].Values);
-                }
-                if (!savedMatricesOptionsDict.ContainsKey(name))
-                {
-                    savedMatricesOptionsDict.Add(name, new Dictionary<string, dynamic> {
-                        { "seed",savedMatrices[name].Seed },
-                        { "isRandom",savedMatrices[name].CreatedFromSeed} });
-                }
-            }
-
-            HttpContext.Session.Set<Dictionary<string, List<List<dynamic>>>>(SessionMatrisDict, savedMatricesValDict);
-            savedMatricesValDict = null;
-
-            HttpContext.Session.SetMatOptions(SessionSeedDict, savedMatricesOptionsDict);
-            savedMatricesOptionsDict = null;
-
-            FileData = null;
-        }
         #endregion
 
     }

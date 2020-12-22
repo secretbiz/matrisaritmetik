@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MatrisAritmetik.Core;
+using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
 
 namespace MatrisAritmetik.Services
@@ -360,6 +361,22 @@ namespace MatrisAritmetik.Services
             }
         }
 
+        public float Trace(MatrisBase<T> A)
+        {
+            if(!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID);
+            }
+            float trace = float.Parse(A[0, 0].ToString());
+            int m = Math.Min(A.Row, A.Col);
+            for(int i = 1; i < m; i++)
+            {
+                trace += float.Parse(A[i, i].ToString());
+            }
+
+            return trace;
+        }
+
         public MatrisBase<T> Inverse(MatrisBase<T> A)
         {
             if (!A.IsSquare())
@@ -611,6 +628,31 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
             }
             return new MatrisBase<T>() { Row = 1, Col = 1, Values = new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } } };
+        }
+
+        public MatrisBase<T> Set(MatrisBase<T> A,
+                                 int i,
+                                 int j,
+                                 float value,
+                                 int based = 0)
+        {
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+            if (i - based < 0 || i - based >= A.Row)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
+            }
+            if (j - based < 0 || j - based >= A.Col)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
+            }
+
+            List<List<T>> newlis = A.Copy().Values;
+            newlis[i][j] = (dynamic)value;
+
+            return new MatrisBase<T>(newlis);
         }
 
         public MatrisBase<T> Row(MatrisBase<T> A,

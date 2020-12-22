@@ -25,6 +25,18 @@ namespace MatrisAritmetik.Core
                                   T value)
         {
             session.SetString(key, JsonSerializer.Serialize(value, typeof(T)));
+            if (typeof(T) == typeof(Dictionary<string, List<List<dynamic>>>))
+            {
+                foreach (List<List<dynamic>> l in ((Dictionary<string, List<List<dynamic>>>)(dynamic)value).Values)
+                {
+                    foreach (List<dynamic> k in l)
+                    {
+                        k.Clear();
+                    }
+                    l.Clear();
+                }
+                ((Dictionary<string, List<List<dynamic>>>)(dynamic)value).Clear();
+            }
         }
 
         /// <summary>
@@ -57,6 +69,12 @@ namespace MatrisAritmetik.Core
             }
             serialized.Append("]");
             session.SetString(key, serialized.ToString());
+
+            foreach (Command c in lis)
+            {
+                c.Dispose();
+            }
+            lis.Clear();
         }
 
         /// <summary>
@@ -78,6 +96,8 @@ namespace MatrisAritmetik.Core
             serialized += JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>));
 
             session.SetString(key, serialized);
+
+            msg.Dispose();
         }
 
         /// <summary>
@@ -104,6 +124,7 @@ namespace MatrisAritmetik.Core
 
             session.SetString(key, value: serialized);
         }
+
         #endregion
 
         #region Variable Getters
@@ -168,6 +189,22 @@ namespace MatrisAritmetik.Core
             return new CommandMessage(msg: msg["msg"].ToString(),
                                       s: (CommandState)int.Parse(msg["state"].ToString()));
         }
+        /// <summary>
+        /// Return matrix values
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Key name</param>
+        /// <returns>Values of matrices</returns>
+        public static Dictionary<string, List<List<object>>> GetMatVals(this ISession session,
+                                                                        string key)
+        {
+            string value = session.GetString(key);
+            if (value == null || value == "" || value == "{}")
+            {
+                return new Dictionary<string, List<List<object>>>();
+            }
+            return JsonSerializer.Deserialize<Dictionary<string, List<List<object>>>>(value);
+        }
 
         /// <summary>
         /// Gets the matrix options
@@ -191,6 +228,37 @@ namespace MatrisAritmetik.Core
                 opts[mat]["isRandom"] = bool.Parse(opts[mat]["isRandom"].ToString());
             }
             return opts;
+        }
+
+        /// <summary>
+        /// Get the proper matrix dictionary for the session
+        /// </summary>
+        /// <param name="session">Session to use</param>
+        /// <param name="matdictkey">Matrix values key name</param>
+        /// <param name="optdictkey">Matrix options key name</param>
+        /// <returns>Matrices in a dictionary</returns>
+        public static Dictionary<string, MatrisBase<dynamic>> GetMatrixDict(this ISession session,
+                                                                            string matdictkey,
+                                                                            string optdictkey)
+        {
+            Dictionary<string, MatrisBase<dynamic>> _dict = new Dictionary<string, MatrisBase<dynamic>>();
+
+            Dictionary<string, List<List<object>>> vals = session.GetMatVals(matdictkey);
+            vals ??= new Dictionary<string, List<List<object>>>();
+
+            Dictionary<string, Dictionary<string, dynamic>> opts = session.GetMatOptions(optdictkey);
+            opts ??= new Dictionary<string, Dictionary<string, dynamic>>();
+
+            foreach (string name in vals.Keys)
+            {
+                _dict.Add(name, new MatrisBase<object>(vals[name]));
+                _dict[name].Seed = opts[name]["seed"];
+                _dict[name].CreatedFromSeed = opts[name]["isRandom"];
+            }
+
+            vals.Clear();
+            opts.Clear();
+            return _dict;
         }
         #endregion
 

@@ -1,4 +1,6 @@
-﻿namespace MatrisAritmetik.Core.Services
+﻿using MatrisAritmetik.Core.Models;
+
+namespace MatrisAritmetik.Core.Services
 {
     /// <summary>
     /// Service for methods related to matrix arithmetic
@@ -46,9 +48,16 @@
         /// <summary>
         /// Gets the rank of the matrix <paramref name="A"/>
         /// </summary>
-        /// <param name="A"></param>
+        /// <param name="A">Matrix to get the rank of</param>
         /// <returns>Rank as <see cref="int"/></returns>
         int Rank(MatrisBase<T> A);
+
+        /// <summary>
+        /// Gets the trace of the matrix <paramref name="A"/>
+        /// </summary>
+        /// <param name="A">Matrix to get the trace of</param>
+        /// <returns>Trace as <see cref="float"/></returns>
+        float Trace(MatrisBase<T> A);
 
         /// <summary>
         /// Gets the adjoint matrix of matrix <paramref name="A"/> if it's a square matrix
@@ -116,6 +125,21 @@
         MatrisBase<T> Get(MatrisBase<T> A,
                           int i,
                           int j,
+                          int based = 0);
+
+        /// <summary>
+        /// Sets the element at index(base=<paramref name="based"/>) (<paramref name="i"/>,<paramref name="j"/>) of <paramref name="A"/> to <paramref name="value"/>
+        /// </summary>
+        /// <param name="A">Matrix to index over</param>
+        /// <param name="i">Row index</param>
+        /// <param name="j">Column index</param>
+        /// <param name="value">New value</param>
+        /// <param name="based">Index base</param>
+        /// <returns>A new matrix with value at given index changed</returns>
+        MatrisBase<T> Set(MatrisBase<T> A,
+                          int i,
+                          int j,
+                          float value,
                           int based = 0);
 
         /// <summary>

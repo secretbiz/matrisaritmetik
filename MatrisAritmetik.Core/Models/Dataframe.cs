@@ -5,17 +5,40 @@ using System.Text;
 
 namespace MatrisAritmetik.Core.Models
 {
+    /// <summary>
+    /// Row label settings to use for <see cref="Dataframe"/>
+    /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class DataframeRowSettings : IDisposable
     {
         #region Settings
+        /// <summary>
+        /// Seperator for the right-most side of <see cref="Dataframe.RowLabels"/> rows from <see cref="Dataframe.Values"/>
+        /// </summary>
         public string LabelSeperatorFromElements = "||";
+        /// <summary>
+        /// Seperator for the top of the <see cref="Dataframe.RowLabels"/>, only used if <see cref="Dataframe.ColLabels"/> exist
+        /// </summary>
         public string LabelSeperatorFromCorner = "+";
+        /// <summary>
+        /// Seperator for each level of <see cref="Dataframe.RowLabels"/> 
+        /// </summary>
         public string LevelSeperator = "|";
+        /// <summary>
+        /// Seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
         public string SpanSeperator = "-";
         #endregion
 
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public DataframeRowSettings() { }
 
+        /// <summary>
+        /// Create a deep copy of the current settings
+        /// </summary>
+        /// <returns>A new <see cref="DataframeRowSettings"/></returns>
         public DataframeRowSettings Copy()
         {
             return new DataframeRowSettings()
@@ -26,6 +49,13 @@ namespace MatrisAritmetik.Core.Models
                 SpanSeperator = SpanSeperator
             };
         }
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return "Cor,Spn,Lvl,Ele: " + LabelSeperatorFromCorner + " " + SpanSeperator + " " + LevelSeperator + " " + LabelSeperatorFromElements;
+        }
+        #endregion
 
         #region Dispose
         private bool disposedValue;
@@ -62,17 +92,40 @@ namespace MatrisAritmetik.Core.Models
         #endregion
     }
 
+    /// <summary>
+    /// Column label settings to use for <see cref="Dataframe"/>
+    /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class DataframeColSettings : IDisposable
     {
         #region Settings
+        /// <summary>
+        /// Seperator for the bottom-most side of <see cref="Dataframe.ColLabels"/> columns from <see cref="Dataframe.Values"/>
+        /// </summary>
         public string LabelSeperatorFromElements = "=";
+        /// <summary>
+        /// Seperator for the left of the <see cref="Dataframe.ColLabels"/>, only used if <see cref="Dataframe.RowLabels"/> exist
+        /// </summary>
         public string LabelSeperatorFromCorner = "+";
+        /// <summary>
+        /// Seperator for each level of <see cref="Dataframe.ColLabels"/> 
+        /// </summary>
         public string LevelSeperator = "-";
+        /// <summary>
+        /// Seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
         public string SpanSeperator = "|";
         #endregion
 
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public DataframeColSettings() { }
 
+        /// <summary>
+        /// Create a deep copy of the current settings
+        /// </summary>
+        /// <returns>A new <see cref="DataframeColSettings"/></returns>
         public DataframeColSettings Copy()
         {
             return new DataframeColSettings()
@@ -83,6 +136,13 @@ namespace MatrisAritmetik.Core.Models
                 SpanSeperator = SpanSeperator
             };
         }
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return "Cor,Spn,Lvl,Ele: " + LabelSeperatorFromCorner + " " + SpanSeperator + " " + LevelSeperator + " " + LabelSeperatorFromElements;
+        }
+        #endregion
 
         #region Dispose
         private bool disposedValue;
@@ -117,23 +177,46 @@ namespace MatrisAritmetik.Core.Models
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 
+    /// <summary>
+    /// A class to enabling storing differing types of data and accessing data inside with labels
+    /// <para>This class is limited with <see cref="DataframeLimits"/></para>
+    /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class Dataframe : MatrisBase<dynamic>, IDisposable
     {
         #region Private Encapsulated Fields
+        /// <summary>
+        /// Row dimension
+        /// </summary>
         private int _row = -1;
+        /// <summary>
+        /// Column dimension
+        /// </summary>
         private int _col = -1;
+        /// <summary>
+        /// Actual values to store
+        /// </summary>
         private List<List<dynamic>> _values;
+        /// <summary>
+        /// Labels for rows
+        /// </summary>
         private List<LabelList> _rowlabels;
+        /// <summary>
+        /// Labels for columns
+        /// </summary>
         private List<LabelList> _collabels;
 
         private bool disposedValue;
         #endregion
 
         #region Public Properties
+        /// <summary>
+        /// Row dimension
+        /// </summary>
         public override int Row
         {
             get
@@ -153,6 +236,9 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Column dimension
+        /// </summary>
         public override int Col
         {
             get
@@ -172,6 +258,9 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Actual values to store
+        /// </summary>
         public override List<List<dynamic>> Values
         {
             get
@@ -273,6 +362,9 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Labels for rows
+        /// </summary>
         public List<LabelList> RowLabels
         {
             get
@@ -380,6 +472,9 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Labels for columns
+        /// </summary>
         public List<LabelList> ColLabels
         {
             get
@@ -497,8 +592,23 @@ namespace MatrisAritmetik.Core.Models
         #endregion
 
         #region Constructors
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public Dataframe() { }
 
+        /// <summary>
+        /// Create a new instance with given values <paramref name="vals"/> and labels <paramref name="rowLabels"/>, <paramref name="colLabels"/>
+        /// and use settings <paramref name="rowSettings"/>, <paramref name="colSettings"/>
+        ///  and use delimiter <paramref name="delim"/> and new-line <paramref name="newline"/> while printing
+        /// </summary>
+        /// <param name="vals"></param>
+        /// <param name="delim"></param>
+        /// <param name="newline"></param>
+        /// <param name="rowLabels"></param>
+        /// <param name="colLabels"></param>
+        /// <param name="rowSettings"></param>
+        /// <param name="colSettings"></param>
         public Dataframe(List<List<dynamic>> vals,
                          string delim = " ",
                          string newline = "\n",
@@ -548,11 +658,22 @@ namespace MatrisAritmetik.Core.Models
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Create a dynamic <see cref="MatrisBase{T}"/> using a copy of <see cref="Dataframe.Values"/>
+        /// </summary>
+        /// <returns></returns>
         private MatrisBase<dynamic> Elements()
         {
             return new MatrisBase<dynamic>(_values);
         }
 
+        /// <summary>
+        /// Sum all values in an integer array within given range
+        /// </summary>
+        /// <param name="arr">Array to use</param>
+        /// <param name="start">Starting index</param>
+        /// <param name="end">Ending index exclusively</param>
+        /// <returns>Sum of values within given range</returns>
         private int ArraySum(int[] arr, int start, int end)
         {
             int total = 0;
@@ -563,6 +684,10 @@ namespace MatrisAritmetik.Core.Models
             return total;
         }
 
+        /// <summary>
+        /// Get width of columns using <see cref="Dataframe.Values"/> and <see cref="Dataframe.ColLabels"/> widths
+        /// </summary>
+        /// <returns>Array of widths for each column</returns>
         private int[] GetColumnWidths()
         {
             // Element columns' widths
@@ -626,6 +751,10 @@ namespace MatrisAritmetik.Core.Models
             return elementwidths;
         }
 
+        /// <summary>
+        /// Get widths for <see cref="Dataframe.RowLabels"/> levels
+        /// </summary>
+        /// <returns>Array of widths for each level of <see cref="Dataframe.RowLabels"/></returns>
         private int[] GetRowLabelColumnWidths()
         {
             // Row label columns' widths
@@ -649,6 +778,12 @@ namespace MatrisAritmetik.Core.Models
             return allwidths;
         }
 
+        /// <summary>
+        /// Sets given <paramref name="res"/> string builder with widths given, using this insantace's labels
+        /// </summary>
+        /// <param name="res">String builder to append strings to</param>
+        /// <param name="rowlbl_widths">Row label widths</param>
+        /// <param name="col_widths">Column widths</param>
         private void SetElementsWithRowLabels(StringBuilder res,
                                               int[] rowlbl_widths,
                                               int[] col_widths)
@@ -710,10 +845,7 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
-        private string GetDebuggerDisplay()
-        {
-            return "df(" + _row + "," + _col + "):" + ToString();
-        }
+
         #endregion
 
         #region Public Methods
@@ -908,6 +1040,13 @@ namespace MatrisAritmetik.Core.Models
                 }
             }
             return res.ToString();
+        }
+        #endregion
+
+        #region Debug
+        private string GetDebuggerDisplay()
+        {
+            return "df(" + _row + "," + _col + "):" + ToString();
         }
         #endregion
 

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MatrisAritmetik.Core;
+using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
 using MatrisAritmetik.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

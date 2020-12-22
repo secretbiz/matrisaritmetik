@@ -23,7 +23,8 @@ namespace MatrisAritmetik.Core.Services
         /// </summary>
         /// <param name="name">Matrix name</param>
         /// <param name="matdict">Matrix dictionary to use</param>
-        void DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict);
+        /// <returns>True if matrix was found and deleted</returns>
+        bool DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict);
         #endregion
 
         #region Built-in Command Methods
@@ -40,17 +41,15 @@ namespace MatrisAritmetik.Core.Services
         List<CommandLabel> GetCommandLabelList(List<string> filter = null);
 
         /// <summary>
-        /// Add a command to the given label
+        /// Sets given <paramref name="vals"/> values dictionary and <paramref name="opts"/> options dictionary according to <paramref name="dict"/> matrix dictionary
         /// </summary>
-        /// <param name="label">Command label name</param>
-        /// <param name="commandInfos">CommandInfo instances to add</param>
-        void AddToCommandLabelList(string label, CommandInfo[] commandInfos);
+        /// <param name="dict">Matrix dictionary to refer to</param>
+        /// <param name="vals">Values dictionary to be updated</param>
+        /// <param name="opts">Options dictionary to be updated</param>
+        void SetMatrixDicts(Dictionary<string, MatrisBase<dynamic>> dict,
+                            Dictionary<string, List<List<object>>> vals,
+                            Dictionary<string, Dictionary<string, dynamic>> opts);
 
-        /// <summary>
-        /// Remove a label
-        /// </summary>
-        /// <param name="label">Label name to remove</param>
-        void ClearCommandLabel(string label);
         #endregion
 
         #region Command Related Methods

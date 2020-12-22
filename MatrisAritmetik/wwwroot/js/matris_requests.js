@@ -118,7 +118,7 @@ function sendCmd(event) {
                 __RequestVerificationToken: tkn,
                 "cmd": filteredcmd,
             },
-            success: function (data) { updateHistoryPanel(tkn); updateMathContent(); },
+            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); updateMathContent(); },
             error: function (error) { console.log(error); }
         });
 }
