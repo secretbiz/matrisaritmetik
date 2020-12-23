@@ -58,7 +58,7 @@ namespace MatrisAritmetik.Services
             }
 
             filteredText = filteredText.Trim();
-            if (filteredText == "")
+            if (string.IsNullOrEmpty(filteredText))
             {
                 throw new Exception(CompilerMessage.MAT_INVALID);
             }
@@ -155,7 +155,7 @@ namespace MatrisAritmetik.Services
             string currentParamType;
             string currentArg;
 
-            if (args.Length < funcinfo.required_params.Length || args.Length > funcinfo.param_names.Length)
+            if (args.Length < funcinfo.Required_params.Length || args.Length > funcinfo.Param_names.Length)
             {
                 throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
             }
@@ -176,8 +176,8 @@ namespace MatrisAritmetik.Services
                     }
 
                     currentArg = rowsplit[0];
-                    currentParamName = funcinfo.param_names[argind];
-                    currentParamType = funcinfo.param_types[argind];
+                    currentParamName = funcinfo.Param_names[argind];
+                    currentParamType = funcinfo.Param_types[argind];
 
                     if (param_dict.ContainsKey(currentParamName))
                     {
@@ -191,7 +191,7 @@ namespace MatrisAritmetik.Services
                     currentArg = rowsplit[1];
                     currentParamName = rowsplit[0];
 
-                    if (Array.IndexOf(funcinfo.param_names, currentParamName) == -1)
+                    if (Array.IndexOf(funcinfo.Param_names, currentParamName) == -1)
                     {
                         throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(currentParamName));
                     }
@@ -201,7 +201,7 @@ namespace MatrisAritmetik.Services
                         throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(currentParamName));
                     }
 
-                    currentParamType = funcinfo.param_types[Array.IndexOf(funcinfo.param_names, currentParamName)];
+                    currentParamType = funcinfo.Param_types[Array.IndexOf(funcinfo.Param_names, currentParamName)];
                 }
                 else
                 {
@@ -265,32 +265,32 @@ namespace MatrisAritmetik.Services
 
             // Check if all required parameters had values
             foreach (int reqindex in
-                     from int reqindex in funcinfo.required_params
-                     where !param_dict.ContainsKey(funcinfo.param_names[reqindex])
+                     from int reqindex in funcinfo.Required_params
+                     where !param_dict.ContainsKey(funcinfo.Param_names[reqindex])
                      select reqindex)
             {
-                throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.param_names[reqindex]));
+                throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.Param_names[reqindex]));
             }
 
-            object[] param_arg = new object[funcinfo.param_names.Length];
+            object[] param_arg = new object[funcinfo.Param_names.Length];
             int ind;
 
             // Create the service
             ConstructorInfo service = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetConstructor(Type.EmptyTypes);
-            object serviceObject = service.Invoke(new object[] { });
+            object serviceObject = service.Invoke(Array.Empty<object>());
 
             // Find and invoke method inside named same as given function name in funcinfo
-            MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.function);
+            MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.Function);
             ParameterInfo[] paraminfo = method.GetParameters();
 
             // Put values in order
             foreach (string par in param_dict.Keys)
             {
-                ind = Array.IndexOf(funcinfo.param_names, par);
+                ind = Array.IndexOf(funcinfo.Param_names, par);
                 param_arg[ind] = param_dict[par];
             }
 
-            for (int k = 0; k < funcinfo.param_names.Length; k++)
+            for (int k = 0; k < funcinfo.Param_names.Length; k++)
             {
                 if (param_arg[k] != null)    // Skip already parsed values
                 {

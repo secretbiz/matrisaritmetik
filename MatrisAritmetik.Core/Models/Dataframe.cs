@@ -11,30 +11,107 @@ namespace MatrisAritmetik.Core.Models
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class DataframeRowSettings : IDisposable
     {
+        private bool disposedValue;
+
         #region Settings
         /// <summary>
-        /// Seperator for the right-most side of <see cref="Dataframe.RowLabels"/> rows from <see cref="Dataframe.Values"/>
+        /// Seperator between elements and labels
         /// </summary>
-        public string LabelSeperatorFromElements = "||";
+        private string labelSeperatorFromElements = "||";
+
         /// <summary>
-        /// Seperator for the top of the <see cref="Dataframe.RowLabels"/>, only used if <see cref="Dataframe.ColLabels"/> exist
+        /// Seperator from top-most
         /// </summary>
-        public string LabelSeperatorFromCorner = "+";
+        private string labelSeperatorFromCorner = "+";
+
         /// <summary>
-        /// Seperator for each level of <see cref="Dataframe.RowLabels"/> 
+        /// Seperator for each level of <see cref="Dataframe.GetRowLabels()"/> 
         /// </summary>
-        public string LevelSeperator = "|";
+        private string levelSeperator = "|";
+
         /// <summary>
-        /// Seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// Seperator for each span
         /// </summary>
-        public string SpanSeperator = "-";
+        private string spanSeperator = "-";
+
         #endregion
 
+        #region Getters and Setters
+
+        /// <summary>
+        /// Get seperator for the right-most side of <see cref="Dataframe.GetRowLabels()"/> rows from <see cref="Dataframe.GetValues()"/>
+        /// </summary>
+        public string GetLabelSeperatorFromElements()
+        {
+            return labelSeperatorFromElements;
+        }
+
+        /// <summary>
+        /// Set seperator for the right-most side of <see cref="Dataframe.GetRowLabels()"/> rows from <see cref="Dataframe.GetValues()"/>
+        /// </summary>
+        public void SetLabelSeperatorFromElements(string value)
+        {
+            labelSeperatorFromElements = value;
+        }
+
+        /// <summary>
+        /// Set seperator for the top-most of the <see cref="Dataframe.GetRowLabels()"/>, only used if <see cref="Dataframe.GetColLabels()"/> exist
+        /// </summary>
+        public string GetLabelSeperatorFromCorner()
+        {
+            return labelSeperatorFromCorner;
+        }
+
+        /// <summary>
+        /// Set seperator for the top-most of the <see cref="Dataframe.GetRowLabels()"/>, only used if <see cref="Dataframe.GetColLabels()"/> exist
+        /// </summary>
+        public void SetLabelSeperatorFromCorner(string value)
+        {
+            labelSeperatorFromCorner = value;
+        }
+
+        /// <summary>
+        /// Get seperator for between each of <see cref="Dataframe.GetRowLabels()"/> columns
+        /// </summary>
+        public string GetLevelSeperator()
+        {
+            return levelSeperator;
+        }
+
+        /// <summary>
+        /// Set seperator for between each of <see cref="Dataframe.GetRowLabels()"/> columns
+        /// </summary>
+        public void SetLevelSeperator(string value)
+        {
+            levelSeperator = value;
+        }
+
+        /// <summary>
+        /// Get seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
+        public string GetSpanSeperator()
+        {
+            return spanSeperator;
+        }
+
+        /// <summary>
+        /// Set seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
+        public void SetSpanSeperator(string value)
+        {
+            spanSeperator = value;
+        }
+
+        #endregion
+
+        #region Constructors
         /// <summary>
         /// Empty constructor
         /// </summary>
         public DataframeRowSettings() { }
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Create a deep copy of the current settings
         /// </summary>
@@ -43,22 +120,22 @@ namespace MatrisAritmetik.Core.Models
         {
             return new DataframeRowSettings()
             {
-                LabelSeperatorFromCorner = LabelSeperatorFromCorner,
-                LabelSeperatorFromElements = LabelSeperatorFromElements,
-                LevelSeperator = LevelSeperator,
-                SpanSeperator = SpanSeperator
+                labelSeperatorFromCorner = GetLabelSeperatorFromCorner(),
+                labelSeperatorFromElements = GetLabelSeperatorFromElements(),
+                levelSeperator = GetLevelSeperator(),
+                spanSeperator = GetSpanSeperator()
             };
         }
+        #endregion
 
         #region Debug
         private string GetDebuggerDisplay()
         {
-            return "Cor,Spn,Lvl,Ele: " + LabelSeperatorFromCorner + " " + SpanSeperator + " " + LevelSeperator + " " + LabelSeperatorFromElements;
+            return "Cor,Spn,Lvl,Ele: " + GetLabelSeperatorFromCorner() + " " + GetSpanSeperator() + " " + GetLevelSeperator() + " " + GetLabelSeperatorFromElements();
         }
         #endregion
 
         #region Dispose
-        private bool disposedValue;
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -68,10 +145,10 @@ namespace MatrisAritmetik.Core.Models
                     // TODO: dispose managed state (managed objects)
                 }
 
-                LabelSeperatorFromElements = null;
-                LabelSeperatorFromCorner = null;
-                LevelSeperator = null;
-                SpanSeperator = null;
+                SetLabelSeperatorFromElements(null);
+                SetLabelSeperatorFromCorner(null);
+                SetLevelSeperator(null);
+                SetSpanSeperator(null);
                 disposedValue = true;
             }
         }
@@ -98,30 +175,107 @@ namespace MatrisAritmetik.Core.Models
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class DataframeColSettings : IDisposable
     {
+        private bool disposedValue;
+
         #region Settings
         /// <summary>
-        /// Seperator for the bottom-most side of <see cref="Dataframe.ColLabels"/> columns from <see cref="Dataframe.Values"/>
+        /// Seperator between elements and labels
         /// </summary>
-        public string LabelSeperatorFromElements = "=";
+        private string labelSeperatorFromElements = "=";
+
         /// <summary>
-        /// Seperator for the left of the <see cref="Dataframe.ColLabels"/>, only used if <see cref="Dataframe.RowLabels"/> exist
+        /// Seperator from left-most
         /// </summary>
-        public string LabelSeperatorFromCorner = "+";
+        private string labelSeperatorFromCorner = "+";
+
         /// <summary>
-        /// Seperator for each level of <see cref="Dataframe.ColLabels"/> 
+        /// Seperator for each level of <see cref="Dataframe.GetColLabels()"/> 
         /// </summary>
-        public string LevelSeperator = "-";
+        private string levelSeperator = "-";
+
         /// <summary>
-        /// Seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// Seperator for each span
         /// </summary>
-        public string SpanSeperator = "|";
+        private string spanSeperator = "|";
+
         #endregion
 
+        #region Getters and Setters
+
+        /// <summary>
+        /// Get seperator for the bottom-most side of <see cref="Dataframe.GetColLabels()"/> rows from <see cref="Dataframe.GetValues()"/>
+        /// </summary>
+        public string GetLabelSeperatorFromElements()
+        {
+            return labelSeperatorFromElements;
+        }
+
+        /// <summary>
+        /// Set seperator for the bottom-most side of <see cref="Dataframe.GetColLabels()"/> rows from <see cref="Dataframe.GetValues()"/>
+        /// </summary>
+        public void SetLabelSeperatorFromElements(string value)
+        {
+            labelSeperatorFromElements = value;
+        }
+
+        /// <summary>
+        /// Get seperator for the left-most of the <see cref="Dataframe.GetColLabels()"/>, only used if <see cref="Dataframe.GetRowLabels()"/> exist
+        /// </summary>
+        public string GetLabelSeperatorFromCorner()
+        {
+            return labelSeperatorFromCorner;
+        }
+
+        /// <summary>
+        /// Set seperator for the left-most of the <see cref="Dataframe.GetColLabels()"/>, only used if <see cref="Dataframe.GetRowLabels()"/> exist
+        /// </summary>
+        public void SetLabelSeperatorFromCorner(string value)
+        {
+            labelSeperatorFromCorner = value;
+        }
+
+        /// <summary>
+        /// Get seperator for between each of <see cref="Dataframe.GetColLabels()"/> rows
+        /// </summary>
+        public string GetLevelSeperator()
+        {
+            return levelSeperator;
+        }
+
+        /// <summary>
+        /// Set seperator for between each of <see cref="Dataframe.GetColLabels()"/> rows
+        /// </summary>
+        public void SetLevelSeperator(string value)
+        {
+            levelSeperator = value;
+        }
+
+        /// <summary>
+        /// Get seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
+        public string GetSpanSeperator()
+        {
+            return spanSeperator;
+        }
+
+        /// <summary>
+        /// Set seperator for each span in a level of a <see cref="Label"/> in a <see cref="LabelList"/> 
+        /// </summary>
+        public void SetSpanSeperator(string value)
+        {
+            spanSeperator = value;
+        }
+
+        #endregion
+
+        #region Constructors
         /// <summary>
         /// Empty constructor
         /// </summary>
         public DataframeColSettings() { }
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Create a deep copy of the current settings
         /// </summary>
@@ -130,23 +284,22 @@ namespace MatrisAritmetik.Core.Models
         {
             return new DataframeColSettings()
             {
-                LabelSeperatorFromCorner = LabelSeperatorFromCorner,
-                LabelSeperatorFromElements = LabelSeperatorFromElements,
-                LevelSeperator = LevelSeperator,
-                SpanSeperator = SpanSeperator
+                labelSeperatorFromCorner = GetLabelSeperatorFromCorner(),
+                labelSeperatorFromElements = GetLabelSeperatorFromElements(),
+                levelSeperator = GetLevelSeperator(),
+                spanSeperator = GetSpanSeperator()
             };
         }
+        #endregion
 
         #region Debug
         private string GetDebuggerDisplay()
         {
-            return "Cor,Spn,Lvl,Ele: " + LabelSeperatorFromCorner + " " + SpanSeperator + " " + LevelSeperator + " " + LabelSeperatorFromElements;
+            return "ColSettings: " + GetLabelSeperatorFromCorner() + " " + GetSpanSeperator() + " " + GetLevelSeperator() + " " + GetLabelSeperatorFromElements();
         }
         #endregion
 
         #region Dispose
-        private bool disposedValue;
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -156,10 +309,10 @@ namespace MatrisAritmetik.Core.Models
                     // TODO: dispose managed state (managed objects)
                 }
 
-                LabelSeperatorFromElements = null;
-                LabelSeperatorFromCorner = null;
-                LevelSeperator = null;
-                SpanSeperator = null;
+                SetLabelSeperatorFromElements(null);
+                SetLabelSeperatorFromCorner(null);
+                SetLevelSeperator(null);
+                SetSpanSeperator(null);
                 disposedValue = true;
             }
         }
@@ -177,8 +330,8 @@ namespace MatrisAritmetik.Core.Models
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
         #endregion
+
     }
 
     /// <summary>
@@ -186,7 +339,7 @@ namespace MatrisAritmetik.Core.Models
     /// <para>This class is limited with <see cref="DataframeLimits"/></para>
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class Dataframe : MatrisBase<dynamic>, IDisposable
+    public class Dataframe : MatrisBase<dynamic>
     {
         #region Private Encapsulated Fields
         /// <summary>
@@ -209,11 +362,19 @@ namespace MatrisAritmetik.Core.Models
         /// Labels for columns
         /// </summary>
         private List<LabelList> _collabels;
+        /// <summary>
+        /// Row label settings
+        /// </summary>
+        private DataframeRowSettings rowSettings;
+        /// <summary>
+        /// Column label settings
+        /// </summary>
+        private DataframeColSettings colSettings;
 
         private bool disposedValue;
         #endregion
 
-        #region Public Properties
+        #region Public Properties, Getters and Setters
         /// <summary>
         /// Row dimension
         /// </summary>
@@ -259,335 +420,370 @@ namespace MatrisAritmetik.Core.Models
         }
 
         /// <summary>
-        /// Actual values to store
+        /// Get column label settings
         /// </summary>
-        public override List<List<dynamic>> Values
+        /// <returns>Current column settings</returns>
+        public DataframeColSettings GetColSettings()
         {
-            get
+            return colSettings;
+        }
+
+        /// <summary>
+        /// Set new settings for column labels
+        /// </summary>
+        /// <param name="value">New settings</param>
+        public void SetColSettings(DataframeColSettings value)
+        {
+            colSettings = value;
+        }
+
+        /// <summary>
+        /// Get row label settings
+        /// </summary>
+        /// <returns>Current row settings</returns>
+        public DataframeRowSettings GetRowSettings()
+        {
+            return rowSettings;
+        }
+
+        /// <summary>
+        /// Set new settings for row labels
+        /// </summary>
+        /// <param name="value">New settings</param>
+        public void SetRowSettings(DataframeRowSettings value)
+        {
+            rowSettings = value;
+        }
+
+        /// <summary>
+        /// Get values to stored
+        /// </summary>
+        public override List<List<dynamic>> GetValues()
+        {
+            if (_values != null)
             {
-                if (_values != null)
+                if (_values.Count * _values[0].Count > (int)DataframeLimits.forSize)
                 {
-                    if (_values.Count * _values[0].Count > (int)DataframeLimits.forSize)
+                    if (_values.Count > (int)DataframeLimits.forRows)
                     {
-                        if (_values.Count > (int)DataframeLimits.forRows)
+                        int delindex = (int)DataframeLimits.forRows;
+                        for (int i = 0; i < _values.Count - delindex; i++)
                         {
-                            int delindex = (int)DataframeLimits.forRows;
-                            for (int i = 0; i < _values.Count - delindex; i++)
-                            {
-                                _values.RemoveAt(delindex);
-                            }
+                            _values.RemoveAt(delindex);
                         }
-                        if (_values.Count >= 1)
+                    }
+                    if (_values.Count >= 1)
+                    {
+                        if (_values[0].Count > (int)DataframeLimits.forCols)
                         {
-                            if (_values[0].Count > (int)DataframeLimits.forCols)
+                            int delindex = (int)DataframeLimits.forCols;
+                            for (int i = 0; i < _values.Count; i++)
                             {
-                                int delindex = (int)DataframeLimits.forCols;
-                                for (int i = 0; i < _values.Count; i++)
+                                if (_values[i].Count > delindex)
                                 {
-                                    if (_values[i].Count > delindex)
+                                    for (int j = 0; j < delindex; j++)
                                     {
-                                        for (int j = 0; j < delindex; j++)
-                                        {
-                                            _values[i].RemoveAt(delindex);
-                                        }
+                                        _values[i].RemoveAt(delindex);
                                     }
                                 }
                             }
                         }
                     }
                 }
-
-                return _values;
             }
-            set
+
+            return _values;
+        }
+
+        /// <summary>
+        /// Set values to store
+        /// </summary>
+        public override void SetValues(List<List<dynamic>> value)
+        {
+            if (value != null)
             {
-                if (value != null)
+                if (_values == null) // Only set if first time
                 {
-                    if (_values == null) // Only set if first time
+                    if (value.Count * value[0].Count > (int)DataframeLimits.forSize)
                     {
-                        if (value.Count * value[0].Count > (int)DataframeLimits.forSize)
+                        List<List<dynamic>> temp = new List<List<dynamic>>();
+                        int collimit = (int)DataframeLimits.forCols;
+
+                        int lastcolsize = Math.Min(value[0].Count, collimit);
+
+                        for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
                         {
-                            List<List<dynamic>> temp = new List<List<dynamic>>();
-                            int collimit = (int)DataframeLimits.forCols;
-
-                            int lastcolsize = Math.Min(value[0].Count, collimit);
-
-                            for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
+                            int colsize = Math.Min(value[i].Count, collimit);
+                            if (lastcolsize != colsize)
                             {
-                                int colsize = Math.Min(value[i].Count, collimit);
-                                if (lastcolsize != colsize)
-                                {
-                                    return;
-                                }
-                                temp.Add(new List<dynamic>());
-                                for (int j = 0; j < colsize; j++)
-                                {
-                                    temp[i].Add(value[i][j]);
-                                }
+                                return;
                             }
-                            _values = temp;
-                        }
-                        else
-                        {
-                            int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
-                            for (int i = 0; i < value.Count; i++)
+                            temp.Add(new List<dynamic>());
+                            for (int j = 0; j < colsize; j++)
                             {
-                                if (value[i].Count != lastcolsize)
-                                {
-                                    return;
-                                }
+                                temp[i].Add(value[i][j]);
                             }
-                            _values = value;
                         }
-
-                        _row = _values.Count;
-                        _col = _row > 0 ? _values[0].Count : 0;
+                        _values = temp;
                     }
-                }
-                else
-                {
-                    if (_values != null)
+                    else
                     {
-                        foreach (List<dynamic> l in _values)
+                        int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
+                        for (int i = 0; i < value.Count; i++)
                         {
-                            l.Clear();
+                            if (value[i].Count != lastcolsize)
+                            {
+                                return;
+                            }
                         }
-                        _values.Clear();
-                        _values = null;
+                        _values = value;
                     }
 
-                    _row = 0;
-                    _col = 0;
+                    _row = _values.Count;
+                    _col = _row > 0 ? _values[0].Count : 0;
                 }
+            }
+            else
+            {
+                if (_values != null)
+                {
+                    foreach (List<dynamic> l in _values)
+                    {
+                        l.Clear();
+                    }
+                    _values.Clear();
+                    _values = null;
+                }
+
+                _row = 0;
+                _col = 0;
             }
         }
 
         /// <summary>
-        /// Labels for rows
+        /// Get labels for rows
         /// </summary>
-        public List<LabelList> RowLabels
+        public List<LabelList> GetRowLabels()
         {
-            get
+            if (_rowlabels != null)
             {
-                if (_rowlabels != null)
+                if (_rowlabels.Count > (int)DataframeLimits.forRowLabelLevels)
                 {
-                    if (_rowlabels.Count > (int)DataframeLimits.forRowLabelLevels)
+                    int delindex = (int)DataframeLimits.forRowLabelLevels;
+                    for (int i = 0; i < _rowlabels.Count - delindex; i++)
                     {
-                        int delindex = (int)DataframeLimits.forRowLabelLevels;
-                        for (int i = 0; i < _rowlabels.Count - delindex; i++)
-                        {
-                            _rowlabels.RemoveAt(delindex);
-                        }
-                    }
-                    if (_rowlabels.Count >= 1)
-                    {
-                        if (_rowlabels[0].Length > (int)DataframeLimits.forRows)
-                        {
-                            int delindex = (int)DataframeLimits.forRows;
-                            for (int i = 0; i < _rowlabels.Count; i++)
-                            {
-                                if (_rowlabels[i].TotalSpan != _row)
-                                {
-                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
-                                }
-
-                                if (_rowlabels[i].Length > delindex)
-                                {
-                                    for (int j = 0; j < delindex; j++)
-                                    {
-                                        _rowlabels[i].Labels.RemoveAt(delindex);
-                                    }
-                                }
-                            }
-                        }
+                        _rowlabels.RemoveAt(delindex);
                     }
                 }
-
-                return _rowlabels;
-            }
-            set
-            {
-                if (value != null)
+                if (_rowlabels.Count >= 1)
                 {
-                    if (_rowlabels != null)
+                    if (_rowlabels[0].Length > (int)DataframeLimits.forRows)
                     {
-                        foreach (LabelList l in _rowlabels)
-                        {
-                            l.Dispose();
-                        }
-                        _rowlabels.Clear();
-                        _rowlabels = null;
-                    }
-
-                    if (value.Count > (int)DataframeLimits.forRowLabelLevels)
-                    {
-                        _rowlabels = value.GetRange(0, (int)DataframeLimits.forRowLabelLevels);
-                    }
-                    else
-                    {
-                        _rowlabels = value;
-                    }
-
-                    if (value.Count >= 1)
-                    {
-                        if (value[0].Length > (int)DataframeLimits.forRows)
-                        {
-                            int len = (int)DataframeLimits.forRows;
-                            for (int i = 0; i < value.Count; i++)
-                            {
-                                if (value[i].TotalSpan != _row)
-                                {
-                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, value[i].TotalSpan));
-                                }
-                                if (value[i].Length > len)
-                                {
-                                    _rowlabels[i] = value[i].GetRange(0, len);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
+                        int delindex = (int)DataframeLimits.forRows;
                         for (int i = 0; i < _rowlabels.Count; i++)
                         {
                             if (_rowlabels[i].TotalSpan != _row)
                             {
                                 throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
                             }
+
+                            if (_rowlabels[i].Length > delindex)
+                            {
+                                for (int j = 0; j < delindex; j++)
+                                {
+                                    _rowlabels[i].GetLabels().RemoveAt(delindex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return _rowlabels;
+        }
+
+        /// <summary>
+        /// Set labels for rows
+        /// </summary>
+        public void SetRowLabels(List<LabelList> value)
+        {
+            if (value != null)
+            {
+                if (_rowlabels != null)
+                {
+                    foreach (LabelList l in _rowlabels)
+                    {
+                        l.Dispose();
+                    }
+                    _rowlabels.Clear();
+                    _rowlabels = null;
+                }
+
+                if (value.Count > (int)DataframeLimits.forRowLabelLevels)
+                {
+                    _rowlabels = value.GetRange(0, (int)DataframeLimits.forRowLabelLevels);
+                }
+                else
+                {
+                    _rowlabels = value;
+                }
+
+                if (value.Count >= 1)
+                {
+                    if (value[0].Length > (int)DataframeLimits.forRows)
+                    {
+                        int len = (int)DataframeLimits.forRows;
+                        for (int i = 0; i < value.Count; i++)
+                        {
+                            if (value[i].TotalSpan != _row)
+                            {
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, value[i].TotalSpan));
+                            }
+                            if (value[i].Length > len)
+                            {
+                                _rowlabels[i] = value[i].GetRange(0, len);
+                            }
                         }
                     }
                 }
                 else
                 {
-                    if (_rowlabels != null)
+                    for (int i = 0; i < _rowlabels.Count; i++)
                     {
-                        foreach (LabelList l in _rowlabels)
+                        if (_rowlabels[i].TotalSpan != _row)
                         {
-                            l.Dispose();
+                            throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
                         }
-                        _rowlabels.Clear();
-                        _rowlabels = null;
                     }
+                }
+            }
+            else
+            {
+                if (_rowlabels != null)
+                {
+                    foreach (LabelList l in _rowlabels)
+                    {
+                        l.Dispose();
+                    }
+                    _rowlabels.Clear();
+                    _rowlabels = null;
                 }
             }
         }
 
         /// <summary>
-        /// Labels for columns
+        /// Get labels for columns
         /// </summary>
-        public List<LabelList> ColLabels
+        public List<LabelList> GetColLabels()
         {
-            get
+            if (_collabels != null)
             {
-                if (_collabels != null)
+                if (_collabels.Count > (int)DataframeLimits.forColLabelLevels)
                 {
-                    if (_collabels.Count > (int)DataframeLimits.forColLabelLevels)
+                    int delindex = (int)DataframeLimits.forColLabelLevels;
+                    for (int i = 0; i < _collabels.Count - delindex; i++)
                     {
-                        int delindex = (int)DataframeLimits.forColLabelLevels;
-                        for (int i = 0; i < _collabels.Count - delindex; i++)
-                        {
-                            _collabels.RemoveAt(delindex);
-                        }
+                        _collabels.RemoveAt(delindex);
                     }
-                    if (_collabels.Count >= 1)
+                }
+                if (_collabels.Count >= 1)
+                {
+                    if (_collabels[0].Length > (int)DataframeLimits.forCols)
                     {
-                        if (_collabels[0].Length > (int)DataframeLimits.forCols)
+                        int delindex = (int)DataframeLimits.forCols;
+                        for (int i = 0; i < _collabels.Count; i++)
                         {
-                            int delindex = (int)DataframeLimits.forCols;
-                            for (int i = 0; i < _collabels.Count; i++)
+                            if (_collabels[i].TotalSpan != _col)
                             {
-                                if (_collabels[i].TotalSpan != _col)
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
+                            }
+                            if (_collabels[i].Length > delindex)
+                            {
+                                for (int j = 0; j < delindex; j++)
                                 {
-                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
-                                }
-                                if (_collabels[i].Length > delindex)
-                                {
-                                    for (int j = 0; j < delindex; j++)
-                                    {
-                                        _collabels[i].Labels.RemoveAt(delindex);
-                                    }
+                                    _collabels[i].GetLabels().RemoveAt(delindex);
                                 }
                             }
                         }
                     }
                 }
-
-                return _collabels;
             }
-            set
+
+            return _collabels;
+        }
+
+        /// <summary>
+        /// Set labels for columns
+        /// </summary>
+        public void SetColLabels(List<LabelList> value)
+        {
+            if (value != null)
             {
-                if (value != null)
+                if (_collabels != null)
                 {
-                    if (_collabels != null)
+                    foreach (LabelList l in _collabels)
                     {
-                        foreach (LabelList l in _collabels)
-                        {
-                            l.Dispose();
-                        }
-                        _collabels.Clear();
-                        _collabels = null;
+                        l.Dispose();
                     }
+                    _collabels.Clear();
+                    _collabels = null;
+                }
 
-                    if (value.Count > (int)DataframeLimits.forColLabelLevels)
-                    {
-                        _collabels = value.GetRange(0, (int)DataframeLimits.forColLabelLevels);
-                    }
-                    else
-                    {
-                        _collabels = value;
-                    }
+                if (value.Count > (int)DataframeLimits.forColLabelLevels)
+                {
+                    _collabels = value.GetRange(0, (int)DataframeLimits.forColLabelLevels);
+                }
+                else
+                {
+                    _collabels = value;
+                }
 
-                    if (value.Count >= 1)
+                if (value.Count >= 1)
+                {
+                    if (value[0].Length > (int)DataframeLimits.forCols)
                     {
-                        if (value[0].Length > (int)DataframeLimits.forCols)
+                        int len = (int)DataframeLimits.forCols;
+                        for (int i = 0; i < value.Count; i++)
                         {
-                            int len = (int)DataframeLimits.forCols;
-                            for (int i = 0; i < value.Count; i++)
+                            if (value[i].TotalSpan != _col)
                             {
-                                if (value[i].TotalSpan != _col)
-                                {
-                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, value[i].TotalSpan));
-                                }
-                                if (value[i].Length > len)
-                                {
-                                    _collabels[i] = value[i].GetRange(0, len);
-                                }
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, value[i].TotalSpan));
                             }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < _collabels.Count; i++)
+                            if (value[i].Length > len)
                             {
-                                if (_collabels[i].TotalSpan != _col)
-                                {
-                                    throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
-                                }
+                                _collabels[i] = value[i].GetRange(0, len);
                             }
                         }
                     }
                     else
                     {
-                        _collabels = value;
+                        for (int i = 0; i < _collabels.Count; i++)
+                        {
+                            if (_collabels[i].TotalSpan != _col)
+                            {
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    if (_collabels != null)
+                    _collabels = value;
+                }
+            }
+            else
+            {
+                if (_collabels != null)
+                {
+                    foreach (LabelList l in _collabels)
                     {
-                        foreach (LabelList l in _collabels)
-                        {
-                            l.Dispose();
-                        }
-                        _collabels.Clear();
-                        _collabels = null;
+                        l.Dispose();
                     }
+                    _collabels.Clear();
+                    _collabels = null;
                 }
             }
         }
-
-        public DataframeRowSettings RowSettings = new DataframeRowSettings();
-
-        public DataframeColSettings ColSettings = new DataframeColSettings();
 
         #endregion
 
@@ -618,7 +814,7 @@ namespace MatrisAritmetik.Core.Models
                          DataframeColSettings colSettings = null)
         {
             // Values and dimensions
-            Values = vals;
+            SetValues(vals);
 
             // Seperators
             Delimiter = delim;
@@ -631,7 +827,7 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                RowLabels = rowLabels;
+                SetRowLabels(rowLabels);
                 _rowlabels.Reverse();
             }
             if (colLabels == null)
@@ -640,32 +836,24 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                ColLabels = colLabels;
+                SetColLabels(colLabels);
                 _collabels.Reverse();
             }
 
             // Settings
             if (rowSettings != null)
             {
-                RowSettings = rowSettings;
+                SetRowSettings(rowSettings);
             }
             if (colSettings != null)
             {
-                ColSettings = colSettings;
+                SetColSettings(colSettings);
             }
 
         }
         #endregion
 
         #region Private Methods
-        /// <summary>
-        /// Create a dynamic <see cref="MatrisBase{T}"/> using a copy of <see cref="Dataframe.Values"/>
-        /// </summary>
-        /// <returns></returns>
-        private MatrisBase<dynamic> Elements()
-        {
-            return new MatrisBase<dynamic>(_values);
-        }
 
         /// <summary>
         /// Sum all values in an integer array within given range
@@ -674,7 +862,7 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="start">Starting index</param>
         /// <param name="end">Ending index exclusively</param>
         /// <returns>Sum of values within given range</returns>
-        private int ArraySum(int[] arr, int start, int end)
+        private static int ArraySum(int[] arr, int start, int end)
         {
             int total = 0;
             for (int i = start; i < end; i++)
@@ -685,14 +873,15 @@ namespace MatrisAritmetik.Core.Models
         }
 
         /// <summary>
-        /// Get width of columns using <see cref="Dataframe.Values"/> and <see cref="Dataframe.ColLabels"/> widths
+        /// Get width of columns using <see cref="Dataframe.GetValues()"/> and <see cref="Dataframe.GetColLabels()"/> widths
         /// </summary>
         /// <returns>Array of widths for each column</returns>
         private int[] GetColumnWidths()
         {
             // Element columns' widths
-            int[] elementwidths = GetColumnWidths(Elements());
-            int spanseplength = ColSettings.SpanSeperator.Length;
+            using MatrisBase<dynamic> mat = new MatrisBase<dynamic>(_values);
+            int[] elementwidths = GetColumnWidths(mat);
+            int spanseplength = GetColSettings().GetSpanSeperator().Length;
 
             if (_collabels != null)
             {
@@ -702,7 +891,7 @@ namespace MatrisAritmetik.Core.Models
                     for (int k = 0; k < _collabels.Count; k++)
                     {
                         currentlabelindex = _collabels[k].GetLabelIndexAtSpan(j + 1);
-                        Label current_label = _collabels[k].Labels[currentlabelindex];
+                        Label current_label = _collabels[k].GetLabels()[currentlabelindex];
                         int labellen = current_label.Value.Length + spanseplength;
                         // Label span is a single column
                         if (current_label.Span == 1)
@@ -728,7 +917,7 @@ namespace MatrisAritmetik.Core.Models
                                 int spanstart = 0;
                                 for (int k2 = 0; k2 < currentlabelindex; k2++)
                                 {
-                                    spanstart += _collabels[k].Labels[k2].Span;
+                                    spanstart += _collabels[k].GetLabels()[k2].Span;
                                 }
                                 for (int j2 = spanstart; j2 < current_label.Span + spanstart; j2++)
                                 {
@@ -752,9 +941,9 @@ namespace MatrisAritmetik.Core.Models
         }
 
         /// <summary>
-        /// Get widths for <see cref="Dataframe.RowLabels"/> levels
+        /// Get widths for <see cref="Dataframe.GetRowLabels()"/> levels
         /// </summary>
-        /// <returns>Array of widths for each level of <see cref="Dataframe.RowLabels"/></returns>
+        /// <returns>Array of widths for each level of <see cref="Dataframe.GetRowLabels()"/></returns>
         private int[] GetRowLabelColumnWidths()
         {
             // Row label columns' widths
@@ -764,7 +953,7 @@ namespace MatrisAritmetik.Core.Models
 
             for (int c = 0; c < lvlcount; c++)
             {
-                List<Label> lbls = _rowlabels[c].Labels;
+                List<Label> lbls = _rowlabels[c].GetLabels();
                 int currentmax = 0;
                 for (int l = 0; l < lbls.Count; l++)
                 {
@@ -788,8 +977,8 @@ namespace MatrisAritmetik.Core.Models
                                               int[] rowlbl_widths,
                                               int[] col_widths)
         {
-            string row_level_sep = RowSettings.LevelSeperator;
-            string row_element_sep = RowSettings.LabelSeperatorFromElements;
+            string row_level_sep = GetRowSettings().GetLevelSeperator();
+            string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
 
             int colno, index;
             int rowlabellevel = _rowlabels.Count;
@@ -815,8 +1004,8 @@ namespace MatrisAritmetik.Core.Models
                     }
                     else
                     {
-                        res.Append(' ', rowlbl_widths[k] - currentlist.Labels[index].Value.Length + 1);
-                        res.Append(currentlist.Labels[index].Value);
+                        res.Append(' ', rowlbl_widths[k] - currentlist.GetLabels()[index].Value.Length + 1);
+                        res.Append(currentlist.GetLabels()[index].Value);
                         lastindex[k] = index;
                     }
 
@@ -845,7 +1034,6 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
-
         #endregion
 
         #region Public Methods
@@ -863,22 +1051,22 @@ namespace MatrisAritmetik.Core.Models
                 lis.Add(new List<dynamic>());
                 for (int j = 0; j < c; j++)
                 {
-                    lis[i].Add(Values[i][j]);
+                    lis[i].Add((dynamic)_values[i][j]);
                 }
             }
 
             List<LabelList> rowlbls = new List<LabelList>();
-            foreach (LabelList lbl in RowLabels)
+            foreach (LabelList lbl in GetRowLabels())
             {
                 rowlbls.Add(lbl.Copy());
             }
             List<LabelList> colbls = new List<LabelList>();
-            foreach (LabelList lbl in ColLabels)
+            foreach (LabelList lbl in GetColLabels())
             {
                 colbls.Add(lbl.Copy());
             }
 
-            return new Dataframe(lis, Delimiter.ToString(), NewLine.ToString(), rowlbls, colbls, RowSettings.Copy(), ColSettings.Copy());
+            return new Dataframe(lis, Delimiter.ToString(), NewLine.ToString(), rowlbls, colbls, GetRowSettings().Copy(), GetColSettings().Copy());
         }
         #endregion
 
@@ -896,7 +1084,8 @@ namespace MatrisAritmetik.Core.Models
 
             if (_rowlabels == null && _collabels == null)
             {
-                return Elements().ToString();
+                using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
+                return matrisBase.ToString();
             }
 
             StringBuilder res = new StringBuilder();
@@ -908,13 +1097,13 @@ namespace MatrisAritmetik.Core.Models
             // Column labels row(s)
             if (_collabels != null)
             {
-                string col_corner_sep = ColSettings.LabelSeperatorFromCorner;
-                string col_span_sep = ColSettings.SpanSeperator;
-                string col_level_sep = ColSettings.LevelSeperator;
+                string col_corner_sep = GetColSettings().GetLabelSeperatorFromCorner();
+                string col_span_sep = GetColSettings().GetSpanSeperator();
+                string col_level_sep = GetColSettings().GetLevelSeperator();
                 int colrepeat = ArraySum(col_widths, 0, _col) + ((_col - 1) * col_span_sep.Length);
                 col_level_sep = new string(col_level_sep[0], colrepeat);
 
-                string col_element_sep = ColSettings.LabelSeperatorFromElements;
+                string col_element_sep = GetColSettings().GetLabelSeperatorFromElements();
 
                 // No row labels
                 if (rowlbl_widths.Length == 0)
@@ -926,12 +1115,12 @@ namespace MatrisAritmetik.Core.Models
                         LabelList labelList = _collabels[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
-                            Label lbl = labelList.Labels[j];
+                            Label lbl = labelList.GetLabels()[j];
 
                             int spanstart = 0;
                             for (int k2 = 0; k2 < j; k2++)
                             {
-                                spanstart += labelList.Labels[k2].Span;
+                                spanstart += labelList.GetLabels()[k2].Span;
                             }
 
                             int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
@@ -977,9 +1166,9 @@ namespace MatrisAritmetik.Core.Models
                 }
                 else // Column and row labels
                 {
-                    string row_corner_sep = RowSettings.LabelSeperatorFromCorner;
-                    string row_span_sep = RowSettings.SpanSeperator;
-                    string row_element_sep = RowSettings.LabelSeperatorFromElements;
+                    string row_corner_sep = GetRowSettings().GetLabelSeperatorFromCorner();
+                    string row_span_sep = GetRowSettings().GetSpanSeperator();
+                    string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
                     int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + (rowlbl_widths.Length - 1) * (row_span_sep.Length + 1) + row_element_sep.Length + col_corner_sep.Length - 1;
 
                     // Column label rows first
@@ -992,12 +1181,12 @@ namespace MatrisAritmetik.Core.Models
                         LabelList labelList = _collabels[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
-                            Label lbl = labelList.Labels[j];
+                            Label lbl = labelList.GetLabels()[j];
 
                             int spanstart = 0;
                             for (int k2 = 0; k2 < j; k2++)
                             {
-                                spanstart += labelList.Labels[k2].Span;
+                                spanstart += labelList.GetLabels()[k2].Span;
                             }
 
                             int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
@@ -1032,7 +1221,8 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (_rowlabels == null) // No labels at all
                 {
-                    return Elements().ToString();
+                    using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
+                    return matrisBase.ToString();
                 }
                 else // Row labels only
                 {
@@ -1089,16 +1279,16 @@ namespace MatrisAritmetik.Core.Models
                     }
 
                     // Settings
-                    if (RowSettings != null)
+                    if (GetRowSettings() != null)
                     {
-                        RowSettings.Dispose();
-                        RowSettings = null;
+                        GetRowSettings().Dispose();
+                        SetRowSettings(null);
                     }
 
-                    if (ColSettings != null)
+                    if (GetColSettings() != null)
                     {
-                        ColSettings.Dispose();
-                        ColSettings = null;
+                        GetColSettings().Dispose();
+                        SetColSettings(null);
                     }
                 }
 

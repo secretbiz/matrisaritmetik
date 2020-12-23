@@ -18,7 +18,8 @@ namespace MatrisAritmetik.Tests
         public static CommandInfo InfoSetter(string func,
                                              IFrontService service)
         {
-            if (service.TryParseBuiltFunc(func, out CommandInfo cmdinfo))
+            CommandInfo cmdinfo = service.TryParseBuiltFunc(func);
+            if (cmdinfo != null)
             { return cmdinfo; }
             else
             { throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!"); }
@@ -644,10 +645,12 @@ namespace MatrisAritmetik.Tests
                 Command command = new Command(cmd);
 
                 // Tokenize 
-                command.Tokens = FrontService.Tokenize(command.TermsToEvaluate[0]);
+                command.SetTokens(FrontService.Tokenize(command.GetTermsToEvaluate()[0]));
+
+                List<Token> tokens = command.GetTokens();
 
                 // Check tokens
-                foreach (Token tkn in command.Tokens)
+                foreach (Token tkn in tokens)
                 {
                     // Check token type
                     Assert.AreEqual(cmds[cmd][tknind].tknType, tkn.tknType,
@@ -687,7 +690,7 @@ namespace MatrisAritmetik.Tests
                 // If last token is output , evaluate command and check output
                 if (cmds[cmd][^1].tknType == TokenType.OUTPUT)
                 {
-                    command.Tokens = FrontService.ShuntingYardAlg(command.Tokens);  // Order tokens
+                    command.SetTokens(FrontService.ShuntingYardAlg(command.GetTokens()));  // Order tokens
 
                     // Check evaluating state
                     Assert.AreEqual(FrontService.EvaluateCommand(command, matdict, new List<Command>()), CommandState.SUCCESS,

@@ -42,7 +42,7 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Priority of this token over other tokens, see <see cref="Token"/>
         /// </summary>
-        public int priority = 0;
+        public int priority;
         #endregion
 
         #region Number, Matrix or Function Token Fields
@@ -88,19 +88,19 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Amount of parameters this token requires
         /// </summary>
-        public int paramCount = 0;
+        public int paramCount;
 
         /// <summary>
         /// Amount of arguments passed to be used with this token
         /// </summary>
-        public int argCount = 0;
+        public int argCount;
         #endregion
 
         #region Docs Token
         /// <summary>
         /// Information about the <see cref="Token.name"/> named matrix or function 
         /// </summary>
-        public string info = null;
+        public string info;
 
         private bool disposedValue;
         #endregion
@@ -217,6 +217,13 @@ namespace MatrisAritmetik.Core.Models
                         paramTypes.Clear();
                         paramTypes = null;
                     }
+
+                    if (val is MatrisBase<object> @mat)
+                    {
+                        mat.Dispose();
+                    }
+
+                    val = null;
                 }
 
                 name = null;

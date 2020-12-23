@@ -48,26 +48,26 @@ namespace MatrisAritmetik.Core
         public static void SetCmdList(this ISession session, string key, List<Command> lis)
         {
             StringBuilder serialized = new StringBuilder();
-            serialized.Append("[");
+            serialized.Append('[');
             for (int i = 0; i < lis.Count; i++)
             {
                 Command cmd = lis[i];
                 Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
                 {
                     { "org", cmd.OriginalCommand },
-                    { "nset", cmd.NameSettings },
-                    { "vset", cmd.ValsSettings },
+                    { "nset", cmd.GetNameSettings() },
+                    { "vset", cmd.GetValsSettings() },
                     { "output", cmd.Output },
                     { "statid", (int)cmd.STATE },
-                    { "statmsg", cmd.STATE_MESSAGE }
+                    { "statmsg", cmd.GetStateMessage() }
                 };
                 serialized.Append(JsonSerializer.Serialize(cmdinfo, typeof(Dictionary<string, dynamic>)));
                 if (i != lis.Count - 1)
                 {
-                    serialized.Append(",");
+                    serialized.Append(',');
                 }
             }
-            serialized.Append("]");
+            serialized.Append(']');
             session.SetString(key, serialized.ToString());
 
             foreach (Command c in lis)
@@ -153,7 +153,7 @@ namespace MatrisAritmetik.Core
                                                string key)
         {
             string value = session.GetString(key);
-            if (value == null || value == "" || value == "[]")
+            if (value == null || string.IsNullOrEmpty(value) || value == "[]")
             {
                 return new List<Command>();
             }
@@ -180,7 +180,7 @@ namespace MatrisAritmetik.Core
                                                 string key)
         {
             string value = session.GetString(key);
-            if (value == null || value == "" || value == "{}")
+            if (value == null || string.IsNullOrEmpty(value) || value == "{}")
             {
                 return new CommandMessage("");
             }
@@ -199,7 +199,7 @@ namespace MatrisAritmetik.Core
                                                                         string key)
         {
             string value = session.GetString(key);
-            if (value == null || value == "" || value == "{}")
+            if (value == null || string.IsNullOrEmpty(value) || value == "{}")
             {
                 return new Dictionary<string, List<List<object>>>();
             }
@@ -216,7 +216,7 @@ namespace MatrisAritmetik.Core
                                                                                     string key)
         {
             string value = session.GetString(key);
-            if (value == null || value == "" || value == "{}")
+            if (value == null || string.IsNullOrEmpty(value) || value == "{}")
             {
                 return new Dictionary<string, Dictionary<string, dynamic>>();
             }

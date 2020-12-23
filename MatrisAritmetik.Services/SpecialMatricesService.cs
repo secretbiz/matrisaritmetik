@@ -107,7 +107,9 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals };
+            MatrisBase<dynamic> res = new MatrisBase<dynamic>() { Row = row, Col = col };
+            res.SetValues(vals);
+            return res;
         }
 
         public MatrisBase<dynamic> RandInt(int row,
@@ -155,7 +157,9 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals, Seed = s, CreatedFromSeed = true };
+            MatrisBase<dynamic> res = new MatrisBase<dynamic>() { Row = row, Col = col, Seed = s, CreatedFromSeed = true };
+            res.SetValues(vals);
+            return res;
         }
 
         public MatrisBase<dynamic> RandFloat(int row,
@@ -203,7 +207,9 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = row, Col = col, Values = vals, Seed = s, CreatedFromSeed = true };
+            MatrisBase<dynamic> res = new MatrisBase<dynamic>() { Row = row, Col = col, Seed = s, CreatedFromSeed = true };
+            res.SetValues(vals);
+            return res;
         }
 
         public MatrisBase<dynamic> SymInt(int dimension,
@@ -258,12 +264,14 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = dimension, Col = dimension, Values = vals, Seed = s, CreatedFromSeed = true };
+            MatrisBase<dynamic> res = new MatrisBase<dynamic>() { Row = dimension, Col = dimension, Seed = s, CreatedFromSeed = true };
+            res.SetValues(vals);
+            return res;
         }
 
         public MatrisBase<dynamic> SymFloat(int dimension,
-                                            int min = 0,
-                                            int max = 1,
+                                            float min = 0,
+                                            float max = 1,
                                             dynamic seed = null)
         {
 
@@ -314,7 +322,9 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<dynamic>() { Row = dimension, Col = dimension, Values = vals, Seed = s, CreatedFromSeed = true };
+            MatrisBase<dynamic> res = new MatrisBase<dynamic>() { Row = dimension, Col = dimension, Seed = s, CreatedFromSeed = true };
+            res.SetValues(vals);
+            return res;
         }
         #endregion
     }

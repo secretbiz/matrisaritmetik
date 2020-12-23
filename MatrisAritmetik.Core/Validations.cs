@@ -20,7 +20,7 @@ namespace MatrisAritmetik.Core
             name = name.Trim();
             Regex name_regex = new Regex(@"^\w*|[0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            if (name.Replace(" ", "") == "")
+            if (string.IsNullOrEmpty(name.Replace(" ", "")))
             {
                 if (throwOnBadName)
                 {

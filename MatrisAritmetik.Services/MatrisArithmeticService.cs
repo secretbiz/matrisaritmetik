@@ -16,7 +16,7 @@ namespace MatrisAritmetik.Services
         /// <param name="a">Any numerically parsable value</param>
         /// <param name="b">Any numerically parsable value</param>
         /// <returns>Result of <paramref name="a"/>+<paramref name="b"/> parsed as <see cref="float"/>s</returns>
-        private T Add(T a, T b)
+        private static T Add(T a, T b)
         {
             return (dynamic)(float.Parse(a.ToString()) + float.Parse(b.ToString()));
         }
@@ -27,7 +27,7 @@ namespace MatrisAritmetik.Services
         /// <param name="a">Any numerically parsable value</param>
         /// <param name="b">Any numerically parsable value</param>
         /// <returns>Result of <paramref name="a"/>*<paramref name="b"/> parsed as <see cref="float"/>s</returns>
-        private T Mul(T a, T b)
+        private static T Mul(T a, T b)
         {
             return (dynamic)(float.Parse(a.ToString()) * float.Parse(b.ToString()));
         }
@@ -39,7 +39,7 @@ namespace MatrisAritmetik.Services
         /// <param name="a">List of numerically parsable values</param>
         /// <param name="b">List of numerically parsable values</param>
         /// <returns>Dot product casted as <typeparamref name="T"/></returns>
-        private T DotProduct(List<T> a,
+        private static T DotProduct(List<T> a,
                              List<T> b)
         {
             if (a.Count != b.Count)
@@ -107,7 +107,7 @@ namespace MatrisAritmetik.Services
             int nc = A.Col;
 
             List<int> zeroCols = new List<int>();
-            List<List<T>> filteredResult = A.Copy().Values;
+            List<List<T>> filteredResult = A.Copy().GetValues();
             for (int j = 0; j < nc; j++)
             {
                 if (A.IsZeroCol(j, 0, (float)0.0))
@@ -141,7 +141,7 @@ namespace MatrisAritmetik.Services
             {
                 next = false;
                 int r = 1;
-                while ((float.Parse(result.Values[p][p].ToString())) == (float)0.0)
+                while ((float.Parse(result.GetValues()[p][p].ToString())) == (float)0.0)
                 {
                     if (p + 1 < nr)
                     {
@@ -179,7 +179,7 @@ namespace MatrisAritmetik.Services
                             result.SetCol(A.Col);
                         }
                         result.FixMinusZero();
-                        result.swapCount = swapCount;
+                        result.SwapCount = swapCount;
                         return result;
                     }
                 }
@@ -191,12 +191,12 @@ namespace MatrisAritmetik.Services
 
                 for (; (r >= 1 && r < (nr - p)); r++)
                 {
-                    if (float.Parse(result.Values[p + r][p].ToString()) != (float)0.0)
+                    if (float.Parse(result.GetValues()[p + r][p].ToString()) != (float)0.0)
                     {
-                        float x = -(float.Parse(result.Values[p + r][p].ToString()) / float.Parse(result.Values[p][p].ToString()));
+                        float x = -(float.Parse(result.GetValues()[p + r][p].ToString()) / float.Parse(result.GetValues()[p][p].ToString()));
                         for (int c = p; c < nc; c++)
                         {
-                            result.Values[p + r][c] = (dynamic)((float.Parse(result.Values[p][c].ToString()) * x) + float.Parse(result.Values[p + r][c].ToString()));
+                            result[p + r][c] = (dynamic)((float.Parse(result.GetValues()[p][c].ToString()) * x) + float.Parse(result.GetValues()[p + r][c].ToString()));
                         }
                     }
                 }
@@ -225,7 +225,7 @@ namespace MatrisAritmetik.Services
             }
 
             result.FixMinusZero();
-            result.swapCount = swapCount;
+            result.SwapCount = swapCount;
             return result;
         }
 
@@ -266,24 +266,24 @@ namespace MatrisAritmetik.Services
                 }
 
                 int pivotindex = 0;
-                while (float.Parse(result.Values[i][pivotindex].ToString()) == (float)0.0)
+                while (float.Parse(result.GetValues()[i][pivotindex].ToString()) == (float)0.0)
                 {
                     pivotindex++;
                 }
 
-                result.MulRow(i, (float)1.0 / float.Parse(result.Values[i][pivotindex].ToString()), 0);
+                result.MulRow(i, (float)1.0 / float.Parse(result.GetValues()[i][pivotindex].ToString()), 0);
 
                 for (int e = i - 1; e >= 0; e--)
                 {
-                    if (float.Parse(result.Values[e][pivotindex].ToString()) == (float)0.0)
+                    if (float.Parse(result.GetValues()[e][pivotindex].ToString()) == (float)0.0)
                     {
                         continue;
                     }
 
-                    float factor = -float.Parse(result.Values[e][pivotindex].ToString());
+                    float factor = -float.Parse(result.GetValues()[e][pivotindex].ToString());
                     for (int j = pivotindex; j < colCount; j++)
                     {
-                        result.Values[e][j] = (dynamic)(float.Parse(result.Values[e][j].ToString()) + (float.Parse(result.Values[i][j].ToString()) * factor));
+                        result[e][j] = (dynamic)(float.Parse(result.GetValues()[e][j].ToString()) + (float.Parse(result.GetValues()[i][j].ToString()) * factor));
                     }
                 }
             }
@@ -307,19 +307,19 @@ namespace MatrisAritmetik.Services
 
             if (A.Row == 1)
             {
-                return float.Parse(A.Values[0][0].ToString());
+                return float.Parse(A.GetValues()[0][0].ToString());
             }
 
             if (A.Row == 2)
             {
-                return (float.Parse(A.Values[0][0].ToString()) * float.Parse(A.Values[1][1].ToString()))
-                       - (float.Parse(A.Values[0][1].ToString()) * float.Parse(A.Values[1][0].ToString()));
+                return (float.Parse(A.GetValues()[0][0].ToString()) * float.Parse(A.GetValues()[1][1].ToString()))
+                       - (float.Parse(A.GetValues()[0][1].ToString()) * float.Parse(A.GetValues()[1][0].ToString()));
             }
 
             using MatrisBase<T> ech = Echelon(A.Copy());
 
-            float det = float.Parse(ech.Values[0][0].ToString());
-            if (ech.swapCount % 2 == 1)
+            float det = float.Parse(ech.GetValues()[0][0].ToString());
+            if (ech.SwapCount % 2 == 1)
             {
                 det *= -1;
             }
@@ -328,7 +328,7 @@ namespace MatrisAritmetik.Services
 
             for (int i = 1; i < dim; i++)
             {
-                det *= float.Parse(ech.Values[i][i].ToString());
+                det *= float.Parse(ech.GetValues()[i][i].ToString());
             }
             return det;
         }
@@ -363,13 +363,13 @@ namespace MatrisAritmetik.Services
 
         public float Trace(MatrisBase<T> A)
         {
-            if(!A.IsValid())
+            if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID);
             }
             float trace = float.Parse(A[0, 0].ToString());
             int m = Math.Min(A.Row, A.Col);
-            for(int i = 1; i < m; i++)
+            for (int i = 1; i < m; i++)
             {
                 trace += float.Parse(A[i, i].ToString());
             }
@@ -479,7 +479,7 @@ namespace MatrisAritmetik.Services
                 result.Add(new List<T>());
                 for (int j = 0; j < B.Col; j++)
                 {
-                    result[i].Add(DotProduct(A.Values[i], B.ColList(j, 0)));
+                    result[i].Add(DotProduct(A.GetValues()[i], B.ColList(j, 0)));
                 }
             }
 
@@ -509,7 +509,9 @@ namespace MatrisAritmetik.Services
                     newvals.Add(B.RowList(r2, 0));
                 }
 
-                return new MatrisBase<T>() { Row = A.Row + B.Row, Col = A.Col, Values = newvals };
+                MatrisBase<T> res = new MatrisBase<T>() { Row = A.Row + B.Row, Col = A.Col };
+                res.SetValues(newvals);
+                return res;
             }
             else if (axis == 1)
             {
@@ -526,8 +528,9 @@ namespace MatrisAritmetik.Services
                     newvals[r].AddRange(B.RowList(r, 0));
                 }
 
-                return new MatrisBase<T>() { Row = A.Row, Col = A.Col + B.Col, Values = newvals };
-
+                MatrisBase<T> res = new MatrisBase<T>() { Row = A.Row, Col = A.Col + B.Col };
+                res.SetValues(newvals);
+                return res;
             }
             else
             {
@@ -554,7 +557,7 @@ namespace MatrisAritmetik.Services
             }
 
             List<List<T>> newlis = new List<List<T>>();
-            List<List<T>> vals = A.Values;
+            List<List<T>> vals = A.GetValues();
             row -= based;
             col -= based;
 
@@ -627,7 +630,10 @@ namespace MatrisAritmetik.Services
             {
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
             }
-            return new MatrisBase<T>() { Row = 1, Col = 1, Values = new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } } };
+
+            MatrisBase<T> res = new MatrisBase<T>() { Row = 1, Col = 1 };
+            res.SetValues(new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } });
+            return res;
         }
 
         public MatrisBase<T> Set(MatrisBase<T> A,
@@ -649,8 +655,8 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
             }
 
-            List<List<T>> newlis = A.Copy().Values;
-            newlis[i][j] = (dynamic)value;
+            List<List<T>> newlis = A.Copy().GetValues();
+            newlis[i - based][j - based] = (dynamic)value;
 
             return new MatrisBase<T>(newlis);
         }
@@ -740,7 +746,7 @@ namespace MatrisAritmetik.Services
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.Values;
+            List<List<T>> vals = A.GetValues();
 
             List<List<T>> newlis = new List<List<T>>();
 
@@ -771,7 +777,7 @@ namespace MatrisAritmetik.Services
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.Values;
+            List<List<T>> vals = A.GetValues();
             List<List<T>> newvals = new List<List<T>>();
             dynamic val;
             for (int i = 0; i < m; i++)
@@ -802,7 +808,7 @@ namespace MatrisAritmetik.Services
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.Values;
+            List<List<T>> vals = A.GetValues();
             List<List<T>> newvals = new List<List<T>>();
 
             for (int i = 0; i < m; i++)
@@ -863,7 +869,7 @@ namespace MatrisAritmetik.Services
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
                 List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.Values;
+                List<List<T>> vals = A.GetValues();
 
                 int i = 0;
                 foreach (int k in indices)
@@ -893,7 +899,7 @@ namespace MatrisAritmetik.Services
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
                 List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.Values;
+                List<List<T>> vals = A.GetValues();
 
                 for (int i = 0; i < m; i++)
                 {
@@ -925,7 +931,7 @@ namespace MatrisAritmetik.Services
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
                 List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.Values;
+                List<List<T>> vals = A.GetValues();
 
                 int c = 0;
                 int r = -1;
@@ -974,7 +980,7 @@ namespace MatrisAritmetik.Services
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.Values;
+            List<List<T>> vals = A.GetValues();
 
             dynamic val;
             float max = old + TOL;

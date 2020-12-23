@@ -103,8 +103,8 @@
 
             @if (cmd.STATE == Core.CommandState.SUCCESS)
             {
-                cmdstyle = SettingString(cmd.NameSettings);
-                outstyle = SettingString(cmd.ValsSettings);
+                cmdstyle = SettingString(cmd.GetNameSettings());
+                outstyle = SettingString(cmd.GetValsSettings());
 
                 if (cmd.OriginalCommand.Contains("?"))
                 {
@@ -127,7 +127,7 @@
                         </td>
                     </tr>
 
-                    if (cmd.ValsSettings.ContainsKey("tex"))
+                    if (cmd.GetValsSettings().ContainsKey("tex"))
                     {
                         try
                         {
@@ -147,7 +147,7 @@
                                             <mtable>
                                                 @if (matoutput.ElementCount > MaxTolarableSize)
                                                 {
-                                                    @foreach (var row in matoutput.CornerMatrix().Values)
+                                                    @foreach (var row in matoutput.CornerMatrix().GetValues())
                                                     {
                                                         <mtr>
                                                             @foreach (var val in row)
@@ -161,7 +161,7 @@
                                                 }
                                                 else
                                                 {
-                                                    @foreach (var row in matoutput.Values)
+                                                    @foreach (var row in matoutput.GetValues())
                                                     {
                                                         <mtr>
                                                             @foreach (var val in row)
@@ -205,7 +205,7 @@
                 </tr>
                 <tr class="outputRow">
                     <td class="cmdoutput" style="white-space:unset !important;" title='@cmd.CommandSummary()'>
-                        <span style="color:red;font-size:16px;font-weight:bolder">[HATA]</span> @cmd.STATE_MESSAGE
+                        <span style="color:red;font-size:16px;font-weight:bolder">[HATA]</span> @cmd.GetStateMessage()
                     </td>
                 </tr>
             }

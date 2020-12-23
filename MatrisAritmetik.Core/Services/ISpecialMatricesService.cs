@@ -66,8 +66,8 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="seed">Seed to use with <see cref="Random"/></param>
         /// <returns></returns>
         MatrisBase<dynamic> SymFloat(int dimension,
-                                     int min = 0,
-                                     int max = 1,
+                                     float min = 0,
+                                     float max = 1,
                                      dynamic seed = null);
 
         /// <summary>

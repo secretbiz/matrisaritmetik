@@ -98,35 +98,35 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// List of commands and settings to evaluate, first one hold the command, rest are settings
         /// </summary>
-        public string[] TermsToEvaluate;
+        private string[] termsToEvaluate;
         /// <summary>
         /// Tokens of the command
         /// </summary>
-        public List<Token> Tokens = new List<Token>();
+        private List<Token> tokens = new List<Token>();
         /// <summary>
         /// Output of the command, generally a string
         /// </summary>
-        public dynamic Output = "";
+        private dynamic output = "";
         /// <summary>
         /// Given command, unprocessed
         /// </summary>
-        public string OriginalCommand = "";
+        private string originalCommand = "";
         /// <summary>
         /// Cleaned command, with expected spacing
         /// </summary>
-        public string CleanedCommand = "";
+        private string cleanedCommand = "";
         /// <summary>
         /// Given settings, unprocessed
         /// </summary>
-        public string OriginalSettings = "";
+        private string originalSettings = "";
         /// <summary>
         /// Dictionary of settings and their values to be applied to command row
         /// </summary>
-        public Dictionary<string, string> NameSettings = new Dictionary<string, string>();
+        private Dictionary<string, string> nameSettings = new Dictionary<string, string>();
         /// <summary>
         /// Dictionary of settings and their values to be applied to output row
         /// </summary>
-        public Dictionary<string, string> ValsSettings = new Dictionary<string, string>();
+        private Dictionary<string, string> valsSettings = new Dictionary<string, string>();
         #endregion
 
         #region Command State Fields and Properties
@@ -143,14 +143,75 @@ namespace MatrisAritmetik.Core.Models
                 STATEID = (int)value;
             }
         }
+
+        public dynamic Output { get => output; set => output = value; }
+
+        public string OriginalCommand { get => originalCommand; set => originalCommand = value; }
+
+        public string CleanedCommand { get => cleanedCommand; set => cleanedCommand = value; }
+
+        public string OriginalSettings { get => originalSettings; set => originalSettings = value; }
+
+        public int STATEID { get => stateID; set => stateID = value; }
+
+        public string[] GetTermsToEvaluate()
+        {
+            return termsToEvaluate ?? Array.Empty<string>();
+        }
+
+        public void SetTermsToEvaluate(string[] value)
+        {
+            termsToEvaluate = value ?? Array.Empty<string>();
+        }
+
+        public List<Token> GetTokens()
+        {
+            return tokens ?? new List<Token>();
+        }
+
+        public void SetTokens(List<Token> value)
+        {
+            tokens = value ?? new List<Token>();
+        }
+
+        public string GetStateMessage()
+        {
+            return StateMessage;
+        }
+
+        public void SetStateMessage(string value)
+        {
+            StateMessage = value;
+        }
+
+        public Dictionary<string, string> GetNameSettings()
+        {
+            return nameSettings ?? new Dictionary<string, string>();
+        }
+
+        public void SetNameSettings(Dictionary<string, string> value)
+        {
+            nameSettings = value ?? new Dictionary<string, string>();
+        }
+
+        public Dictionary<string, string> GetValsSettings()
+        {
+            return valsSettings ?? new Dictionary<string, string>();
+        }
+
+        public void SetValsSettings(Dictionary<string, string> value)
+        {
+            valsSettings = value ?? new Dictionary<string, string>();
+        }
+
         /// <summary>
         /// Command's <see cref="CommandState"/> as an integer 
         /// </summary>
-        public int STATEID = -1;
+        private int stateID = -1;
         /// <summary>
         /// Current message about the state of the command
         /// </summary>
-        public string STATE_MESSAGE = "";
+        private string StateMessage = "";
 
         private bool disposedValue;
         #endregion
@@ -173,10 +234,10 @@ namespace MatrisAritmetik.Core.Models
                        string output)
         {
             OriginalCommand = org;
-            NameSettings = nset;
-            ValsSettings = vset;
+            SetNameSettings(nset);
+            SetValsSettings(vset);
             STATE = (CommandState)stat;
-            STATE_MESSAGE = statmsg;
+            SetStateMessage(statmsg);
             Output = output;
         }
 
@@ -186,7 +247,7 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="cmd">Command string</param>
         public Command(string cmd)
         {
-            if (cmd == "")
+            if (string.IsNullOrEmpty(cmd))
             {
                 return;
             }
@@ -194,21 +255,21 @@ namespace MatrisAritmetik.Core.Models
             OriginalCommand = cmd;
 
             /* Check if custom settings given */
-            TermsToEvaluate = OriginalCommand.Split(";", StringSplitOptions.RemoveEmptyEntries);
+            SetTermsToEvaluate(OriginalCommand.Split(";", StringSplitOptions.RemoveEmptyEntries));
 
-            if (TermsToEvaluate.Length == 0)
+            if (GetTermsToEvaluate().Length == 0)
             {
                 return;
             }
 
             // Settings given
-            if (TermsToEvaluate.Length > 1)
+            if (GetTermsToEvaluate().Length > 1)
             {
                 string[] currentsetting;
 
-                for (int i = 1; i < TermsToEvaluate.Length; i++)
+                for (int i = 1; i < GetTermsToEvaluate().Length; i++)
                 {
-                    currentsetting = TermsToEvaluate[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                    currentsetting = GetTermsToEvaluate()[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
                     switch (currentsetting.Length)
                     {
@@ -234,7 +295,7 @@ namespace MatrisAritmetik.Core.Models
                                 StringBuilder combinedsetting = new StringBuilder();
                                 for (int j = 1; j < currentsetting.Length; j++)
                                 {
-                                    combinedsetting.Append(" ");
+                                    combinedsetting.Append(' ');
                                     combinedsetting.Append(currentsetting[j]);
                                 }
 
@@ -246,13 +307,13 @@ namespace MatrisAritmetik.Core.Models
                 }
             }
             // At this point command should be ready to be examined and settings should all be done
-            CleanedCommand = TermsToEvaluate[0];
+            CleanedCommand = GetTermsToEvaluate()[0];
         }
         #endregion
 
         #region Private Methods
         /// <summary>
-        /// Places given setting an value to <see cref="Command.NameSettings"/> or <see cref="Command.ValsSettings"/> dictionaries
+        /// Places given setting an value to <see cref="Command.GetNameSettings()"/> or <see cref="Command.GetValsSettings()"/> dictionaries
         /// </summary>
         /// <param name="settingname">Name of the setting</param>
         /// <param name="valueofsetting">Value of the setting</param>
@@ -270,13 +331,13 @@ namespace MatrisAritmetik.Core.Models
                             valueofsetting = "none";
                         }
 
-                        if (!NameSettings.ContainsKey(settingname))
+                        if (!GetNameSettings().ContainsKey(settingname))
                         {
-                            NameSettings.Add(settingname, valueofsetting);
+                            GetNameSettings().Add(settingname, valueofsetting);
                         }
                         else
                         {
-                            NameSettings[settingname] = valueofsetting;
+                            GetNameSettings()[settingname] = valueofsetting;
                         }
 
                         return;
@@ -289,13 +350,13 @@ namespace MatrisAritmetik.Core.Models
                             valueofsetting = "none";
                         }
 
-                        if (!ValsSettings.ContainsKey(settingname))
+                        if (!GetValsSettings().ContainsKey(settingname))
                         {
-                            ValsSettings.Add(settingname, valueofsetting);
+                            GetValsSettings().Add(settingname, valueofsetting);
                         }
                         else
                         {
-                            ValsSettings[settingname] = valueofsetting;
+                            GetValsSettings()[settingname] = valueofsetting;
                         }
 
                         return;
@@ -311,22 +372,22 @@ namespace MatrisAritmetik.Core.Models
                 valueofsetting = "none";
             }
 
-            if (!NameSettings.ContainsKey(settingname))
+            if (!GetNameSettings().ContainsKey(settingname))
             {
-                NameSettings.Add(settingname, valueofsetting);
+                GetNameSettings().Add(settingname, valueofsetting);
             }
             else
             {
-                NameSettings[settingname] = valueofsetting;
+                GetNameSettings()[settingname] = valueofsetting;
             }
 
-            if (!ValsSettings.ContainsKey(settingname))
+            if (!GetValsSettings().ContainsKey(settingname))
             {
-                ValsSettings.Add(settingname, valueofsetting);
+                GetValsSettings().Add(settingname, valueofsetting);
             }
             else
             {
-                ValsSettings[settingname] = valueofsetting;
+                GetValsSettings()[settingname] = valueofsetting;
             }
         }
         #endregion
@@ -334,7 +395,7 @@ namespace MatrisAritmetik.Core.Models
         #region Debug
         private string GetDebuggerDisplay()
         {
-            return STATE.ToString() + STATE_MESSAGE;
+            return STATE.ToString() + GetStateMessage();
         }
         #endregion
 
@@ -347,20 +408,20 @@ namespace MatrisAritmetik.Core.Models
         {
             StringBuilder cmdset = new StringBuilder();
             StringBuilder outset = new StringBuilder();
-            foreach (string setting in NameSettings.Keys)
+            foreach (string setting in GetNameSettings().Keys)
             {
                 cmdset.Append(setting);
-                cmdset.Append(":");
-                cmdset.Append(NameSettings[setting]);
-                cmdset.Append("\t");
+                cmdset.Append(':');
+                cmdset.Append(GetNameSettings()[setting]);
+                cmdset.Append('\t');
             }
 
-            foreach (string setting in ValsSettings.Keys)
+            foreach (string setting in GetValsSettings().Keys)
             {
                 outset.Append(setting);
-                outset.Append(":");
-                outset.Append(ValsSettings[setting]);
-                outset.Append("\t");
+                outset.Append(':');
+                outset.Append(GetValsSettings()[setting]);
+                outset.Append('\t');
             }
 
             string state = STATE switch
@@ -390,24 +451,21 @@ Durum: " + state;
             {
                 if (disposing)
                 {
-                    if (NameSettings != null)
+                    if (GetNameSettings() != null)
                     {
-                        NameSettings.Clear();
-                        NameSettings = null;
+                        SetNameSettings(null);
                     }
-                    if (ValsSettings != null)
+                    if (GetValsSettings() != null)
                     {
-                        ValsSettings.Clear();
-                        ValsSettings = null;
+                        SetValsSettings(null);
                     }
-                    if (Tokens != null)
+                    if (tokens != null)
                     {
-                        foreach (Token d in Tokens)
+                        foreach (Token d in tokens)
                         {
                             d.Dispose();
                         }
-                        Tokens.Clear();
-                        Tokens = null;
+                        SetTokens(null);
                     }
                 }
 
@@ -415,8 +473,8 @@ Durum: " + state;
                 OriginalCommand = null;
                 CleanedCommand = null;
                 OriginalSettings = null;
-                TermsToEvaluate = null;
-                STATE_MESSAGE = null;
+                SetTermsToEvaluate(null);
+                SetStateMessage(null);
                 disposedValue = true;
             }
         }

@@ -7,7 +7,7 @@ namespace MatrisAritmetik.Core.Services
     /// <summary>
     /// Service for methods related to changes in front-end
     /// </summary>
-    public interface IFrontService
+    public interface IFrontService : IDisposable
     {
         #region Matrix dictionary
         /// <summary>
@@ -61,12 +61,11 @@ namespace MatrisAritmetik.Core.Services
         Command CreateCommand(string cmd);
 
         /// <summary>
-        /// Try and find a function with the given <paramref name="name"/>, if found then store it's info in <paramref name="cmdinfo"/>
+        /// Try and find a function with the given <paramref name="name"/>
         /// </summary>
         /// <param name="name">Function name to search for</param>
-        /// <param name="cmdinfo"><see cref="CommandInfo"/> instance to use if function is found</param>
-        /// <returns>True if <paramref name="name"/> is a function</returns>
-        bool TryParseBuiltFunc(string name, out CommandInfo cmdinfo);
+        /// <returns>A <see cref="CommandInfo"/> instance if given <paramref name="name"/> was found, or null otherwise</returns>
+        CommandInfo TryParseBuiltFunc(string name);
 
         /// <summary>
         /// Tokenize a string expression
@@ -96,7 +95,7 @@ namespace MatrisAritmetik.Core.Services
         /// </summary>
         /// <returns><c>true</c> if <paramref name="date"/> was null or more than <see cref="CompilerLimits.forCmdSendRateInSeconds"/> seconds old
         /// <para> Otherwise sets current session variables and returns <c>false</c></para></returns>
-        bool CheckCmdDate(DateTime date);
+        bool CheckCmdDate(DateTime calldate);
 
         /// <summary>
         /// Command to clean up the command history

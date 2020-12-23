@@ -14,13 +14,22 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Command's current state
         /// </summary>
-        public CommandState State = CommandState.IDLE;
+        private CommandState state = CommandState.IDLE;
         /// <summary>
         /// Last message
         /// </summary>
-        public string Message = "";
+        private string message = "";
 
         private bool disposedValue;
+
+        /// <summary>
+        /// Command's current state
+        /// </summary>
+        public CommandState State { get => state; set => state = value; }
+        /// <summary>
+        /// Last message
+        /// </summary>
+        public string Message { get => message; set => message = value; }
         #endregion
 
         #region Constructors
@@ -78,7 +87,7 @@ namespace MatrisAritmetik.Core
     /// <summary>
     /// Const strings and static string methods for storing custom command state messages
     /// </summary>
-    public class CommandStateMessage
+    public static class CommandStateMessage
     {
         // CLEANUP
         public const string SUCCESS_CLEANUP = "Komut geçmişi temizlendi";

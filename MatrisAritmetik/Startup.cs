@@ -76,7 +76,7 @@ namespace MatrisAritmetik
                       }
                       using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
                       {
-                          tmp = await reader.ReadToEndAsync();
+                          tmp = await reader.ReadToEndAsync().ConfigureAwait(false);
                       }
 
                       Console.WriteLine("Body: " + tmp);

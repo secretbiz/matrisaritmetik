@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Core", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Services", "..\MatrisAritmetik.Services\MatrisAritmetik.Services.csproj", "{ECDF0F84-0756-4956-B6A0-BCE43A370AA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatrisAritmetik.Tests", "..\MatrisAritmetik.Tests\MatrisAritmetik.Tests.csproj", "{67BA1384-938A-42C1-B277-DBCA4AE3288D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrisAritmetik.Tests", "..\MatrisAritmetik.Tests\MatrisAritmetik.Tests.csproj", "{67BA1384-938A-42C1-B277-DBCA4AE3288D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E684BC3C-A9E2-47C9-8BE8-3A4B100069FA}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,7 +5,7 @@ namespace MatrisAritmetik.Core
     /// <summary>
     /// Messages related to request warnings and errors
     /// </summary>
-    public class RequestMessage
+    public static class RequestMessage
     {
         /// <summary>
         /// Given request didn't have required keys

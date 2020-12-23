@@ -34,7 +34,7 @@
                         <mtable>
                             @if (Model[name].ElementCount > MaxTolarableSize)
                             {
-                                @foreach (var row in Model[name].CornerMatrix().Values)
+                                @foreach (var row in Model[name].CornerMatrix().GetValues())
                                 {
                                     <mtr>
                                         @foreach (var val in row)
@@ -48,7 +48,7 @@
                             }
                             else
                             {
-                                @foreach (var row in Model[name].Values)
+                                @foreach (var row in Model[name].GetValues())
                                 {
                                     <mtr>
                                         @foreach (var val in row)

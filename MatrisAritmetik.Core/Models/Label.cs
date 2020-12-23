@@ -122,15 +122,16 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Amount of <see cref="Label"/>s this list has
         /// </summary>
-        private int _length = 0;
+        private int _length;
         /// <summary>
         /// Total span of this list's <see cref="Label"/>s
         /// </summary>
-        private int _totalspan = 0;
+        private int _totalspan;
         /// <summary>
         /// List of all <see cref="Label"/>s
         /// </summary>
-        private List<Label> _labels;
+        private List<Label> _labels = new List<Label>();
+
         private bool disposedValue;
         #endregion
 
@@ -145,12 +146,25 @@ namespace MatrisAritmetik.Core.Models
         public int TotalSpan => _totalspan;
 
         /// <summary>
-        /// List of all <see cref="Label"/>s
+        /// Get new list of all <see cref="Label"/>s
         /// </summary>
-        public List<Label> Labels
+        public List<Label> GetLabels()
         {
-            get => _labels;
-            set
+            return _labels;
+        }
+
+        /// <summary>
+        /// Set the list of all <see cref="Label"/>s
+        /// </summary>
+        public void SetLabels(List<Label> value)
+        {
+            if (value == null)
+            {
+                _length = 0;
+                _labels = new List<Label>();
+                _totalspan = 0;
+            }
+            else
             {
                 _length = value.Count;
                 _labels = value;
@@ -161,6 +175,7 @@ namespace MatrisAritmetik.Core.Models
                 }
             }
         }
+
         #endregion
 
         #region Constructors
@@ -197,7 +212,7 @@ namespace MatrisAritmetik.Core.Models
         /// Create a <see cref="LabelList"/> from given list of <see cref="Label"/>s
         /// </summary>
         /// <param name="labels">List of labels</param>
-        public LabelList(List<Label> labels) { Labels = labels; }
+        public LabelList(List<Label> labels) { SetLabels(labels); }
         #endregion
 
         #region Public Methods
@@ -221,7 +236,7 @@ namespace MatrisAritmetik.Core.Models
         /// Get the index of which label is spanning over the given index <paramref name="ind"/>
         /// </summary>
         /// <param name="ind">Index to use</param>
-        /// <returns>Index of <see cref="Label"/> in <see cref="LabelList.Labels"/>, which spans over given index <paramref name="ind"/></returns>
+        /// <returns>Index of <see cref="Label"/> in <see cref="LabelList.GetLabels()"/>, which spans over given index <paramref name="ind"/></returns>
         public int GetLabelIndexAtSpan(int ind)
         {
             if (_totalspan < ind)
