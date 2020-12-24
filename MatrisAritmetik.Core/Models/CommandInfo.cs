@@ -162,7 +162,8 @@ namespace MatrisAritmetik.Core.Models
                 Service = Service.ToString(),
                 Returns = Returns.ToString(),
                 Param_names = tempparamnames,
-                Param_types = tempparamtypes
+                Param_types = tempparamtypes,
+                Required_params = tempreq
             };
         }
         #endregion
