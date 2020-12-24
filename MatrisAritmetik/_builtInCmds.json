@@ -4,17 +4,17 @@
         "Functions": [
             {
                 "fullname": "Yardım",
-                "description": "Derleyici hakkında bilgi döner",
+                "description": "Derleyici veya verilen terim hakkında bilgi al",
 
                 "alias_list": [ "?" ],
                 "function": "Help",
-                "param_types": [],
-                "param_names": [],
-                "required_params": [],
+                "param_types": [ "dynamic" ],
+                "param_names": [ "term" ],
+                "required_params": 0,
                 "returns": "string",
 
                 "function_template": "!Help()",
-                "function_template_filled": "!Help()",
+                "function_template_filled": "!Help(term:!null)",
 
                 "service": "FrontService"
             },
@@ -26,7 +26,7 @@
                 "function": "CleanUp",
                 "param_types": [],
                 "param_names": [],
-                "required_params": [],
+                "required_params": 0,
                 "returns": "void",
 
                 "function_template": "!CleanUp()",
@@ -47,7 +47,7 @@
                 "function": "Identity",
                 "param_types": [ "int" ],
                 "param_names": [ "dimension" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Identity()",
@@ -63,7 +63,7 @@
                 "function": "RandInt",
                 "param_types": [ "int", "int", "int", "int", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!RandInt(,,,,)",
@@ -79,7 +79,7 @@
                 "function": "SymInt",
                 "param_types": [ "int", "int", "int", "int" ],
                 "param_names": [ "dimension", "min", "max", "seed" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!SymInt(,,,)",
@@ -95,7 +95,7 @@
                 "function": "RandFloat",
                 "param_types": [ "int", "int", "float", "float", "int" ],
                 "param_names": [ "row", "col", "min", "max", "seed" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!RandFloat(,,,,)",
@@ -111,7 +111,7 @@
                 "function": "SymFloat",
                 "param_types": [ "int", "float", "float", "int" ],
                 "param_names": [ "dimension", "min", "max", "seed" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!SymFloat(,,,)",
@@ -127,7 +127,7 @@
                 "function": "Fill",
                 "param_types": [ "int", "int", "float" ],
                 "param_names": [ "row", "col", "fill" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "Matris",
 
                 "function_template": "!Fill(,,)",
@@ -143,7 +143,7 @@
                 "function": "Range",
                 "param_types": [ "float", "float", "float", "int", "int" ],
                 "param_names": [ "start", "end", "interval", "axis", "digits" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!Range(,,,)",
@@ -165,7 +165,7 @@
                 "function": "MatrisMul",
                 "param_types": [ "Matris", "Matris" ],
                 "param_names": [ "A", "B" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!MatrisMul(,)",
@@ -187,7 +187,7 @@
                 "function": "Sign",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Sign()",
@@ -203,7 +203,7 @@
                 "function": "Abs",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Abs()",
@@ -219,7 +219,7 @@
                 "function": "Round",
                 "param_types": [ "Matris", "int" ],
                 "param_names": [ "A", "n" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Round(,)",
@@ -235,7 +235,7 @@
                 "function": "Replace",
                 "param_types": [ "Matris", "float", "float", "float" ],
                 "param_names": [ "A", "old", "with", "TOL" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "Matris",
 
                 "function_template": "!Replace(,,,)",
@@ -258,7 +258,7 @@
                 "function": "Transpose",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Transpose()",
@@ -274,7 +274,7 @@
                 "function": "Determinant",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "float",
 
                 "function_template": "!Determinant()",
@@ -290,7 +290,7 @@
                 "function": "Rank",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "int",
 
                 "function_template": "!Rank()",
@@ -306,7 +306,7 @@
                 "function": "Echelon",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Echelon()",
@@ -322,7 +322,7 @@
                 "function": "RREchelon",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!RREchelon()",
@@ -338,7 +338,7 @@
                 "function": "Inverse",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Inverse()",
@@ -354,7 +354,7 @@
                 "function": "PseudoInverse",
                 "param_types": [ "Matris", "int" ],
                 "param_names": [ "A", "side" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!PseudoInverse(,)",
@@ -370,7 +370,7 @@
                 "function": "Minor",
                 "param_types": [ "Matris", "int", "int", "int" ],
                 "param_names": [ "A", "row", "col", "based" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "float",
 
                 "function_template": "!Minor(,,,)",
@@ -386,7 +386,7 @@
                 "function": "MinorMatris",
                 "param_types": [ "Matris", "int", "int", "int" ],
                 "param_names": [ "A", "row", "col", "based" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "Matris",
 
                 "function_template": "!MinorMatris(,,,)",
@@ -402,7 +402,7 @@
                 "function": "Adjoint",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Adjoint()",
@@ -418,7 +418,7 @@
                 "function": "Trace",
                 "param_types": [ "Matris" ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "float",
 
                 "function_template": "!Trace()",
@@ -442,7 +442,7 @@
                     "Matris"
                 ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "int",
 
                 "function_template": "!RowDim()",
@@ -460,7 +460,7 @@
                     "Matris"
                 ],
                 "param_names": [ "A" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "int",
 
                 "function_template": "!ColDim()",
@@ -481,7 +481,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "i", "j", "based" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "Matris",
 
                 "function_template": "!Get(,,,)",
@@ -503,7 +503,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "i", "j", "value", "based" ],
-                "required_params": [ 0, 1, 2, 3 ],
+                "required_params": 4,
                 "returns": "Matris",
 
                 "function_template": "!Set(,,,,)",
@@ -523,7 +523,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "i", "based" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!Row(,,)",
@@ -543,7 +543,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "j", "based" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!Col(,,)",
@@ -566,7 +566,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "r1", "r2", "c1", "c2", "based" ],
-                "required_params": [ 0, 1, 2, 3, 4 ],
+                "required_params": 5,
                 "returns": "Matris",
 
                 "function_template": "!Sub(,,,,,)",
@@ -586,7 +586,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "row", "col" ],
-                "required_params": [ 0, 1, 2 ],
+                "required_params": 3,
                 "returns": "Matris",
 
                 "function_template": "!Resize(,,)",
@@ -605,7 +605,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "axis" ],
-                "required_params": [ 0 ],
+                "required_params": 1,
                 "returns": "Matris",
 
                 "function_template": "!Shuffle(,)",
@@ -625,7 +625,7 @@
                     "int"
                 ],
                 "param_names": [ "A", "B", "axis" ],
-                "required_params": [ 0, 1 ],
+                "required_params": 2,
                 "returns": "Matris",
 
                 "function_template": "!Concatenate(,,)",

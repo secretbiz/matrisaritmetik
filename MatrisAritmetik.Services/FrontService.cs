@@ -173,13 +173,14 @@ namespace MatrisAritmetik.Services
                 tkn.name = value;
                 tkn.info = "matrix";
             }
-            else if (string.IsNullOrEmpty(value)) // Spammed bunch of question marks
+            else if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(tkn.info)) // Spammed bunch of question marks or request !Help on a number
             {
                 tkn.info = "info";
             }
             else    // NOTHING FOUND
             {
-                tkn.val = value;
+                tkn.name = string.IsNullOrWhiteSpace(value) ? ((object)tkn.val).ToString() : value;
+                tkn.val = tkn.name;
                 tkn.info = "null";
             }
         }
@@ -296,6 +297,18 @@ namespace MatrisAritmetik.Services
                 tkn.priority = 10;
             }
 
+            else if (exp == "?")
+            {
+                tkn.info = "info";
+                tkn.tknType = TokenType.DOCS;
+            }
+
+            else if (exp == ",")
+            {
+                tkn.tknType = TokenType.ARGSEPERATOR;               // ARGUMENT SEPERATOR
+                tkn.priority = 1;
+            }
+
             else if (exp.Length > 1
                      && exp != ".^"
                      && exp != ".*"
@@ -308,18 +321,6 @@ namespace MatrisAritmetik.Services
             {
                 tkn.tknType = TokenType.MATRIS;                   // MATRIX
                 tkn.name = exp;
-            }
-
-            else if (exp == "?")
-            {
-                tkn.info = "info";
-                tkn.tknType = TokenType.DOCS;
-            }
-
-            else if (exp == ",")
-            {
-                tkn.tknType = TokenType.ARGSEPERATOR;               // ARGUMENT SEPERATOR
-                tkn.priority = 1;
             }
 
             else
@@ -503,7 +504,8 @@ namespace MatrisAritmetik.Services
                                     List<Token> operands,
                                     object serviceObject,
                                     MethodInfo method,
-                                    object[] arguments)
+                                    object[] arguments,
+                                    Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (op.service)
             {
@@ -518,7 +520,7 @@ namespace MatrisAritmetik.Services
                             }
                         case "Help":
                             {
-                                return new Token() { name = "", val = Help(), tknType = TokenType.DOCS };
+                                return HelpInternal(operands.Count != 0 ? operands[0] : null, matDict);
                             }
                         default:
                             throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
@@ -596,11 +598,23 @@ namespace MatrisAritmetik.Services
 
                 case TokenType.MATRIS:
                     {
-                        arguments[argIndex] = matDict.ContainsKey(operand.name)
-                            ? matDict[operand.name]
-                            : operand.val is MatrisBase<object>
-                                ? (object)operand.val
-                                : throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operand.name));
+                        if (matDict.ContainsKey(operand.name))
+                        {
+                            arguments[argIndex] = matDict[operand.name];
+                        }
+                        else if (operand.val is MatrisBase<object>)
+                        {
+                            arguments[argIndex] = (object)operand.val;
+                        }
+                        else if (Validations.ValidMatrixName(operand.name))
+                        {
+                            operand.tknType = TokenType.STRING;
+                            arguments[argIndex] = operand.name;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.UNKNOWN_VARIABLE(operand.name));
+                        }
 
                         break;
                     }
@@ -738,6 +752,11 @@ namespace MatrisAritmetik.Services
                     case "Matris":
                         {
                             arguments[argumentIndex] = (MatrisBase<dynamic>)arguments[argumentIndex];
+                            break;
+                        }
+                    case "dynamic":
+                        {
+                            arguments[argumentIndex] = (dynamic)arguments[argumentIndex];
                             break;
                         }
                     default:
@@ -1157,12 +1176,13 @@ namespace MatrisAritmetik.Services
                             throw new Exception(CompilerMessage.PARANTHESIS_COUNT_ERROR);
                         }
 
-                        if (!string.IsNullOrEmpty(op.service) && op.service != "FrontService")
+                        if (!string.IsNullOrEmpty(op.service))
                         {
                             Type serviceType = op.service switch
                             {
                                 "MatrisArithmeticService" => typeof(MatrisArithmeticService<object>),
                                 "SpecialMatricesService" => typeof(SpecialMatricesService),
+                                "FrontService" => typeof(FrontService),
                                 _ => throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service))
                             };
 
@@ -1182,7 +1202,7 @@ namespace MatrisAritmetik.Services
                         param_arg = ParseDefaultValues(op.paramCount, param_arg, paraminfo);
 
                         // Invoke method found with given arguments
-                        return InvokeMethods(op, operands, serviceObject, method, param_arg);
+                        return InvokeMethods(op, operands, serviceObject, method, param_arg, matDict);
 
                     }
             }
@@ -1239,9 +1259,22 @@ namespace MatrisAritmetik.Services
                     }
                 case "special":
                     {
-                        cmd.STATE = CommandState.SUCCESS;
-                        cmd.SetStateMessage(CommandStateMessage.DOCS_SPECIAL_FOUND(tkn.name));
-                        cmd.Output = Constants.Description(tkn.name);
+                        if (matdict.ContainsKey(tkn.name))
+                        {
+                            cmd.STATE = CommandState.SUCCESS;
+                            cmd.SetStateMessage(CommandStateMessage.DOCS_MAT_SPECIAL_FOUND(tkn.name));
+                            cmd.Output = matdict[tkn.name].Details(tkn.name)
+                                         + "\nÖzel değer: "
+                                         + tkn.name
+                                         + "\n"
+                                         + Constants.Description(tkn.name);
+                        }
+                        else
+                        {
+                            cmd.STATE = CommandState.SUCCESS;
+                            cmd.SetStateMessage(CommandStateMessage.DOCS_SPECIAL_FOUND(tkn.name));
+                            cmd.Output = Constants.Description(tkn.name);
+                        }
                         break;
                     }
                 default:        // given name was a function, and also possibly a matrix
@@ -1250,9 +1283,11 @@ namespace MatrisAritmetik.Services
                         {
                             cmd.STATE = CommandState.SUCCESS;
                             cmd.SetStateMessage(CommandStateMessage.DOCS_MAT_FUNC_FOUND(tkn.name));
-                            cmd.Output = matdict[tkn.name].Details(tkn.name) +
-                                "\nKomut: " + tkn.name + "\n" +
-                                tkn.info;
+                            cmd.Output = matdict[tkn.name].Details(tkn.name)
+                                         + "\nKomut: "
+                                         + tkn.name
+                                         + "\n"
+                                         + tkn.info;
                         }
                         else
                         {
@@ -1265,6 +1300,92 @@ namespace MatrisAritmetik.Services
             }
             return cmd;
         }
+
+        /// <summary>
+        /// Sets given token's value to documentation of about the subject given in <see cref="Token.info"/>
+        /// </summary>
+        /// <param name="tkn">Token to use</param>
+        /// <param name="matdict">Matrix dictionary to reference to</param>
+        /// <returns>Given <paramref name="tkn"/> with updated <see cref="Token.val"/></returns>
+        private static void SetDocsAsValue(Token tkn,
+                                           Dictionary<string, MatrisBase<dynamic>> matdict)
+        {
+            switch (tkn.info)
+            {
+                case "matrix":
+                    {
+                        if (matdict.ContainsKey(tkn.name))
+                        {
+                            tkn.val = matdict[tkn.name].Details(tkn.name);
+                        }
+                        break;
+                    }
+                case "info":    // info about how to use the compiler
+                    {
+                        tkn.val = CompilerMessage.COMPILER_HELP;
+                        break;
+                    }
+                case "null":    // nothing found, return as is
+                    {
+                        tkn.val = ((object)tkn.val).ToString();
+                        break;
+                    }
+                case "special":
+                    {
+                        if (matdict.ContainsKey(tkn.name))
+                        {
+                            tkn.val = matdict[tkn.name].Details(tkn.name)
+                                      + "\nÖzel değer: "
+                                      + tkn.name
+                                      + "\n"
+                                      + Constants.Description(tkn.name);
+                        }
+                        else
+                        {
+                            tkn.val = Constants.Description(tkn.name);
+                        }
+                        break;
+                    }
+                default:        // given name was a function, and also possibly a matrix
+                    {
+                        if (matdict.ContainsKey(tkn.name))
+                        {
+                            tkn.val = matdict[tkn.name].Details(tkn.name)
+                                      + "\nKomut: "
+                                      + tkn.name
+                                      + "\n"
+                                      + tkn.info;
+                        }
+                        else
+                        {
+                            tkn.val = tkn.info;
+                        }
+                        break;
+                    }
+            }
+        }
+
+
+        /// <summary>
+        /// Wrapper-like for <see cref="Help(dynamic)"/>
+        /// </summary>
+        /// <param name="term">Token to use as reference, null to get <see cref="CompilerMessage.COMPILER_HELP"/></param>
+        /// <param name="matDict">Matrix dictionary to refer to</param>
+        /// <returns>Token with updated docs</returns>
+        private Token HelpInternal(Token term, Dictionary<string, MatrisBase<dynamic>> matDict)
+        {
+            if (term is null)
+            {
+                return new Token() { tknType = TokenType.DOCS, name = "info", val = CompilerMessage.COMPILER_HELP };
+            }
+
+            SetAsDocsToken(term, term.name);
+
+            SetDocsAsValue(term, matDict);
+
+            return term;
+        }
+
         #endregion
 
         #region FrontService Methods
@@ -1650,7 +1771,8 @@ namespace MatrisAritmetik.Services
                                         }
                                     case TokenType.FUNCTION:
                                         {
-                                            if (tkns[0].paramCount == 0)
+                                            using CommandInfo cinfo = TryParseBuiltFunc(tkns[0].name);
+                                            if (cinfo.Required_params == 0)
                                             {
                                                 break;
                                             }
@@ -1806,9 +1928,9 @@ namespace MatrisAritmetik.Services
             CleanUp_state = true;
         }
 
-        public string Help()
+        public string Help(dynamic term = null)
         {
-            return CompilerMessage.COMPILER_HELP;
+            return string.Empty;
         }
 
         #endregion

@@ -103,9 +103,9 @@ namespace MatrisAritmetik.Core.Services
         void CleanUp();
 
         /// <summary>
-        /// Returns compiler documentation
+        /// Returns information about <paramref name="term"/> if any given, if "<see cref="null"/>" given return compiler help
         /// </summary>
-        string Help();
+        string Help(dynamic term = null);
         #endregion
     }
 }

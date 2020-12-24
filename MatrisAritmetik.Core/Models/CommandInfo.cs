@@ -39,7 +39,7 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Indices of which parameters are required
         /// </summary>
-        private int[] required_params;
+        private int required_params;
         /// <summary>
         /// Type name of what the "function" returns
         /// </summary>
@@ -78,7 +78,7 @@ namespace MatrisAritmetik.Core.Models
 
         public string[] Param_names { get => param_names ?? Array.Empty<string>(); set => param_names = value ?? Array.Empty<string>(); }
 
-        public int[] Required_params { get => required_params ?? Array.Empty<int>(); set => required_params = value ?? Array.Empty<int>(); }
+        public int Required_params { get => required_params; set => required_params = value; }
 
         public string Function_template { get => function_template; set => function_template = value; }
 
@@ -101,24 +101,16 @@ namespace MatrisAritmetik.Core.Models
         public string MinimalFormat()
         {
             StringBuilder req = new StringBuilder();
-            List<int> paraminds = new List<int>(Required_params);
-            for (int i = 0; i < Param_types.Length; i++)
+            for (int i = 0; i < Required_params; i++)
             {
-                if (paraminds.Contains(i))
+                req.Append(Param_names[i])
+                   .Append(':')
+                   .Append(Param_types[i]);
+
+                if (i != Required_params - 1)
                 {
-                    req.Append(Param_names[i]);
-                    req.Append(':');
-                    req.Append(Param_types[i]);
-                    if (i != Param_types.Length - 1)
-                    {
-                        if (paraminds.Contains(i + 1))
-                        {
-
-                            req.Append(", ");
-                        }
-                    }
+                    req.Append(", ");
                 }
-
             }
             return req.ToString();
         }
@@ -143,13 +135,11 @@ namespace MatrisAritmetik.Core.Models
             string[] temp = new string[Alias_list.Count];
             string[] tempparamnames = new string[Param_names.Length];
             string[] tempparamtypes = new string[Param_types.Length];
-            int[] tempreq = new int[Required_params.Length];
 
             Alias_list.CopyTo(temp);
 
             Array.Copy(Param_names, tempparamnames, Param_names.Length);
             Array.Copy(Param_types, tempparamtypes, Param_types.Length);
-            Array.Copy(Required_params, tempreq, Required_params.Length);
 
             return new CommandInfo()
             {
@@ -163,7 +153,7 @@ namespace MatrisAritmetik.Core.Models
                 Returns = Returns.ToString(),
                 Param_names = tempparamnames,
                 Param_types = tempparamtypes,
-                Required_params = tempreq
+                Required_params = Required_params
             };
         }
         #endregion
@@ -196,7 +186,6 @@ namespace MatrisAritmetik.Core.Models
                 Service = null;
                 Function_template = null;
                 Function_template_filled = null;
-                Required_params = null;
                 Param_names = null;
                 Param_types = null;
 

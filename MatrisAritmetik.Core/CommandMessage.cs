@@ -99,10 +99,6 @@ namespace MatrisAritmetik.Core
 
         // DOCS
         public const string SUCCESS_COMPILER_DOCS = "Derleyici kullanma bilgisi alındı";
-        public static string DOCS_MAT_FUNC_FOUND(string name)
-        {
-            return "Matris ve komut olan " + name + " hakkında bilgi alındı";
-        }
 
         public static string DOCS_MAT_FOUND(string name)
         {
@@ -117,6 +113,16 @@ namespace MatrisAritmetik.Core
         public static string DOCS_SPECIAL_FOUND(string name)
         {
             return "Özel değer " + name + " hakkında bilgi alındı";
+        }
+
+        public static string DOCS_MAT_FUNC_FOUND(string name)
+        {
+            return "Matris ve komut olan " + name + " hakkında bilgi alındı";
+        }
+
+        public static string DOCS_MAT_SPECIAL_FOUND(string name)
+        {
+            return "Matris ve özel değer " + name + " hakkında bilgi alındı";
         }
 
         public static string DOCS_NOT_MAT_FUNC(string name)

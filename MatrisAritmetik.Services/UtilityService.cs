@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -155,7 +154,7 @@ namespace MatrisAritmetik.Services
             string currentParamType;
             string currentArg;
 
-            if (args.Length < funcinfo.Required_params.Length || args.Length > funcinfo.Param_names.Length)
+            if (args.Length < funcinfo.Required_params || args.Length > funcinfo.Param_names.Length)
             {
                 throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
             }
@@ -264,12 +263,12 @@ namespace MatrisAritmetik.Services
             }
 
             // Check if all required parameters had values
-            foreach (int reqindex in
-                     from int reqindex in funcinfo.Required_params
-                     where !param_dict.ContainsKey(funcinfo.Param_names[reqindex])
-                     select reqindex)
+            for (int i = 0; i < funcinfo.Required_params; i++)
             {
-                throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.Param_names[reqindex]));
+                if (!param_dict.ContainsKey(funcinfo.Param_names[i]))
+                {
+                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.Param_names[i]));
+                }
             }
 
             object[] param_arg = new object[funcinfo.Param_names.Length];
