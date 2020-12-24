@@ -9,7 +9,7 @@ namespace MatrisAritmetik.Models.Core
     /// Used as "null" value for <see cref="Token"/>s
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class None
+    public sealed class None
     {
         public None() { }
 

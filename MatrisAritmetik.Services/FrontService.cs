@@ -36,7 +36,7 @@ namespace MatrisAritmetik.Services
         /// <param name="symbol">Symbol/operator to use</param>
         /// <returns>Given token with values set</returns>
         private static Token SetTokenFieldsViaSymbol(Token tkn,
-                                              string symbol)
+                                                     string symbol)
         {
             switch (symbol)
             {
@@ -163,6 +163,11 @@ namespace MatrisAritmetik.Services
                 tkn.name = value;
                 tkn.info = cmdinfo.Info();
             }
+            else if (Constants.Contains(value))
+            {
+                tkn.name = value;
+                tkn.info = "special";
+            }
             else if (Validations.ValidMatrixName(value))
             {   // MATRIX
                 tkn.name = value;
@@ -185,55 +190,20 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to apply values to </param>
         /// <param name="name">Special value's name</param>
         /// <returns>True if token was set as a special value token</returns>
-        private static bool SetAsSpecialToken(Token tkn,
+        private bool SetAsSpecialToken(Token tkn,
                                        string name)
         {
-            if (name == "null")
+            if (Constants.Contains(name))
             {
-                tkn.val = new None();
-                tkn.tknType = TokenType.NULL;
-            }
-            else if (name == "e")
-            {
-                tkn.val = 2.7182818;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "pi")
-            {
-                tkn.val = 3.1415926;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "tau")
-            {
-                tkn.val = 6.2831853;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "sq2")
-            {
-                tkn.val = 1.4142135;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "sq3")
-            {
-                tkn.val = 1.7320508;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "sq5")
-            {
-                tkn.val = 2.2360679;
-                tkn.tknType = TokenType.NUMBER;
-            }
-            else if (name == "golden")
-            {
-                tkn.val = 1.6180339;
-                tkn.tknType = TokenType.NUMBER;
+                tkn.val = Constants.Get(name);
+                tkn.tknType = tkn.val is None ? TokenType.NULL : TokenType.NUMBER;
+                return true;
             }
             else
             {
                 return false;
             }
 
-            return true;
         }
 
         /// <summary>
@@ -279,7 +249,7 @@ namespace MatrisAritmetik.Services
                 {
                     if (!SetAsSpecialToken(tkn, exp))
                     {
-                        throw new Exception(CompilerMessage.NOT_A_(tkn.ToString() + ":" + exp, "fonksiyon ya da özel bir değer"));
+                        throw new Exception(CompilerMessage.NOT_A_(exp, "fonksiyon ya da özel bir değer"));
                     }
                 }
             }
@@ -479,7 +449,7 @@ namespace MatrisAritmetik.Services
         /// <param name="paramarr">Parameter array</param>
         /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
         private static int GetParamIndex(string name,
-                                  ParameterInfo[] paramarr)
+                                         ParameterInfo[] paramarr)
         {
             int ind = 0;
             foreach (ParameterInfo p in paramarr)
@@ -500,7 +470,7 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>True if given token holds a <see cref="MatrisBase{object}"/></returns>
         private static bool CheckMatrixAndUpdateVal(Token tkn,
-                                             Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                    Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (tkn.tknType)
             {
@@ -613,10 +583,10 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>Argument at index <paramref name="argIndex"/> after changes applied</returns>
         private static object ApplyArgumentValue(Token op,
-                                          Token operand,
-                                          object[] arguments,
-                                          int argIndex,
-                                          Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                 Token operand,
+                                                 object[] arguments,
+                                                 int argIndex,
+                                                 Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (operand.tknType)
             {
@@ -654,10 +624,10 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to if needed</param>
         /// <returns>Parsed <paramref name="arguments"/></returns>
         private static object[] CheckAndParseArgumentsAndHints(Token op,
-                                                        List<Token> operands,
-                                                        object[] arguments,
-                                                        ParameterInfo[] paraminfo,
-                                                        Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                               List<Token> operands,
+                                                               object[] arguments,
+                                                               ParameterInfo[] paraminfo,
+                                                               Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
             bool hintUsed = false;
@@ -718,10 +688,10 @@ namespace MatrisAritmetik.Services
         /// <param name="argumentIndex">Index of argument to parse</param>
         /// <returns> Argument at index <paramref name="argumentIndex"/> after parsed as parameter's type</returns>
         private static object ParseTokenValAsParameterType(Token op,
-                                                    List<Token> operands,
-                                                    object[] arguments,
-                                                    int operandIndex,
-                                                    int argumentIndex)
+                                                           List<Token> operands,
+                                                           object[] arguments,
+                                                           int operandIndex,
+                                                           int argumentIndex)
         {
             try
             {
@@ -792,8 +762,8 @@ namespace MatrisAritmetik.Services
         /// <param name="parameterInfo">Parameter information array</param>
         /// <returns><paramref name="arguments"/> where "null" values are parsed as default values picked from <paramref name="parameterInfo"/></returns>
         private static object[] ParseDefaultValues(int parameterCount,
-                                            object[] arguments,
-                                            ParameterInfo[] parameterInfo)
+                                                   object[] arguments,
+                                                   ParameterInfo[] parameterInfo)
         {
             for (int k = 0; k < parameterCount; k++)
             {
@@ -872,8 +842,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if necessary</param>
         /// <returns>Operands list after evaluation</returns>
         private static List<Token> EvalWithSymbolOperator(Token op,
-                                                   List<Token> operands,
-                                                   Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                          List<Token> operands,
+                                                          Dictionary<string, MatrisBase<dynamic>> matDict)
         {
             switch (op.symbol)
             {
@@ -968,7 +938,16 @@ namespace MatrisAritmetik.Services
                     {
                         if (operands[0].tknType != TokenType.NUMBER)
                         {
-                            throw new Exception(CompilerMessage.EXPO_NOT_SCALAR);
+                            operands[0].val = !CheckMatrixAndUpdateVal(operands[0], matDict)
+                                              ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
+                                              : !((MatrisBase<dynamic>)operands[0].val).IsScalar()
+                                                  ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
+                                                  : float.Parse(((MatrisBase<object>)operands[0].val)[0, 0].ToString());
+
+                            if (!(operands[0].val is int) && !(operands[0].val is float) && !(operands[0].val is double))
+                            {
+                                throw new Exception(CompilerMessage.EXPO_NOT_SCALAR);
+                            }
                         }
 
                         if (operands[0].val < 0)
@@ -1220,8 +1199,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="cmd"/> updated with helpful message</returns>
         private static Command SetDocsCommand(Command cmd,
-                                       Token tkn,
-                                       Dictionary<string, MatrisBase<dynamic>> matdict)
+                                              Token tkn,
+                                              Dictionary<string, MatrisBase<dynamic>> matdict)
         {
             switch (tkn.info)
             {
@@ -1256,6 +1235,13 @@ namespace MatrisAritmetik.Services
                                 ? CommandStateMessage.DOCS_NONE_FOUND(tkn.symbol)
                                 : (string)CommandStateMessage.DOCS_NONE_FOUND(tkn.val));
 
+                        break;
+                    }
+                case "special":
+                    {
+                        cmd.STATE = CommandState.SUCCESS;
+                        cmd.SetStateMessage(CommandStateMessage.DOCS_SPECIAL_FOUND(tkn.name));
+                        cmd.Output = Constants.Description(tkn.name);
                         break;
                     }
                 default:        // given name was a function, and also possibly a matrix

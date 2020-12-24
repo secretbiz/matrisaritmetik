@@ -1,4 +1,7 @@
-﻿namespace MatrisAritmetik.Core
+﻿using System.Text;
+using MatrisAritmetik.Core.Models;
+
+namespace MatrisAritmetik.Core
 {
     /// <summary>
     /// Collection of strings and functions to create warning, error and information messages
@@ -236,38 +239,61 @@
         /// </summary>
         public const string DOCS_HELP = "'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.";
 
-        private static readonly string _compilerHelp = ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz. (örnek: ?komut_veya_matris)" +
-                                     "\n>>> Çıktılar veya menülerin üzerine işaretçinizi bekleterek gerekli bilgilere ulaşabilirsiniz." +
+        public static string CONSTANTS
+        {
+            get
+            {
+                StringBuilder res = new StringBuilder();
+                foreach (string key in Constants.Dict.Keys)
+                {
+                    res.Append('\n')
+                       .Append('\t')
+                       .Append(' ', 2)
+                       .Append('!')
+                       .Append(key)
+                       .Append('\t', 2)
+                       .Append(Constants.Description(key));
+                }
+                res.Append('\n')
+                   .Append('\t')
+                   .Append(' ', 2)
+                   .Append('-', 30)
+                   .Append(' ');
+                return res.ToString();
+            }
+        }
 
-                                     "\n\n>>> '!' bir ön-ektir:" +
-                                     "\n\to Komutları kullanmak için komut isminden önce '!' koyunuz. (örnek: !komut)" +
-                                     "\n\to Özel değerleri kullanmak için isimden önce '!' koyunuz. (örnek: !null) " +
-                                     "\n\to İstenen bir parametreye değer vermek için 'parametre_ismi:argüman' formatını kullanınız." +
-                                     "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez." +
-
-                                     "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):" +
-                                     "\n\to .* : Matris çarpımı = A .* B" +
-                                     "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A" +
-                                     "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)" +
-
-                                     "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız." +
-                                     "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir." +
-                                     "\n\to Komut stilleri için ayardan önce 'cmd:' ön-ekini kullanınız." +
-                                     "\n\to Çıktı stilleri için ayardan önce 'out:' ön-ekini kullanınız." +
-                                     "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır." +
-                                     "\n\n\to CSS stilleri verilen kurallar çerçevesinde uygulanabilir" +
-                                     "\n\t       Ayar       |        Açıklama         |    Beklenen değer   " +
-                                     "\n\t ---------------- | ----------------------- | --------------------" +
-                                     "\n\t       quiet      | Komut geçmişinde gizle  |          boş        " +
-                                     "\n\t        tex       |  LaTeX formatında yaz   |          boş        " +
-                                     "\n\t       color      |  Yazı rengini ayarla    | renk ismi veya #rgb " +
-                                     "\n\t background-color | Arkaplan rengini ayarla | renk ismi veya #rgb " +
-                                     "\n\t    font-weight   |     Yazı kalınlığı      | 0-900, bold, lighter" +
-
-                                     "\n\n\to Örnek stilli komutlar:" +
-                                     "\n\t\t!Identity(4) ; cmd:quiet ; out:font-weigth bolder ; color blue" +
-                                     "\n\t\t!RandFloatMat(4,4,2,3,1); background-color #d233c1; color white; tex\n\n" +
-                                     MAT_LIMITS_HELP;
+        private static readonly string _compilerHelp =
+                                     ">>> '?' bir ön-ektir. Bilgi almak istediğiniz terimden önce '?' koyunuz. (örnek: ?MatrisMul)"
+                                     + "\n>>> Çıktılar veya menülerin üzerine işaretçinizi bekleterek gerekli bilgilere ulaşabilirsiniz."
+                                     + "\n\n>>> '!' bir ön-ektir:"
+                                     + "\n\to Komutları kullanmak için komut isminden önce '!' koyunuz. (örnek: !Rank)(yardım: ?komut)"
+                                     + "\n\to Özel değerleri kullanmak için isimden önce '!' koyunuz. (örnek: !null)(yardım: ?değer)"
+                                     + "\n\to Özel değerler ve açıklamaları:\n\t  ------------------------------ "
+                                     + CONSTANTS
+                                     + "\n\to İstenen bir parametreye değer vermek için 'parametre:argüman' formatını kullanınız.(örnek: seed:5)"
+                                     + "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez."
+                                     + "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):"
+                                     + "\n\to .* : Matris çarpımı = A .* B"
+                                     + "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A"
+                                     + "\n\to ./ : 2. matrisin tersi ile matris çarpımı = A ./ B == A .* !Inverse(B)"
+                                     + "\n\n>>> Komutlar ve çıktılara özel stiller eklemek için komuttan sonra ';' karakterini kullanınız."
+                                     + "\n>>> Stiller 'ayar_1 değer_1 ; ayar_2 değer_2 ; ...' formatını takip etmelidir."
+                                     + "\n\to Komut stilleri için ayardan önce 'cmd:' ön-ekini kullanınız."
+                                     + "\n\to Çıktı stilleri için ayardan önce 'out:' ön-ekini kullanınız."
+                                     + "\n\to Ön-ek kullanılmazsa ayarlar hem komut hem de çıktıya uygulanır."
+                                     + "\n\n\to CSS stilleri verilen kurallar çerçevesinde uygulanabilir"
+                                     + "\n\t       Ayar       |        Açıklama         |    Beklenen değer   "
+                                     + "\n\t ---------------- | ----------------------- | --------------------"
+                                     + "\n\t       quiet      | Komut geçmişinde gizle  |          boş        "
+                                     + "\n\t        tex       |  LaTeX formatında yaz   |          boş        "
+                                     + "\n\t       color      |  Yazı rengini ayarla    | renk ismi veya #rgb "
+                                     + "\n\t background-color | Arkaplan rengini ayarla | renk ismi veya #rgb "
+                                     + "\n\t    font-weight   |     Yazı kalınlığı      | 0-900, bold, lighter"
+                                     + "\n\n\to Örnek stilli komutlar:"
+                                     + "\n\t\t!Identity(4) ; cmd:quiet ; out:font-weigth bolder ; color blue"
+                                     + "\n\t\t!RandFloat(4,4,max:30,seed:1); background-color #d233c1; color white; tex\n\n"
+                                     + MAT_LIMITS_HELP;
 
         /// <summary>
         /// Short and detailed documentation about the matrix compiler
