@@ -7,6 +7,9 @@ using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Core.Models
 {
+    /// <summary>
+    /// Class for enumerating built-in special values
+    /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class ConstantsEnum : IEnumerable
     {
@@ -192,6 +195,12 @@ namespace MatrisAritmetik.Core.Models
         #endregion
 
         #region Custom Methods
+        /// <summary>
+        /// Add a new item with <paramref name="key"/> , <paramref name="value"/> and it's <paramref name="description"/>
+        /// </summary>
+        /// <param name="key">Name of the key to access this item</param>
+        /// <param name="value">Value of this item</param>
+        /// <param name="description">Description of this item</param>
         public void Add(string key, dynamic value, string description)
         {
             if (_keys.Contains(key))
@@ -206,6 +215,11 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Returns the description of the item with key given <paramref name="key"/>
+        /// </summary>
+        /// <param name="key">Name of the key</param>
+        /// <returns>Description of given <paramref name="key"/>'s corresponding item</returns>
         public string GetDescription(string key)
         {
             if (!_keys.Contains(key))
@@ -267,14 +281,17 @@ namespace MatrisAritmetik.Core.Models
 
     }
 
+    /// <summary>
+    /// Class to store and access to special values
+    /// </summary>
     public static class Constants
     {
         private static readonly ConstantsEnum _dict = new ConstantsEnum()
         {
             { "null", new None() , "Boş değer(null). Fonksiyonlarda argüman olarak kullanabilir." },
             { "e", (float)2.7182818 , "Euler sayısı(2.7182818), doğal logaritma tabanı." },
-            { "pi", (float)3.1415926 , "Pi(3.1415926), bir çemberin çevresinin yarıçapına oranı." },
-            { "tau", (float)6.2831853 , "Tau(6.2831853), bir çemberin çevresinin çapına oranı." },
+            { "pi", (float)3.1415926 , "Pi(3.1415926), bir çemberin çevresinin çapına oranı." },
+            { "tau", (float)6.2831853 , "Tau(6.2831853), bir çemberin çevresinin yarıçapına oranı." },
             { "sq2", (float)1.4142135 , "2'nin karekökü(1.4142135)" },
             { "sq3", (float)1.7320508 , "3'ün karekökü(1.7320508)" },
             { "sq5", (float)2.2360679 , "5'in karekökü(2.2360679)" },
@@ -297,11 +314,21 @@ namespace MatrisAritmetik.Core.Models
         };
         */
 
+        /// <summary>
+        /// Check if given <paramref name="key"/> is a special value name
+        /// </summary>
+        /// <param name="key">Key name to check</param>
+        /// <returns>True if <paramref name="key"/> exists in <see cref="Constants.Dict"/></returns>
         public static bool Contains(string key)
         {
             return _dict.ContainsKey(key);
         }
 
+        /// <summary>
+        /// Get the value of a special value
+        /// </summary>
+        /// <param name="key">Name of the special value</param>
+        /// <returns>Value of the special key if it exists as an <see cref="object"/>, throws othewise</returns>
         public static object Get(string key)
         {
             if (Contains(key))
@@ -314,6 +341,11 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Get the description of a special value
+        /// </summary>
+        /// <param name="key">Key name for the special value</param>
+        /// <returns>Description of special <paramref name="key"/> if it exists, throws otherwise</returns>
         public static string Description(string key)
         {
             if (Contains(key))
