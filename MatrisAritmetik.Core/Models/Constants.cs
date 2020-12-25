@@ -289,6 +289,9 @@ namespace MatrisAritmetik.Core.Models
         private static readonly ConstantsEnum _dict = new ConstantsEnum()
         {
             { "null", new None() , "Boş değer(null). Fonksiyonlarda argüman olarak kullanabilir." },
+            { "nan", float.NaN , "Sayı olmayan(tanımsız). Tanımsız değer, 0/0 vb." },
+            { "inf", float.PositiveInfinity , "Pozitif sonsuz(+Inf). Sonsuz değer, 1/0 vb." },
+            { "ninf", float.NegativeInfinity, "Negatif sonsuz(-Inf). Sonsuz değer, -1/0 vb." },
             { "e", (float)2.7182818 , "Euler sayısı(2.7182818), doğal logaritma tabanı." },
             { "pi", (float)3.1415926 , "Pi(3.1415926), bir çemberin çevresinin çapına oranı." },
             { "tau", (float)6.2831853 , "Tau(6.2831853), bir çemberin çevresinin yarıçapına oranı." },
@@ -304,6 +307,9 @@ namespace MatrisAritmetik.Core.Models
         private static readonly ConstantsDict Dict = new ConstantsDict()
         {
             { "null", new None() , "No value. Can be used as an argument." },
+            { "nan", float.NaN , "NaN(not a number). Represents cases of 0/0 etc." },
+            { "inf", float.PositiveInfinity , "Positive infinity(+Inf). Represents cases of 1/0 etc." },
+            { "ninf", float.NegativeInfinity, "Negative infinity(-Inf). Represents cases of -1/0 etc." },
             { "e", (float)2.7182818 , "Euler's number, the base of natural logarithms." },
             { "pi", (float)3.1415926 , "Pi, ratio of a circle's circumference to it's diameter." },
             { "tau", (float)6.2831853 , "Tau, ratio of a circle's circumference to it's radius.\nEquals to 2*pi" },

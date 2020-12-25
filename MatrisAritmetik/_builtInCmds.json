@@ -4,17 +4,17 @@
         "Functions": [
             {
                 "fullname": "Yardım",
-                "description": "Derleyici veya verilen terim hakkında bilgi al",
+                "description": "Derleyici veya verilen terim 'term' hakkında bilgi al. '!Help(argüman)' formatını kullanınız.",
 
                 "alias_list": [ "?" ],
                 "function": "Help",
-                "param_types": [ "dynamic" ],
+                "param_types": [ "dinamik" ],
                 "param_names": [ "term" ],
                 "required_params": 0,
                 "returns": "string",
 
                 "function_template": "!Help()",
-                "function_template_filled": "!Help(term:!null)",
+                "function_template_filled": "!Help()",
 
                 "service": "FrontService"
             },

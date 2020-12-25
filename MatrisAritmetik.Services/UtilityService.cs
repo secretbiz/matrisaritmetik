@@ -289,41 +289,8 @@ namespace MatrisAritmetik.Services
                 param_arg[ind] = param_dict[par];
             }
 
-            for (int k = 0; k < funcinfo.Param_names.Length; k++)
-            {
-                if (param_arg[k] != null)    // Skip already parsed values
-                {
-                    continue;
-                }
+            CompilerUtils.ParseDefaultValues(funcinfo.Param_names.Length, param_arg, paraminfo);
 
-                else if (paraminfo[k].DefaultValue != null) // default value wasn't null
-                {
-                    switch (paraminfo[k].DefaultValue.GetType().ToString())
-                    {
-                        case "System.DBNull":
-                            {
-                                throw new Exception(CompilerMessage.MISSING_ARGUMENT(paraminfo[k].Name));
-                            }
-                        case "System.Int32":
-                            {
-                                param_arg[k] = Convert.ToInt32(paraminfo[k].DefaultValue);
-                                break;
-                            }
-                        case "System.Single":
-                            {
-                                param_arg[k] = Convert.ToSingle(paraminfo[k].DefaultValue);
-                                break;
-                            }
-                        case "System.Double":
-                            {
-                                param_arg[k] = Convert.ToDouble(paraminfo[k].DefaultValue);
-                                break;
-                            }
-                        default:
-                            throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(paraminfo[k].Name, paraminfo[k].ParameterType.Name));
-                    }
-                }
-            }
             MatrisBase<T> result = (MatrisBase<T>)method.Invoke(serviceObject, param_arg);
 
             return result;
@@ -389,7 +356,6 @@ namespace MatrisAritmetik.Services
             }
 
         }
-
 
         public int IndexOfAbsMax(List<T> lis)
         {

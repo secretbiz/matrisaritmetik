@@ -161,12 +161,17 @@ namespace MatrisAritmetik.Core.Models
         public void SetValues(string _symbol,
                               OperatorAssociativity _assoc,
                               int _priority,
-                              int _paramCount)
+                              int _paramCount,
+                              bool setAsOpToken = true)
         {
             symbol = _symbol;
             assoc = _assoc;
             priority = _priority;
             paramCount = _paramCount;
+            if (setAsOpToken)
+            {
+                tknType = TokenType.OPERATOR;
+            }
         }
         #endregion
 

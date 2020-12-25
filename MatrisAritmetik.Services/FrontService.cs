@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
@@ -35,108 +36,64 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn"><see cref="Token"/> to use</param>
         /// <param name="symbol">Symbol/operator to use</param>
         /// <returns>Given token with values set</returns>
-        private static Token SetTokenFieldsViaSymbol(Token tkn,
+        private Token SetTokenFieldsViaSymbol(Token tkn,
                                                      string symbol)
         {
             switch (symbol)
             {
                 case ":":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = ":";
-                        tkn.priority = 2;
-                        tkn.assoc = OperatorAssociativity.RIGHT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues(":", OperatorAssociativity.RIGHT, 2, 2);
                         break;
                     }
                 case "=":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "=";
-                        tkn.priority = 0;
-                        tkn.assoc = OperatorAssociativity.RIGHT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("=", OperatorAssociativity.RIGHT, 0, 2);
                         break;
                     }
                 case "+":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "+";
-                        tkn.priority = 3;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("+", OperatorAssociativity.LEFT, 3, 2);
                         break;
                     }
                 case "-":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "-";
-                        tkn.priority = 3;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("-", OperatorAssociativity.LEFT, 3, 2);
                         break;
                     }
                 case "*":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "*";
-                        tkn.priority = 4;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("*", OperatorAssociativity.LEFT, 4, 2);
                         break;
                     }
                 case "/":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "/";
-                        tkn.priority = 4;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("/", OperatorAssociativity.LEFT, 4, 2);
                         break;
                     }
                 case "%":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "%";
-                        tkn.priority = 4;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("%", OperatorAssociativity.LEFT, 4, 2);
                         break;
                     }
                 case "^":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "^";
-                        tkn.priority = 5;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("^", OperatorAssociativity.LEFT, 5, 2);
                         break;
                     }
                 case ".^":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = ".^";
-                        tkn.priority = 5;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues(".^", OperatorAssociativity.LEFT, 5, 2);
                         break;
                     }
                 case ".*":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = ".*";
-                        tkn.priority = 5;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues(".*", OperatorAssociativity.LEFT, 5, 2);
                         break;
                     }
                 case "./":
                     {
-                        tkn.tknType = TokenType.OPERATOR;
-                        tkn.symbol = "./";
-                        tkn.priority = 6;
-                        tkn.assoc = OperatorAssociativity.LEFT;
-                        tkn.paramCount = 2;
+                        tkn.SetValues("./", OperatorAssociativity.LEFT, 6, 2);
                         break;
                     }
                 default:
@@ -332,11 +289,78 @@ namespace MatrisAritmetik.Services
         }
 
         /// <summary>
+        /// Set given expression <paramref name="exp"/> as an assignment expression
+        /// </summary>
+        /// <param name="exp">Expression to use</param>
+        /// <returns>Properly split valid assignment expression</returns>
+        private string SetExpressionForAssignOP(string exp)
+        {
+            string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
+            if (expsplits.Length == 0)
+            {
+                throw new Exception(CompilerMessage.EQ_FORMAT);
+            }
+            else if (expsplits.Length != 2)
+            {
+                throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
+            }
+            else
+            {
+                expsplits[0] = expsplits[0].Trim();
+                expsplits[1] = expsplits[1].Trim();
+                if (string.IsNullOrEmpty(expsplits[0]) || string.IsNullOrEmpty(expsplits[1]))
+                {
+                    throw new Exception(CompilerMessage.EQ_FORMAT);
+                }
+
+                string symbol = expsplits[0][^1].ToString();
+                string[] symbols = new string[] { "+", "-", "*", "/", "^", "%" };
+
+                StringBuilder res = new StringBuilder();
+
+                if (Array.IndexOf(symbols, symbol) == -1)
+                {
+                    if (!Validations.ValidMatrixName(expsplits[0]))
+                    {
+                        throw new Exception(CompilerMessage.MAT_NAME_INVALID);
+                    }
+                    res.Append(expsplits[0])
+                       .Append(' ')
+                       .Append('=')
+                       .Append(' ')
+                       .Append(expsplits[1]);
+
+                    return res.ToString();   // Matris_name = (some_expression)
+                }
+                else
+                {
+                    expsplits[0] = expsplits[0][0..^1].Trim();
+                    res.Append(expsplits[0])
+                       .Append(' ')
+                       .Append('=')
+                       .Append(' ')
+                       .Append(expsplits[0])
+                       .Append(' ')
+                       .Append(symbol)
+                       .Append(' ')
+                       .Append('(')
+                       .Append(' ')
+                       .Append(expsplits[1])
+                       .Append(' ')
+                       .Append(')');
+
+                    return res.ToString();   // Matris_name = (some_expression)
+                }
+
+            }
+        }
+
+        /// <summary>
         /// Split a string expression to tokenizable elements
         /// </summary>
         /// <param name="exp">String expression to split</param>
         /// <returns>Array of tokenizable string expressions</returns>
-        private static string[] TokenizeSplit(string exp)
+        private string[] TokenizeSplit(string exp)
         {
             exp = exp
                 .Replace("+", " + ")
@@ -366,75 +390,7 @@ namespace MatrisAritmetik.Services
 
             if (exp.Contains("=")) // Matris_name = some_expression
             {
-                string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
-                if (expsplits.Length == 0)
-                {
-                    throw new Exception(CompilerMessage.EQ_FORMAT);
-                }
-                else if (expsplits.Length != 2)
-                {
-                    throw new Exception(CompilerMessage.EQ_MULTIPLE_USE);
-                }
-                else
-                {
-                    expsplits[0] = expsplits[0].Trim();
-                    expsplits[1] = expsplits[1].Trim();
-                    if (string.IsNullOrEmpty(expsplits[0]) || string.IsNullOrEmpty(expsplits[1]))
-                    {
-                        throw new Exception(CompilerMessage.EQ_FORMAT);
-                    }
-
-                    string newPart = "";
-                    switch (expsplits[0][^1].ToString())
-                    {
-                        case "+":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " + ";
-                                break;
-                            }
-                        case "-":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " - ";
-                                break;
-                            }
-                        case "*":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " * ";
-                                break;
-                            }
-                        case "/":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " / ";
-                                break;
-                            }
-                        case "^":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " ^ ";
-                                break;
-                            }
-                        case "%":
-                            {
-                                expsplits[0] = expsplits[0][0..^1].Trim();
-                                newPart = expsplits[0] + " % ";
-                                break;
-                            }
-                        default:
-                            {
-                                if (!Validations.ValidMatrixName(expsplits[0]))
-                                {
-                                    throw new Exception(CompilerMessage.MAT_NAME_INVALID);
-                                }
-                                break;
-                            }
-                    }
-
-                    exp = $"{expsplits[0]} = {newPart}( {expsplits[1]} )";   // Matris_name = (some_expression)
-                }
+                exp = SetExpressionForAssignOP(exp);
             }
             while (exp.Contains("  "))
             {
@@ -449,7 +405,7 @@ namespace MatrisAritmetik.Services
         /// <param name="name">Parameter name</param>
         /// <param name="paramarr">Parameter array</param>
         /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
-        private static int GetParamIndex(string name,
+        private int GetParamIndex(string name,
                                          ParameterInfo[] paramarr)
         {
             int ind = 0;
@@ -462,33 +418,6 @@ namespace MatrisAritmetik.Services
                 ind++;
             }
             return (ind < paramarr.Length) ? ind : -1;
-        }
-
-        /// <summary>
-        /// Check if given token <paramref name="tkn"/> is a <see cref="MatrisBase{object}"/>
-        /// </summary>
-        /// <param name="tkn">Token to check</param>
-        /// <param name="matDict">Matrix dictionary to reference to</param>
-        /// <returns>True if given token holds a <see cref="MatrisBase{object}"/></returns>
-        private static bool CheckMatrixAndUpdateVal(Token tkn,
-                                                    Dictionary<string, MatrisBase<dynamic>> matDict)
-        {
-            switch (tkn.tknType)
-            {
-                case TokenType.MATRIS:
-                    if (matDict.ContainsKey(tkn.name))
-                    {
-                        tkn.val = matDict[tkn.name];
-                    }
-                    else if (!(tkn.val is MatrisBase<object>))
-                    {
-                        throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(tkn.name));
-                    }
-
-                    return true;
-                default:
-                    return false;
-            }
         }
 
         /// <summary>
@@ -584,7 +513,7 @@ namespace MatrisAritmetik.Services
         /// <param name="argIndex">Index of the argument</param>
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>Argument at index <paramref name="argIndex"/> after changes applied</returns>
-        private static object ApplyArgumentValue(Token op,
+        private object ApplyArgumentValue(Token op,
                                                  Token operand,
                                                  object[] arguments,
                                                  int argIndex,
@@ -637,7 +566,7 @@ namespace MatrisAritmetik.Services
         /// <param name="param_dict">Parameter dictionary to keep track of parameters</param>
         /// <param name="matDict">Matrix dictionary to reference to if needed</param>
         /// <returns>Parsed <paramref name="arguments"/></returns>
-        private static object[] CheckAndParseArgumentsAndHints(Token op,
+        private object[] CheckAndParseArgumentsAndHints(Token op,
                                                                List<Token> operands,
                                                                object[] arguments,
                                                                ParameterInfo[] paraminfo,
@@ -701,7 +630,7 @@ namespace MatrisAritmetik.Services
         /// <param name="operandIndex">Index of operand to use</param>
         /// <param name="argumentIndex">Index of argument to parse</param>
         /// <returns> Argument at index <paramref name="argumentIndex"/> after parsed as parameter's type</returns>
-        private static object ParseTokenValAsParameterType(Token op,
+        private object ParseTokenValAsParameterType(Token op,
                                                            List<Token> operands,
                                                            object[] arguments,
                                                            int operandIndex,
@@ -754,7 +683,7 @@ namespace MatrisAritmetik.Services
                             arguments[argumentIndex] = (MatrisBase<dynamic>)arguments[argumentIndex];
                             break;
                         }
-                    case "dynamic":
+                    case "dinamik":
                         {
                             arguments[argumentIndex] = (dynamic)arguments[argumentIndex];
                             break;
@@ -774,93 +703,13 @@ namespace MatrisAritmetik.Services
         }
 
         /// <summary>
-        /// Parse default values from <paramref name="parameterInfo"/> into given "null" values in <paramref name="arguments"/> 
-        /// </summary>
-        /// <param name="parameterCount">How many parameters to iterate over</param>
-        /// <param name="arguments">Arguments array</param>
-        /// <param name="parameterInfo">Parameter information array</param>
-        /// <returns><paramref name="arguments"/> where "null" values are parsed as default values picked from <paramref name="parameterInfo"/></returns>
-        private static object[] ParseDefaultValues(int parameterCount,
-                                                   object[] arguments,
-                                                   ParameterInfo[] parameterInfo)
-        {
-            for (int k = 0; k < parameterCount; k++)
-            {
-                if (arguments[k] != null)    // Skip already parsed values
-                {
-                    continue;
-                }
-                else if (parameterInfo[k].DefaultValue != null) // default value wasn't null
-                {
-                    switch (parameterInfo[k].DefaultValue.GetType().ToString())
-                    {
-                        case "System.DBNull":
-                            {
-                                throw new Exception(CompilerMessage.MISSING_ARGUMENT(parameterInfo[k].Name));
-                            }
-                        case "System.Int32":
-                            {
-                                arguments[k] = Convert.ToInt32(parameterInfo[k].DefaultValue, CultureInfo.CurrentCulture);
-                                break;
-                            }
-                        case "System.Single":
-                            {
-                                arguments[k] = Convert.ToSingle(parameterInfo[k].DefaultValue, CultureInfo.CurrentCulture);
-                                break;
-                            }
-                        case "System.Double":
-                            {
-                                arguments[k] = Convert.ToDouble(parameterInfo[k].DefaultValue, CultureInfo.CurrentCulture);
-                                break;
-                            }
-                        default:
-                            throw new Exception(CompilerMessage.PARAM_DEFAULT_PARSE_ERROR(parameterInfo[k].Name, parameterInfo[k].ParameterType.Name));
-                    }
-                }
-            }
-
-            return arguments;
-        }
-
-        /// <summary>
-        /// Custom power operator
-        /// </summary>
-        /// <param name="a">base value</param>
-        /// <param name="b">exponential value</param>
-        /// <returns>a^b</returns>
-        private static double PowerMethod(double a, double b)
-        {
-            double result;
-            if (b == 0.0)
-            {
-                if (a == 0.0) // 0^0
-                {
-                    result = double.NaN;
-                }
-                else
-                {
-                    result = 1.0;    // x^0
-                }
-            }
-            else if (b < 0.0)
-            {
-                result = a == 0.0 ? double.PositiveInfinity : Math.Pow(a, b);
-            }
-            else
-            {
-                result = a == 0.0 ? 0.0 : Math.Pow(a, b);
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Evaluate expressino where <paramref name="op"/> is <see cref="TokenType.OPERATOR"/> type
         /// </summary>
         /// <param name="op">Operator token, type <see cref="TokenType.OPERATOR"/></param>
         /// <param name="operands">List of operands</param>
         /// <param name="matDict">Matrix dictionary to refer to if necessary</param>
         /// <returns>Operands list after evaluation</returns>
-        private static List<Token> EvalWithSymbolOperator(Token op,
+        private List<Token> EvalWithSymbolOperator(Token op,
                                                           List<Token> operands,
                                                           Dictionary<string, MatrisBase<dynamic>> matDict)
         {
@@ -868,260 +717,71 @@ namespace MatrisAritmetik.Services
             {
                 case "+":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-                        CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                        operands[0].val = operands[1].val + operands[0].val;
-                        operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
-
+                        CompilerUtils.OPBasic("+", operands[1], operands[0], matDict);
                         break;
                     }
                 case "-":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-                        CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                        operands[0].val = operands[1].val - operands[0].val;
-                        operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
-
+                        CompilerUtils.OPBasic("-", operands[1], operands[0], matDict);
                         break;
                     }
                 case "*":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-                        CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                        operands[0].val *= operands[1].val;
-                        operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
-
+                        CompilerUtils.OPBasic("*", operands[1], operands[0], matDict);
                         break;
                     }
                 case "/":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-                        CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                        operands[0].val = operands[1].val / operands[0].val;
-                        operands[0].tknType = operands[1].tknType == TokenType.MATRIS ? TokenType.MATRIS : operands[0].tknType;
+                        CompilerUtils.OPBasic("/", operands[1], operands[0], matDict);
                         break;
                     }
                 case "%":
                     {
-                        if (operands[0].tknType == TokenType.NUMBER) // dynamic % number
-                        {
-                            CheckMatrixAndUpdateVal(operands[1], matDict);
-
-                            operands[0].val = operands[1].val % (dynamic)(int)operands[0].val;
-                            operands[0].tknType = operands[1].tknType;
-                        }
-                        else if (CheckMatrixAndUpdateVal(operands[0], matDict)) // matris % matris
-                        {
-                            // base operands[0]
-                            // term to get mod of operands[1]should be matrix
-                            operands[0].val = CheckMatrixAndUpdateVal(operands[1], matDict) || ((MatrisBase<dynamic>)operands[0].val).IsScalar()
-                                ? operands[1].val % operands[0].val
-                                : throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.MODULO_FORMATS);
-                        }
-
+                        CompilerUtils.OPModulo(operands[1], operands[0], matDict);
                         break;
                     }
                 case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
                     {
-                        if (operands[0].tknType != TokenType.NUMBER)
-                        {
-                            operands[0].val = !CheckMatrixAndUpdateVal(operands[0], matDict)
-                                              ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
-                                              : !((MatrisBase<dynamic>)operands[0].val).IsScalar()
-                                                  ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
-                                                  : ((MatrisBase<dynamic>)operands[0].val)[0, 0];
-                        }
-
-                        if (CheckMatrixAndUpdateVal(operands[1], matDict))  // base matrix
-                        {
-                            operands[0].val = ((MatrisBase<object>)operands[1].val).Power((dynamic)operands[0].val);
-                            operands[0].tknType = TokenType.MATRIS;
-                        }
-                        else // base is number
-                        {
-                            operands[0].val = PowerMethod(double.Parse(operands[1].val.ToString()), double.Parse(operands[0].val.ToString()));
-                            operands[0].tknType = TokenType.NUMBER;
-                        }
-
+                        CompilerUtils.OPExpo(operands[1], operands[0], matDict);
                         break;
                     }
                 case ".^":      // A.^3 == A@A@A  , A kare matris
                     {
-                        if (operands[0].tknType != TokenType.NUMBER)
-                        {
-                            operands[0].val = !CheckMatrixAndUpdateVal(operands[0], matDict)
-                                              ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
-                                              : !((MatrisBase<dynamic>)operands[0].val).IsScalar()
-                                                  ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
-                                                  : float.Parse(((MatrisBase<object>)operands[0].val)[0, 0].ToString());
-
-                            if (!(operands[0].val is int) && !(operands[0].val is float) && !(operands[0].val is double))
-                            {
-                                throw new Exception(CompilerMessage.EXPO_NOT_SCALAR);
-                            }
-                        }
-
-                        if (operands[0].val < 0)
-                        {
-                            throw new Exception(CompilerMessage.SPECOP_MATPOWER_EXPO);
-                        }
-                        else if (operands[0].val == 0)
-                        {
-                            operands[0].val = 1;
-                            operands[0].tknType = TokenType.NUMBER;
-                            break;
-                        }
-
-                        if (CheckMatrixAndUpdateVal(operands[1], matDict))
-                        {
-                            if (!operands[1].val.IsSquare())
-                            {
-                                throw new Exception(CompilerMessage.SPECOP_MATPOWER_SQUARE);
-                            }
-
-                            MatrisBase<dynamic> res = operands[1].val.Copy();
-                            using MatrisBase<dynamic> mat = res.Copy();
-
-                            IMatrisArithmeticService<dynamic> matservice = new MatrisArithmeticService<dynamic>();
-
-                            for (int i = 1; i < operands[0].val; i++)
-                            {
-                                res = matservice.MatrisMul(res, mat);
-                            }
-
-                            operands[0].val = res;
-                            operands[0].tknType = TokenType.MATRIS;
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
-                        }
-
+                        CompilerUtils.OPMatMulByExpo(operands[1], operands[0], matDict);
                         break;
                     }
                 case ".*":
                     {
-                        MatrisBase<dynamic> mat1, mat2;
-                        mat1 = CheckMatrixAndUpdateVal(operands[0], matDict)
-                            ? (MatrisBase<dynamic>)operands[0].val
-                            : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-
-                        mat2 = CheckMatrixAndUpdateVal(operands[1], matDict)
-                            ? (MatrisBase<dynamic>)operands[1].val
-                            : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
-
-                        operands[0].val = ((IMatrisArithmeticService<dynamic>)new MatrisArithmeticService<object>()).MatrisMul(mat2, mat1);
-
+                        CompilerUtils.OPMatMul(operands[1], operands[0], matDict);
                         break;
                     }
                 case "./":
                     {
-                        MatrisBase<dynamic> mat1, mat2;
-                        mat1 = CheckMatrixAndUpdateVal(operands[0], matDict)
-                            ? (MatrisBase<dynamic>)operands[0].val
-                            : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-
-                        mat2 = CheckMatrixAndUpdateVal(operands[1], matDict)
-                            ? (MatrisBase<dynamic>)operands[1].val
-                            : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
-
-                        IMatrisArithmeticService<object> matservice = new MatrisArithmeticService<object>();
-
-                        operands[0].val = matservice.MatrisMul(mat2, matservice.Inverse(mat1));
-
+                        CompilerUtils.OPMatMulWithInverse(operands[1], operands[0], matDict);
                         break;
                     }
                 case "u-":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-
+                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict);
                         operands[0].val = -operands[0].val;
 
                         break;
                     }
                 case "u+":
                     {
-                        CheckMatrixAndUpdateVal(operands[0], matDict);
-
+                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict);
                         break;
                     }
                 case "=":
                     {
-                        if (operands[1].tknType != TokenType.MATRIS) // LHS should just be a valid name for a matrix
-                        {
-                            throw new Exception(CompilerMessage.EQ_FORMAT);
-                        }
-                        else
-                        {
-                            switch (operands[0].tknType)
-                            {
-                                case TokenType.NUMBER:  // RHS is scalar
-                                    {
-                                        operands[0].val = new MatrisBase<dynamic>(1, 1, operands[0].val);
-                                        break;
-                                    }
-                                case TokenType.MATRIS:   // RHS is possibly a matrix
-                                    {
-                                        operands[0].val = matDict.ContainsKey(operands[0].name)
-                                            ? (dynamic)matDict[operands[0].name]
-                                            : operands[0].val is MatrisBase<object>
-                                                ? operands[0].val
-                                                : throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(operands[0].name));
-                                        break;
-                                    }
-                                default:
-                                    {
-                                        if (!(operands[0].val is MatrisBase<object>))  // If RHS is not even a matrix, throw 
-                                        {
-                                            throw new Exception(CompilerMessage.EQ_FAILED);
-                                        }
-                                        break;
-                                    }
-                            }
-
-                            // Update the matrix table accordingly
-                            if (matDict.ContainsKey(operands[1].name))
-                            {
-                                matDict[operands[1].name] = operands[0].val;
-                            }
-                            else if (Validations.ValidMatrixName(operands[1].name))
-                            {
-                                if (matDict.Count < (int)MatrisLimits.forMatrisCount)
-                                {
-                                    matDict.Add(operands[1].name, operands[0].val);
-                                }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.MAT_LIMIT);
-                                }
-                            }
-                            else // LHS was invalid
-                            {
-                                if (string.IsNullOrEmpty(operands[1].name))
-                                {
-                                    throw new Exception(CompilerMessage.EQ_FORMAT);
-                                }
-                                else
-                                {
-                                    throw new Exception(CompilerMessage.MAT_NAME_INVALID);
-                                }
-                            }
-                        }
+                        CompilerUtils.OPAssignment(operands[1], operands[0], matDict);
                         break;
                     }
                 case ":":
                     {
                         operands[0].info = Validations.ValidMatrixName(operands[1].name)
-                            ? operands[1].name
-                            : throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
+                                         ? operands[1].name
+                                         : throw new Exception(CompilerMessage.PARAMETER_HINT_INVALID(operands[1].name));
                         break;
                     }
                 default:
@@ -1199,7 +859,7 @@ namespace MatrisAritmetik.Services
                         param_arg = CheckAndParseArgumentsAndHints(op, operands, param_arg, paraminfo, matDict);
 
                         // Replace nulls with default values
-                        param_arg = ParseDefaultValues(op.paramCount, param_arg, paraminfo);
+                        param_arg = CompilerUtils.ParseDefaultValues(op.paramCount, param_arg, paraminfo);
 
                         // Invoke method found with given arguments
                         return InvokeMethods(op, operands, serviceObject, method, param_arg, matDict);
@@ -1218,7 +878,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to use as help reference</param>
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="cmd"/> updated with helpful message</returns>
-        private static Command SetDocsCommand(Command cmd,
+        private Command SetDocsCommand(Command cmd,
                                               Token tkn,
                                               Dictionary<string, MatrisBase<dynamic>> matdict)
         {
@@ -1307,7 +967,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to use</param>
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="tkn"/> with updated <see cref="Token.val"/></returns>
-        private static void SetDocsAsValue(Token tkn,
+        private void SetDocsAsValue(Token tkn,
                                            Dictionary<string, MatrisBase<dynamic>> matdict)
         {
             switch (tkn.info)
@@ -1374,7 +1034,7 @@ namespace MatrisAritmetik.Services
         /// <returns>Token with updated docs</returns>
         private Token HelpInternal(Token term, Dictionary<string, MatrisBase<dynamic>> matDict)
         {
-            if (term is null)
+            if (term is null || term.tknType == TokenType.NULL)
             {
                 return new Token() { tknType = TokenType.DOCS, name = "info", val = CompilerMessage.COMPILER_HELP };
             }
@@ -1384,6 +1044,199 @@ namespace MatrisAritmetik.Services
             SetDocsAsValue(term, matDict);
 
             return term;
+        }
+
+        /// <summary>
+        /// Handle single token commands, update <paramref name="cmd"/> command accordingly
+        /// </summary>
+        /// <param name="cmd">Command to update</param>
+        /// <param name="tkn">Token in the command to update</param>
+        /// <param name="matdict">Matrix dictionary to refer to</param>
+        /// <returns>Commands <see cref="CommandState"/> after evaluation or '<see cref="null"/>' if nothing worked</returns>
+        private CommandState? SingleTermCommand(Command cmd,
+                                                Token tkn,
+                                                Dictionary<string, MatrisBase<dynamic>> matdict)
+        {
+            if (Validations.ValidMatrixName(tkn.name) && tkn.tknType == TokenType.MATRIS)
+            {
+                if (matdict != null)
+                {
+                    if (matdict.ContainsKey(tkn.name))
+                    {
+                        cmd.STATE = CommandState.SUCCESS;
+                        cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_MAT);
+                        cmd.Output = matdict[tkn.name].ToString();
+                    }
+                    else // Return null if no matrix found with given name
+                    {
+                        cmd.STATE = CommandState.SUCCESS;
+                        cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
+                        cmd.Output = "null";
+                    }
+                }
+                else
+                {
+                    cmd.STATE = CommandState.SUCCESS;
+                    cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
+                    cmd.Output = "null";
+                }
+                return CommandState.SUCCESS;
+            }
+            else
+            {
+                switch (tkn.tknType)
+                {
+                    case TokenType.NUMBER:
+                        {
+                            cmd.STATE = CommandState.SUCCESS;
+                            cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NUM);
+                            cmd.Output = tkn.val.ToString();
+                            return CommandState.SUCCESS;
+                        }
+                    case TokenType.NULL:
+                        {
+                            cmd.STATE = CommandState.SUCCESS;
+                            cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
+                            cmd.Output = "null";
+                            return CommandState.SUCCESS;
+                        }
+                    case TokenType.DOCS:
+                        {
+                            cmd = SetDocsCommand(cmd, tkn, matdict
+                                                               ?? new Dictionary<string, MatrisBase<dynamic>>());
+                            return cmd.STATE;
+                        }
+                    case TokenType.OPERATOR:
+                        {
+                            tkn.symbol = (tkn.symbol == "u+" || tkn.symbol == "u-") ? tkn.symbol[1].ToString() : tkn.symbol;
+                            cmd.STATE = CommandState.ERROR;
+                            cmd.SetStateMessage(CompilerMessage.OP_CANT_BE_ALONE(tkn.symbol));
+                            return CommandState.ERROR;
+                        }
+                    case TokenType.FUNCTION:
+                        {
+                            using CommandInfo cinfo = TryParseBuiltFunc(tkn.name);
+                            if (cinfo.Required_params == 0)
+                            {
+                                break;
+                            }
+
+                            cmd.STATE = CommandState.WARNING;
+                            cmd.SetStateMessage(CompilerMessage.FUNC_REQUIRES_ARGS(tkn.name, tkn.paramCount));
+                            return CommandState.WARNING;
+                        }
+                    default:
+                        {
+                            cmd.STATE = CommandState.ERROR;
+                            cmd.SetStateMessage(tkn.tknType.ToString() + " tipi terim tek başına kullanılamaz ");
+                            return CommandState.ERROR;
+                        }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Iterate through given <paramref name="tkns"/> and evaluate each of them, update <paramref name="operandStack"/> accordingly
+        /// </summary>
+        /// <param name="tkns">List of tokens to evaluate</param>
+        /// <param name="operandStack">Operand stack to push arguments and results to</param>
+        /// <param name="matdict">Matrix dictionary to refer to</param>
+        private void EvaluateTokens(List<Token> tkns,
+                                    Stack<Token> operandStack,
+                                    Dictionary<string, MatrisBase<dynamic>> matdict)
+        {
+            int ind = 0;
+            while (ind < tkns.Count)
+            {
+                Token tkn = tkns[ind];
+                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.NULL)
+                {
+                    operandStack.Push(tkn);
+                }
+                else
+                {
+                    List<Token> operands = new List<Token>();
+
+                    if (tkn.tknType == TokenType.FUNCTION)
+                    {
+                        if (operandStack.Count < tkn.argCount)
+                        {
+                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
+                        }
+
+                        for (int i = 0; i < tkn.argCount; i++)
+                        {
+                            operands.Add(operandStack.Pop());
+                        }
+                    }
+                    else
+                    {
+                        if (operandStack.Count < tkn.paramCount)
+                        {
+                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
+                        }
+
+                        for (int i = 0; i < tkn.paramCount; i++)
+                        {
+                            operands.Add(operandStack.Pop());
+                        }
+                    }
+
+                    operandStack.Push(EvalOperator(tkn, operands, matdict));
+
+                }
+                ind++;
+            }
+        }
+
+        /// <summary>
+        /// Evaluate given IDLE command
+        /// </summary>
+        /// <param name="cmd">Command to evaluate</param>
+        /// <param name="tkns">Tokens of the command</param>
+        /// <param name="matdict">Matrix dictionary to refer to</param>
+        private void EvaluateIdleCommand(Command cmd,
+                                         List<Token> tkns,
+                                         Dictionary<string, MatrisBase<dynamic>> matdict)
+        {
+            Stack<Token> operandStack = new Stack<Token>();
+            try
+            {
+                EvaluateTokens(tkns, operandStack, matdict);
+
+                if (operandStack.Count == 1)
+                {
+                    if (operandStack.Peek().tknType == TokenType.VOID)
+                    {
+                        cmd.Output = CommandStateMessage.SUCCESS_RET_NULL;
+                        cmd.STATE = CommandState.SUCCESS;
+                    }
+                    else
+                    {
+                        cmd.Output = operandStack.Pop().val.ToString();
+                        cmd.STATE = CommandState.SUCCESS;
+                        cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
+                    }
+                }
+                else if (operandStack.Count == 0)
+                {
+                    cmd.STATE = CommandState.ERROR;
+
+                    cmd.SetStateMessage(tkns.Count == 0 ? CompilerMessage.OP_INVALID(cmd.GetTermsToEvaluate()[0]) : CompilerMessage.ARG_COUNT_ERROR);
+                }
+                else
+                {
+                    cmd.STATE = CommandState.ERROR;
+                    cmd.SetStateMessage(CompilerMessage.CMD_FORMAT_ERROR);
+                }
+            }
+            catch (Exception err)
+            {
+                cmd.STATE = CommandState.ERROR;
+                cmd.SetStateMessage(err.Message);
+            }
         }
 
         #endregion
@@ -1701,174 +1554,27 @@ namespace MatrisAritmetik.Services
                 return CommandState.ERROR;
             }
 
-            List<Token> tkns = cmd.GetTokens();
-
             switch (cmd.STATE)
             {
                 // Komut ilk defa işlenmekte
                 case CommandState.IDLE:
                     {
                         cmd.STATE = CommandState.UNAVAILABLE;
+                        List<Token> tkns = cmd.GetTokens();
 
-                        // Tek terim verildi
+                        // Single token
                         if (tkns.Count == 1)
                         {
-                            if (Validations.ValidMatrixName(tkns[0].name) && tkns[0].tknType == TokenType.MATRIS)
-                            {
-                                if (matdict != null)
-                                {
-                                    if (matdict.ContainsKey(tkns[0].name))
-                                    {
-                                        cmd.STATE = CommandState.SUCCESS;
-                                        cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_MAT);
-                                        cmd.Output = matdict[tkns[0].name].ToString();
-                                    }
-                                    else // Return null if no matrix found with given name
-                                    {
-                                        cmd.STATE = CommandState.SUCCESS;
-                                        cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
-                                        cmd.Output = "null";
-                                    }
-                                }
-                                else
-                                {
-                                    cmd.STATE = CommandState.SUCCESS;
-                                    cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
-                                    cmd.Output = "null";
-                                }
-                                return CommandState.SUCCESS;
-                            }
-                            else
-                            {
-                                switch (tkns[0].tknType)
-                                {
-                                    case TokenType.NUMBER:
-                                        {
-                                            cmd.STATE = CommandState.SUCCESS;
-                                            cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NUM);
-                                            cmd.Output = tkns[0].val.ToString();
-                                            return CommandState.SUCCESS;
-                                        }
-                                    case TokenType.NULL:
-                                        {
-                                            cmd.STATE = CommandState.SUCCESS;
-                                            cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
-                                            cmd.Output = "null";
-                                            return CommandState.SUCCESS;
-                                        }
-                                    case TokenType.DOCS:
-                                        {
-                                            cmd = SetDocsCommand(cmd, tkns[0], matdict
-                                                                               ?? new Dictionary<string, MatrisBase<dynamic>>());
-                                            return cmd.STATE;
-                                        }
-                                    case TokenType.OPERATOR:
-                                        {
-                                            tkns[0].symbol = (tkns[0].symbol == "u+" || tkns[0].symbol == "u-") ? tkns[0].symbol[1].ToString() : tkns[0].symbol;
-                                            cmd.STATE = CommandState.ERROR;
-                                            cmd.SetStateMessage(CompilerMessage.OP_CANT_BE_ALONE(tkns[0].symbol));
-                                            return CommandState.ERROR;
-                                        }
-                                    case TokenType.FUNCTION:
-                                        {
-                                            using CommandInfo cinfo = TryParseBuiltFunc(tkns[0].name);
-                                            if (cinfo.Required_params == 0)
-                                            {
-                                                break;
-                                            }
+                            CommandState state = SingleTermCommand(cmd, tkns[0], matdict) ?? CommandState.UNAVAILABLE;
 
-                                            cmd.STATE = CommandState.WARNING;
-                                            cmd.SetStateMessage(CompilerMessage.FUNC_REQUIRES_ARGS(tkns[0].name, tkns[0].paramCount));
-                                            return CommandState.WARNING;
-                                        }
-                                    default:
-                                        {
-                                            cmd.STATE = CommandState.ERROR;
-                                            cmd.SetStateMessage(tkns[0].tknType.ToString() + " tipi terim tek başına kullanılamaz ");
-                                            return CommandState.ERROR;
-                                        }
-                                }
+                            if (state != CommandState.UNAVAILABLE) // Check if token needs further evaluation, if not return
+                            {
+                                return state;
                             }
                         }
 
-                        // More than a single token
-                        int ind = 0;
-                        Stack<Token> operandStack = new Stack<Token>();
-                        try
-                        {
-                            while (ind < tkns.Count)
-                            {
-                                Token tkn = tkns[ind];
-                                if (tkn.tknType == TokenType.NUMBER || tkn.tknType == TokenType.MATRIS || tkn.tknType == TokenType.NULL)
-                                {
-                                    operandStack.Push(tkn);
-                                }
-                                else
-                                {
-                                    List<Token> operands = new List<Token>();
-
-                                    if (tkn.tknType == TokenType.FUNCTION)
-                                    {
-                                        if (operandStack.Count < tkn.argCount)
-                                        {
-                                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
-                                        }
-
-                                        for (int i = 0; i < tkn.argCount; i++)
-                                        {
-                                            operands.Add(operandStack.Pop());
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (operandStack.Count < tkn.paramCount)
-                                        {
-                                            throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
-                                        }
-
-                                        for (int i = 0; i < tkn.paramCount; i++)
-                                        {
-                                            operands.Add(operandStack.Pop());
-                                        }
-                                    }
-
-                                    operandStack.Push(EvalOperator(tkn, operands, matdict));
-
-                                }
-                                ind++;
-                            }
-
-                            if (operandStack.Count == 1)
-                            {
-                                if (operandStack.Peek().tknType == TokenType.VOID)
-                                {
-                                    cmd.Output = CommandStateMessage.SUCCESS_RET_NULL;
-                                    cmd.STATE = CommandState.SUCCESS;
-                                }
-                                else
-                                {
-                                    cmd.Output = operandStack.Pop().val.ToString();
-                                    cmd.STATE = CommandState.SUCCESS;
-                                    cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_NULL);
-                                }
-                            }
-                            else if (operandStack.Count == 0)
-                            {
-                                cmd.STATE = CommandState.ERROR;
-
-                                cmd.SetStateMessage(tkns.Count == 0 ? CompilerMessage.OP_INVALID(cmd.GetTermsToEvaluate()[0]) : CompilerMessage.ARG_COUNT_ERROR);
-                            }
-                            else
-                            {
-                                cmd.STATE = CommandState.ERROR;
-                                cmd.SetStateMessage(CompilerMessage.CMD_FORMAT_ERROR);
-                            }
-                        }
-                        catch (Exception err)
-                        {
-                            cmd.STATE = CommandState.ERROR;
-                            cmd.SetStateMessage(err.Message);
-                        }
+                        // More than a single token or single token needs evaluation
+                        EvaluateIdleCommand(cmd, tkns, matdict);
 
                         break;
                     }
@@ -1887,6 +1593,7 @@ namespace MatrisAritmetik.Services
 
             }
 
+            // Clean up command history
             if (CleanUp_state && cmd.STATE == CommandState.SUCCESS && cmdHistory != null)
             {
                 foreach (Command c in cmdHistory)

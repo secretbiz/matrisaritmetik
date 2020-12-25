@@ -9,60 +9,6 @@ namespace MatrisAritmetik.Services
 {
     public class MatrisArithmeticService<T> : IMatrisArithmeticService<T>
     {
-        #region Private Generic Operations
-        /// <summary>
-        /// Parses <paramref name="a"/> and <paramref name="b"/> as <see cref="float"/>s and adds them together
-        /// </summary>
-        /// <param name="a">Any numerically parsable value</param>
-        /// <param name="b">Any numerically parsable value</param>
-        /// <returns>Result of <paramref name="a"/>+<paramref name="b"/> parsed as <see cref="float"/>s</returns>
-        private static T Add(T a, T b)
-        {
-            return (dynamic)(float.Parse(a.ToString()) + float.Parse(b.ToString()));
-        }
-
-        /// <summary>
-        /// Parses <paramref name="a"/> and <paramref name="b"/> as <see cref="float"/>s and multiplies them together
-        /// </summary>
-        /// <param name="a">Any numerically parsable value</param>
-        /// <param name="b">Any numerically parsable value</param>
-        /// <returns>Result of <paramref name="a"/>*<paramref name="b"/> parsed as <see cref="float"/>s</returns>
-        private static T Mul(T a, T b)
-        {
-            return (dynamic)(float.Parse(a.ToString()) * float.Parse(b.ToString()));
-        }
-
-        /// <summary>
-        /// Dot product of given lists <paramref name="a"/> and <paramref name="b"/>
-        /// <para>Values in <paramref name="a"/> and <paramref name="b"/> are parsed as <see cref="float"/>s during calculation</para>
-        /// </summary>
-        /// <param name="a">List of numerically parsable values</param>
-        /// <param name="b">List of numerically parsable values</param>
-        /// <returns>Dot product casted as <typeparamref name="T"/></returns>
-        private static T DotProduct(List<T> a,
-                             List<T> b)
-        {
-            if (a.Count != b.Count)
-            {
-                throw new Exception("Boyutlar hatalı");
-            }
-
-            if (a.Count == 0)
-            {
-                throw new Exception("Boyut sıfır");
-            }
-
-            T res = Mul(a[0], b[0]);
-
-            for (int i = 1; i < a.Count; i++)
-            {
-                res = Add(res, Mul(a[i], b[i]));
-            }
-
-            return res;
-        }
-        #endregion
-
         #region MatrisArithmeticService Methods
 
         public MatrisBase<T> Transpose(MatrisBase<T> A)
@@ -465,26 +411,10 @@ namespace MatrisAritmetik.Services
             return Transpose(new MatrisBase<T>(adj));
         }
 
-        public MatrisBase<T> MatrisMul(MatrisBase<T> A, MatrisBase<T> B)
+        public MatrisBase<T> MatrisMul(MatrisBase<T> A,
+                                       MatrisBase<T> B)
         {
-            if (A.Col != B.Row)
-            {
-                throw new Exception(CompilerMessage.MAT_MUL_BAD_SIZE);
-            }
-
-            List<List<T>> result = new List<List<T>>();
-
-            for (int i = 0; i < A.Row; i++)
-            {
-                result.Add(new List<T>());
-                for (int j = 0; j < B.Col; j++)
-                {
-                    result[i].Add(DotProduct(A.GetValues()[i], B.ColList(j, 0)));
-                }
-            }
-
-            return new MatrisBase<T>(result);
-
+            return CompilerUtils.MatrisMul(A, B);
         }
 
         public MatrisBase<T> Concatenate(MatrisBase<T> A,

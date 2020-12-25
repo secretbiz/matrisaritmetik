@@ -1,12 +1,54 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using MatrisAritmetik.Core.Models;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace MatrisAritmetik.Core
 {
+
+    /// <summary>
+    /// Override handling of doubles
+    /// </summary>
+    public class DoubleConverter : JsonConverter<double?>
+    {
+        public override double? ReadJson(JsonReader reader, Type objectType, [AllowNull] double? existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            string val = reader.ReadAsString();
+            return val switch
+            {
+                "NaN" => double.NaN,
+                "Infinity" => double.PositiveInfinity,
+                "-Infinity" => double.NegativeInfinity,
+                _ => double.TryParse(val, out double d) ? d : existingValue ?? double.NaN,
+            };
+        }
+
+        public override void WriteJson(JsonWriter writer, [AllowNull] double? value, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            if (double.IsNaN(value.Value))
+            {
+                writer.WriteValue("NaN");
+            }
+            else if (double.IsPositiveInfinity(value.Value))
+            {
+                writer.WriteValue("Infinity");
+            }
+            else if (double.IsNegativeInfinity(value.Value))
+            {
+                writer.WriteValue("-Infinity");
+            }
+            else
+            {
+                writer.WriteValue(value);
+            }
+        }
+    }
+
     /// <summary>
     /// Class for setting and getting session variables
     /// </summary>
@@ -24,9 +66,9 @@ namespace MatrisAritmetik.Core
                                   string key,
                                   T value)
         {
-            session.SetString(key, JsonSerializer.Serialize(value, typeof(T)));
             if (typeof(T) == typeof(Dictionary<string, List<List<dynamic>>>))
             {
+                session.SetString(key, JsonConvert.SerializeObject(value, new DoubleConverter()));
                 foreach (List<List<dynamic>> l in ((Dictionary<string, List<List<dynamic>>>)(dynamic)value).Values)
                 {
                     foreach (List<dynamic> k in l)
@@ -36,6 +78,10 @@ namespace MatrisAritmetik.Core
                     l.Clear();
                 }
                 ((Dictionary<string, List<List<dynamic>>>)(dynamic)value).Clear();
+            }
+            else
+            {
+                session.SetString(key, JsonConvert.SerializeObject(value));
             }
         }
 
@@ -203,7 +249,23 @@ namespace MatrisAritmetik.Core
             {
                 return new Dictionary<string, List<List<object>>>();
             }
-            return JsonSerializer.Deserialize<Dictionary<string, List<List<object>>>>(value);
+
+            Dictionary<string, List<List<object>>> dict = new Dictionary<string, List<List<object>>>();
+
+            foreach (KeyValuePair<string, List<List<double>>> pair in JsonConvert.DeserializeObject<Dictionary<string, List<List<double>>>>(value))
+            {
+                List<List<object>> objlis = new List<List<object>>();
+                for (int i = 0; i < pair.Value.Count; i++)
+                {
+                    objlis.Add(new List<object>());
+                    for (int j = 0; j < pair.Value[i].Count; j++)
+                    {
+                        objlis[i].Add(pair.Value[i][j]);
+                    }
+                }
+                dict.Add(pair.Key, objlis);
+            }
+            return dict;
         }
 
         /// <summary>

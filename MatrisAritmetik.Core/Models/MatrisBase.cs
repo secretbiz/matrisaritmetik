@@ -641,11 +641,11 @@ namespace MatrisAritmetik.Core.Models
         public string Details(string name = "")
         {
             string seed_str = CreatedFromSeed ? Seed.ToString() : "-";
-            return "Matris: " + name + ", Seed: " + seed_str +
-                ", Boyut: " + _row + "x" + _col +
-                "\nElementler:\n" +
-                ToString();
-
+            return $"Matris: {name}\n"
+                   + $"Seed: {seed_str}\n"
+                   + $"Boyut: {_row}x{_col}\n"
+                   + "Elementler:\n"
+                   + ToString();
         }
 
         /// <summary>
