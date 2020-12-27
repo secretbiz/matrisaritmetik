@@ -1,30 +1,27 @@
-﻿@model Dictionary<string, Core.Models.MatrisBase<dynamic>>
+﻿@model Dictionary<string, Core.Models.Dataframe>
 @{
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
-    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows);
+    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.DataframeLimits.forCols * 10, (int)MatrisAritmetik.Core.DataframeLimits.forRows) / 2;
     //var tkn = ViewData["tkn"];
-    var headclass = ViewData["headcls"]; //"matris_table matris_table_head" or "df_matris_table df_matris_table_head"
-    var headtdclass = ViewData["headtdcls"]; // "saved_mattable_title" or "df_saved_mattable_title"
-    var bodyclass = ViewData["bodyclass"]; // "matris_table" or "df_matris_table"
-    var headparentclass = bodyclass + "_head";
+
 }
 
 @if (Model != null)
 {
     @if (Model.Count() != 0)
     {
-        <thead id='@headparentclass' class='@headclass'>
+        <thead id="veri_table_head" class="veri_table veri_table_head">
             <tr>
-                <td colspan="18" class='@headtdclass'>Kayıtlı Matrisler (@(Model.Count()))</td>
+                <td colspan="18" class="df_saved_dftable_title">Kayıtlı Veri Tabloları (@(Model.Count()))</td>
             </tr>
         </thead>
     }
-    @* Ekli matrislerin satırları partial *@
     @foreach (var name in Model.Keys)
     {
-        <tbody id="matris_table" class='@bodyclass'>
-            <tr id='@ConcatName("matris_table_",name)'>
+        <tbody id="veri_table" class="veri_table">
+
+            <tr id='@ConcatName("veri_table_",name)'>
                 @*Name*@
                 <td colspan="3">
                     <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
@@ -40,7 +37,7 @@
 
                 @*Values*@
                 <td colspan="11">
-                    <div id='@ConcatName("matris_vals_",name)' style="max-height:200px;overflow-y:auto;">
+                    <div id='@ConcatName("veri_vals_",name)' style="max-height:200px;overflow-y:auto;">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                             <mrow>
                                 <mo> ( </mo>
@@ -83,13 +80,13 @@
                 @*Buttons*@
                 @*
                     <td colspan="2" align="center">
-                        <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrise özel işlemler")' />
+                        <input id='@ConcatName("veri_islem_",name)' type="button" class="button" value="İşlemler" name="veri_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verie özel işlemler")' />
                     </td>
                 *@
                 <td colspan="3" align="center">
                     <ul class="list-inline m-0">
                         <li class="list-inline-item">
-                            <button name="matris_table_delbutton" id='@ConcatName("matris_table_delbutton_",name)' class="btn btn-warning btn-sm matdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrisi sil")'>
+                            <button name="veri_table_delbutton" id='@ConcatName("veri_table_delbutton_",name)' class="btn btn-warning btn-sm dfdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verii sil")'>
                                 <i class="fa fa-trash"></i>
                             </button>
                         </li>
@@ -100,7 +97,7 @@
         </tbody>
     }
 
-    foreach (MatrisAritmetik.Core.Models.MatrisBase<dynamic> m in Model.Values)
+    foreach (MatrisAritmetik.Core.Models.Dataframe m in Model.Values)
     {
         m.Dispose();
     }

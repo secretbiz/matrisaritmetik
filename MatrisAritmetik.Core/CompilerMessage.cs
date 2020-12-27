@@ -18,6 +18,66 @@ namespace MatrisAritmetik.Core
         }
         #endregion
 
+        #region LIMITS
+        /// <summary>
+        /// Dataframe creation limit
+        /// </summary>
+        private static readonly string _dfLimit = "Veri tablosu limitine(=" + (int)DataframeLimits.forDataframeCount + ") ulaşıldı, atama işlemi yapmak için bir veri tablosunu siliniz! ";
+        public static string DF_LIMIT => _dfLimit;
+
+        /// <summary>
+        /// All limits summarized in a multi-line string 
+        /// </summary>
+        private static readonly string _dfLimitsHelp = ">>> Veri tablosu limitleri(maksimum):"
+                                                       + $"\n\tSatır:{(int)DataframeLimits.forRows}"
+                                                       + $"\n\tSütun:{(int)DataframeLimits.forCols}"
+                                                       + $"\n\tKaydedilebilir veri tablosu sayısı:{(int)DataframeLimits.forDataframeCount}"
+                                                       + $"\n\tVeri tablosu isim uzunluğu:{(int)DataframeLimits.forName}"
+                                                       + $"\n\tSatır etiket seviyesi:{(int)DataframeLimits.forRowLabelLevels}"
+                                                       + $"\n\tSütun etiket seviyesi:{(int)DataframeLimits.forColLabelLevels}";
+        public static string DF_LIMITS_HELP => _dfLimitsHelp;
+        #endregion
+
+        #region NAME
+        /// <summary>
+        /// A dataframe with given <paramref name="name"/> was successfully created and added to dictionary
+        /// </summary>
+        /// <param name="name">Dataframe names used</param>
+        /// <returns>Message telling dataframe was created</returns>
+        public static string SAVED_DF(string name)
+        {
+            return "'" + name + "' adlı bir veri tablosu oluşturuldu!";
+        }
+        /// <summary>
+        /// Given dataframe name already exists
+        /// </summary>
+        /// <param name="name">Name given</param>
+        /// <returns>Message telling name already exists</returns>
+        public static string DF_NAME_ALREADY_EXISTS(string name)
+        {
+            return name + " adlı bir veri tablosu zaten oluşturulmuş!";
+        }
+        /// <summary>
+        /// Dataframe with given name doesn't exist 
+        /// </summary>
+        /// <param name="name">Name given</param>
+        /// <returns>Message telling no dataframe with given name was found</returns>
+        public static string NOT_SAVED_DF(string name)
+        {
+            return "'" + name + "' adlı bir veri tablosu bulunamadı!";
+        }
+
+        /// <summary>
+        /// Dataframe named <paramref name="name"/> was successfully deleted from the dictionary
+        /// </summary>
+        /// <param name="name">Dataframe's name</param>
+        /// <returns>Message telling deletion was successful</returns>
+        public static string DELETED_DF(string name)
+        {
+            return "'" + name + "' adlı veri tablosu silindi!";
+        }
+        #endregion
+
         #endregion
 
         #region MATRIX MESSAGES
@@ -46,10 +106,11 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// All limits summarized in a multi-line string 
         /// </summary>
-        private static readonly string _matLimitsHelp = "Matris limitleri:" +
-                                               "\n\tSatır:" + (int)MatrisLimits.forRows + " Sütun:" + (int)MatrisLimits.forCols +
-                                               "\n\tKaydedilebilir matris sayısı:" + (int)MatrisLimits.forMatrisCount +
-                                               "\n\tMatris isim uzunluğu:" + (int)MatrisLimits.forName;
+        private static readonly string _matLimitsHelp = ">>> Matris limitleri(maksimum):"
+                                                        + $"\n\tSatır:{(int)MatrisLimits.forRows}"
+                                                        + $"\n\tSütun:{(int)MatrisLimits.forCols}"
+                                                        + $"\n\tKaydedilebilir matris sayısı:{(int)MatrisLimits.forMatrisCount}"
+                                                        + $"\n\tMatris isim uzunluğu:{(int)MatrisLimits.forName}";
         public static string MAT_LIMITS_HELP => _matLimitsHelp;
 
         #endregion
@@ -178,9 +239,99 @@ namespace MatrisAritmetik.Core
         public const string MAT_SHOULD_BE_SCALAR = "Verilen matris skaler olmalı!";
         #endregion
 
+        #region OPERATOR ISSUES
+        /// <summary>
+        /// Dynamic value failed to be parsed as float
+        /// </summary>
+        public const string DYNAMIC_VAL_PARSE_FAILED = "Verilen değer sayı olarak kullanılamadı!";
+
+        /// <summary>
+        /// Addition float try-parse failed
+        /// </summary>
+        public const string ADDITION_PARSE_FAILED = "Toplama işlemi yapılamaz, sayı olarak kullanılamayan değerler bulundu!";
+        public const string ADDITION_SIZE_INVALID = "Matris boyutları toplama işlemi için aynı olmalı!";
+
+        /// <summary>
+        /// Subtraction float try-parse failed
+        /// </summary>
+        public const string SUBTRACTION_PARSE_FAILED = "Çıkarma işlemi yapılamaz, sayı olarak kullanılamayan değerler bulundu!";
+        public const string SUBTRACTION_SIZE_INVALID = "Matris boyutları çıkarma işlemi için aynı olmalı!";
+
+        /// <summary>
+        /// Multiplication float try-parse failed
+        /// </summary>
+        public const string MULTIPLICATION_PARSE_FAILED = "Çarpma işlemi yapılamaz, sayı olarak kullanılamayan değerler bulundu!";
+        public const string MULTIPLICATION_SIZE_INVALID = "Matris boyutları çarpma işlemi için aynı olmalı!";
+
+        /// <summary>
+        /// Multiplication float try-parse failed
+        /// </summary>
+        public const string DIVISION_PARSE_FAILED = "Bölme işlemi yapılamaz, sayı olarak kullanılamayan değerler bulundu!";
+        public const string DIVISION_SIZE_INVALID = "Matris boyutları bölme işlemi için aynı olmalı!";
+
+        /// <summary>
+        /// Multiplication float try-parse failed
+        /// </summary>
+        public const string MODULO_PARSE_FAILED = "Mod işlemi yapılamaz, sayı olarak kullanılamayan değerler bulundu!";
+        public const string MODULO_SIZE_INVALID = "Matris boyutları mod işlemi için aynı olmalı!";
+        public const string MODULO_MAT_INVALID = "Matris mod olarak kullanılamaz!";
+        #endregion
+
         #endregion
 
         #region COMPILER RELATED
+
+        #region COMPILER MODE RELATED
+        /// <summary>
+        /// Given mode was not valid to reference a value
+        /// </summary>
+        /// <param name="mode">Compiler mode</param>
+        /// <returns>Message telling user can't reference to some values using this <paramref name="mode"/></returns>
+        public static string COMPILER_MODE_MISMATCH(CompilerDictionaryMode mode)
+        {
+            switch (mode)
+            {
+                case CompilerDictionaryMode.Matrix:
+                    {
+                        return $"Matris derleyici modu yalnızca matris referanslarına izin verir!";
+                    }
+                case CompilerDictionaryMode.Dataframe:
+                    {
+                        return $"Veri tablosu derleyici modu yalnızca veri tablosu referanslarına izin verir!";
+                    }
+                default:
+                    {
+                        return $"Derleyici modunda bir hata oluştu!";
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Given mode was not valid for returning return <paramref name="type"/>
+        /// </summary>
+        /// <param name="mode">Compiler mode</param>
+        /// <param name="type">Return type</param>
+        /// <returns>Message telling user can't use functions which has <paramref name="type"/> return type using this <paramref name="mode"/></returns>
+        public static string COMPILER_RETURNTYPE_MISMATCH(CompilerDictionaryMode mode, string type)
+        {
+            switch (mode)
+            {
+                case CompilerDictionaryMode.Matrix:
+                    {
+                        return $"Matris derleyici modu {type} tipi dönen fonksiyonlara izin vermez!";
+                    }
+                case CompilerDictionaryMode.Dataframe:
+                    {
+                        return $"Veri tablosu derleyici modu {type} tipi dönen fonksiyonlara izin vermez!";
+                    }
+                default:
+                    {
+                        return $"Derleyici modunda bir hata oluştu!";
+                    }
+            }
+        }
+
+        #endregion
 
         #region FUNCTION RELATED
         // MATRIX MULTIPLICATION SIZE
@@ -239,6 +390,9 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string DOCS_HELP = "'?' kullanımı ile ilgili bilgi için '?' komutunu kullanın.";
 
+        /// <summary>
+        /// Information about constants in the compiler
+        /// </summary>
         public static string CONSTANTS
         {
             get
@@ -269,10 +423,10 @@ namespace MatrisAritmetik.Core
                                      + "\n\n>>> '!' bir ön-ektir:"
                                      + "\n\to Komutları kullanmak için komut isminden önce '!' koyunuz. (örnek: !Rank)(yardım: ?komut)"
                                      + "\n\to Özel değerleri kullanmak için isimden önce '!' koyunuz. (örnek: !null)(yardım: ?değer)"
+                                     + "\n\to İstenen bir parametreye değer vermek için 'parametre:argüman' formatını kullanınız.(örnek: seed:5)"
+                                     + "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez.(hatalı format: !komut(param:1,-1)"
                                      + "\n\to Özel değerler ve açıklamaları:\n\t  ------------------------------ "
                                      + CONSTANTS
-                                     + "\n\to İstenen bir parametreye değer vermek için 'parametre:argüman' formatını kullanınız.(örnek: seed:5)"
-                                     + "\n\to Parametre ismi kullanıldıktan sonra pozisyonel argüman verilemez."
                                      + "\n\n>>> Özel aritmetik operatörler (A,B: Matris, n: tam sayı):"
                                      + "\n\to .* : Matris çarpımı = A .* B"
                                      + "\n\to .^ : Matrisin kendisiyle matris çarpımı = A .^ n == A .* A .* A ... .* A"
@@ -292,13 +446,21 @@ namespace MatrisAritmetik.Core
                                      + "\n\t    font-weight   |     Yazı kalınlığı      | 0-900, bold, lighter"
                                      + "\n\n\to Örnek stilli komutlar:"
                                      + "\n\t\t!Identity(4) ; cmd:quiet ; out:font-weigth bolder ; color blue"
-                                     + "\n\t\t!RandFloat(4,4,max:30,seed:1); background-color #d233c1; color white; tex\n\n"
-                                     + MAT_LIMITS_HELP;
+                                     + "\n\t\t!RandInt(14,8,max:30,seed:54); background-color #122122; color white; tex\n\n";
 
         /// <summary>
-        /// Short and detailed documentation about the matrix compiler
+        /// Detailed documentation about the matrix/dataframe compiler
         /// </summary>
-        public static string COMPILER_HELP => _compilerHelp;
+        /// <param name="mode">Compiler mode, adds limitation information to the end of returned string depending on this mode</param>
+        /// <returns>Detailed multi-line string explaining rules of the compiler</returns>
+        public static string COMPILER_HELP(CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        {
+            return _compilerHelp + (mode == CompilerDictionaryMode.Matrix
+                                         ? MAT_LIMITS_HELP
+                                         : mode == CompilerDictionaryMode.Dataframe
+                                                ? DF_LIMITS_HELP
+                                                : MAT_LIMITS_HELP + "\n\n" + DF_LIMITS_HELP);
+        }
 
         #endregion
 
@@ -437,7 +599,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// 'null' can't be used with operators
         /// </summary>
-        public const string OP_WITH_NULL = "İşlemlerde null değeri kullanılamaz!";
+        public const string OP_WITH_NULL = "Aritmetik işlemlerde null değeri kullanılamaz!";
 
         #endregion
 

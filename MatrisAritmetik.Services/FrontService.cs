@@ -37,7 +37,7 @@ namespace MatrisAritmetik.Services
         /// <param name="symbol">Symbol/operator to use</param>
         /// <returns>Given token with values set</returns>
         private Token SetTokenFieldsViaSymbol(Token tkn,
-                                                     string symbol)
+                                              string symbol)
         {
             switch (symbol)
             {
@@ -171,11 +171,14 @@ namespace MatrisAritmetik.Services
         /// <param name="name">Function name to search and use</param>
         /// <returns>True if token was set to be a function token</returns>
         private bool SetAsFunctionToken(Token tkn,
-                                        string name)
+                                        string name,
+                                        CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             using CommandInfo cmdinfo = TryParseBuiltFunc(name);
             if (cmdinfo != null) // VALID FUNCTION
             {
+                Validations.CheckModeAndReturnType(mode, cmdinfo.Returns.ToString());
+
                 tkn.paramCount = cmdinfo.Param_names.Length;
                 tkn.service = cmdinfo.Service.ToString();
                 tkn.tknType = TokenType.FUNCTION;
@@ -198,12 +201,13 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to set values to</param>
         /// <param name="exp">Expression to process</param>
         private void SetSpecialValueToken(Token tkn,
-                                          string exp)
+                                          string exp,
+                                          CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (exp[0] == '!')          // A function or a special value
             {
                 exp = exp.Replace("!", "");
-                if (!SetAsFunctionToken(tkn, exp))
+                if (!SetAsFunctionToken(tkn, exp, mode))
                 {
                     if (!SetAsSpecialToken(tkn, exp))
                     {
@@ -232,7 +236,8 @@ namespace MatrisAritmetik.Services
         /// </summary>
         /// <param name="exp"> String expression to tokenize </param>
         /// <returns>Token created from the expression</returns>
-        private Token String2Token(string exp)
+        private Token String2Token(string exp,
+                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             Token tkn = new Token();
 
@@ -271,7 +276,7 @@ namespace MatrisAritmetik.Services
                      && exp != ".*"
                      && exp != "./")
             {
-                SetSpecialValueToken(tkn, exp);
+                SetSpecialValueToken(tkn, exp, mode);
             }
 
             else if (Validations.ValidMatrixName(exp))
@@ -293,7 +298,7 @@ namespace MatrisAritmetik.Services
         /// </summary>
         /// <param name="exp">Expression to use</param>
         /// <returns>Properly split valid assignment expression</returns>
-        private string SetExpressionForAssignOP(string exp)
+        private void SetExpressionForAssignOP(ref string exp)
         {
             string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
             if (expsplits.Length == 0)
@@ -330,7 +335,7 @@ namespace MatrisAritmetik.Services
                        .Append(' ')
                        .Append(expsplits[1]);
 
-                    return res.ToString();   // Matris_name = (some_expression)
+                    exp = res.ToString();   // Matris_name = (some_expression)
                 }
                 else
                 {
@@ -349,7 +354,7 @@ namespace MatrisAritmetik.Services
                        .Append(' ')
                        .Append(')');
 
-                    return res.ToString();   // Matris_name = (some_expression)
+                    exp = res.ToString();   // Matris_name = (some_expression)
                 }
 
             }
@@ -390,7 +395,7 @@ namespace MatrisAritmetik.Services
 
             if (exp.Contains("=")) // Matris_name = some_expression
             {
-                exp = SetExpressionForAssignOP(exp);
+                SetExpressionForAssignOP(ref exp);
             }
             while (exp.Contains("  "))
             {
@@ -406,7 +411,7 @@ namespace MatrisAritmetik.Services
         /// <param name="paramarr">Parameter array</param>
         /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
         private int GetParamIndex(string name,
-                                         ParameterInfo[] paramarr)
+                                  ParameterInfo[] paramarr)
         {
             int ind = 0;
             foreach (ParameterInfo p in paramarr)
@@ -434,7 +439,8 @@ namespace MatrisAritmetik.Services
                                     object serviceObject,
                                     MethodInfo method,
                                     object[] arguments,
-                                    Dictionary<string, MatrisBase<dynamic>> matDict)
+                                    Dictionary<string, MatrisBase<dynamic>> matDict,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (op.service)
             {
@@ -449,7 +455,7 @@ namespace MatrisAritmetik.Services
                             }
                         case "Help":
                             {
-                                return HelpInternal(operands.Count != 0 ? operands[0] : null, matDict);
+                                return HelpInternal(operands.Count != 0 ? operands[0] : null, matDict, mode);
                             }
                         default:
                             throw new Exception(CompilerMessage.UNKNOWN_FRONTSERVICE_FUNC(op.name));
@@ -489,9 +495,11 @@ namespace MatrisAritmetik.Services
 
                         operands[0].tknType = op.returns switch
                         {
+                            "Veri Tablosu" => TokenType.MATRIS,
                             "Matris" => TokenType.MATRIS,
                             "int" => TokenType.NUMBER,
                             "float" => TokenType.NUMBER,
+                            "string" => TokenType.STRING,
                             "void" => TokenType.VOID,
                             _ => TokenType.NULL,
                         };
@@ -514,10 +522,11 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>Argument at index <paramref name="argIndex"/> after changes applied</returns>
         private object ApplyArgumentValue(Token op,
-                                                 Token operand,
-                                                 object[] arguments,
-                                                 int argIndex,
-                                                 Dictionary<string, MatrisBase<dynamic>> matDict)
+                                          Token operand,
+                                          object[] arguments,
+                                          int argIndex,
+                                          Dictionary<string, MatrisBase<dynamic>> matDict,
+                                          CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (operand.tknType)
             {
@@ -529,10 +538,12 @@ namespace MatrisAritmetik.Services
                     {
                         if (matDict.ContainsKey(operand.name))
                         {
+                            Validations.CheckModeAndMatrixReference(mode, matDict[operand.name]);
                             arguments[argIndex] = matDict[operand.name];
                         }
                         else if (operand.val is MatrisBase<object>)
                         {
+                            Validations.CheckModeAndMatrixReference(mode, operand.val);
                             arguments[argIndex] = (object)operand.val;
                         }
                         else if (Validations.ValidMatrixName(operand.name))
@@ -567,10 +578,11 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to reference to if needed</param>
         /// <returns>Parsed <paramref name="arguments"/></returns>
         private object[] CheckAndParseArgumentsAndHints(Token op,
-                                                               List<Token> operands,
-                                                               object[] arguments,
-                                                               ParameterInfo[] paraminfo,
-                                                               Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                        List<Token> operands,
+                                                        object[] arguments,
+                                                        ParameterInfo[] paraminfo,
+                                                        Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                        CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
             bool hintUsed = false;
@@ -610,11 +622,11 @@ namespace MatrisAritmetik.Services
                     pind = k;
                 }
 
-                arguments[pind] = ApplyArgumentValue(op, operands[k], arguments, pind, matDict);
+                arguments[pind] = ApplyArgumentValue(op, operands[k], arguments, pind, matDict, mode);
 
                 if (arguments[pind] != null) // Parse given value if not null
                 {
-                    arguments[pind] = ParseTokenValAsParameterType(op, operands, arguments, k, pind);
+                    arguments[pind] = ParseTokenValAsParameterType(op, operands, arguments, k, pind, mode);
                 }
 
             }
@@ -631,10 +643,11 @@ namespace MatrisAritmetik.Services
         /// <param name="argumentIndex">Index of argument to parse</param>
         /// <returns> Argument at index <paramref name="argumentIndex"/> after parsed as parameter's type</returns>
         private object ParseTokenValAsParameterType(Token op,
-                                                           List<Token> operands,
-                                                           object[] arguments,
-                                                           int operandIndex,
-                                                           int argumentIndex)
+                                                    List<Token> operands,
+                                                    object[] arguments,
+                                                    int operandIndex,
+                                                    int argumentIndex,
+                                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             try
             {
@@ -680,7 +693,14 @@ namespace MatrisAritmetik.Services
                         }
                     case "Matris":
                         {
+                            Validations.CheckModeAndMatrixReference(mode, arguments[argumentIndex]);
                             arguments[argumentIndex] = (MatrisBase<dynamic>)arguments[argumentIndex];
+                            break;
+                        }
+                    case "Veri Tablosu":
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, arguments[argumentIndex]);
+                            arguments[argumentIndex] = (Dataframe)arguments[argumentIndex];
                             break;
                         }
                     case "dinamik":
@@ -710,71 +730,72 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if necessary</param>
         /// <returns>Operands list after evaluation</returns>
         private List<Token> EvalWithSymbolOperator(Token op,
-                                                          List<Token> operands,
-                                                          Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                   List<Token> operands,
+                                                   Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (op.symbol)
             {
                 case "+":
                     {
-                        CompilerUtils.OPBasic("+", operands[1], operands[0], matDict);
+                        CompilerUtils.OPBasic("+", operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "-":
                     {
-                        CompilerUtils.OPBasic("-", operands[1], operands[0], matDict);
+                        CompilerUtils.OPBasic("-", operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "*":
                     {
-                        CompilerUtils.OPBasic("*", operands[1], operands[0], matDict);
+                        CompilerUtils.OPBasic("*", operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "/":
                     {
-                        CompilerUtils.OPBasic("/", operands[1], operands[0], matDict);
+                        CompilerUtils.OPBasic("/", operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "%":
                     {
-                        CompilerUtils.OPModulo(operands[1], operands[0], matDict);
+                        CompilerUtils.OPModulo(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "^":   // A^3 == A'nın elemanlarının 3. kuvvetleri
                     {
-                        CompilerUtils.OPExpo(operands[1], operands[0], matDict);
+                        CompilerUtils.OPExpo(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case ".^":      // A.^3 == A@A@A  , A kare matris
                     {
-                        CompilerUtils.OPMatMulByExpo(operands[1], operands[0], matDict);
+                        CompilerUtils.OPMatMulByExpo(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case ".*":
                     {
-                        CompilerUtils.OPMatMul(operands[1], operands[0], matDict);
+                        CompilerUtils.OPMatMul(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "./":
                     {
-                        CompilerUtils.OPMatMulWithInverse(operands[1], operands[0], matDict);
+                        CompilerUtils.OPMatMulWithInverse(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case "u-":
                     {
-                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict);
+                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict, mode);
                         operands[0].val = -operands[0].val;
 
                         break;
                     }
                 case "u+":
                     {
-                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict);
+                        CompilerUtils.CheckMatrixAndUpdateVal(operands[0], matDict, mode);
                         break;
                     }
                 case "=":
                     {
-                        CompilerUtils.OPAssignment(operands[1], operands[0], matDict);
+                        CompilerUtils.OPAssignment(operands[1], operands[0], matDict, mode);
                         break;
                     }
                 case ":":
@@ -800,13 +821,14 @@ namespace MatrisAritmetik.Services
         /// <returns>A token storing the result of the evaluation</returns>
         private Token EvalOperator(Token op,
                                    List<Token> operands,
-                                   Dictionary<string, MatrisBase<dynamic>> matDict)
+                                   Dictionary<string, MatrisBase<dynamic>> matDict,
+                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (op.tknType)
             {
                 case TokenType.OPERATOR: // OPERATORS
                     {
-                        operands = EvalWithSymbolOperator(op, operands, matDict);
+                        operands = EvalWithSymbolOperator(op, operands, matDict, mode);
                         break;
                     }
 
@@ -856,13 +878,13 @@ namespace MatrisAritmetik.Services
                         }
 
                         // Parse values from tokens to arguments and check if they are referenced correctly
-                        param_arg = CheckAndParseArgumentsAndHints(op, operands, param_arg, paraminfo, matDict);
+                        param_arg = CheckAndParseArgumentsAndHints(op, operands, param_arg, paraminfo, matDict, mode);
 
                         // Replace nulls with default values
                         param_arg = CompilerUtils.ParseDefaultValues(op.paramCount, param_arg, paraminfo);
 
                         // Invoke method found with given arguments
-                        return InvokeMethods(op, operands, serviceObject, method, param_arg, matDict);
+                        return InvokeMethods(op, operands, serviceObject, method, param_arg, matDict, mode);
 
                     }
             }
@@ -879,8 +901,9 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="cmd"/> updated with helpful message</returns>
         private Command SetDocsCommand(Command cmd,
-                                              Token tkn,
-                                              Dictionary<string, MatrisBase<dynamic>> matdict)
+                                       Token tkn,
+                                       Dictionary<string, MatrisBase<dynamic>> matdict,
+                                       CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (tkn.info)
             {
@@ -888,6 +911,7 @@ namespace MatrisAritmetik.Services
                     {
                         if (matdict.ContainsKey(tkn.name))
                         {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[tkn.name]);
                             cmd.STATE = CommandState.SUCCESS;
                             cmd.SetStateMessage(CommandStateMessage.DOCS_MAT_FOUND(tkn.name));
                             cmd.Output = matdict[tkn.name].Details(tkn.name);
@@ -903,7 +927,7 @@ namespace MatrisAritmetik.Services
                     {
                         cmd.STATE = CommandState.SUCCESS;
                         cmd.SetStateMessage(CommandStateMessage.SUCCESS_COMPILER_DOCS);
-                        cmd.Output = CompilerMessage.COMPILER_HELP;
+                        cmd.Output = CompilerMessage.COMPILER_HELP(mode);
                         break;
                     }
                 case "null":    // nothing found
@@ -921,6 +945,7 @@ namespace MatrisAritmetik.Services
                     {
                         if (matdict.ContainsKey(tkn.name))
                         {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[tkn.name]);
                             cmd.STATE = CommandState.SUCCESS;
                             cmd.SetStateMessage(CommandStateMessage.DOCS_MAT_SPECIAL_FOUND(tkn.name));
                             cmd.Output = matdict[tkn.name].Details(tkn.name)
@@ -941,6 +966,7 @@ namespace MatrisAritmetik.Services
                     {
                         if (matdict.ContainsKey(tkn.name))
                         {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[tkn.name]);
                             cmd.STATE = CommandState.SUCCESS;
                             cmd.SetStateMessage(CommandStateMessage.DOCS_MAT_FUNC_FOUND(tkn.name));
                             cmd.Output = matdict[tkn.name].Details(tkn.name)
@@ -968,7 +994,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="tkn"/> with updated <see cref="Token.val"/></returns>
         private void SetDocsAsValue(Token tkn,
-                                           Dictionary<string, MatrisBase<dynamic>> matdict)
+                                    Dictionary<string, MatrisBase<dynamic>> matdict,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (tkn.info)
             {
@@ -982,7 +1009,7 @@ namespace MatrisAritmetik.Services
                     }
                 case "info":    // info about how to use the compiler
                     {
-                        tkn.val = CompilerMessage.COMPILER_HELP;
+                        tkn.val = CompilerMessage.COMPILER_HELP(mode);
                         break;
                     }
                 case "null":    // nothing found, return as is
@@ -1032,16 +1059,18 @@ namespace MatrisAritmetik.Services
         /// <param name="term">Token to use as reference, null to get <see cref="CompilerMessage.COMPILER_HELP"/></param>
         /// <param name="matDict">Matrix dictionary to refer to</param>
         /// <returns>Token with updated docs</returns>
-        private Token HelpInternal(Token term, Dictionary<string, MatrisBase<dynamic>> matDict)
+        private Token HelpInternal(Token term,
+                                   Dictionary<string, MatrisBase<dynamic>> matDict,
+                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (term is null || term.tknType == TokenType.NULL)
             {
-                return new Token() { tknType = TokenType.DOCS, name = "info", val = CompilerMessage.COMPILER_HELP };
+                return new Token() { tknType = TokenType.DOCS, name = "info", val = CompilerMessage.COMPILER_HELP(mode) };
             }
 
             SetAsDocsToken(term, term.name);
 
-            SetDocsAsValue(term, matDict);
+            SetDocsAsValue(term, matDict, mode);
 
             return term;
         }
@@ -1055,7 +1084,8 @@ namespace MatrisAritmetik.Services
         /// <returns>Commands <see cref="CommandState"/> after evaluation or '<see cref="null"/>' if nothing worked</returns>
         private CommandState? SingleTermCommand(Command cmd,
                                                 Token tkn,
-                                                Dictionary<string, MatrisBase<dynamic>> matdict)
+                                                Dictionary<string, MatrisBase<dynamic>> matdict,
+                                                CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (Validations.ValidMatrixName(tkn.name) && tkn.tknType == TokenType.MATRIS)
             {
@@ -1063,6 +1093,7 @@ namespace MatrisAritmetik.Services
                 {
                     if (matdict.ContainsKey(tkn.name))
                     {
+                        Validations.CheckModeAndMatrixReference(mode, matdict[tkn.name]);
                         cmd.STATE = CommandState.SUCCESS;
                         cmd.SetStateMessage(CommandStateMessage.SUCCESS_RET_MAT);
                         cmd.Output = matdict[tkn.name].ToString();
@@ -1102,8 +1133,10 @@ namespace MatrisAritmetik.Services
                         }
                     case TokenType.DOCS:
                         {
-                            cmd = SetDocsCommand(cmd, tkn, matdict
-                                                               ?? new Dictionary<string, MatrisBase<dynamic>>());
+                            cmd = SetDocsCommand(cmd,
+                                                 tkn,
+                                                 matdict ?? new Dictionary<string, MatrisBase<dynamic>>(),
+                                                 mode);
                             return cmd.STATE;
                         }
                     case TokenType.OPERATOR:
@@ -1145,7 +1178,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to refer to</param>
         private void EvaluateTokens(List<Token> tkns,
                                     Stack<Token> operandStack,
-                                    Dictionary<string, MatrisBase<dynamic>> matdict)
+                                    Dictionary<string, MatrisBase<dynamic>> matdict,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             int ind = 0;
             while (ind < tkns.Count)
@@ -1184,7 +1218,7 @@ namespace MatrisAritmetik.Services
                         }
                     }
 
-                    operandStack.Push(EvalOperator(tkn, operands, matdict));
+                    operandStack.Push(EvalOperator(tkn, operands, matdict, mode));
 
                 }
                 ind++;
@@ -1199,12 +1233,13 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to refer to</param>
         private void EvaluateIdleCommand(Command cmd,
                                          List<Token> tkns,
-                                         Dictionary<string, MatrisBase<dynamic>> matdict)
+                                         Dictionary<string, MatrisBase<dynamic>> matdict,
+                                         CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             Stack<Token> operandStack = new Stack<Token>();
             try
             {
-                EvaluateTokens(tkns, operandStack, matdict);
+                EvaluateTokens(tkns, operandStack, matdict, mode);
 
                 if (operandStack.Count == 1)
                 {
@@ -1262,6 +1297,26 @@ namespace MatrisAritmetik.Services
             }
         }
 
+        public void AddToDfDict(string name,
+                                Dataframe df,
+                                Dictionary<string, Dataframe> dfdict)
+        {
+            if (dfdict == null)
+            {
+                throw new Exception(CompilerMessage.MAT_DICT_INVALID);
+            }
+
+            if (dfdict.Count >= (int)DataframeLimits.forDataframeCount)
+            {
+                throw new Exception(CompilerMessage.DF_LIMIT);
+            }
+
+            if (Validations.ValidMatrixName(name)) // Check again just in case
+            {
+                dfdict.Add(name, df);
+            }
+        }
+
         public bool DeleteFromMatrisDict(string name,
                                          Dictionary<string, MatrisBase<dynamic>> matdict)
         {
@@ -1274,6 +1329,23 @@ namespace MatrisAritmetik.Services
             {
                 matdict[name].Dispose();
                 matdict.Remove(name);
+                return true;
+            }
+            return false;
+        }
+
+        public bool DeleteFromDfDict(string name,
+                                     Dictionary<string, Dataframe> dfdict)
+        {
+            if (dfdict == null)
+            {
+                return false;
+            }
+
+            if (dfdict.ContainsKey(name))
+            {
+                dfdict[name].Dispose();
+                dfdict.Remove(name);
                 return true;
             }
             return false;
@@ -1301,19 +1373,33 @@ namespace MatrisAritmetik.Services
             builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
         }
 
-        public List<CommandLabel> GetCommandLabelList(List<string> filter = null)
+        public List<CommandLabel> GetCommandLabelList(List<string> filter = null,
+                                                      bool blacklist = false)
         {
             if (filter == null)
             {
-                return GetBuiltInCommands();
+                return blacklist ? GetBuiltInCommands() : new List<CommandLabel>();
             }
 
             List<CommandLabel> filtered = new List<CommandLabel>();
-            foreach (CommandLabel lbl in GetBuiltInCommands())
+            if (blacklist)
             {
-                if (filter.Contains(lbl.Label))
+                foreach (CommandLabel lbl in GetBuiltInCommands())
                 {
-                    filtered.Add(lbl);
+                    if (!filter.Contains(lbl.Label))
+                    {
+                        filtered.Add(lbl);
+                    }
+                }
+            }
+            else
+            {
+                foreach (CommandLabel lbl in GetBuiltInCommands())
+                {
+                    if (filter.Contains(lbl.Label))
+                    {
+                        filtered.Add(lbl);
+                    }
                 }
             }
             return filtered;
@@ -1362,11 +1448,88 @@ namespace MatrisAritmetik.Services
                 }
 
                 opts.Add(name, new Dictionary<string, dynamic>
-                               {
-                                   { "seed",dict[name].Seed },
-                                   { "isRandom",dict[name].CreatedFromSeed}
-                               }
+                            {
+                                { "seed",dict[name].Seed },
+                                { "isRandom",dict[name].CreatedFromSeed}
+                            }
                         );
+            }
+        }
+
+        public void SetDfDicts(Dictionary<string, Dataframe> dict,
+                               Dictionary<string, List<List<object>>> vals,
+                               Dictionary<string, Dictionary<string, List<LabelList>>> lbls,
+                               Dictionary<string, Dictionary<string, dynamic>> settings)
+        {
+            if (dict == null)
+            {
+                if (vals != null)
+                {
+                    vals.Clear();
+                }
+
+                if (lbls != null)
+                {
+                    lbls.Clear();
+                }
+
+                if (settings != null)
+                {
+                    settings.Clear();
+                }
+                return;
+            }
+
+            if (vals == null)
+            {
+                vals = new Dictionary<string, List<List<object>>>();
+            }
+            if (lbls == null)
+            {
+                lbls = new Dictionary<string, Dictionary<string, List<LabelList>>>();
+            }
+            if (settings == null)
+            {
+                settings = new Dictionary<string, Dictionary<string, dynamic>>();
+            }
+
+            foreach (string name in dict.Keys)
+            {
+                if (vals.ContainsKey(name))
+                {
+                    vals[name].Clear();
+                    vals.Remove(name);
+                }
+
+                vals.Add(name, dict[name].GetValues());
+
+                if (lbls.ContainsKey(name))
+                {
+                    lbls[name].Clear();
+                    lbls.Remove(name);
+                }
+
+                lbls.Add(name, new Dictionary<string, List<LabelList>>
+                            {
+                                { "col_labels", dict[name].GetColLabels() },
+                                { "row_labels", dict[name].GetRowLabels() }
+                            }
+                        );
+
+                if (settings.ContainsKey(name))
+                {
+                    settings[name].Clear();
+                    settings.Remove(name);
+                }
+
+                settings.Add(name, new Dictionary<string, dynamic>
+                                {
+                                    { "seed", dict[name].Seed },
+                                    { "isRandom", dict[name].CreatedFromSeed },
+                                    { "col_settings", dict[name].GetColSettings().GetSeperators() },
+                                    { "row_settings", dict[name].GetRowSettings().GetSeperators()  }
+                                }
+                            );
             }
         }
 
@@ -1499,14 +1662,15 @@ namespace MatrisAritmetik.Services
             return new List<Token>(outputQueue.ToArray());
         }
 
-        public List<Token> Tokenize(string exp)
+        public List<Token> Tokenize(string exp,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             string[] explist = TokenizeSplit(exp);
             List<Token> tkns = new List<Token>();
 
             foreach (string e in explist)
             {
-                Token tkn = String2Token(e);
+                Token tkn = String2Token(e, mode);
                 // Decide for unary or binary
                 if (e == "-" || e == "+")
                 {
@@ -1547,7 +1711,8 @@ namespace MatrisAritmetik.Services
 
         public CommandState EvaluateCommand(Command cmd,
                                             Dictionary<string, MatrisBase<dynamic>> matdict,
-                                            List<Command> cmdHistory)
+                                            List<Command> cmdHistory,
+                                            CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (cmd == null)
             {
@@ -1565,7 +1730,7 @@ namespace MatrisAritmetik.Services
                         // Single token
                         if (tkns.Count == 1)
                         {
-                            CommandState state = SingleTermCommand(cmd, tkns[0], matdict) ?? CommandState.UNAVAILABLE;
+                            CommandState state = SingleTermCommand(cmd, tkns[0], matdict, mode) ?? CommandState.UNAVAILABLE;
 
                             if (state != CommandState.UNAVAILABLE) // Check if token needs further evaluation, if not return
                             {
@@ -1574,8 +1739,7 @@ namespace MatrisAritmetik.Services
                         }
 
                         // More than a single token or single token needs evaluation
-                        EvaluateIdleCommand(cmd, tkns, matdict);
-
+                        EvaluateIdleCommand(cmd, tkns, matdict, mode);
                         break;
                     }
                 // Komut işlenmekte veya hatalı

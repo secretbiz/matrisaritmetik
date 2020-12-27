@@ -89,6 +89,7 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (disposing)
                 {
+                    _value = string.Empty;
                 }
 
                 _value = null;
@@ -120,14 +121,6 @@ namespace MatrisAritmetik.Core.Models
     {
         #region Private Encapsulated Fields
         /// <summary>
-        /// Amount of <see cref="Label"/>s this list has
-        /// </summary>
-        private int _length;
-        /// <summary>
-        /// Total span of this list's <see cref="Label"/>s
-        /// </summary>
-        private int _totalspan;
-        /// <summary>
         /// List of all <see cref="Label"/>s
         /// </summary>
         private List<Label> _labels = new List<Label>();
@@ -139,41 +132,37 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Amount of <see cref="Label"/>s this list has
         /// </summary>
-        public int Length => _length;
+        public int Length => Labels == null ? 0 : Labels.Count;
         /// <summary>
         /// Total span of this list's <see cref="Label"/>s
         /// </summary>
-        public int TotalSpan => _totalspan;
+        public int TotalSpan
+        {
+            get
+            {
+                if (Labels == null)
+                {
+                    return 0;
+                }
 
+                int t = 0;
+                foreach (Label l in Labels)
+                {
+                    t += l.Span;
+                }
+                return t;
+            }
+        }
         /// <summary>
         /// Get new list of all <see cref="Label"/>s
         /// </summary>
-        public List<Label> GetLabels()
-        {
-            return _labels;
-        }
-
         /// <summary>
         /// Set the list of all <see cref="Label"/>s
         /// </summary>
-        public void SetLabels(List<Label> value)
+        public List<Label> Labels
         {
-            if (value == null)
-            {
-                _length = 0;
-                _labels = new List<Label>();
-                _totalspan = 0;
-            }
-            else
-            {
-                _length = value.Count;
-                _labels = value;
-                _totalspan = 0;
-                foreach (Label lbl in value)
-                {
-                    _totalspan += lbl.Span;
-                }
-            }
+            get => _labels;
+            set => _labels = value ?? new List<Label>();
         }
 
         #endregion
@@ -195,8 +184,6 @@ namespace MatrisAritmetik.Core.Models
         public LabelList(int length, int spaneach = 1, string prefix = "col_", int based = 1)
         {
             _labels = new List<Label>();
-            _length = length;
-            _totalspan = length * spaneach;
 
             if (length > 0)
             {
@@ -212,7 +199,7 @@ namespace MatrisAritmetik.Core.Models
         /// Create a <see cref="LabelList"/> from given list of <see cref="Label"/>s
         /// </summary>
         /// <param name="labels">List of labels</param>
-        public LabelList(List<Label> labels) { SetLabels(labels); }
+        public LabelList(List<Label> labels) { Labels = labels; }
         #endregion
 
         #region Public Methods
@@ -239,11 +226,11 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Index of <see cref="Label"/> in <see cref="LabelList.GetLabels()"/>, which spans over given index <paramref name="ind"/></returns>
         public int GetLabelIndexAtSpan(int ind)
         {
-            if (_totalspan < ind)
+            if (TotalSpan < ind)
             {
                 return -1;
             }
-            if (_length == 1)
+            if (Length == 1)
             {
                 return 0;
             }
@@ -264,8 +251,8 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>A new <see cref="LabelList"/></returns>
         public LabelList Copy()
         {
-            Label[] temp = new Label[_length];
-            for (int i = 0; i < _length; i++)
+            Label[] temp = new Label[Length];
+            for (int i = 0; i < Length; i++)
             {
                 temp[i] = _labels[i].Copy();
             }

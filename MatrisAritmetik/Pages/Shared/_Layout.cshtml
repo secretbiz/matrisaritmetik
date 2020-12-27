@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <link href='@Url.Content("~/css/matris_panels.css")' rel='stylesheet' type='text/css' asp-append-version="true"/>
+    <link href='@Url.Content("~/css/matris_panels.css")' rel='stylesheet' type='text/css' asp-append-version="true" />
+    <link href='@Url.Content("~/css/veri_panels.css")' rel='stylesheet' type='text/css' asp-append-version="true" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="https://code.jquery.com/jquery-3.3.1.slim.min.js" />
 
+    <script type="text/javascript"
+            src="https://code.jquery.com/jquery-3.3.1.slim.min.js">
+    </script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js">
+    </script>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
@@ -20,6 +25,7 @@
 <body>
 
     <script src="~/js/matris_requests.js" asp-append-version="true" type="module"></script>
+    <script src="~/js/veri_requests.js" asp-append-version="true" type="module"></script>
 
     @RenderBody()
 

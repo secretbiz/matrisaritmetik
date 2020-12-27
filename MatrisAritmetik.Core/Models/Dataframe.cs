@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 
 namespace MatrisAritmetik.Core.Models
@@ -109,6 +110,24 @@ namespace MatrisAritmetik.Core.Models
         /// Empty constructor
         /// </summary>
         public DataframeRowSettings() { }
+
+        /// <summary>
+        /// Settings from list, seperator order: [from_elements, from_corner, level, span] 
+        /// </summary>
+        public DataframeRowSettings(List<string> lis)
+        {
+            if (lis == null)
+            {
+                return;
+            }
+            else if (lis.Count == 4)
+            {
+                labelSeperatorFromElements = lis[0] ?? labelSeperatorFromElements;
+                labelSeperatorFromCorner = lis[1] ?? labelSeperatorFromCorner;
+                levelSeperator = lis[2] ?? levelSeperator;
+                spanSeperator = lis[3] ?? spanSeperator;
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -126,6 +145,15 @@ namespace MatrisAritmetik.Core.Models
                 spanSeperator = GetSpanSeperator()
             };
         }
+
+        /// <summary>
+        /// Return seperators in order: [from_elements, from_corner, level, span] 
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetSeperators()
+        {
+            return new List<string>() { labelSeperatorFromElements, labelSeperatorFromCorner, levelSeperator, spanSeperator };
+        }
         #endregion
 
         #region Debug
@@ -142,7 +170,10 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    labelSeperatorFromElements = string.Empty;
+                    labelSeperatorFromCorner = string.Empty;
+                    levelSeperator = string.Empty;
+                    spanSeperator = string.Empty;
                 }
 
                 SetLabelSeperatorFromElements(null);
@@ -273,6 +304,23 @@ namespace MatrisAritmetik.Core.Models
         /// Empty constructor
         /// </summary>
         public DataframeColSettings() { }
+        /// <summary>
+        /// Settings from list, seperator order: [from_elements, from_corner, level, span] 
+        /// </summary>
+        public DataframeColSettings(List<string> lis)
+        {
+            if (lis == null)
+            {
+                return;
+            }
+            else if (lis.Count == 4)
+            {
+                labelSeperatorFromElements = lis[0] ?? labelSeperatorFromElements;
+                labelSeperatorFromCorner = lis[1] ?? labelSeperatorFromCorner;
+                levelSeperator = lis[2] ?? levelSeperator;
+                spanSeperator = lis[3] ?? spanSeperator;
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -290,6 +338,15 @@ namespace MatrisAritmetik.Core.Models
                 spanSeperator = GetSpanSeperator()
             };
         }
+
+        /// <summary>
+        /// Return seperators in order: [from_elements, from_corner, level, span] 
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetSeperators()
+        {
+            return new List<string>() { labelSeperatorFromElements, labelSeperatorFromCorner, levelSeperator, spanSeperator };
+        }
         #endregion
 
         #region Debug
@@ -306,7 +363,10 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    labelSeperatorFromElements = string.Empty;
+                    labelSeperatorFromCorner = string.Empty;
+                    levelSeperator = string.Empty;
+                    spanSeperator = string.Empty;
                 }
 
                 SetLabelSeperatorFromElements(null);
@@ -339,7 +399,7 @@ namespace MatrisAritmetik.Core.Models
     /// <para>This class is limited with <see cref="DataframeLimits"/></para>
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class Dataframe : MatrisBase<dynamic>
+    public class Dataframe : MatrisBase<object>
     {
         #region Private Encapsulated Fields
         /// <summary>
@@ -353,7 +413,7 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Actual values to store
         /// </summary>
-        private List<List<dynamic>> _values;
+        private List<List<object>> _values;
         /// <summary>
         /// Labels for rows
         /// </summary>
@@ -458,7 +518,7 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Get values to stored
         /// </summary>
-        public override List<List<dynamic>> GetValues()
+        public override List<List<object>> GetValues()
         {
             if (_values != null)
             {
@@ -498,56 +558,76 @@ namespace MatrisAritmetik.Core.Models
         /// <summary>
         /// Set values to store
         /// </summary>
-        public override void SetValues(List<List<dynamic>> value)
+        public override void SetValues(List<List<object>> value)
         {
             if (value != null)
             {
-                if (_values == null) // Only set if first time
+                if (value.Count * value[0].Count > (int)DataframeLimits.forSize)
                 {
-                    if (value.Count * value[0].Count > (int)DataframeLimits.forSize)
+                    List<List<object>> temp = new List<List<object>>();
+                    int collimit = (int)DataframeLimits.forCols;
+
+                    int lastcolsize = Math.Min(value[0].Count, collimit);
+
+                    for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
                     {
-                        List<List<dynamic>> temp = new List<List<dynamic>>();
-                        int collimit = (int)DataframeLimits.forCols;
-
-                        int lastcolsize = Math.Min(value[0].Count, collimit);
-
-                        for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
+                        int colsize = Math.Min(value[i].Count, collimit);
+                        if (lastcolsize != colsize)
                         {
-                            int colsize = Math.Min(value[i].Count, collimit);
-                            if (lastcolsize != colsize)
+                            return;
+                        }
+                        temp.Add(new List<object>());
+                        for (int j = 0; j < colsize; j++)
+                        {
+                            if (float.TryParse(value[i][j].ToString(), out float res))
                             {
-                                return;
+                                temp[i].Add(res);
                             }
-                            temp.Add(new List<dynamic>());
-                            for (int j = 0; j < colsize; j++)
+                            else
                             {
-                                temp[i].Add(value[i][j]);
+                                temp[i].Add(value[i][j].ToString());
                             }
                         }
-                        _values = temp;
                     }
-                    else
-                    {
-                        int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
-                        for (int i = 0; i < value.Count; i++)
-                        {
-                            if (value[i].Count != lastcolsize)
-                            {
-                                return;
-                            }
-                        }
-                        _values = value;
-                    }
-
-                    _row = _values.Count;
-                    _col = _row > 0 ? _values[0].Count : 0;
+                    _values = temp;
                 }
+                else
+                {
+                    _values = new List<List<object>>() { };
+                    int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
+                    for (int i = 0; i < value.Count; i++)
+                    {
+                        if (value[i].Count != lastcolsize)
+                        {
+                            _values = new List<List<object>>() { };
+                            return;
+                        }
+                        else
+                        {
+                            _values.Add(new List<object>());
+                            for (int j = 0; j < value[i].Count; j++)
+                            {
+                                if (float.TryParse(value[i][j].ToString(), out float res))
+                                {
+                                    _values[i].Add(res);
+                                }
+                                else
+                                {
+                                    _values[i].Add(value[i][j].ToString());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Row = _values.Count;
+                Col = _row > 0 ? _values[0].Count : 0;
             }
             else
             {
                 if (_values != null)
                 {
-                    foreach (List<dynamic> l in _values)
+                    foreach (List<object> l in _values)
                     {
                         l.Clear();
                     }
@@ -555,9 +635,10 @@ namespace MatrisAritmetik.Core.Models
                     _values = null;
                 }
 
-                _row = 0;
-                _col = 0;
+                Row = 0;
+                Col = 0;
             }
+
         }
 
         /// <summary>
@@ -591,7 +672,7 @@ namespace MatrisAritmetik.Core.Models
                             {
                                 for (int j = 0; j < delindex; j++)
                                 {
-                                    _rowlabels[i].GetLabels().RemoveAt(delindex);
+                                    _rowlabels[i].Labels.RemoveAt(delindex);
                                 }
                             }
                         }
@@ -701,7 +782,7 @@ namespace MatrisAritmetik.Core.Models
                             {
                                 for (int j = 0; j < delindex; j++)
                                 {
-                                    _collabels[i].GetLabels().RemoveAt(delindex);
+                                    _collabels[i].Labels.RemoveAt(delindex);
                                 }
                             }
                         }
@@ -805,7 +886,7 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="colLabels"></param>
         /// <param name="rowSettings"></param>
         /// <param name="colSettings"></param>
-        public Dataframe(List<List<dynamic>> vals,
+        public Dataframe(List<List<object>> vals,
                          string delim = " ",
                          string newline = "\n",
                          List<LabelList> rowLabels = null,
@@ -845,9 +926,17 @@ namespace MatrisAritmetik.Core.Models
             {
                 SetRowSettings(rowSettings);
             }
+            else
+            {
+                SetRowSettings(new DataframeRowSettings());
+            }
             if (colSettings != null)
             {
                 SetColSettings(colSettings);
+            }
+            else
+            {
+                SetColSettings(new DataframeColSettings());
             }
 
         }
@@ -891,7 +980,7 @@ namespace MatrisAritmetik.Core.Models
                     for (int k = 0; k < _collabels.Count; k++)
                     {
                         currentlabelindex = _collabels[k].GetLabelIndexAtSpan(j + 1);
-                        Label current_label = _collabels[k].GetLabels()[currentlabelindex];
+                        Label current_label = _collabels[k].Labels[currentlabelindex];
                         int labellen = current_label.Value.Length + spanseplength;
                         // Label span is a single column
                         if (current_label.Span == 1)
@@ -917,13 +1006,13 @@ namespace MatrisAritmetik.Core.Models
                                 int spanstart = 0;
                                 for (int k2 = 0; k2 < currentlabelindex; k2++)
                                 {
-                                    spanstart += _collabels[k].GetLabels()[k2].Span;
+                                    spanstart += _collabels[k].Labels[k2].Span;
                                 }
                                 for (int j2 = spanstart; j2 < current_label.Span + spanstart; j2++)
                                 {
                                     if (elementwidths[j2] >= newlength)
                                     {
-                                        carryover += (elementwidths[j2] - newlength);
+                                        carryover += elementwidths[j2] - newlength;
                                     }
                                     else
                                     {
@@ -946,14 +1035,18 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Array of widths for each level of <see cref="Dataframe.GetRowLabels()"/></returns>
         private int[] GetRowLabelColumnWidths()
         {
+            if (_rowlabels == null)
+            {
+                return Array.Empty<int>();
+            }
             // Row label columns' widths
-            int lvlcount = (_rowlabels != null) ? _rowlabels.Count : 0;
+            int lvlcount = _rowlabels.Count;
 
             int[] allwidths = new int[lvlcount];
 
             for (int c = 0; c < lvlcount; c++)
             {
-                List<Label> lbls = _rowlabels[c].GetLabels();
+                List<Label> lbls = _rowlabels[c].Labels ?? new List<Label>();
                 int currentmax = 0;
                 for (int l = 0; l < lbls.Count; l++)
                 {
@@ -982,7 +1075,7 @@ namespace MatrisAritmetik.Core.Models
 
             int colno, index;
             int rowlabellevel = _rowlabels.Count;
-            List<dynamic> row = null;
+            List<dynamic> row = new List<dynamic>();
             LabelList currentlist;
 
             int[] lastindex = new int[rowlabellevel];
@@ -1004,8 +1097,8 @@ namespace MatrisAritmetik.Core.Models
                     }
                     else
                     {
-                        res.Append(' ', rowlbl_widths[k] - currentlist.GetLabels()[index].Value.Length + 1);
-                        res.Append(currentlist.GetLabels()[index].Value);
+                        res.Append(' ', rowlbl_widths[k] - currentlist.Labels[index].Value.Length + 1);
+                        res.Append(currentlist.Labels[index].Value);
                         lastindex[k] = index;
                     }
 
@@ -1020,7 +1113,7 @@ namespace MatrisAritmetik.Core.Models
                 colno = 0;
                 foreach (dynamic element in row)
                 {
-                    res.Append(' ', (col_widths[colno] - element.ToString().Length));
+                    res.Append(' ', col_widths[colno] - element.ToString().Length);
                     res.Append((string)element.ToString());
 
                     if (colno != Col - 1)
@@ -1034,6 +1127,24 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
+        /// <summary>
+        /// Create a copy of given <see cref="LabelList"/> list
+        /// </summary>
+        /// <param name="lis">List of <see cref="LabelList"/> to copy</param>
+        /// <returns>Deep copy of the objects</returns>
+        private List<LabelList> GetCopyOfLabels(List<LabelList> lis)
+        {
+            if (lis == null)
+            {
+                return null;
+            }
+            List<LabelList> newlis = new List<LabelList>();
+            foreach (LabelList l in lis)
+            {
+                newlis.Add(l.Copy());
+            }
+            return newlis;
+        }
         #endregion
 
         #region Public Methods
@@ -1055,18 +1166,177 @@ namespace MatrisAritmetik.Core.Models
                 }
             }
 
-            List<LabelList> rowlbls = new List<LabelList>();
-            foreach (LabelList lbl in GetRowLabels())
+            List<LabelList> rowlbls = null;
+            if (GetRowLabels() != null)
             {
-                rowlbls.Add(lbl.Copy());
+                rowlbls = new List<LabelList>();
+                foreach (LabelList lbl in GetRowLabels())
+                {
+                    rowlbls.Add(lbl.Copy());
+                }
             }
-            List<LabelList> colbls = new List<LabelList>();
-            foreach (LabelList lbl in GetColLabels())
+            List<LabelList> colbls = null;
+            if (GetColLabels() != null)
             {
-                colbls.Add(lbl.Copy());
+                colbls = new List<LabelList>();
+                foreach (LabelList lbl in GetColLabels())
+                {
+                    colbls.Add(lbl.Copy());
+                }
             }
 
             return new Dataframe(lis, Delimiter.ToString(), NewLine.ToString(), rowlbls, colbls, GetRowSettings().Copy(), GetColSettings().Copy());
+        }
+
+        /// <summary>
+        /// Creates a smaller printable dataframe for larger dataframes, using only values in the corners
+        /// </summary>
+        /// <param name="rowEachCorner">Amount of rows for each corner</param>
+        /// <param name="colEachCorner">Amount of columns for each corner</param>
+        /// <param name="filler">Value to be used between corners</param>
+        /// <returns>A smaller dataframe with <paramref name="filler"/> dividing it to 4 smaller dataframes</returns>
+        public override dynamic CornerMatrix(int rowEachCorner = -1,
+                                             int colEachCorner = -1,
+                                             string filler = "...")
+        {
+            if (Row == 0 || Col == 0)
+            {
+                return new Dataframe();
+            }
+
+            List<List<object>> smallerList = new List<List<object>>();
+
+            if (rowEachCorner <= 0)
+            {
+                rowEachCorner = Math.Min((int)((float)Row * 0.33), 4);
+                rowEachCorner = rowEachCorner == 0 ? Row : rowEachCorner;
+            }
+            if (colEachCorner <= 0)
+            {
+                colEachCorner = Math.Min((int)((float)Col * 0.33), 4);
+                colEachCorner = colEachCorner == 0 ? Col : colEachCorner;
+            }
+
+            // No reduction
+            if (((float)rowEachCorner * 2.0) + 1.0 > (float)Row && ((float)colEachCorner * 2.0) + 1.0 > (float)Col)
+            {
+                return new Dataframe(_values, rowSettings: GetRowSettings().Copy(), colSettings: GetColSettings().Copy());
+            }
+            // Only reduce columns
+            else if (((float)rowEachCorner * 2.0) + 1.0 > (float)Row)
+            {
+                // Start reducing columns
+                for (int i = 0; i < Row; i++)
+                {
+                    smallerList.Add(new List<object>());
+                    for (int left = 0; left < colEachCorner; left++)
+                    {
+                        smallerList[i].Add(_values[i][left].ToString());
+                    }
+
+                    smallerList[i].Add(filler);
+
+                    for (int right = Col - colEachCorner; right < Col; right++)
+                    {
+                        smallerList[i].Add(_values[i][right].ToString());
+                    }
+                }
+
+            }
+            // Only reduce rows
+            else if (((float)colEachCorner * 2.0) + 1.0 > (float)Col)
+            {
+                // Start reducing rows
+                // Upper half
+                for (int u = 0; u < rowEachCorner; u++)
+                {
+                    smallerList.Add(new List<object>());
+                    for (int left = 0; left < colEachCorner; left++)
+                    {
+                        smallerList[u].Add(_values[u][left].ToString());
+                    }
+                }
+
+                smallerList.Add(new List<object>());
+                for (int j = 0; j < Col; j++)
+                {
+                    smallerList[rowEachCorner].Add(filler);
+                }
+
+                int rrowind = rowEachCorner + 1;
+                // Bottom half
+                for (int i = Row - rowEachCorner; i < Row; i++)
+                {
+                    smallerList.Add(new List<object>());
+                    for (int bleft = 0; bleft < colEachCorner; bleft++)
+                    {
+                        smallerList[rrowind].Add(_values[i][bleft].ToString());
+                    }
+                    rrowind++;
+                }
+
+            }
+            else
+            {
+                // Reduce both rows and columns
+                // Upper half
+                for (int u = 0; u < rowEachCorner; u++)
+                {
+                    smallerList.Add(new List<object>());
+                    for (int left = 0; left < colEachCorner; left++)
+                    {
+                        smallerList[u].Add(_values[u][left].ToString());
+                    }
+
+                    smallerList[u].Add(filler);
+
+                    for (int right = Col - colEachCorner; right < Col; right++)
+                    {
+                        smallerList[u].Add(_values[u][right].ToString());
+                    }
+                }
+
+                smallerList.Add(new List<object>());
+                for (int j = 0; j < (colEachCorner * 2) + 1; j++)
+                {
+                    smallerList[rowEachCorner].Add(filler);
+                }
+
+                int rowind = rowEachCorner + 1;
+                // Bottom half
+                for (int i = Row - rowEachCorner; i < Row; i++)
+                {
+                    smallerList.Add(new List<object>());
+                    for (int bleft = 0; bleft < colEachCorner; bleft++)
+                    {
+                        smallerList[rowind].Add(_values[i][bleft].ToString());
+                    }
+
+                    smallerList[rowind].Add(filler);
+
+                    for (int bright = Col - colEachCorner; bright < Col; bright++)
+                    {
+                        smallerList[rowind].Add(_values[i][bright].ToString());
+                    }
+                    rowind++;
+                }
+            }
+            return new Dataframe(smallerList, rowSettings: GetRowSettings().Copy(), colSettings: GetColSettings().Copy());
+        }
+
+        /// <summary>
+        /// Creates a dataframe detail summary
+        /// </summary>
+        /// <param name="name">Name given for this dataframe</param>
+        /// <returns>A string with dataframe name, seed(if exists), dimensions and values</returns>
+        public override string Details(string name = "")
+        {
+            string seed_str = CreatedFromSeed ? $"Seed: {Seed}\n" : string.Empty;
+            return $"Veri Tablosu: {name}\n"
+                   + seed_str
+                   + $"Boyut: {_row}x{_col}\n"
+                   + "Elementler:\n"
+                   + ToString();
         }
         #endregion
 
@@ -1115,12 +1385,12 @@ namespace MatrisAritmetik.Core.Models
                         LabelList labelList = _collabels[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
-                            Label lbl = labelList.GetLabels()[j];
+                            Label lbl = labelList.Labels[j];
 
                             int spanstart = 0;
                             for (int k2 = 0; k2 < j; k2++)
                             {
-                                spanstart += labelList.GetLabels()[k2].Span;
+                                spanstart += labelList.Labels[k2].Span;
                             }
 
                             int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
@@ -1151,7 +1421,7 @@ namespace MatrisAritmetik.Core.Models
                         colno = 0;
                         foreach (dynamic element in row)
                         {
-                            res.Append(' ', (col_widths[colno] - element.ToString().Length));
+                            res.Append(' ', col_widths[colno] - element.ToString().Length);
                             res.Append((string)element.ToString());
 
                             if (colno != Col - 1)
@@ -1169,7 +1439,7 @@ namespace MatrisAritmetik.Core.Models
                     string row_corner_sep = GetRowSettings().GetLabelSeperatorFromCorner();
                     string row_span_sep = GetRowSettings().GetSpanSeperator();
                     string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
-                    int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + (rowlbl_widths.Length - 1) * (row_span_sep.Length + 1) + row_element_sep.Length + col_corner_sep.Length - 1;
+                    int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + ((rowlbl_widths.Length - 1) * (row_span_sep.Length + 1)) + row_element_sep.Length + col_corner_sep.Length - 1;
 
                     // Column label rows first
                     int colLabelLength = _collabels.Count;
@@ -1181,12 +1451,12 @@ namespace MatrisAritmetik.Core.Models
                         LabelList labelList = _collabels[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
-                            Label lbl = labelList.GetLabels()[j];
+                            Label lbl = labelList.Labels[j];
 
                             int spanstart = 0;
                             for (int k2 = 0; k2 < j; k2++)
                             {
-                                spanstart += labelList.GetLabels()[k2].Span;
+                                spanstart += labelList.Labels[k2].Span;
                             }
 
                             int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
@@ -1233,10 +1503,868 @@ namespace MatrisAritmetik.Core.Models
         }
         #endregion
 
+        #region Operator Overloads
+
+        #region Equals
+        public static bool operator ==(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                return false;
+            }
+
+            bool isEqual = true;
+            List<List<object>> vals1 = df.GetValues();
+            List<List<object>> vals2 = df2.GetValues();
+            for (int i = 0; i < df.Row; i++)
+            {
+                if (!isEqual)
+                {
+                    break;
+                }
+
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (vals1[i][j].ToString() != vals2[i][j].ToString())
+                    {
+                        isEqual = false;
+                        break;
+                    }
+                }
+            }
+            return isEqual;
+        }
+
+        public static bool operator ==(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                return false;
+            }
+
+            bool isEqual = true;
+            List<List<object>> vals1 = df.GetValues();
+            List<List<dynamic>> vals2 = mat2.GetValues();
+            for (int i = 0; i < df.Row; i++)
+            {
+                if (!isEqual)
+                {
+                    break;
+                }
+
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(vals1[i][j].ToString(), out float res))
+                    {
+                        if (res != float.Parse(vals2[i][j].ToString()))
+                        {
+                            isEqual = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            return isEqual;
+        }
+        public static bool operator ==(MatrisBase<dynamic> mat, Dataframe df)
+        {
+            return df == mat;
+        }
+
+        public static bool operator ==(dynamic other, Dataframe df)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (df.IsScalar())
+            {
+                if (other is int @int)
+                {
+                    return int.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @int;
+                }
+                else if (other is float @float)
+                {
+                    return float.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @float;
+                }
+                else if (other is double @double)
+                {
+                    return double.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @double;
+                }
+                else
+                {
+                    return other.ToString() == df[0, 0].ToString();
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool operator ==(Dataframe df, dynamic other)
+        {
+            return other == df;
+        }
+
+        #endregion
+
+        #region Not Equals
+
+        public static bool operator !=(Dataframe df, MatrisBase<dynamic> mat)
+        {
+            return !(mat == df);
+        }
+        public static bool operator !=(MatrisBase<dynamic> mat, Dataframe df)
+        {
+            return df != mat;
+        }
+
+        public static bool operator !=(Dataframe df, Dataframe df2)
+        {
+            return !(df == df2);
+        }
+
+        public static bool operator !=(dynamic other, Dataframe df)
+        {
+            return !(other == df);
+        }
+        public static bool operator !=(Dataframe df, dynamic other)
+        {
+            return !(df == other);
+        }
+
+        #endregion
+
+        #region Addition
+        // Unary
+        public static Dataframe operator +(Dataframe df)
+        {
+            return df;
+        }
+
+        public static Dataframe operator +(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                throw new Exception(CompilerMessage.ADDITION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float r1)
+                        && float.TryParse(df2.GetValues()[i][j].ToString(), out float r2))
+                    {
+                        newlis[i].Add(r1 + r2);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator +(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (mat2.IsScalar())
+            {
+                return df + (dynamic)float.Parse(mat2.GetValues()[0][0].ToString());
+            }
+
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                throw new Exception(CompilerMessage.ADDITION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(res + float.Parse(mat2.GetValues()[i][j].ToString()));
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+        public static Dataframe operator +(MatrisBase<dynamic> mat, Dataframe df)
+        {
+            return df + mat;
+        }
+
+        public static Dataframe operator +(Dataframe df, dynamic val)
+        {
+            if (val is null)
+            {
+                val = 0;
+            }
+
+            if (float.TryParse(val.ToString(), out float res))
+            {
+                List<List<object>> vals = df.GetValues();
+                List<List<object>> newlis = new List<List<object>>();
+                for (int i = 0; i < df.Row; i++)
+                {
+                    newlis.Add(new List<object>());
+                    for (int j = 0; j < df.Col; j++)
+                    {
+                        newlis[i].Add(float.Parse(vals[i][j].ToString()) + res);
+                    }
+                }
+                Dataframe result = df.Copy();
+                result.SetValues(newlis);
+                return result;
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+            }
+
+        }
+        public static Dataframe operator +(dynamic val, Dataframe df)
+        {
+            return df + val;
+        }
+
+        #endregion
+
+        #region Subtraction
+        // Unary
+        public static Dataframe operator -(Dataframe df)
+        {
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float r1))
+                    {
+                        newlis[i].Add(r1 * -1);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator -(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                throw new Exception(CompilerMessage.SUBTRACTION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float r1)
+                        && float.TryParse(df2.GetValues()[i][j].ToString(), out float r2))
+                    {
+                        newlis[i].Add(r1 - r2);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.SUBTRACTION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator -(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (mat2.IsScalar())
+            {
+                return df - (dynamic)float.Parse(mat2.GetValues()[0][0].ToString());
+            }
+
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                throw new Exception(CompilerMessage.SUBTRACTION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(res - float.Parse(mat2.GetValues()[i][j].ToString()));
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.SUBTRACTION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+        public static Dataframe operator -(MatrisBase<dynamic> mat, Dataframe df)
+        {
+            if (mat.IsScalar())
+            {
+                return (dynamic)float.Parse(mat.GetValues()[0][0].ToString()) - df;
+            }
+
+            if (df.Row != mat.Row || df.Col != mat.Col)
+            {
+                throw new Exception(CompilerMessage.SUBTRACTION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(float.Parse(mat.GetValues()[i][j].ToString()) - res);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.SUBTRACTION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator -(Dataframe df, dynamic val)
+        {
+            if (val is null)
+            {
+                val = 0;
+            }
+
+            if (float.TryParse(val.ToString(), out float res))
+            {
+                List<List<object>> vals = df.GetValues();
+                List<List<object>> newlis = new List<List<object>>();
+                for (int i = 0; i < df.Row; i++)
+                {
+                    newlis.Add(new List<object>());
+                    for (int j = 0; j < df.Col; j++)
+                    {
+                        newlis[i].Add(float.Parse(vals[i][j].ToString()) - res);
+                    }
+                }
+                Dataframe result = df.Copy();
+                result.SetValues(newlis);
+                return result;
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+            }
+
+        }
+        public static Dataframe operator -(dynamic val, Dataframe df)
+        {
+            return val + (-df);
+        }
+
+        #endregion
+
+        #region Multiplication
+        public static Dataframe operator *(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                throw new Exception(CompilerMessage.ADDITION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float r1)
+                        && float.TryParse(df2.GetValues()[i][j].ToString(), out float r2))
+                    {
+                        newlis[i].Add(r1 * r2);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator *(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (mat2.IsScalar())
+            {
+                return df * (dynamic)float.Parse(mat2.GetValues()[0][0].ToString());
+            }
+
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                throw new Exception(CompilerMessage.ADDITION_SIZE_INVALID);
+            }
+
+            List<List<object>> newlis = new List<List<dynamic>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(df.GetValues()[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(res * float.Parse(mat2.GetValues()[i][j].ToString()));
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+        public static Dataframe operator *(MatrisBase<dynamic> mat, Dataframe df)
+        {
+            return df * mat;
+        }
+
+        public static Dataframe operator *(Dataframe df, dynamic val)
+        {
+            if (val is null)
+            {
+                val = 1;
+            }
+
+            if (float.TryParse(val.ToString(), out float res))
+            {
+                List<List<object>> vals = df.GetValues();
+                List<List<object>> newlis = new List<List<object>>();
+                for (int i = 0; i < df.Row; i++)
+                {
+                    newlis.Add(new List<object>());
+                    for (int j = 0; j < df.Col; j++)
+                    {
+                        newlis[i].Add(float.Parse(vals[i][j].ToString()) * res);
+                    }
+                }
+                Dataframe result = df.Copy();
+                result.SetValues(newlis);
+                return result;
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+            }
+
+        }
+        public static Dataframe operator *(dynamic val, Dataframe df)
+        {
+            return df * val;
+        }
+        #endregion
+
+        #region Division
+
+        public static Dataframe operator /(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                throw new Exception(CompilerMessage.DIVISION_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = df.GetValues();
+            List<List<object>> vals2 = df2.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(vals1[i][j].ToString(), out float r1)
+                           && float.TryParse(vals2[i][j].ToString(), out float r2))
+                    {
+                        newlis[i].Add(r1 / r2);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.DIVISION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator /(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (mat2.IsScalar())
+            {
+                return df / (dynamic)float.Parse(mat2.GetValues()[0][0].ToString());
+            }
+
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                throw new Exception(CompilerMessage.DIVISION_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = df.GetValues();
+            List<List<object>> vals2 = mat2.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(vals1[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(res / float.Parse(vals2[i][j].ToString()));
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.DIVISION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+        public static Dataframe operator /(MatrisBase<dynamic> mat, Dataframe df)
+        {
+
+            if (mat.IsScalar())
+            {
+                return (dynamic)float.Parse(mat.GetValues()[0][0].ToString()) / df;
+            }
+
+            if (mat.Row != df.Row || mat.Col != df.Col)
+            {
+                throw new Exception(CompilerMessage.DIVISION_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = mat.GetValues();
+            List<List<object>> vals2 = df.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < mat.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if (float.TryParse(vals2[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(float.Parse(vals1[i][j].ToString()) / res);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.DIVISION_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator /(Dataframe df, dynamic val)
+        {
+            if (val is null)
+            {
+                return df.Copy();
+            }
+            else
+            {
+                if (float.TryParse(val.ToString(), out float res))
+                {
+                    List<List<object>> vals = df.GetValues();
+                    List<List<object>> newlis = new List<List<object>>();
+                    for (int i = 0; i < df.Row; i++)
+                    {
+                        newlis.Add(new List<object>());
+                        for (int j = 0; j < df.Col; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float dval))
+                            {
+                                newlis[i].Add(dval / res);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.DIVISION_PARSE_FAILED);
+                            }
+                        }
+                    }
+                    Dataframe result = df.Copy();
+                    result.SetValues(newlis);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+                }
+            }
+        }
+        public static Dataframe operator /(dynamic val, Dataframe df)
+        {
+            if (val is null)
+            {
+                return df.Copy();
+            }
+            else
+            {
+                if (float.TryParse(val.ToString(), out float res))
+                {
+                    List<List<object>> vals = df.GetValues();
+                    List<List<object>> newlis = new List<List<object>>();
+                    for (int i = 0; i < df.Row; i++)
+                    {
+                        newlis.Add(new List<object>());
+                        for (int j = 0; j < df.Col; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float dval))
+                            {
+                                newlis[i].Add(res / dval);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.DIVISION_PARSE_FAILED);
+                            }
+                        }
+                    }
+                    Dataframe result = df.Copy();
+                    result.SetValues(newlis);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+                }
+
+            }
+
+        }
+
+        #endregion
+
+        #region Modulo
+        public static Dataframe operator %(Dataframe df, Dataframe df2)
+        {
+            if (df.Row != df2.Row || df.Col != df2.Col)
+            {
+                throw new Exception(CompilerMessage.MODULO_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = df.GetValues();
+            List<List<object>> vals2 = df2.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<dynamic>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(vals1[i][j].ToString(), out float r1)
+                           && float.TryParse(vals2[i][j].ToString(), out float r2))
+                    {
+                        newlis[i].Add(r1 % r2);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.MODULO_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator %(Dataframe df, MatrisBase<dynamic> mat2)
+        {
+            if (mat2.IsScalar())
+            {
+                return df % (dynamic)float.Parse(mat2.GetValues()[0][0].ToString());
+            }
+
+            if (df.Row != mat2.Row || df.Col != mat2.Col)
+            {
+                throw new Exception(CompilerMessage.MODULO_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = df.GetValues();
+            List<List<object>> vals2 = mat2.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < df.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < df.Col; j++)
+                {
+                    if (float.TryParse(vals1[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(res % float.Parse(vals2[i][j].ToString()));
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.MODULO_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+        public static Dataframe operator %(MatrisBase<dynamic> mat, Dataframe df)
+        {
+
+            if (mat.IsScalar())
+            {
+                return (dynamic)float.Parse(mat.GetValues()[0][0].ToString()) % df;
+            }
+
+            if (mat.Row != df.Row || mat.Col != df.Col)
+            {
+                throw new Exception(CompilerMessage.MODULO_SIZE_INVALID);
+            }
+
+            List<List<object>> vals1 = mat.GetValues();
+            List<List<object>> vals2 = df.GetValues();
+            List<List<object>> newlis = new List<List<object>>();
+            for (int i = 0; i < mat.Row; i++)
+            {
+                newlis.Add(new List<object>());
+                for (int j = 0; j < mat.Col; j++)
+                {
+                    if (float.TryParse(vals2[i][j].ToString(), out float res))
+                    {
+                        newlis[i].Add(float.Parse(vals1[i][j].ToString()) % res);
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.MODULO_PARSE_FAILED);
+                    }
+                }
+            }
+            Dataframe result = df.Copy();
+            result.SetValues(newlis);
+            return result;
+        }
+
+        public static Dataframe operator %(Dataframe df, dynamic val)
+        {
+            if (val is null)
+            {
+                return df.Copy();
+            }
+            else
+            {
+                if (float.TryParse(val.ToString(), out float res))
+                {
+                    List<List<object>> vals = df.GetValues();
+                    List<List<object>> newlis = new List<List<object>>();
+                    for (int i = 0; i < df.Row; i++)
+                    {
+                        newlis.Add(new List<object>());
+                        for (int j = 0; j < df.Col; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float dval))
+                            {
+                                newlis[i].Add(dval % res);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.MODULO_PARSE_FAILED);
+                            }
+                        }
+                    }
+                    Dataframe result = df.Copy();
+                    result.SetValues(newlis);
+                    return result;
+                }
+                else
+                {
+                    throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+                }
+            }
+        }
+        public static Dataframe operator %(dynamic val, Dataframe df)
+        {
+            if (df.IsScalar())
+            {
+                if (float.TryParse(val.ToString(), out float res))
+                {
+                    if (float.TryParse(df.GetValues()[0][0].ToString(), out float dval))
+                    {
+                        Dataframe result = df.Copy();
+                        result.SetValues(new List<List<object>>() { new List<object>() { res % dval } });
+                        return result;
+                    }
+                    else
+                    {
+                        throw new Exception(CompilerMessage.MODULO_PARSE_FAILED);
+                    }
+                }
+                else
+                {
+                    throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
+
+                }
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.MODULO_MAT_INVALID);
+            }
+        }
+
+        #endregion
+
+        #endregion
+
         #region Debug
         private string GetDebuggerDisplay()
         {
-            return "df(" + _row + "," + _col + "):" + ToString();
+            return "df(" + _row + "," + _col + ")\n" + ToString();
         }
         #endregion
 
@@ -1250,7 +2378,7 @@ namespace MatrisAritmetik.Core.Models
                     // Values
                     if (_values != null)
                     {
-                        foreach (List<dynamic> r in _values)
+                        foreach (List<object> r in _values)
                         {
                             r.Clear();
                         }
@@ -1303,6 +2431,60 @@ namespace MatrisAritmetik.Core.Models
             Dispose(disposing: false);
         }
 
+        #endregion
+
+        #region Hash Override
+
+        public override bool Equals(object obj)
+        {
+            return obj is Dataframe dataframe &&
+                   base.Equals(obj) &&
+                   Row == dataframe.Row &&
+                   Col == dataframe.Col &&
+                   Seed == dataframe.Seed &&
+                   Delimiter == dataframe.Delimiter &&
+                   NewLine == dataframe.NewLine &&
+                   Digits == dataframe.Digits &&
+                   SwapCount == dataframe.SwapCount &&
+                   CreatedFromSeed == dataframe.CreatedFromSeed &&
+                   ElementCount == dataframe.ElementCount &&
+                   _row == dataframe._row &&
+                   _col == dataframe._col &&
+                   EqualityComparer<List<List<object>>>.Default.Equals(_values, dataframe._values) &&
+                   EqualityComparer<List<LabelList>>.Default.Equals(_rowlabels, dataframe._rowlabels) &&
+                   EqualityComparer<List<LabelList>>.Default.Equals(_collabels, dataframe._collabels) &&
+                   EqualityComparer<DataframeRowSettings>.Default.Equals(rowSettings, dataframe.rowSettings) &&
+                   EqualityComparer<DataframeColSettings>.Default.Equals(colSettings, dataframe.colSettings) &&
+                   disposedValue == dataframe.disposedValue &&
+                   Row == dataframe.Row &&
+                   Col == dataframe.Col;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+            hash.Add(base.GetHashCode());
+            hash.Add(Row);
+            hash.Add(Col);
+            hash.Add(Seed);
+            hash.Add(Delimiter);
+            hash.Add(NewLine);
+            hash.Add(Digits);
+            hash.Add(SwapCount);
+            hash.Add(CreatedFromSeed);
+            hash.Add(ElementCount);
+            hash.Add(_row);
+            hash.Add(_col);
+            hash.Add(_values);
+            hash.Add(_rowlabels);
+            hash.Add(_collabels);
+            hash.Add(rowSettings);
+            hash.Add(colSettings);
+            hash.Add(disposedValue);
+            hash.Add(Row);
+            hash.Add(Col);
+            return hash.ToHashCode();
+        }
         #endregion
     }
 }

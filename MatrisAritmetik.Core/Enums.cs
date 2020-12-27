@@ -113,4 +113,24 @@ namespace MatrisAritmetik.Core
         RIGHT
     };
 
+    /// <summary>
+    /// Compiler dictionary reference mode
+    /// </summary>
+    public enum CompilerDictionaryMode
+    {
+        /// <summary>
+        /// Compiler mode that only enables usage of matrix dictionaries
+        /// </summary>
+        Matrix,
+
+        /// <summary>
+        /// Compiler mode that only enables usage of dataframe dictionaries
+        /// </summary>
+        Dataframe,
+
+        /// <summary>
+        /// Compiler mode that enables both dataframe and matrix dictionaries
+        /// </summary>
+        All
+    }
 }

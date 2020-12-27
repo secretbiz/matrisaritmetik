@@ -56,7 +56,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Maximum column count per dataframe
         /// </summary>
-        forCols = 32,
+        forCols = 12,
 
         /// <summary>
         /// Maximum depth level of column labels (<see cref="Dataframe"/>.ColumnLabels.Count)
@@ -66,12 +66,12 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Maximum element count
         /// </summary>
-        forSize = 512 * 32,
+        forSize = 512 * 12,
 
         /// <summary>
         /// Maximum element count including labels
         /// </summary>
-        forTotalSize = (512 * 32) + (512 * 2) + (32 * 3),
+        forTotalSize = (512 * 12) + (512 * 2) + (32 * 3),
 
         /// <summary>
         /// Maximum character amount for a dataframe name 

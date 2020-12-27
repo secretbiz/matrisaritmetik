@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
+using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core
 {
@@ -38,7 +40,7 @@ namespace MatrisAritmetik.Core
                 return false;
             }
 
-            if (!("0123456789".Contains(name[0])) && (name_regex.Match(name).Groups[0].Value == name))
+            if (!"0123456789".Contains(name[0]) && (name_regex.Match(name).Groups[0].Value == name))
             {
                 return true;
             }
@@ -50,5 +52,55 @@ namespace MatrisAritmetik.Core
             return false;
         }
 
+        /// <summary>
+        /// Validate given <paramref name="mat"/> match with given compiler <paramref name="mode"/>
+        /// </summary>
+        /// <param name="mode">Compiler mode</param>
+        /// <param name="mat">Matrix to check</param>
+        public static void CheckModeAndMatrixReference(CompilerDictionaryMode mode,
+                                                       dynamic mat)
+        {
+            if (mode == CompilerDictionaryMode.Dataframe && !(mat is Dataframe))
+            {
+                throw new Exception(CompilerMessage.COMPILER_MODE_MISMATCH(mode));
+            }
+            else if (mode == CompilerDictionaryMode.Matrix && mat is Dataframe)
+            {
+                throw new Exception(CompilerMessage.COMPILER_MODE_MISMATCH(mode));
+            }
+        }
+
+        /// <summary>
+        /// Validate given <paramref name="mat"/> match with given compiler <paramref name="mode"/>
+        /// </summary>
+        /// <param name="mode">Compiler mode</param>
+        /// <param name="mat">Matrix to check</param>
+        public static void CheckModeAndReturnType(CompilerDictionaryMode mode,
+                                                  string returntype)
+        {
+            switch (returntype)
+            {
+                case "Matris":
+                    {
+                        if (mode == CompilerDictionaryMode.Dataframe)
+                        {
+                            throw new Exception(CompilerMessage.COMPILER_RETURNTYPE_MISMATCH(mode, returntype));
+                        }
+                        break;
+                    }
+                case "Veri Tablosu":
+                    {
+                        if (mode == CompilerDictionaryMode.Matrix)
+                        {
+                            throw new Exception(CompilerMessage.COMPILER_RETURNTYPE_MISMATCH(mode, returntype));
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        return;
+                    }
+            }
+        }
     }
 }

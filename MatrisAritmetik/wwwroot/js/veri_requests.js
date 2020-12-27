@@ -1,9 +1,12 @@
-﻿function updateMathContent() {
+﻿function updateMathContentDf() {
     try {
-        var math = document.getElementById("matris_table_base");
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
+        var mat = document.getElementById("matris_table_base");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, mat]);
 
-        var hist = document.getElementById("output_body");
+        var df = document.getElementById("veri_table_base");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, df]);
+
+        var hist = document.getElementById("output_body_df");
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, hist]);
         //console.log("rerendering math...");
     }
@@ -12,8 +15,8 @@
     }
 }
 
-//////// matris ekleme fonksiyonu
-function addMatrix(event) {
+//////// df ekleme fonksiyonu
+function addDataframe(event) {
     var tkn = event.currentTarget.token;
     var delim = document.getElementById("displaySelectedSpacer").value;
     var newline = document.getElementById("displaySelectedLiner").value;
@@ -28,16 +31,16 @@ function addMatrix(event) {
         $.ajax(
             {
                 type: 'POST',
-                url: 'Matris?handler=AddMatrix',
+                url: 'Veri?handler=AddDataframe',
                 data:
                 {
                     __RequestVerificationToken: tkn,
-                    "name": document.getElementById("matris_name").value,
-                    "vals": document.getElementById("matris_vals").value,
+                    "name": document.getElementById("veri_name").value,
+                    "vals": document.getElementById("veri_vals").value,
                     "delimiter": delim,
                     "newline": newline
                 },
-                success: function (data) { updateTable(tkn); updateHistoryPanel(tkn);},
+                success: function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
                 error: function (error) { console.log(error); }
             });
     }
@@ -45,63 +48,92 @@ function addMatrix(event) {
         $.ajax(
             {
                 type: 'POST',
-                url: 'Matris?handler=AddMatrixSpecial',
+                url: 'Veri?handler=AddDataframeSpecial',
                 data:
                 {
                     __RequestVerificationToken: tkn,
-                    "name": document.getElementById("matris_name").value,
-                    "func": document.getElementById("matris_vals_special").value,
-                    "args": document.getElementById("matris_special_args").value
+                    "name": document.getElementById("veri_name").value,
+                    "func": document.getElementById("veri_vals_special").value,
+                    "args": document.getElementById("veri_special_args").value
                 },
-                success: function (_data) { updateTable(tkn); updateHistoryPanel(tkn); },
+                success: function (_data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
                 error: function (error) { console.log(error); }
             });
     }
 }
 
-//////// matris tablosu güncelleme
-function updateTable(token) {
-    $('#matris_table_base').load('/Matris?handler=UpdateMatrisTable', { __RequestVerificationToken: token }, function ()
-    {
-        updateMathContent();
+//////// df ve matris tablosu güncelleme
+export function updatedfTable(token) {
+    $('#veri_table_base').load('/Veri?handler=UpdateDataframeTable', { __RequestVerificationToken: token }, function () {
+        var math = document.getElementById("veri_table_base");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
         // Butonları bul & eventlistener ekle
-        var buttons = document.getElementsByName("matris_table_delbutton");
-        for (var i = 0; i < buttons.length; i++)
-        {
-            buttons[i].addEventListener("click", deleteMatrix, false);
+        var buttons = document.getElementsByName("veri_table_delbutton");
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", deleteDataframe, false);
             buttons[i].token = token;
         }
-        
+
+    });
+}
+
+export function updateMatTable(token) {
+    $('#matris_table_base').load('/Veri?handler=UpdateMatrisTable', { __RequestVerificationToken: token }, function () {
+        var math = document.getElementById("matris_table_base");
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
+        // Butonları bul & eventlistener ekle
+        var buttons = document.getElementsByName("matris_table_delbutton");
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", deleteMatrixDf, false);
+            buttons[i].token = token;
+        }
+
     });
 }
 
 
-//////// matris silme fonksiyonu
-function deleteMatrix(event) {
+//////// df ve matris silme fonksiyonu
+function deleteDataframe(event) {
     var tkn = event.currentTarget.token;
     $.ajax(
         {
             type: 'POST',
-            url: 'Matris?handler=DeleteMatrix',
+            url: 'Veri?handler=DeleteDataframe',
             data:
             {
                 __RequestVerificationToken: tkn,
                 "name": event.currentTarget.id,
             },
-            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); },
+            success: function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
             error: function (error) { console.log(error); }
         });
 }
 
-// matris ekleme butonu click event
-const matris_add_button = document.getElementById("matris_add_button");
-if (matris_add_button) { matris_add_button.addEventListener("click", addMatrix, false); }
+function deleteMatrixDf(event) {
+    var tkn = event.currentTarget.token;
+    $.ajax(
+        {
+            type: 'POST',
+            url: 'Veri?handler=DeleteMatrix',
+            data:
+            {
+                __RequestVerificationToken: tkn,
+                "name": event.currentTarget.id,
+            },
+            success: function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
+            error: function (error) { console.log(error); }
+        });
+}
+
+// df ekleme butonu click event
+const veri_add_button = document.getElementById("veri_add_button");
+if (veri_add_button) { veri_add_button.addEventListener("click", addDataframe, false); }
 
 
 //////// komut gönder
-function sendCmd(event) {
+function sendCmdDf(event) {
     var tkn = event.currentTarget.token;
-    var filteredcmd = document.getElementById("matris_komut_satır").textContent
+    var filteredcmd = document.getElementById("matris_komut_satır_df").textContent
         .split("=").join("!!__EQ!!")
         .split("&").join("!!__AND!!")
         .split("./").join("!!__REVMUL!!")
@@ -113,28 +145,28 @@ function sendCmd(event) {
     $.ajax(
         {
             type: 'POST',
-            url: 'Matris?handler=SendCmd',
+            url: 'Veri?handler=SendCmd',
             data:
             {
                 __RequestVerificationToken: tkn,
                 "cmd": filteredcmd,
             },
-            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); updateMathContent(); },
+            success: function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); updateMathContentDf(); },
             error: function (error) { console.log(error); }
         });
 }
 
 // komut gönderme butonu click event
-const matris_komut_button = document.getElementById("matris_komut_button");
-if (matris_komut_button) { matris_komut_button.addEventListener("click", sendCmd, false); }
+const veri_komut_button = document.getElementById("veri_komut_button");
+if (veri_komut_button) { veri_komut_button.addEventListener("click", sendCmdDf, false); }
 
 
 //////// komut dropdown seçeneklerinde değişim
-function placeAsCommand(event) {
+function placeAsCommandDf(event) {
     if (event.currentTarget.value == "komut_options_placeholder")
         return;
 
-    var command_row = document.getElementById("matris_komut_satır");
+    var command_row = document.getElementById("matris_komut_satır_df");
 
     // Empty input area
     if (command_row.textContent == "")
@@ -143,17 +175,17 @@ function placeAsCommand(event) {
         command_row.textContent += event.currentTarget.value;
 
     event.currentTarget.selectedIndex = 0;
-    colorInput();
+    colorInputDf();
 }
 
 // komut dropdown change event
-const matris_komut_options = document.getElementById("matris_komut_options");
-if (matris_komut_options) { matris_komut_options.addEventListener("change", placeAsCommand, false); }
+const veri_komut_options = document.getElementById("veri_komut_options");
+if (veri_komut_options) { veri_komut_options.addEventListener("change", placeAsCommandDf, false); }
 
 //////// dosya yükleme
-async function uploadFiles(event) {
+async function uploadFilesDf(event) {
     var tkn = event.currentTarget.token;
-    var input = document.getElementById("matris_file_button");
+    var input = document.getElementById("veri_file_button");
     var files = input.files;
 
     if (files == null)
@@ -162,13 +194,13 @@ async function uploadFiles(event) {
         return;
 
     if (files[0].size > 5e+7) {
-        resetFilePanel(null);
+        resetFilePanelDf(null);
         alert("Dosya boyutu en fazla 5MB olabilir!");
         return;
     }
 
     if (files[0].type != "text/plain" && files[0].type != "text/csv" && files[0].type != "application/vnd.ms-excel") {
-        resetFilePanel(null);
+        resetFilePanelDf(null);
         alert("Dosya olarak yalnızca text(.txt) ve comma-seperated-values(.csv) uzantılı dosyalar yüklenebilir!");
         return;
     }
@@ -176,30 +208,30 @@ async function uploadFiles(event) {
 
     formData.append("file", files[0]);
     formData.append("type", files[0].type);
-    formData.append("name", document.getElementById("matris_name").value);
+    formData.append("name", document.getElementById("veri_name").value);
     formData.append("delim", document.getElementById("displaySelectedSpacer").value);
     formData.append("newline", document.getElementById("displaySelectedLiner").value);
 
-    await fetch('Matris?handler=UploadFile',
+    await fetch('Veri?handler=UploadFile',
         {
             method: "POST",
             body: formData,
             headers:
                 { "RequestVerificationToken": tkn }
         }
-    ).then(function (data) { updateTable(tkn); updateHistoryPanel(tkn); });
-    
+    ).then(function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); });
+
 }
 
-function resetFilePanel(args) {
-    document.getElementById("matris_file_button").value = '';
+function resetFilePanelDf(args) {
+    document.getElementById("veri_file_button").value = '';
     document.getElementById("displaySelectedLiner").value = "";
     document.getElementById("displaySelectedSpacer").value = "";
-    document.getElementById("matris_name").value = "";
+    document.getElementById("veri_name").value = "";
 }
 
-function placeDefaultValues(event) {
-    var input = document.getElementById("matris_file_button");
+function placeDefaultValuesDf(event) {
+    var input = document.getElementById("veri_file_button");
     var files = input.files;
 
     if (files == null)
@@ -208,19 +240,19 @@ function placeDefaultValues(event) {
         return;
 
     if (files[0].size > 5e+7) {
-        resetFilePanel(null);
+        resetFilePanelDf(null);
         alert("Dosya boyutu en fazla 5MB olabilir!");
         return;
     }
 
     if (files[0].type != "text/plain" && files[0].type != "text/csv" && files[0].type != "application/vnd.ms-excel") {
-        resetFilePanel(null);
+        resetFilePanelDf(null);
         alert("Dosya olarak yalnızca text(.txt) ve comma-seperated-values(.csv) uzantılı dosyalar yüklenebilir!");
         return;
     }
 
     let name = files[0].name;
-    document.getElementById("matris_name").value = name.substring(0, name.lastIndexOf("."));
+    document.getElementById("veri_name").value = name.substring(0, name.lastIndexOf("."));
 
     switch (files[0].type) {
         case "text/plain":
@@ -243,7 +275,7 @@ function placeDefaultValues(event) {
             }
         default:
             {
-                resetFilePanel(null);
+                resetFilePanelDf(null);
                 alert("Dosya uzantısı .csv veya .txt olmalı!");
                 return;
             }
@@ -251,126 +283,125 @@ function placeDefaultValues(event) {
 }
 
 // dosya yükleme butonu click event
-const matris_fromfile_create_button = document.getElementById("matris_fromfile_create_button");
-if (matris_fromfile_create_button) { matris_fromfile_create_button.addEventListener("click", uploadFiles, false); }
+const veri_fromfile_create_button = document.getElementById("veri_fromfile_create_button");
+if (veri_fromfile_create_button) { veri_fromfile_create_button.addEventListener("click", uploadFilesDf, false); }
 // dosya seçme paneli change event
-const matris_file_button = document.getElementById("matris_file_button");
-if (matris_file_button) { matris_file_button.addEventListener("change", placeDefaultValues, false); }
+const veri_file_button = document.getElementById("veri_file_button");
+if (veri_file_button) { veri_file_button.addEventListener("change", placeDefaultValuesDf, false); }
 
-//////// Text matris panelini göster
-function textMatrisPick(event) {
-    
+//////// Text df panelini göster
+function textVeriPickDf(event) {
+
     // Hide special panels
-    document.getElementById("matris_vals_special").style.display = "none";
-    document.getElementById("matris_special_args").style.display = "none";
-    document.getElementById("matris_file_button").style.display = "none";
+    document.getElementById("veri_vals_special").style.display = "none";
+    document.getElementById("veri_special_args").style.display = "none";
+    document.getElementById("veri_file_button").style.display = "none";
 
     // Show standard panel
-    document.getElementById("matris_vals").style.display = "inherit";
-    document.getElementById("matris_options_column").style.display = "block";
+    document.getElementById("veri_vals").style.display = "inherit";
+    document.getElementById("veri_options_column").style.display = "block";
 
     // Update "active" classes and styles
-    document.getElementById("matris_create_bytext_parent").classList.add("active");
-    document.getElementById("matris_create_fromfile_parent").classList.remove("active");
-    document.getElementById("special_matris_options").style.backgroundColor = "inherit";
-    document.getElementById("special_matris_options").style.border = null;
-    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
+    document.getElementById("veri_create_bytext_parent").classList.add("active");
+    document.getElementById("veri_create_fromfile_parent").classList.remove("active");
+    document.getElementById("special_veri_options").style.backgroundColor = "inherit";
+    document.getElementById("special_veri_options").style.border = null;
+    //document.getElementById("veri_create_byfile_parent").classList.remove("active");
 
     // Change add button's attribute
-    document.getElementById("matris_add_button").setAttribute("currentTab", "text");
+    document.getElementById("veri_add_button").setAttribute("currentTab", "text");
 
-    document.getElementById("matris_fromfile_create_button").style.display = "none";
-    document.getElementById("matris_add_button").style.display = "inline-block";
+    document.getElementById("veri_fromfile_create_button").style.display = "none";
+    document.getElementById("veri_add_button").style.display = "inline-block";
 }
 
-// yazıdan matris tab click event
-const matris_create_bytext = document.getElementById("matris_create_bytext");
-if (matris_create_bytext) { matris_create_bytext.addEventListener("click", textMatrisPick, false); }
+// yazıdan df tab click event
+const veri_create_bytext = document.getElementById("veri_create_bytext");
+if (veri_create_bytext) { veri_create_bytext.addEventListener("click", textVeriPickDf, false); }
 
-//////// Dosya ile matris panelini göster
-function fileMatrisPick(event) {
+//////// Dosya ile df panelini göster
+function fileVeriPickDf(event) {
 
     // Hide other panels
-    document.getElementById("matris_vals_special").style.display = "none";
-    document.getElementById("matris_special_args").style.display = "none";
-    document.getElementById("matris_vals").style.display = "none";
-    document.getElementById("matris_options_column").style.display = "none";
+    document.getElementById("veri_vals_special").style.display = "none";
+    document.getElementById("veri_special_args").style.display = "none";
+    document.getElementById("veri_vals").style.display = "none";
+    document.getElementById("veri_options_column").style.display = "none";
 
     // Show upload button and options
-    document.getElementById("matris_file_button").style.display = "block";
-    document.getElementById("matris_options_column").style.display = "block";
+    document.getElementById("veri_file_button").style.display = "block";
+    document.getElementById("veri_options_column").style.display = "block";
 
     // Update "active" classes and styles
-    document.getElementById("matris_create_fromfile_parent").classList.add("active");
-    document.getElementById("matris_create_bytext_parent").classList.remove("active");
-    document.getElementById("special_matris_options").style.backgroundColor = "inherit";
-    document.getElementById("special_matris_options").style.border = null;
-    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
+    document.getElementById("veri_create_fromfile_parent").classList.add("active");
+    document.getElementById("veri_create_bytext_parent").classList.remove("active");
+    document.getElementById("special_veri_options").style.backgroundColor = "inherit";
+    document.getElementById("special_veri_options").style.border = null;
+    //document.getElementById("veri_create_byfile_parent").classList.remove("active");
 
     // Change add button's attribute
-    document.getElementById("matris_add_button").setAttribute("currentTab", "file");
+    document.getElementById("veri_add_button").setAttribute("currentTab", "file");
 
-    document.getElementById("matris_fromfile_create_button").style.display = "inline-block";
-    document.getElementById("matris_add_button").style.display = "none";
+    document.getElementById("veri_fromfile_create_button").style.display = "inline-block";
+    document.getElementById("veri_add_button").style.display = "none";
 }
 
-// dosyadan matris tab click event
-const matris_create_fromfile = document.getElementById("matris_create_fromfile");
-if (matris_create_fromfile) { matris_create_fromfile.addEventListener("click", fileMatrisPick, false); }
+// dosyadan df tab click event
+const veri_create_fromfile = document.getElementById("veri_create_fromfile");
+if (veri_create_fromfile) { veri_create_fromfile.addEventListener("click", fileVeriPickDf, false); }
 
-//////// özel matris dropdown seçeneklerinde değişim
-function specialMatrisPick(event) {
+//////// özel df dropdown seçeneklerinde değişim
+function specialVeriPickDf(event) {
     if (event.currentTarget.value == "special_options_placeholder")
         return;
 
     // Make special panel visible
-    document.getElementById("matris_vals_special").style.display = "inherit";
-    document.getElementById("matris_special_args").style.display = "inherit";
+    document.getElementById("veri_vals_special").style.display = "inherit";
+    document.getElementById("veri_special_args").style.display = "inherit";
 
     // Replace args placeholder with minimal needed
-    document.getElementById("matris_special_args").placeholder = event.currentTarget[event.currentTarget.selectedIndex].getAttribute("data");
+    document.getElementById("veri_special_args").placeholder = event.currentTarget[event.currentTarget.selectedIndex].getAttribute("data");
 
     // Hide standard panel
-    document.getElementById("matris_vals").style.display = "none";
-    document.getElementById("matris_options_column").style.display = "none";
-    document.getElementById("matris_file_button").style.display = "none";
+    document.getElementById("veri_vals").style.display = "none";
+    document.getElementById("veri_options_column").style.display = "none";
+    document.getElementById("veri_file_button").style.display = "none";
 
     // Update "active" classes and styles
-    document.getElementById("special_matris_options").style.backgroundColor = "white";
-    document.getElementById("special_matris_options").style.setProperty("border", "1px solid #d6d6d6", "important");
-    document.getElementById("matris_create_bytext_parent").classList.remove("active");
-    document.getElementById("matris_create_fromfile_parent").classList.remove("active");
-    //document.getElementById("matris_create_byfile_parent").classList.remove("active");
+    document.getElementById("special_veri_options").style.backgroundColor = "white";
+    document.getElementById("special_veri_options").style.setProperty("border", "1px solid #d6d6d6", "important");
+    document.getElementById("veri_create_bytext_parent").classList.remove("active");
+    document.getElementById("veri_create_fromfile_parent").classList.remove("active");
+    //document.getElementById("veri_create_byfile_parent").classList.remove("active");
 
     // Add selected value
-    document.getElementById("matris_vals_special").value = event.currentTarget.value;
+    document.getElementById("veri_vals_special").value = event.currentTarget.value;
 
     // Revert displayed selection
     event.currentTarget.selectedIndex = 0;
 
     // Change add button's attribute
-    document.getElementById("matris_add_button").setAttribute("currentTab", "special");
+    document.getElementById("veri_add_button").setAttribute("currentTab", "special");
 
-    document.getElementById("matris_fromfile_create_button").style.display = "none";
-    document.getElementById("matris_add_button").style.display = "inline-block";
+    document.getElementById("veri_fromfile_create_button").style.display = "none";
+    document.getElementById("veri_add_button").style.display = "inline-block";
 }
 
 // komut dropdown change event
-const special_matris_options = document.getElementById("special_matris_options");
-if (special_matris_options) { special_matris_options.addEventListener("change", specialMatrisPick, false); }
+const special_veri_options = document.getElementById("special_veri_options");
+if (special_veri_options) { special_veri_options.addEventListener("change", specialVeriPickDf, false); }
 
 //////// komut geçmişi panelini güncelle
-function updateHistoryPanel(token) {
-    $('#output_body').load('/Matris?handler=UpdateHistoryPanel', { __RequestVerificationToken: token }, function () {
-        updateTable(token);
-        }
+function updateHistoryPanelDf(token) {
+    $('#output_body_df').load('/Veri?handler=UpdateHistoryPanel', { __RequestVerificationToken: token }, function () {
+        updateMatTable(token);
+    }
 
     );
 }
 
-
 // Token highlighting ( individual )
-function colorInput(_event) {
+function colorInputDf(_event) {
     var append = false;
     var parentspan = window.getSelection();
     var parentnode = null;
@@ -383,7 +414,7 @@ function colorInput(_event) {
         ind = parseInt(baseind);
         ind += parentspan.baseNode.textContent.length - 1;
 
-        let chars = document.getElementById("matris_komut_satır").childNodes;
+        let chars = document.getElementById("matris_komut_satır_df").childNodes;
         let lastind = parseInt(chars[chars.length - 1].id.split("_")[1]);
 
         if (lastind > chars.length - 1) {
@@ -406,8 +437,7 @@ function colorInput(_event) {
                     ind += 1;
             }
         }
-        else if ( ind != chars.length)
-        {
+        else if (ind != chars.length) {
             if (baseind != "0") {
                 ind += 1;
             }
@@ -423,27 +453,27 @@ function colorInput(_event) {
         append = true;
     }
 
-    let inputSpan = document.getElementById("matris_komut_satır");
+    let inputSpan = document.getElementById("matris_komut_satır_df");
     const maxlen = 128;
     if (inputSpan.textContent.length > maxlen) {
         inputSpan.textContent = inputSpan.textContent.substring(0, maxlen);
         alert("Komut karakter limiti: " + maxlen);
-        setCaretPos(inputSpan);
+        setCaretPosDf(inputSpan);
         return;
     }
-    let newText = Highlight(inputSpan.textContent);
+    let newText = HighlightDf(inputSpan.textContent);
     inputSpan.innerHTML = newText;
     if (append)
-        setCaretPos(inputSpan);
+        setCaretPosDf(inputSpan);
     else
-        setCaretPos(inputSpan, ind);
+        setCaretPosDf(inputSpan, ind);
 
 }
 
 const operators = ["+", "-", "*", "/", ".", "%", "^", "="];
 const seperators = ["(", ")", ","];
 
-function Highlight(text) {
+function HighlightDf(text) {
     var htmlText = text;
 
     var span = "";
@@ -496,10 +526,9 @@ function Highlight(text) {
                 span = "<span class='settings_attname' id='cmd_" + i + "'>";
                 anySettingNameRead = true;
             }
-            
+
         }
-        else
-        {   // Any other operation
+        else {   // Any other operation
             if (operators.includes(char))
                 span = "<span class='operator' id='cmd_" + i + "'>";
             else if (seperators.includes(char))
@@ -530,9 +559,9 @@ function Highlight(text) {
     return htmlText;
 }
 
-function setCaretPos(elem,o = null) {
+function setCaretPosDf(elem, o = null) {
     let range = document.createRange();
-   
+
     if (o != null) {
         var _temp = true;
         while (_temp) {
@@ -558,10 +587,11 @@ function setCaretPos(elem,o = null) {
 }
 
 // Command syntax 
-const matris_komut_satır = document.getElementById("matris_komut_satır");
-if (matris_komut_satır) { matris_komut_satır.addEventListener("input", colorInput, false); }
-if (matris_komut_satır) {
-    matris_komut_satır.addEventListener('copy', (event) => {
+const matris_komut_satır_df = document.getElementById("matris_komut_satır_df");
+if (matris_komut_satır_df) { matris_komut_satır_df.addEventListener("input", colorInputDf, false); }
+if (matris_komut_satır_df) {
+    matris_komut_satır_df.addEventListener('copy', (event) => {
         event.clipboardData.setData('text', document.getSelection());
         event.preventDefault();
-    }); }
+    });
+}

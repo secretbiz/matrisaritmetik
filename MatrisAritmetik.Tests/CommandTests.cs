@@ -468,7 +468,7 @@ namespace MatrisAritmetik.Tests
                                                     new Token(){tknType=TokenType.RIGHTBRACE},
                                                     new Token(){
                                                         tknType=TokenType.OUTPUT,
-                                                        val=CompilerMessage.COMPILER_HELP
+                                                        val=CompilerMessage.COMPILER_HELP()
                                                     }
                                                   }
                     },
@@ -602,14 +602,14 @@ namespace MatrisAritmetik.Tests
                     { "?", new List<Token>(){ new Token(){tknType=TokenType.DOCS,info="info"},
                                               new Token(){
                                                   tknType=TokenType.OUTPUT,
-                                                  val=CompilerMessage.COMPILER_HELP
+                                                  val=CompilerMessage.COMPILER_HELP()
                                               }
                                           }
                     },
                     { "???", new List<Token>(){ new Token(){tknType=TokenType.DOCS,info="info"},
                                                 new Token(){
                                                   tknType=TokenType.OUTPUT,
-                                                  val=CompilerMessage.COMPILER_HELP
+                                                  val=CompilerMessage.COMPILER_HELP()
                                                 }
                                             }
                     },
@@ -634,7 +634,9 @@ namespace MatrisAritmetik.Tests
             }
         };
 
-        private void Tokenize_And_Evaluate_Command(Dictionary<string, List<Token>> cmds, Dictionary<string, MatrisBase<dynamic>> matdict)
+        private void Tokenize_And_Evaluate_Command(Dictionary<string, List<Token>> cmds,
+                                                   Dictionary<string, MatrisBase<dynamic>> matdict,
+                                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             // Loop through expressions
             foreach (string cmd in cmds.Keys)
@@ -645,7 +647,7 @@ namespace MatrisAritmetik.Tests
                 Command command = new Command(cmd);
 
                 // Tokenize 
-                command.SetTokens(FrontService.Tokenize(command.GetTermsToEvaluate()[0]));
+                command.SetTokens(FrontService.Tokenize(command.GetTermsToEvaluate()[0], mode));
 
                 List<Token> tokens = command.GetTokens();
 

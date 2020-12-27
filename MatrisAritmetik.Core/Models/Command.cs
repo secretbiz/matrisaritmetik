@@ -94,7 +94,7 @@ namespace MatrisAritmetik.Core.Models
         private const string ApplyOut = "out:";
         #endregion
 
-        #region Public Fields
+        #region Private Fields
         /// <summary>
         /// List of commands and settings to evaluate, first one hold the command, rest are settings
         /// </summary>
@@ -129,7 +129,7 @@ namespace MatrisAritmetik.Core.Models
         private Dictionary<string, string> valsSettings = new Dictionary<string, string>();
         #endregion
 
-        #region Command State Fields and Properties
+        #region Command State Fields and Public Properties
         private CommandState _state = CommandState.IDLE;
         /// <summary>
         /// Current <see cref="CommandState"/> of the command
@@ -408,20 +408,39 @@ namespace MatrisAritmetik.Core.Models
         {
             StringBuilder cmdset = new StringBuilder();
             StringBuilder outset = new StringBuilder();
-            foreach (string setting in GetNameSettings().Keys)
+
+            foreach (KeyValuePair<string, string> pair in GetNameSettings())
             {
-                cmdset.Append(setting);
-                cmdset.Append(':');
-                cmdset.Append(GetNameSettings()[setting]);
-                cmdset.Append('\t');
+                cmdset.Append('\n')
+                      .Append('\t')
+                      .Append(' ')
+                      .Append(pair.Key);
+
+                if (!string.IsNullOrWhiteSpace(pair.Value))
+                {
+                    cmdset.Append(' ')
+                          .Append('=')
+                          .Append(' ')
+                          .Append(pair.Value)
+                          .Append(';');
+                }
             }
 
-            foreach (string setting in GetValsSettings().Keys)
+            foreach (KeyValuePair<string, string> pair in GetValsSettings())
             {
-                outset.Append(setting);
-                outset.Append(':');
-                outset.Append(GetValsSettings()[setting]);
-                outset.Append('\t');
+                outset.Append('\n')
+                      .Append('\t')
+                      .Append(' ')
+                      .Append(pair.Key);
+
+                if (!string.IsNullOrWhiteSpace(pair.Value))
+                {
+                    outset.Append(' ')
+                          .Append('=')
+                          .Append(' ')
+                          .Append(pair.Value)
+                          .Append(';');
+                }
             }
 
             string state = STATE switch
@@ -434,12 +453,11 @@ namespace MatrisAritmetik.Core.Models
                 _ => "---",
             };
 
-            return "Komut: " + OriginalCommand + @"
-Ek ayarlar(Komut):" + cmdset + @"
-Ek ayarlar(Çıktı):" + outset + @"
-Çıktı:
-" + Output.ToString() + @"
-Durum: " + state;
+            return $"Komut: {OriginalCommand}"
+                   + $"\nDurum: {state}"
+                   + (cmdset.Length == 0 ? string.Empty : ("\nKomut stili:" + cmdset.ToString()))
+                   + (outset.Length == 0 ? string.Empty : ("\nÇıktı stili:" + outset.ToString()))
+                   + (string.IsNullOrWhiteSpace(Output is null ? string.Empty : Output.ToString()) ? string.Empty : ("\nÇıktı:\n" + Output.ToString()));
 
         }
         #endregion

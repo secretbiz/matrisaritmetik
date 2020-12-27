@@ -1,40 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
 namespace MatrisAritmetik.Pages
 {
-    /// <summary>
-    /// Page for matrix related operations
-    /// </summary>
-    public class MatrisModel : PageModel
+    public class VeriModel : PageModel
     {
         #region Session Variable Names
         private const string SessionMatrisDict = "_MatDictVals";
         private const string SessionSeedDict = "_MatDictSeed";
-        private const string SessionLastMessage = "_lastMsg";
-        private const string SessionOutputHistory = "_outputHistory";
-        private const string SessionLastCommandDate = "_lastCmdDate";
-        private const string SessionLastOutputDate = "_lastOutDate";
-        private const string SessionDfSettings = "_dfSettings"; // TO-DO : Change this
+        private const string SessionDfDict = "_dfDictVals";
+        private const string SessionDfSettings = "_dfSettings";
+        private const string SessionDfLabels = "_dfLabels";
+        private const string SessionLastMessage = "_dflastMsg";
+        private const string SessionOutputHistory = "_dfoutputHistory";
+        private const string SessionLastCommandDate = "_dflastCmdDate";
+        private const string SessionLastOutputDate = "_dflastOutDate";
         #endregion
 
         #region Expected Request Parameter Names
         private const string CommandParam = "cmd";
-        private const string MatrisNameParam = "name";
-        private const string MatrisValsParam = "vals";
-        private const string MatrisDelimParam = "delimiter";
-        private const string MatrisNewLineParam = "newline";
-        private const string MatrisSpecialFuncParam = "func";
-        private const string MatrisSpecialArgsParam = "args";
+        private const string DfNameParam = "name";
+        private const string DfValsParam = "vals";
+        private const string DfDelimParam = "delimiter";
+        private const string DfNewLineParam = "newline";
+        private const string DfSpecialFuncParam = "func";
+        private const string DfSpecialArgsParam = "args";
         #endregion
 
         #region ViewData Keys
@@ -60,20 +58,26 @@ namespace MatrisAritmetik.Pages
         /// Special matrix creating methods
         /// </summary>
         private readonly ISpecialMatricesService _specialMatricesService;
+        /// <summary>
+        /// Statistics methods
+        /// </summary>
+        private readonly IStatisticsService _statsService;
         #endregion
 
         #region Page Constructor
-        public MatrisModel(ILogger<MatrisModel> logger,
-                           IUtilityService<dynamic> utilityService,
-                           IMatrisArithmeticService<dynamic> matrisService,
-                           IFrontService frontService,
-                           ISpecialMatricesService specialMatricesService)
+        public VeriModel(ILogger<MatrisModel> logger,
+                         IUtilityService<dynamic> utilityService,
+                         IMatrisArithmeticService<dynamic> matrisService,
+                         IFrontService frontService,
+                         ISpecialMatricesService specialMatricesService,
+                         IStatisticsService statsService)
         {
             _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
             _matrisService = matrisService;
             _specialMatricesService = specialMatricesService;
+            _statsService = statsService;
         }
         #endregion
 
@@ -85,11 +89,7 @@ namespace MatrisAritmetik.Pages
         /// <summary>
         /// List of special labels used for special matrices
         /// </summary>
-        private readonly List<string> SpecialsLabels = new List<string>() { "Özel Matris" };
-        /// <summary>
-        /// List of labels to ignore
-        /// </summary>
-        private readonly List<string> IgnoreLabels = new List<string>() { "Özel Veri Tablosu" };
+        private readonly List<string> SpecialsLabels = new List<string>() { "�zel Veri Tablosu" };
         #endregion
 
         #region GET Actions
@@ -107,11 +107,13 @@ namespace MatrisAritmetik.Pages
                 _frontService.ReadCommandInformation();
             }
 
-            ViewData["komut_optionsdict"] = _frontService.GetCommandLabelList(IgnoreLabels, true);
+            ViewData["komut_optionsdict"] = _frontService.GetCommandLabelList(null, true);
 
             ViewData["special_optiondict"] = _frontService.GetCommandLabelList(SpecialsLabels);
 
             ViewData["matrix_dict"] = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+
+            ViewData["df_dict"] = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
 
             ViewData["output_history"] = new Dictionary<string, dynamic>()
             {
@@ -135,11 +137,10 @@ namespace MatrisAritmetik.Pages
                                           );
         }
 
-
         /// <summary>
-        /// Create and save a matrix with given name and values from text
+        /// Create and save a dataframe with given name and values from text
         /// </summary>
-        public async Task OnPostAddMatrix()
+        public async Task OnPostAddDataframe()
         {
             if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)))
             {
@@ -148,60 +149,62 @@ namespace MatrisAritmetik.Pages
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
                 await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
 
-                if (reqdict.ContainsKey(MatrisNameParam)
-                    && reqdict.ContainsKey(MatrisValsParam)
-                    && reqdict.ContainsKey(MatrisDelimParam)
-                    && reqdict.ContainsKey(MatrisNewLineParam)
+                if (reqdict.ContainsKey(DfNameParam)
+                    && reqdict.ContainsKey(DfValsParam)
+                    && reqdict.ContainsKey(DfDelimParam)
+                    && reqdict.ContainsKey(DfNewLineParam)
                    )
                 {
+                    Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
 
-                    Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
-
-                    if (!HttpContext.Session.GetDfSettings(SessionDfSettings).ContainsKey(reqdict[MatrisNameParam]))
+                    if (!HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict).ContainsKey(reqdict[DfNameParam]))
                     {
-                        if (!_dict.ContainsKey(reqdict[MatrisNameParam]))
+                        if (!_dict.ContainsKey(reqdict[DfNameParam]))
                         {
                             try
                             {
-                                Validations.ValidMatrixName(reqdict[MatrisNameParam], throwOnBadName: true);
+                                Validations.ValidMatrixName(reqdict[DfNameParam], throwOnBadName: true);
 
-                                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict) ?? new Dictionary<string, List<List<object>>>();
-                                Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict) ?? new Dictionary<string, Dictionary<string, dynamic>>();
+                                reqdict[DfDelimParam] = _utils.FixLiterals(reqdict[DfDelimParam]);
+                                reqdict[DfNewLineParam] = _utils.FixLiterals(reqdict[DfNewLineParam]);
+                                reqdict[DfValsParam] = _utils.FixLiterals(reqdict[DfValsParam]);
 
-                                reqdict[MatrisDelimParam] = _utils.FixLiterals(reqdict[MatrisDelimParam]);
-                                reqdict[MatrisNewLineParam] = _utils.FixLiterals(reqdict[MatrisNewLineParam]);
-                                reqdict[MatrisValsParam] = _utils.FixLiterals(reqdict[MatrisValsParam]);
-
-                                using MatrisBase<dynamic> mat = new MatrisBase<dynamic>
+                                using Dataframe df = new Dataframe
                                                                 (
                                                                     _utils.StringTo2DList
                                                                     (
-                                                                        reqdict[MatrisValsParam],
-                                                                        reqdict[MatrisDelimParam],
-                                                                        reqdict[MatrisNewLineParam]
+                                                                        reqdict[DfValsParam],
+                                                                        reqdict[DfDelimParam],
+                                                                        reqdict[DfNewLineParam]
                                                                     )
                                                                 );
-                                _frontService.AddToMatrisDict
+                                _frontService.AddToDfDict
                                 (
-                                    reqdict[MatrisNameParam],
-                                    mat,
+                                    reqdict[DfNameParam],
+                                    df,
                                     _dict
                                 );
 
-                                _frontService.SetMatrixDicts(_dict, vals, opts);
+                                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                                Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
+                                Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
 
-                                HttpContext.Session.Set(SessionMatrisDict, vals);
+                                _frontService.SetDfDicts(_dict, vals, labels, settings);
 
-                                HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+                                HttpContext.Session.Set(SessionDfDict, vals);
+                                HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
+                                HttpContext.Session.SetDfSettings(SessionDfSettings, settings);
 
-                                using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS);
+                                using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_DF(reqdict[DfNameParam]), CommandState.SUCCESS);
                                 HttpContext.Session.SetLastMsg(
                                                                 SessionLastMessage,
                                                                 msg
                                                               );
 
+                                DisposeDfDicts(null, labels);
                                 vals.Clear();
-                                opts.Clear();
+                                labels.Clear();
+                                settings.Clear();
                             }
                             catch (Exception err)
                             {
@@ -217,7 +220,7 @@ namespace MatrisAritmetik.Pages
                         }
                         else
                         {
-                            using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING);
+                            using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(reqdict[DfNameParam]), CommandState.WARNING);
                             HttpContext.Session.SetLastMsg(
                                                             SessionLastMessage,
                                                             msg
@@ -226,18 +229,19 @@ namespace MatrisAritmetik.Pages
                     }
                     else
                     {
-                        using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING);
+                        using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[DfNameParam]), CommandState.WARNING);
                         HttpContext.Session.SetLastMsg(
                                                         SessionLastMessage,
                                                         msg
                                                       );
                     }
 
+                    DisposeDfDicts(_dict, null);
                     _dict.Clear();
                 }
                 else
                 {
-                    using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddMatrix", new string[2] { MatrisNameParam, MatrisValsParam }), CommandState.ERROR);
+                    using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("AddDataframe", new string[2] { DfNameParam, DfValsParam }), CommandState.ERROR);
                     HttpContext.Session.SetLastMsg(
                                                     SessionLastMessage,
                                                     msg
@@ -259,9 +263,9 @@ namespace MatrisAritmetik.Pages
 
 
         /// <summary>
-        /// Create and save a matrix from given special class with given arguments and name
+        /// Create and save a dataframe from given special class with given arguments and name
         /// </summary>
-        public async Task OnPostAddMatrixSpecial()
+        public async Task OnPostAddDataframeSpecial()
         {
             if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastCommandDate)))
             {
@@ -270,32 +274,37 @@ namespace MatrisAritmetik.Pages
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
                 await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
 
-                if (reqdict.ContainsKey(MatrisNameParam) && reqdict.ContainsKey(MatrisSpecialFuncParam) && reqdict.ContainsKey(MatrisSpecialArgsParam))
+                if (reqdict.ContainsKey(DfNameParam) && reqdict.ContainsKey(DfSpecialFuncParam) && reqdict.ContainsKey(DfSpecialArgsParam))
                 {
-                    Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
 
-                    if (_dict.ContainsKey(reqdict[MatrisNameParam]))
+                    Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
+
+                    if (!_dict.ContainsKey(reqdict[DfNameParam]))
+                    {
+                        if (HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict).ContainsKey(reqdict[DfNameParam]))
+                        {
+                            HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
+                            using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[DfNameParam]), CommandState.WARNING);
+                            HttpContext.Session.SetLastMsg(
+                                                            SessionLastMessage,
+                                                            msg
+                                                          );
+                            DisposeDfDicts(_dict, null);
+                            return;
+                        }
+                    }
+                    else
                     {
                         HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
-                        using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING);
+                        using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(reqdict[DfNameParam]), CommandState.WARNING);
                         HttpContext.Session.SetLastMsg(
                                                         SessionLastMessage,
                                                         msg
                                                       );
+                        DisposeDfDicts(_dict, null);
                         return;
                     }
-                    else if (HttpContext.Session.GetDfSettings(SessionDfSettings).ContainsKey(reqdict[MatrisNameParam]))
-                    {
-                        HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
-                        using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(reqdict[MatrisNameParam]), CommandState.WARNING);
-                        HttpContext.Session.SetLastMsg(
-                                                        SessionLastMessage,
-                                                        msg
-                                                      );
-                        return;
-                    }
-
-                    string actualFuncName = reqdict[MatrisSpecialFuncParam][1..reqdict[MatrisSpecialFuncParam].IndexOf("(", StringComparison.CurrentCulture)];
+                    string actualFuncName = reqdict[DfSpecialFuncParam][1..reqdict[DfSpecialFuncParam].IndexOf("(", StringComparison.CurrentCulture)];
 
                     if (string.IsNullOrEmpty(actualFuncName))
                     {
@@ -305,6 +314,7 @@ namespace MatrisAritmetik.Pages
                                                         SessionLastMessage,
                                                         msg
                                                       );
+                        DisposeDfDicts(_dict, null);
                         return;
                     }
 
@@ -313,36 +323,43 @@ namespace MatrisAritmetik.Pages
                     {
                         try
                         {
-                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict) ?? new Dictionary<string, List<List<object>>>();
-                            Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict) ?? new Dictionary<string, Dictionary<string, dynamic>>();
+                            Validations.ValidMatrixName(reqdict[DfNameParam], throwOnBadName: true);
 
-                            Validations.ValidMatrixName(reqdict[MatrisNameParam], throwOnBadName: true);
+                            using Dataframe df = _utils.SpecialStringTo2DList
+                                                 (
+                                                     reqdict[DfSpecialArgsParam],
+                                                     cmdinfo,
+                                                     _dict
+                                                 );
 
-                            _frontService.AddToMatrisDict
+                            _frontService.AddToDfDict
                             (
-                                reqdict[MatrisNameParam],
-                                _utils.SpecialStringTo2DList
-                                (
-                                    reqdict[MatrisSpecialArgsParam],
-                                    cmdinfo,
-                                    _dict
-                                ),
+                                reqdict[DfNameParam],
+                                df,
                                 _dict
                             );
 
-                            _frontService.SetMatrixDicts(_dict, vals, opts);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
+                            Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
-                            HttpContext.Session.Set(SessionMatrisDict, vals);
+                            _frontService.SetDfDicts(_dict, vals, labels, settings);
 
-                            HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+                            HttpContext.Session.Set(SessionDfDict, vals);
+                            HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
+                            HttpContext.Session.SetDfSettings(SessionDfSettings, settings);
 
-                            using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS);
+                            using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_DF(reqdict[DfNameParam]), CommandState.SUCCESS);
                             HttpContext.Session.SetLastMsg(
                                                             SessionLastMessage,
                                                             msg
                                                           );
+
+                            DisposeDfDicts(null, labels);
                             vals.Clear();
-                            opts.Clear();
+                            labels.Clear();
+                            settings.Clear();
+
                         }
                         catch (Exception err)
                         {
@@ -355,6 +372,8 @@ namespace MatrisAritmetik.Pages
                                                             msg
                                                           );
                         }
+
+                        DisposeDfDicts(_dict, null);
 
                         _dict.Clear();
                     }
@@ -370,8 +389,8 @@ namespace MatrisAritmetik.Pages
                 else
                 {
                     using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS(
-                                                                                    "AddMatrixSpecial",
-                                                                                    new string[3] { MatrisNameParam, MatrisSpecialFuncParam, MatrisSpecialArgsParam }),
+                                                                                    "AddDataframeSpecial",
+                                                                                    new string[3] { DfNameParam, DfSpecialFuncParam, DfSpecialArgsParam }),
                                                                                     CommandState.ERROR);
                     HttpContext.Session.SetLastMsg(
                                                     SessionLastMessage,
@@ -407,9 +426,9 @@ namespace MatrisAritmetik.Pages
 
                 await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData).ConfigureAwait(false);
 
-                Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
+                Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
 
-                if (!HttpContext.Session.GetDfSettings(SessionDfSettings).ContainsKey(FileData["name"]))
+                if (!HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict).ContainsKey(FileData["name"]))
                 {
                     if (!_dict.ContainsKey(FileData["name"]))
                     {
@@ -417,7 +436,7 @@ namespace MatrisAritmetik.Pages
                         {
                             Validations.ValidMatrixName(FileData["name"], throwOnBadName: true);
 
-                            using MatrisBase<dynamic> mat = new MatrisBase<dynamic>
+                            using Dataframe mat = new Dataframe
                                                             (
                                                                 _utils.StringTo2DList
                                                                 (
@@ -426,30 +445,35 @@ namespace MatrisAritmetik.Pages
                                                                     FileData["newline"]
                                                                 )
                                                             );
-                            _frontService.AddToMatrisDict
+                            _frontService.AddToDfDict
                             (
                                 FileData["name"],
                                 mat,
                                 _dict
                             );
 
-                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.Get<Dictionary<string, List<List<object>>>>(SessionMatrisDict) ?? new Dictionary<string, List<List<object>>>();
-                            Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict) ?? new Dictionary<string, Dictionary<string, dynamic>>();
 
-                            _frontService.SetMatrixDicts(_dict, vals, opts);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
+                            Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
-                            HttpContext.Session.Set(SessionMatrisDict, vals);
+                            _frontService.SetDfDicts(_dict, vals, labels, settings);
 
-                            HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
+                            HttpContext.Session.Set(SessionDfDict, vals);
+                            HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
+                            HttpContext.Session.SetDfSettings(SessionDfSettings, settings);
 
-                            using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_MATRIX(FileData["name"]), CommandState.SUCCESS);
+                            using CommandMessage msg = new CommandMessage(CompilerMessage.SAVED_DF(FileData["name"]), CommandState.SUCCESS);
                             HttpContext.Session.SetLastMsg(
                                                             SessionLastMessage,
                                                             msg
                                                           );
 
+                            DisposeDfDicts(null, labels);
+
                             vals.Clear();
-                            opts.Clear();
+                            labels.Clear();
+                            settings.Clear();
                         }
                         catch (Exception err)
                         {
@@ -465,7 +489,7 @@ namespace MatrisAritmetik.Pages
                     }
                     else
                     {
-                        using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING);
+                        using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING);
                         HttpContext.Session.SetLastMsg(
                                                         SessionLastMessage,
                                                         msg
@@ -474,15 +498,17 @@ namespace MatrisAritmetik.Pages
                 }
                 else
                 {
-                    using CommandMessage msg = new CommandMessage(CompilerMessage.DF_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING);
+                    using CommandMessage msg = new CommandMessage(CompilerMessage.MAT_NAME_ALREADY_EXISTS(FileData["name"]), CommandState.WARNING);
                     HttpContext.Session.SetLastMsg(
                                                     SessionLastMessage,
                                                     msg
                                                   );
                 }
 
+                DisposeDfDicts(_dict, null);
                 _dict.Clear();
                 FileData.Clear();
+
                 HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
             }
             else
@@ -505,18 +531,18 @@ namespace MatrisAritmetik.Pages
 
             await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
 
-            if (reqdict.ContainsKey(MatrisNameParam))
+            if (reqdict.ContainsKey(DfNameParam))
             {
-                reqdict[MatrisNameParam] = reqdict[MatrisNameParam].Replace("matris_table_delbutton_", "");
+                reqdict[DfNameParam] = reqdict[DfNameParam].Replace("matris_table_delbutton_", "");
 
                 Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
                 Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
                 Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
-                if (_frontService.DeleteFromMatrisDict(reqdict[MatrisNameParam], _dict))
+                if (_frontService.DeleteFromMatrisDict(reqdict[DfNameParam], _dict))
                 {
-                    vals.Remove(reqdict[MatrisNameParam]);
-                    opts.Remove(reqdict[MatrisNameParam]);
+                    vals.Remove(reqdict[DfNameParam]);
+                    opts.Remove(reqdict[DfNameParam]);
                 }
 
                 // Uncomment this if deleting matrices are made possible through compiler
@@ -525,7 +551,7 @@ namespace MatrisAritmetik.Pages
                 HttpContext.Session.Set(SessionMatrisDict, vals);
                 HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
 
-                using CommandMessage msg = new CommandMessage(CompilerMessage.DELETED_MATRIX(reqdict[MatrisNameParam]), CommandState.SUCCESS);
+                using CommandMessage msg = new CommandMessage(CompilerMessage.DELETED_MATRIX(reqdict[DfNameParam]), CommandState.SUCCESS);
                 HttpContext.Session.SetLastMsg(
                                                 SessionLastMessage,
                                                 msg
@@ -539,6 +565,54 @@ namespace MatrisAritmetik.Pages
             reqdict.Clear();
         }
 
+        /// <summary>
+        /// Remove a dataframe from the table
+        /// </summary>
+        public async Task OnPostDeleteDataframe()
+        {
+            Dictionary<string, string> reqdict = new Dictionary<string, string>();
+
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+
+            if (reqdict.ContainsKey(DfNameParam))
+            {
+                reqdict[DfNameParam] = reqdict[DfNameParam].Replace("veri_table_delbutton_", "");
+
+                Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
+                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
+                Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
+
+                if (_frontService.DeleteFromDfDict(reqdict[DfNameParam], _dict))
+                {
+                    vals.Remove(reqdict[DfNameParam]);
+                    labels.Remove(reqdict[DfNameParam]);
+                    settings.Remove(reqdict[DfNameParam]);
+                }
+
+                // Uncomment this if deleting matrices are made possible through compiler
+                //_frontService.SetMatrixDicts(_dict, vals, opts);
+
+                HttpContext.Session.Set(SessionDfDict, vals);
+                HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
+                HttpContext.Session.SetDfSettings(SessionDfSettings, settings);
+
+                DisposeDfDicts(_dict, labels);
+
+                using CommandMessage msg = new CommandMessage(CompilerMessage.DELETED_DF(reqdict[DfNameParam]), CommandState.SUCCESS);
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                msg
+                                              );
+
+                _dict.Clear();
+                vals.Clear();
+                labels.Clear();
+                settings.Clear();
+            }
+
+            reqdict.Clear();
+        }
 
         /// <summary>
         /// Create and evaluate a command
@@ -566,19 +640,23 @@ namespace MatrisAritmetik.Pages
                             Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
                             Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
+                            Dictionary<string, Dataframe> dfdict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
+                            Dictionary<string, List<List<object>>> dfvals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, Dictionary<string, List<LabelList>>> dflabels = HttpContext.Session.GetDfLabels(SessionDfLabels);
                             Dictionary<string, Dictionary<string, dynamic>> dfsettings = HttpContext.Session.GetDfSettings(SessionDfSettings);
-                            foreach (string name in dfsettings.Keys)
+
+                            foreach (KeyValuePair<string, Dataframe> pair in dfdict)
                             {
-                                tempdict.Add(name, new Dataframe());
+                                tempdict.Add(pair.Key, pair.Value);
                             }
 
                             cmd.SetTokens(_frontService.ShuntingYardAlg(_frontService.Tokenize(cmd.GetTermsToEvaluate()[0],
-                                                                                               CompilerDictionaryMode.Matrix)));
+                                                                                               CompilerDictionaryMode.All)));
 
                             _frontService.EvaluateCommand(cmd,
                                                           tempdict,
                                                           cmdlis,
-                                                          CompilerDictionaryMode.Matrix);
+                                                          CompilerDictionaryMode.All);
 
                             using CommandMessage msg = new CommandMessage(cmd.GetStateMessage(), cmd.STATE);
                             HttpContext.Session.SetLastMsg(SessionLastMessage,
@@ -586,7 +664,25 @@ namespace MatrisAritmetik.Pages
 
                             foreach (string key in tempdict.Keys)
                             {
-                                if (!(tempdict[key] is Dataframe df))
+                                if (tempdict[key] is Dataframe df)
+                                {
+                                    if (dfdict.ContainsKey(key))
+                                    {
+                                        dfdict[key] = df;
+                                    }
+                                    else
+                                    {
+                                        dfdict.Add(key, df);
+                                    }
+
+                                    if (_dict.ContainsKey(key))
+                                    {
+                                        _dict.Remove(key);
+                                        vals.Remove(key);
+                                        opts.Remove(key);
+                                    }
+                                }
+                                else
                                 {
                                     if (_dict.ContainsKey(key))
                                     {
@@ -596,6 +692,14 @@ namespace MatrisAritmetik.Pages
                                     {
                                         _dict.Add(key, tempdict[key]);
                                     }
+
+                                    if (dfdict.ContainsKey(key))
+                                    {
+                                        dfdict.Remove(key);
+                                        dfvals.Remove(key);
+                                        dflabels.Remove(key);
+                                        dfsettings.Remove(key);
+                                    }
                                 }
                             }
 
@@ -603,10 +707,25 @@ namespace MatrisAritmetik.Pages
                             HttpContext.Session.Set(SessionMatrisDict, vals);
                             HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
 
+                            _frontService.SetDfDicts(dfdict, dfvals, dflabels, dfsettings);
+                            HttpContext.Session.Set(SessionDfDict, dfvals);
+                            HttpContext.Session.SetDfLabels(SessionDfLabels, dflabels);
+                            HttpContext.Session.SetDfSettings(SessionDfSettings, dfsettings);
+
+                            DisposeDfDicts(null, dflabels);
+
+                            foreach (MatrisBase<dynamic> d in tempdict.Values)
+                            {
+                                d.Dispose();
+                            }
+
                             tempdict.Clear();
                             _dict.Clear();
                             vals.Clear();
                             opts.Clear();
+                            dfdict.Clear();
+                            dfvals.Clear();
+                            dflabels.Clear();
                             dfsettings.Clear();
                         }
                         catch (Exception err)
@@ -666,15 +785,26 @@ namespace MatrisAritmetik.Pages
 
         #region POST Action Partials
         /// <summary>
+        /// Dataframe table partial view re-rendering
+        /// </summary>
+        /// <returns>Partial view result of the matrix table</returns>
+        public PartialViewResult OnPostUpdateDataframeTable()
+        {
+            PartialViewResult mpart = Partial("_VeriTablePartial", HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings));
+
+            return mpart;
+        }
+
+        /// <summary>
         /// Matrix table partial view re-rendering
         /// </summary>
         /// <returns>Partial view result of the matrix table</returns>
         public PartialViewResult OnPostUpdateMatrisTable()
         {
             PartialViewResult mpart = Partial("_MatrisTablePartial", HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict));
-            mpart.ViewData["headcls"] = "matris_table matris_table_head";
-            mpart.ViewData["headtdcls"] = "saved_mattable_title";
-            mpart.ViewData["bodyclass"] = "matris_table";
+            mpart.ViewData["headcls"] = "df_matris_table df_matris_table_head";
+            mpart.ViewData["headtdcls"] = "df_saved_mattable_title";
+            mpart.ViewData["bodyclass"] = "df_matris_table";
             return mpart;
         }
 
@@ -686,7 +816,7 @@ namespace MatrisAritmetik.Pages
         {
             PartialViewResult mpart =
                 Partial(
-                            "_OutputPanelPartial",
+                            "_dfOutputPanelPartial",
                             new Dictionary<string, dynamic>()
                             {
                                 { CommandHistoryKey , HttpContext.Session.GetCmdList(SessionOutputHistory) },
@@ -699,5 +829,40 @@ namespace MatrisAritmetik.Pages
 
         #endregion
 
+        #region Dispose
+        /// <summary>
+        /// Dispose given dataframe dictionary and/or labels dictionary
+        /// </summary>
+        /// <param name="dfdict">Dataframe dictionary</param>
+        /// <param name="lbls">Labels dictionary</param>
+        private void DisposeDfDicts(Dictionary<string, Dataframe> dfdict,
+                                    Dictionary<string, Dictionary<string, List<LabelList>>> lbls)
+        {
+            if (dfdict != null)
+            {
+                foreach (Dataframe d in dfdict.Values)
+                {
+                    d.Dispose();
+                }
+            }
+            if (lbls != null)
+            {
+                foreach (Dictionary<string, List<LabelList>> d in lbls.Values)
+                {
+                    foreach (List<LabelList> ls in d.Values)
+                    {
+                        if (ls != null)
+                        {
+                            foreach (LabelList l in ls)
+                            {
+                                l.Dispose();
+                            }
+                            ls.Clear();
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

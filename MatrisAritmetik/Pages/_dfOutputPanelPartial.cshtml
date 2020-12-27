@@ -4,14 +4,14 @@
 
     MatrisAritmetik.Core.Models.Command cmd;
     MatrisAritmetik.Core.CommandMessage msg;
-    MatrisAritmetik.Core.Models.MatrisBase<string> matoutput;
+    MatrisAritmetik.Core.Models.Dataframe matoutput;
 
     string cmdstyle = ";"; string outstyle = ";";
-    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows);
-    MatrisAritmetik.Core.Services.IUtilityService<string> utilityService = new MatrisAritmetik.Services.UtilityService<string>();
+    int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.DataframeLimits.forCols * 12, (int)MatrisAritmetik.Core.DataframeLimits.forRows) / 2;
+    MatrisAritmetik.Core.Services.IUtilityService<object> utilityService = new MatrisAritmetik.Services.UtilityService<object>();
 
-    string lastmsg = MatrisModel.LastMessageKey;
-    string cmdhist = MatrisModel.CommandHistoryKey;
+    string lastmsg = VeriModel.LastMessageKey;
+    string cmdhist = VeriModel.CommandHistoryKey;
 
     if (Model != null)
     {
@@ -84,14 +84,14 @@
     if (Model[cmdhist].Count == 0)
     {
 
-        <tr class="cmdrepeat" title='Komut ek-bilgileri burada görüntülenir'>
+        <tr class="cmdrepeat_df" title='Komut ek-bilgileri burada görüntülenir'>
             <td>
-                <span class="command_start">>>></span> Komut geçmişi burada görüntülenir <span class="command_start">=</span>
+                <span class="command_start_df">>>></span> Komut geçmişi burada görüntülenir <span class="command_start_df">=</span>
             </td>
         </tr>
 
         <tr class="outputRow">
-            <td class="cmdoutput">Çıktı geçmişi burada görüntülenir...</td>
+            <td class="cmdoutput_df">Çıktı geçmişi burada görüntülenir...</td>
         </tr>
 
     }
@@ -108,7 +108,7 @@
 
                 if (cmd.OriginalCommand.Contains("?"))
                 {
-                    <tr class="cmdrepeat cmdHelpCommandGiven" style='@cmdstyle' title='@cmd.CommandSummary()'>
+                    <tr class="cmdrepeat_df cmdHelpCommandGiven_df" style='@cmdstyle' title='@cmd.CommandSummary()'>
                         <td style='@cmdstyle'>
                             <span class="cmdHelpStart">>>></span> @cmd.OriginalCommand <span class="cmdHelpStart">=</span>
                         </td>
@@ -116,14 +116,14 @@
 
 
                     <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
-                        <td class="cmdoutput compilerHelp" style='@outstyle'>@cmd.Output</td>
+                        <td class="cmdoutput_df compilerHelp" style='@outstyle'>@cmd.Output</td>
                     </tr>
                 }
                 else
                 {
-                    <tr class="cmdrepeat" style='@cmdstyle' title='@cmd.CommandSummary()'>
+                    <tr class="cmdrepeat_df" style='@cmdstyle' title='@cmd.CommandSummary()'>
                         <td style='@cmdstyle'>
-                            <span class="command_start">>>></span> @cmd.OriginalCommand <span class="command_start">=</span>
+                            <span class="command_start_df">>>></span> @cmd.OriginalCommand <span class="command_start_df">=</span>
                         </td>
                     </tr>
 
@@ -131,11 +131,11 @@
                     {
                         try
                         {
-                            matoutput = new MatrisAritmetik.Core.Models.MatrisBase<string>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
+                            matoutput = new MatrisAritmetik.Core.Models.Dataframe(utilityService.StringTo2DList((string)cmd.Output.ToString()));
                         }
                         catch (Exception)
                         {
-                            matoutput = new MatrisAritmetik.Core.Models.MatrisBase<string>(0, 0, "");
+                            matoutput = (new MatrisAritmetik.Core.Models.Dataframe(new List<List<dynamic>>()," ","\n",null,null,null,null));
                         }
                         if (matoutput.IsValid())
                         {
@@ -183,7 +183,7 @@
                         else
                         {
                             <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
-                                <td class="cmdoutput" style='@outstyle'>@cmd.Output</td>
+                                <td class="cmdoutput_df" style='@outstyle'>@cmd.Output</td>
                             </tr>
                         }
                     }
@@ -191,20 +191,20 @@
                     {
 
                         <tr class="outputRow" style='@outstyle' title='@cmd.CommandSummary()'>
-                            <td class="cmdoutput" style='@outstyle'>@cmd.Output</td>
+                            <td class="cmdoutput_df" style='@outstyle'>@cmd.Output</td>
                         </tr>
                     }
                 }
             }
             else if (cmd.STATE == Core.CommandState.ERROR)
             {
-                <tr class="cmdrepeat" style="min-height:unset !important;" title='@cmd.CommandSummary()'>
+                <tr class="cmdrepeat_df" style="min-height:unset !important;" title='@cmd.CommandSummary()'>
                     <td class="commandError">
-                        <span class="command_start">>>></span> @cmd.OriginalCommand
+                        <span class="command_start_df">>>></span> @cmd.OriginalCommand
                     </td>
                 </tr>
                 <tr class="outputRow">
-                    <td class="cmdoutput" style="white-space:unset !important;" title='@cmd.CommandSummary()'>
+                    <td class="cmdoutput_df" style="white-space:unset !important;" title='@cmd.CommandSummary()'>
                         <span style="color:red;font-size:16px;font-weight:bolder">[HATA]</span> @cmd.GetStateMessage()
                     </td>
                 </tr>

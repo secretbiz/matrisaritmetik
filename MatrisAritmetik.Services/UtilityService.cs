@@ -18,12 +18,17 @@ namespace MatrisAritmetik.Services
         /// <summary>
         /// Encoded version of "=" sign from the body
         /// </summary>
-        private const string EQSignSpecial = "!__EQ!";
+        private const string EQSignSpecial = "!!__EQ!!";
 
         /// <summary>
         /// Encoded version of "./" sign from the body
         /// </summary>
-        private const string ReverMatMulSpecial = "!__REVMUL!";
+        private const string ReverMatMulSpecial = "!!__REVMUL!!";
+
+        /// <summary>
+        /// Encoded version of "&" sign from the body
+        /// </summary>
+        private const string ANDSignSpecial = "!!__AND!!";
         #endregion
 
         #region UtilityService Methods
@@ -254,6 +259,19 @@ namespace MatrisAritmetik.Services
 
                             break;
                         }
+                    case "Veri Tablosu":
+                        {
+                            if (matdict.ContainsKey(currentArg))
+                            {
+                                param_dict.Add(currentParamName, matdict[currentArg]);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
+                            }
+
+                            break;
+                        }
                     default:
                         {
                             throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
@@ -294,6 +312,169 @@ namespace MatrisAritmetik.Services
             MatrisBase<T> result = (MatrisBase<T>)method.Invoke(serviceObject, param_arg);
 
             return result;
+        }
+
+        public Dataframe SpecialStringTo2DList(string text,
+                                               CommandInfo funcinfo,
+                                               Dictionary<string, Dataframe> dfdict,
+                                               char argseperator = ',',
+                                               char argnamevalseperator = ':',
+                                               bool removeliterals = true)
+        {
+            string filteredText = text;
+            if (removeliterals)
+            {
+                filteredText = filteredText.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ').Replace(" ", "");
+            }
+
+            string[] rowsplit;
+
+            // Store given arguments
+            Dictionary<string, object> param_dict = new Dictionary<string, object>();
+
+            string[] args = filteredText.Split(argseperator);
+            string currentParamName;
+            string currentParamType;
+            string currentArg;
+
+            if (args.Length < funcinfo.Required_params || args.Length > funcinfo.Param_names.Length)
+            {
+                throw new Exception(CompilerMessage.ARG_COUNT_ERROR);
+            }
+
+            bool paramHintUsed = false;
+
+            // Start checking arguments, parse them
+            for (int argind = 0; argind < args.Length; argind++)
+            {
+                rowsplit = args[argind].Split(argnamevalseperator);
+
+                // Positional
+                if (rowsplit.Length == 1)
+                {
+                    if (paramHintUsed)
+                    {
+                        throw new Exception(CompilerMessage.ARG_GIVEN_AFTER_HINTED_PARAM);
+                    }
+
+                    currentArg = rowsplit[0];
+                    currentParamName = funcinfo.Param_names[argind];
+                    currentParamType = funcinfo.Param_types[argind];
+
+                    if (param_dict.ContainsKey(currentParamName))
+                    {
+                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(currentParamName));
+                    }
+                }
+                // Parameter name given
+                else if (rowsplit.Length == 2)
+                {
+                    paramHintUsed = true;
+                    currentArg = rowsplit[1];
+                    currentParamName = rowsplit[0];
+
+                    if (Array.IndexOf(funcinfo.Param_names, currentParamName) == -1)
+                    {
+                        throw new Exception(CompilerMessage.PARAMETER_NAME_INVALID(currentParamName));
+                    }
+
+                    if (param_dict.ContainsKey(currentParamName))
+                    {
+                        throw new Exception(CompilerMessage.MULTIPLE_REFERENCES(currentParamName));
+                    }
+
+                    currentParamType = funcinfo.Param_types[Array.IndexOf(funcinfo.Param_names, currentParamName)];
+                }
+                else
+                {
+                    throw new Exception(CompilerMessage.STRING_FORMAT_INVALID("param_1:değer_1, param_2:değer_2 ... veya değer_1,değer_2,..."));
+                }
+
+                // Parse as param type
+                switch (currentParamType)
+                {
+                    case "int":
+                        {
+                            if (int.TryParse(currentArg, out int element))
+                            {
+                                param_dict.Add(currentParamName, element);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "tamsayı"));
+                            }
+
+                            break;
+                        }
+                    case "float":
+                        {
+                            if (float.TryParse(currentArg, out float element))
+                            {
+                                param_dict.Add(currentParamName, element);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "ondalıklı"));
+                            }
+
+                            break;
+                        }
+                    case "string":
+                        {
+                            param_dict.Add(currentParamName, currentArg);
+                            break;
+                        }
+                    case "Matris":
+                        {
+                            if (dfdict.ContainsKey(currentArg))
+                            {
+                                param_dict.Add(currentParamName, dfdict[currentArg]);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
+                            }
+
+                            break;
+                        }
+                    default:
+                        {
+                            throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
+                        }
+                }
+
+            }
+
+            // Check if all required parameters had values
+            for (int i = 0; i < funcinfo.Required_params; i++)
+            {
+                if (!param_dict.ContainsKey(funcinfo.Param_names[i]))
+                {
+                    throw new Exception(CompilerMessage.MISSING_ARGUMENT(funcinfo.Param_names[i]));
+                }
+            }
+
+            object[] param_arg = new object[funcinfo.Param_names.Length];
+            int ind;
+
+            // Create the service
+            ConstructorInfo service = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetConstructor(Type.EmptyTypes);
+            object serviceObject = service.Invoke(Array.Empty<object>());
+
+            // Find and invoke method inside named same as given function name in funcinfo
+            MethodInfo method = Type.GetType("MatrisAritmetik.Services.SpecialMatricesService").GetMethod(funcinfo.Function);
+            ParameterInfo[] paraminfo = method.GetParameters();
+
+            // Put values in order
+            foreach (string par in param_dict.Keys)
+            {
+                ind = Array.IndexOf(funcinfo.Param_names, par);
+                param_arg[ind] = param_dict[par];
+            }
+
+            CompilerUtils.ParseDefaultValues(funcinfo.Param_names.Length, param_arg, paraminfo);
+
+            return (Dataframe)method.Invoke(serviceObject, param_arg);
         }
 
         public async Task ReadFileFromRequest(Stream reqbody,
@@ -351,7 +532,7 @@ namespace MatrisAritmetik.Services
 
                 if (!decodedRequestDict.ContainsKey(pairsplit[0]))
                 {
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace(EQSignSpecial, "=").Replace(ReverMatMulSpecial, "./"));
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace(EQSignSpecial, "=").Replace(ANDSignSpecial, "&").Replace(ReverMatMulSpecial, "./"));
                 }
             }
 
@@ -395,7 +576,7 @@ namespace MatrisAritmetik.Services
             T currentmin = lis[0];
             foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
             {
-                if ((float.Parse(val.ToString()) < (float.Parse(currentmin.ToString()))))
+                if (float.Parse(val.ToString()) < float.Parse(currentmin.ToString()))
                 {
                     currentmin = val;
                 }

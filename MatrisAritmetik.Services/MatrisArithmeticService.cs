@@ -87,7 +87,7 @@ namespace MatrisAritmetik.Services
             {
                 next = false;
                 int r = 1;
-                while ((float.Parse(result.GetValues()[p][p].ToString())) == (float)0.0)
+                while (float.Parse(result.GetValues()[p][p].ToString()) == (float)0.0)
                 {
                     if (p + 1 < nr)
                     {
@@ -96,10 +96,16 @@ namespace MatrisAritmetik.Services
                             nr--;
                         }
 
-                        result.SwapToEnd(p, 0);
+                        if (!Sub(result, p, nr, p, p + 1, 0).IsZeroCol(1))
+                        {
+                            result.SwapToEnd(p, 0);
+                            swapCount++;
+                        }
+                        else
+                        {
+                            p++;
+                        }
                         next = true;
-                        swapCount++;
-
                         break;
                     }
                     else
@@ -135,7 +141,7 @@ namespace MatrisAritmetik.Services
                     continue;
                 }
 
-                for (; (r >= 1 && r < (nr - p)); r++)
+                for (; r >= 1 && r < (nr - p); r++)
                 {
                     if (float.Parse(result.GetValues()[p + r][p].ToString()) != (float)0.0)
                     {
@@ -189,49 +195,50 @@ namespace MatrisAritmetik.Services
                 return A;
             }
 
-            MatrisBase<T> result = Echelon(A);
+            MatrisBase<T> result = A.Copy();
 
-            int rowCount = A.Row;
-            while (result.IsZeroRow(rowCount, 1, (float)0.0))
+            int lead = 0;
+            int nr = A.Row;
+            int nc = A.Col;
+
+            for (int r = 0; r < nr; r++)
             {
-                rowCount--;
-            }
-
-            if (rowCount < 1)
-            {
-                return A;
-            }
-
-            int colCount = A.Col;
-
-            for (int i = rowCount - 1; i >= 0; i--)
-            {
-                if (result.IsZeroRow(i, 0, (float)0.0))
+                if (nc <= lead)
                 {
-                    continue;
+                    break;
                 }
-
-                int pivotindex = 0;
-                while (float.Parse(result.GetValues()[i][pivotindex].ToString()) == (float)0.0)
+                int i = r;
+                while (float.Parse(result[i, lead].ToString()) == (float)0.0)
                 {
-                    pivotindex++;
-                }
-
-                result.MulRow(i, (float)1.0 / float.Parse(result.GetValues()[i][pivotindex].ToString()), 0);
-
-                for (int e = i - 1; e >= 0; e--)
-                {
-                    if (float.Parse(result.GetValues()[e][pivotindex].ToString()) == (float)0.0)
+                    i++;
+                    if (nr == i)
                     {
-                        continue;
-                    }
-
-                    float factor = -float.Parse(result.GetValues()[e][pivotindex].ToString());
-                    for (int j = pivotindex; j < colCount; j++)
-                    {
-                        result[e][j] = (dynamic)(float.Parse(result.GetValues()[e][j].ToString()) + (float.Parse(result.GetValues()[i][j].ToString()) * factor));
+                        i = r;
+                        lead++;
+                        if (nc == lead)
+                        {
+                            break;
+                        }
                     }
                 }
+
+                result.Swap(i, r, 0, 0);
+
+                if (float.Parse(result[r, lead].ToString()) != (float)0.0)
+                {
+                    result.MulRow(r, (float)1.0 / float.Parse(result[r, lead].ToString()), 0);
+                }
+                for (int j = 0; j < nr; j++)
+                {
+                    if (j != r)
+                    {
+                        for (int k = 0; k < nc; k++)
+                        {
+                            result.MulThenSubFromOtherRow(r, float.Parse(result[j, lead].ToString()), j, 0);
+                        }
+                    }
+                }
+                lead++;
             }
 
             result.FixMinusZero();
@@ -330,7 +337,7 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            if (Determinant(A) == (float)(0.0))
+            if (Determinant(A) == (float)0.0)
             {
                 throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
@@ -369,7 +376,7 @@ namespace MatrisAritmetik.Services
                         throw new Exception(CompilerMessage.MAT_PSEINV_DET_ZERO(sidename));
                     }
 
-                    throw err;
+                    throw new Exception("Genelleştirilmiş ters matris hatası:\n", err);
                 }
             }
             else  // Right inverse
@@ -385,7 +392,7 @@ namespace MatrisAritmetik.Services
                         throw new Exception(CompilerMessage.MAT_PSEINV_DET_ZERO(sidename));
                     }
 
-                    throw err;
+                    throw new Exception("Genelleştirilmiş ters matris hatası:\n", err);
                 }
             }
         }
@@ -691,7 +698,7 @@ namespace MatrisAritmetik.Services
                 for (int c = 0; c < n; c++)
                 {
                     val = vals[r][c];
-                    newlis[(r * n + c) / col].Add(val);
+                    newlis[((r * n) + c) / col].Add(val);
                 }
             }
 
@@ -722,7 +729,7 @@ namespace MatrisAritmetik.Services
                     }
                     else
                     {
-                        newvals[i].Add((dynamic)(1));
+                        newvals[i].Add((dynamic)1);
                     }
                 }
             }

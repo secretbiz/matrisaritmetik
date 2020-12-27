@@ -153,6 +153,123 @@
             }
         ]
     },
+    {
+        "Label": "Özel Veri Tablosu",
+        "Functions": [
+            {
+                "fullname": "Birim matris",
+                "description": "Birim matris olarak veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "IdentityDf",
+                "param_types": [ "int" ],
+                "param_names": [ "dimension" ],
+                "required_params": 1,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!IdentityDf()",
+                "function_template_filled": "!IdentityDf(dimension)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Tamsayı",
+                "description": "Rastgele tamsayılar ile veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "RandIntDf",
+                "param_types": [ "int", "int", "int", "int", "int" ],
+                "param_names": [ "row", "col", "min", "max", "seed" ],
+                "required_params": 2,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!RandIntDf(,,,,)",
+                "function_template_filled": "!RandIntDf(row,col,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Tamsayı Simetrik",
+                "description": "Rastgele tamsayılar ile simetrik veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "SymIntDf",
+                "param_types": [ "int", "int", "int", "int" ],
+                "param_names": [ "dimension", "min", "max", "seed" ],
+                "required_params": 1,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!SymIntDf(,,,)",
+                "function_template_filled": "!SymIntDf(dimension,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Rasyonel",
+                "description": "Rastgele rasyonel sayılar ile veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "RandFloatDf",
+                "param_types": [ "int", "int", "float", "float", "int" ],
+                "param_names": [ "row", "col", "min", "max", "seed" ],
+                "required_params": 2,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!RandFloatDf(,,,,)",
+                "function_template_filled": "!RandFloatDf(row,col,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Rasyonel Simetrik",
+                "description": "Rastgele rasyonel sayılar ile simetrik veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "SymFloatDf",
+                "param_types": [ "int", "float", "float", "int" ],
+                "param_names": [ "dimension", "min", "max", "seed" ],
+                "required_params": 1,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!SymFloatDf(,,,)",
+                "function_template_filled": "!SymFloatDf(dimension,min:0,max:1,seed:!null)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Doldur",
+                "description": "Verilen sayı ile doldurulmuş veri tablosu oluşturma fonksiyonu",
+
+                "alias_list": [],
+                "function": "FillDf",
+                "param_types": [ "int", "int", "float" ],
+                "param_names": [ "row", "col", "fill" ],
+                "required_params": 3,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!FillDf(,,)",
+                "function_template_filled": "!FillDf(row,col,fill)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Aralık",
+                "description": "Verilen aralığı verilen alt-aralıklara bölünmüş halde satır veya sütun vektörü.\n\t\t  axis:(0 = Satır matris, 1 = sütun matris)\n\t\t  digits:Kullanılacak ondalıklı basamak sayısı",
+
+                "alias_list": [],
+                "function": "RangeDf",
+                "param_types": [ "float", "float", "float", "int", "int" ],
+                "param_names": [ "start", "end", "interval", "axis", "digits" ],
+                "required_params": 2,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!RangeDf(,,,)",
+                "function_template_filled": "!RangeDf(start,end,interval:1,axis:0,digits:6)",
+
+                "service": "SpecialMatricesService"
+            }
+        ]
+    },
 
     {
         "Label": "Aritmetik",

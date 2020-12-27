@@ -19,12 +19,29 @@ namespace MatrisAritmetik.Core.Services
         void AddToMatrisDict(string name, MatrisBase<dynamic> mat, Dictionary<string, MatrisBase<dynamic>> matdict);
 
         /// <summary>
+        /// Add a dataframe to the dataframe dictionary
+        /// </summary>
+        /// <param name="name">Dataframe name</param>
+        /// <param name="df">Dataframe to add</param>
+        /// <param name="dfdict">Dataframe dictionary to add the dataframe to</param>
+        void AddToDfDict(string name, Dataframe df, Dictionary<string, Dataframe> dfdict);
+
+        /// <summary>
         /// Remove a matrix from the matrix dictionary
         /// </summary>
         /// <param name="name">Matrix name</param>
         /// <param name="matdict">Matrix dictionary to use</param>
         /// <returns>True if matrix was found and deleted</returns>
         bool DeleteFromMatrisDict(string name, Dictionary<string, MatrisBase<dynamic>> matdict);
+
+        /// <summary>
+        /// Remove a dataframe from the dataframe dictionary
+        /// </summary>
+        /// <param name="name">Dataframe name</param>
+        /// <param name="dfdict">Dataframe dictionary to use</param>
+        /// <returns>True if dataframe was found and deleted</returns>
+        bool DeleteFromDfDict(string name, Dictionary<string, Dataframe> dfdict);
+
         #endregion
 
         #region Built-in Command Methods
@@ -37,8 +54,10 @@ namespace MatrisAritmetik.Core.Services
         /// Get built-in command informations in labels
         /// </summary>
         /// <param name="filter">Label names to pick from all labels</param>
+        /// <param name="blacklist">Wheter to use filter as blacklist or a whitelist</param>
         /// <returns>A list of <see cref="CommandLabel"/>s containing built-in command information</returns>
-        List<CommandLabel> GetCommandLabelList(List<string> filter = null);
+        List<CommandLabel> GetCommandLabelList(List<string> filter = null,
+                                               bool blacklist = false);
 
         /// <summary>
         /// Sets given <paramref name="vals"/> values dictionary and <paramref name="opts"/> options dictionary according to <paramref name="dict"/> matrix dictionary
@@ -50,6 +69,16 @@ namespace MatrisAritmetik.Core.Services
                             Dictionary<string, List<List<object>>> vals,
                             Dictionary<string, Dictionary<string, dynamic>> opts);
 
+        /// <summary>
+        /// Sets given <paramref name="vals"/> values dictionary and <paramref name="opts"/> options dictionary according to <paramref name="dict"/> dataframe dictionary
+        /// </summary>
+        /// <param name="dict">Dataframe dictionary to refer to</param>
+        /// <param name="vals">Values dictionary to be updated</param>
+        /// <param name="opts">Options dictionary to be updated</param>
+        void SetDfDicts(Dictionary<string, Dataframe> dict,
+                        Dictionary<string, List<List<object>>> vals,
+                        Dictionary<string, Dictionary<string, List<LabelList>>> lbls,
+                        Dictionary<string, Dictionary<string, dynamic>> settings);
         #endregion
 
         #region Command Related Methods
@@ -72,7 +101,8 @@ namespace MatrisAritmetik.Core.Services
         /// </summary>
         /// <param name="exp">String expression</param>
         /// <returns>List of tokens created from given expression</returns>
-        List<Token> Tokenize(string exp);
+        List<Token> Tokenize(string exp,
+                             CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix);
 
         /// <summary>
         /// Shunting Yard Algorithm to order tokens
@@ -88,7 +118,10 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <param name="cmdHistory">Command history to add this command to</param>
         /// <returns>The state of the <paramref name="cmd"/></returns>
-        CommandState EvaluateCommand(Command cmd, Dictionary<string, MatrisBase<dynamic>> matdict, List<Command> cmdHistory);
+        CommandState EvaluateCommand(Command cmd,
+                                     Dictionary<string, MatrisBase<dynamic>> matdict,
+                                     List<Command> cmdHistory,
+                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix);
 
         /// <summary>
         /// Check if last command sent was dated old enough ( ><see cref="CompilerLimits.forCmdSendRateInSeconds"/> seconds old )

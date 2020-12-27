@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Reflection;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
+using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Services
 {
@@ -123,28 +124,46 @@ namespace MatrisAritmetik.Services
 
         #region Other Utility Methods
         /// <summary>
-        /// Check if given token <paramref name="tkn"/> is a <see cref="MatrisBase{object}"/>
+        /// Check if given token <paramref name="tkn"/> is a <see cref="MatrisBase{object}"/> and update it's value if needed
         /// </summary>
         /// <param name="tkn">Token to check</param>
         /// <param name="matDict">Matrix dictionary to reference to</param>
+        /// <param name="mode">Compiler mode</param>
+        /// <param name="assertNonNull">Wheter to assert token's value to be non-null after checks and updates</param>
         /// <returns>True if given token holds a <see cref="MatrisBase{object}"/></returns>
         public static bool CheckMatrixAndUpdateVal(Token tkn,
-                                                    Dictionary<string, MatrisBase<dynamic>> matDict)
+                                                   Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix,
+                                                   bool assertNonNull = false)
         {
             switch (tkn.tknType)
             {
                 case TokenType.MATRIS:
                     if (matDict.ContainsKey(tkn.name))
                     {
+                        Validations.CheckModeAndMatrixReference(mode, (dynamic)matDict[tkn.name]);
                         tkn.val = matDict[tkn.name];
                     }
                     else if (!(tkn.val is MatrisBase<object>))
                     {
                         throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(tkn.name));
                     }
+                    else
+                    {
+                        Validations.CheckModeAndMatrixReference(mode, tkn.val);
+                    }
+
+                    if (assertNonNull)
+                    {
+                        AssertNotNull(tkn);
+                    }
 
                     return true;
                 default:
+                    if (assertNonNull)
+                    {
+                        AssertNotNull(tkn);
+                    }
                     return false;
             }
         }
@@ -198,6 +217,18 @@ namespace MatrisAritmetik.Services
             return arguments;
         }
 
+        /// <summary>
+        /// Assert given token value isn't null
+        /// </summary>
+        /// <param name="tkn">Token to check</param>
+        /// <exception cref="CompilerMessage.OP_WITH_NULL"></exception>
+        public static void AssertNotNull(Token tkn)
+        {
+            if (tkn.val is null || tkn.val is None)
+            {
+                throw new Exception(CompilerMessage.OP_WITH_NULL);
+            }
+        }
         #endregion
 
         #region Operator Methods
@@ -209,7 +240,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPAssignment(Token LHS,
                                         Token RHS,
-                                        Dictionary<string, MatrisBase<dynamic>> matDict)
+                                        Dictionary<string, MatrisBase<dynamic>> matDict,
+                                        CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
 
             if (LHS.tknType != TokenType.MATRIS) // LHS should just be a valid name for a matrix
@@ -227,11 +259,19 @@ namespace MatrisAritmetik.Services
                         }
                     case TokenType.MATRIS:   // RHS is possibly a matrix
                         {
-                            RHS.val = matDict.ContainsKey(RHS.name)
-                                ? (dynamic)matDict[RHS.name]
-                                : RHS.val is MatrisBase<object>
-                                    ? RHS.val
-                                    : throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(RHS.name));
+                            if (matDict.ContainsKey(RHS.name))
+                            {
+                                Validations.CheckModeAndMatrixReference(mode, (dynamic)matDict[RHS.name]);
+                                RHS.val = (dynamic)matDict[RHS.name];
+                            }
+                            else if (RHS.val is MatrisBase<object>)
+                            {
+                                Validations.CheckModeAndMatrixReference(mode, RHS.val);
+                            }
+                            else
+                            {
+                                throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(RHS.name));
+                            }
                             break;
                         }
                     default:
@@ -240,6 +280,7 @@ namespace MatrisAritmetik.Services
                             {
                                 throw new Exception(CompilerMessage.EQ_FAILED);
                             }
+                            Validations.CheckModeAndMatrixReference(mode, RHS.val);
                             break;
                         }
                 }
@@ -247,12 +288,50 @@ namespace MatrisAritmetik.Services
                 // Update the matrix table accordingly
                 if (matDict.ContainsKey(LHS.name))
                 {
+                    Validations.CheckModeAndMatrixReference(mode, matDict[LHS.name]);
+                    /* // THIS PART UPDATES EXISTING MATRIX'S VALUES IN PLACE
+                    if (matDict[LHS.name] is Dataframe && !(RHS.val is Dataframe))
+                    {
+                        matDict[LHS.name] = new Dataframe(((MatrisBase<object>)RHS.val).GetValues());
+                    }
+                    else if (RHS.val is Dataframe dataframe && !(matDict[LHS.name] is Dataframe))
+                    {
+                        matDict[LHS.name] = new MatrisBase<object>(dataframe.GetValues());
+                    }
+                    else
+                    {
+                        matDict[LHS.name] = RHS.val;
+                    }
+                    */
                     matDict[LHS.name] = RHS.val;
                 }
                 else if (Validations.ValidMatrixName(LHS.name))
                 {
-                    if (matDict.Count < (int)MatrisLimits.forMatrisCount)
+                    int dfcount = 0;
+                    foreach (string name in matDict.Keys)
                     {
+                        if (matDict[name] is Dataframe)
+                        {
+                            dfcount++;
+                        }
+                    }
+
+                    if (RHS.val is Dataframe)
+                    {
+                        if (dfcount < (int)DataframeLimits.forDataframeCount)
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, RHS.val);
+                            matDict.Add(LHS.name, RHS.val);
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.DF_LIMIT);
+                        }
+                    }
+                    else if (matDict.Count - dfcount < (int)MatrisLimits.forMatrisCount)
+                    {
+                        Validations.CheckModeAndMatrixReference(mode, RHS.val);
+                        AssertNotNull(RHS);
                         matDict.Add(LHS.name, RHS.val);
                     }
                     else
@@ -284,11 +363,19 @@ namespace MatrisAritmetik.Services
         public static void OPBasic(string symbol,
                                    Token LHS,
                                    Token RHS,
-                                   Dictionary<string, MatrisBase<dynamic>> matDict)
+                                   Dictionary<string, MatrisBase<dynamic>> matDict,
+                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
-            CheckMatrixAndUpdateVal(RHS, matDict);
-            CheckMatrixAndUpdateVal(LHS, matDict);
+            CheckMatrixAndUpdateVal(RHS, matDict, mode, true);
+            CheckMatrixAndUpdateVal(LHS, matDict, mode, true);
+
             RHS.tknType = LHS.tknType == TokenType.MATRIS ? TokenType.MATRIS : RHS.tknType;
+
+            if (RHS.tknType == TokenType.MATRIS)
+            {
+                Validations.CheckModeAndMatrixReference(mode, RHS.val);
+                Validations.CheckModeAndMatrixReference(mode, LHS.val);
+            }
 
             switch (symbol)
             {
@@ -326,20 +413,22 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPModulo(Token _base,
                                     Token _mode,
-                                    Dictionary<string, MatrisBase<dynamic>> matDict)
+                                    Dictionary<string, MatrisBase<dynamic>> matDict,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
+
             if (_mode.tknType == TokenType.NUMBER) // dynamic % number
             {
-                CheckMatrixAndUpdateVal(_base, matDict);
+                CheckMatrixAndUpdateVal(_base, matDict, mode, true);
 
                 _mode.val = _base.val % (dynamic)(float)_mode.val;
                 _mode.tknType = _base.tknType;
             }
-            else if (CheckMatrixAndUpdateVal(_mode, matDict)) // matris % matris
+            else if (CheckMatrixAndUpdateVal(_mode, matDict, mode, true)) // matris % matris
             {
                 // base _mode
                 // term to get mod of _baseshould be matrix
-                _mode.val = CheckMatrixAndUpdateVal(_base, matDict) || ((MatrisBase<dynamic>)_mode.val).IsScalar()
+                _mode.val = CheckMatrixAndUpdateVal(_base, matDict, mode, true) || ((MatrisBase<dynamic>)_mode.val).IsScalar()
                     ? _base.val % _mode.val
                     : throw new Exception(CompilerMessage.MOD_MAT_THEN_BASE_MAT);
             }
@@ -357,24 +446,29 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPExpo(Token _base,
                                   Token _expo,
-                                  Dictionary<string, MatrisBase<dynamic>> matDict)
+                                  Dictionary<string, MatrisBase<dynamic>> matDict,
+                                  CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (_expo.tknType != TokenType.NUMBER)
             {
-                _expo.val = !CheckMatrixAndUpdateVal(_expo, matDict)
+                _expo.val = !CheckMatrixAndUpdateVal(_expo, matDict, mode, true)
                                   ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
                                   : !((MatrisBase<dynamic>)_expo.val).IsScalar()
                                       ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
                                       : ((MatrisBase<dynamic>)_expo.val)[0, 0];
             }
 
-            if (CheckMatrixAndUpdateVal(_base, matDict))  // base matrix
+            if (CheckMatrixAndUpdateVal(_base, matDict, mode, true))  // base matrix
             {
+                AssertNotNull(_base);
                 _expo.val = ((MatrisBase<object>)_base.val).Power((dynamic)_expo.val);
                 _expo.tknType = TokenType.MATRIS;
+                Validations.CheckModeAndMatrixReference(mode, _expo.val);
             }
             else // base is number
             {
+                AssertNotNull(_base);
+                AssertNotNull(_expo);
                 _expo.val = CompilerUtils.PowerMethod(double.Parse(_base.val.ToString()), double.Parse(_expo.val.ToString()));
                 _expo.tknType = TokenType.NUMBER;
             }
@@ -388,20 +482,22 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPMatMul(Token LHS,
                                     Token RHS,
-                                    Dictionary<string, MatrisBase<dynamic>> matDict)
+                                    Dictionary<string, MatrisBase<dynamic>> matDict,
+                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
 
             MatrisBase<dynamic> mat1, mat2;
-            mat1 = CheckMatrixAndUpdateVal(RHS, matDict)
+            mat1 = CheckMatrixAndUpdateVal(RHS, matDict, mode, true)
                 ? (MatrisBase<dynamic>)RHS.val
                 : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
-            mat2 = CheckMatrixAndUpdateVal(LHS, matDict)
+            mat2 = CheckMatrixAndUpdateVal(LHS, matDict, mode, true)
                 ? (MatrisBase<dynamic>)LHS.val
                 : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
             RHS.val = MatrisMul(mat2, mat1);
 
+            Validations.CheckModeAndMatrixReference(mode, RHS.val);
         }
 
         /// <summary>
@@ -412,11 +508,12 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPMatMulByExpo(Token _base,
                                           Token _expo,
-                                          Dictionary<string, MatrisBase<dynamic>> matDict)
+                                          Dictionary<string, MatrisBase<dynamic>> matDict,
+                                          CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             if (_expo.tknType != TokenType.NUMBER)
             {
-                _expo.val = !CheckMatrixAndUpdateVal(_expo, matDict)
+                _expo.val = !CheckMatrixAndUpdateVal(_expo, matDict, mode, true)
                                   ? throw new Exception(CompilerMessage.EXPO_NOT_SCALAR)
                                   : !((MatrisBase<dynamic>)_expo.val).IsScalar()
                                       ? throw new Exception(CompilerMessage.MAT_SHOULD_BE_SCALAR)
@@ -439,7 +536,7 @@ namespace MatrisAritmetik.Services
                 return;
             }
 
-            if (CheckMatrixAndUpdateVal(_base, matDict))
+            if (CheckMatrixAndUpdateVal(_base, matDict, mode, true))
             {
                 if (!_base.val.IsSquare())
                 {
@@ -448,6 +545,8 @@ namespace MatrisAritmetik.Services
 
                 MatrisBase<dynamic> res = _base.val.Copy();
                 using MatrisBase<dynamic> mat = res.Copy();
+
+                AssertNotNull(_expo);
 
                 for (int i = 1; i < _expo.val; i++)
                 {
@@ -461,6 +560,8 @@ namespace MatrisAritmetik.Services
             {
                 throw new Exception(CompilerMessage.SPECOP_MATPOWER_BASE);
             }
+
+            Validations.CheckModeAndMatrixReference(mode, _expo.val);
         }
 
         /// <summary>
@@ -471,18 +572,21 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if needed</param>
         public static void OPMatMulWithInverse(Token LHS,
                                                Token RHS,
-                                               Dictionary<string, MatrisBase<dynamic>> matDict)
+                                               Dictionary<string, MatrisBase<dynamic>> matDict,
+                                               CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             MatrisBase<dynamic> mat1, mat2;
-            mat1 = CheckMatrixAndUpdateVal(RHS, matDict)
+            mat1 = CheckMatrixAndUpdateVal(RHS, matDict, mode, true)
                  ? (MatrisBase<dynamic>)RHS.val
                  : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
 
-            mat2 = CheckMatrixAndUpdateVal(LHS, matDict)
+            mat2 = CheckMatrixAndUpdateVal(LHS, matDict, mode, true)
                  ? (MatrisBase<dynamic>)LHS.val
                  : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
 
             RHS.val = MatrisMul(mat2, new MatrisArithmeticService<dynamic>().Inverse(mat1));
+
+            Validations.CheckModeAndMatrixReference(mode, RHS.val);
         }
 
         #endregion

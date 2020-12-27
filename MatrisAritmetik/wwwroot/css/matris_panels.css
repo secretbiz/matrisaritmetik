@@ -23,7 +23,71 @@ body {
     font-weight:bold;
     background-color:lightgrey;
 }
+/* SIDE NAV */
 
+.sidenav_linkstitle {
+    position: absolute;
+    color: aliceblue;
+    font-size: 30px;
+    font-weight: bolder;
+    top: 25px;
+}
+.navcolumn {
+    padding: 20% 5px 0px 1px;
+    background-color: peru;
+    color: white;
+    font-size: 30px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #103f6bfa;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 50px;
+}
+
+    .sidenav a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #d2983d;
+        display: block;
+        transition: 0.1s;
+    }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+    
+        .sidenav a u{
+            cursor:default;
+        }
+
+    .sidenav .closebtn {
+        position: absolute;
+        color: #ff9900;
+        top: 0;
+        right: 25px;
+        font-size: 40px;
+        margin-left: 50px;
+    }
+
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+
+        .sidenav a {
+            font-size: 18px;
+        }
+}
 /********** LEFT_PANEL *********/
 #left_panel {
     flex: 0 0 auto !important;
@@ -72,7 +136,9 @@ body {
     display: flex;
     background-color: #eae073;
     border: 2px solid black;
+    border-top: 0px;
     min-height: 65px;
+    padding: 2px;
 }
 
 #matris_name {
@@ -187,33 +253,44 @@ body {
 }
 
 /*** MATRIS KAYITLARI TABLOSU ***/
+.saved_mattable_title {
+    color: white !important;
+    text-align: center;
+    padding: 1px;
+    font-weight: bold;
+}
+
 #matris_table_base {
     width: 100%;
     table-layout: fixed;
     border-spacing: 0px 1rem !important;
 }
 
-#matris_table {
+.matris_table_head {
+    background-color: #b8860b !important;
+}
+
+.matris_table {
     background-color: #d6c081;
 }
-    #matris_table tr td:first-child {
+    .matris_table tr td:first-child {
         border-top-left-radius: 11px;
         border-bottom-left-radius: 11px;
     }
 
-    #matris_table tr td:last-child {
+    .matris_table tr td:last-child {
         border-top-right-radius: 11px;
         border-bottom-right-radius: 11px;
     }
-    #matris_table tr {
+    .matris_table tr {
         padding-bottom:3px;
     }
-    #matris_table td {
+    .matris_table td {
         overflow: auto;
     }
 
-.matdelbtn 
-{
+.matdelbtn {
+    background-color: #b8860b !important;
     border-radius: 13px !important;
 }
 
@@ -253,10 +330,11 @@ body {
     padding: 1px;
     background-color: #eae073;
     border: 2px solid black;
+    border-top: 1px solid black;
 }
 #matris_komut_satır {
     flex-grow: 2;
-    padding: 1px;
+    padding: 3px;
     margin: 1px;
     background-color: #373738;
     color: white;
@@ -299,10 +377,12 @@ body {
     color: white;
     font-weight: bold;
     z-index: 2;
+    margin: 2px;
 }
 #matris_komut_options {
     background-color: #d39f5a;
     font-weight: bold;
+    margin: 2px;
 }
 
 
@@ -319,15 +399,18 @@ body {
     table-layout: fixed;
 }
 
-.command_start{
-    font-weight:bold;
-    color:blue;
+.command_start {
+    font-weight: bold;
+    font-size: 16px;
+    color: blue;
 }
 .cmdrepeat {
     min-height: 25px;
     font-family: monospace;
     background-color: #d39f5a;
-    font-weight:bold;
+    font-weight: bold;
+    border-bottom: 2px solid #374ce2;
+    border-top: 2px solid #374ce2;
 }
 .cmdHelpStart {
     font-size: medium;
@@ -342,26 +425,28 @@ body {
 }
 
 .cmdoutput {
+    padding:2px;
     white-space: pre-wrap;
     font-weight: 600;
     font-family: "Courier New", Courier, monospace
 }
 #output_body {
-    border: 2px double #4c3a0b;
+    border: 2px solid #1d1c1c;
     background-color: burlywood !important;
     display: block;
     max-height: 48em;
     overflow-y: scroll;
     max-width: inherit;
 }
-#output_body tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-}
-#output_body td {
-    overflow: auto;
-}
+    #output_body tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+    #output_body td {
+        overflow: auto;
+    }
+
 #output_textarea {
     font-size: 14px;
     font-weight: normal;
@@ -373,27 +458,26 @@ body {
 }
 
 .outputRow {
-    border-bottom: 2px dashed #d39f5a;
-    padding: 2px 0px 2px 2px;
+    padding: 3px;
 }
 
 .output_cmd_info {
     color: white;
     background-color: #4553c6;
     border: 3px solid white;
-    padding-left: 2px;
+    padding: 3px;
 }
 .output_cmd_warning {
     color: #ff6a00;
     background-color: #fbee5a;
     border: 3px solid #ff6a00;
-    padding-left: 2px;
+    padding: 3px;
 }
 .output_cmd_error {
     color: red;
     background-color: #fcbfbf;
     border: 3px solid darkred;
-    padding-left: 2px;
+    padding: 3px;
 }
 
 .compilerHelp {

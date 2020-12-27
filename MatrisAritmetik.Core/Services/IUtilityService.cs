@@ -52,6 +52,22 @@ namespace MatrisAritmetik.Core.Services
                                             bool removeliterals = true);
 
         /// <summary>
+        /// Create a special dataframe from given args in <paramref name="text"/> and function <paramref name="funcinfo"/>
+        /// </summary>
+        /// <param name="text">Arguments</param>
+        /// <param name="funcinfo">Function info instance</param>
+        /// <param name="dfdict">Dataframe dictionary to reference to</param>
+        /// <param name="argseperator">Argument seperator used in <paramref name="text"/></param>
+        /// <param name="argnamevalseperator">Character to show a parameter name was referred</param>
+        /// <param name="removeliterals">Wheter to remove string literals('\t','\r',...)</param>
+        /// <returns>A special dataframe created with given arguments in <paramref name="text"/></returns>
+        Dataframe SpecialStringTo2DList(string text,
+                                        CommandInfo funcinfo,
+                                        Dictionary<string, Dataframe> dfdict,
+                                        char argseperator = ',',
+                                        char argnamevalseperator = ':',
+                                        bool removeliterals = true);
+        /// <summary>
         /// Performs an async <see cref="Task"/> to read and decode the request body <paramref name="reqbody"/> with given encoding <paramref name="enc"/>
         /// <para>Ignores request parameters given in <paramref name="ignoredparams"/></para>
         /// <para>Adds parameters and values to <paramref name="decodedRequestDict"/> dictionary</para>

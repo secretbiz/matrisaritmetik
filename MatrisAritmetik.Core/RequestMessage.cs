@@ -25,7 +25,7 @@ namespace MatrisAritmetik.Core
         /// <returns>Message telling how long to wait</returns>
         public static string REQUEST_SPAM(DateTime last)
         {
-            return "Yeni bir komut göndermek için " + Math.Round(((int)CompilerLimits.forCmdSendRateInSeconds - (DateTime.Now - last).TotalSeconds), 2) + " saniye bekleyiniz!";
+            return "Yeni bir komut göndermek için " + Math.Round((int)CompilerLimits.forCmdSendRateInSeconds - (DateTime.Now - last).TotalSeconds, 2) + " saniye bekleyiniz!";
         }
     }
 }

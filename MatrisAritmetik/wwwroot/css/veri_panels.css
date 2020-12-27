@@ -1,0 +1,343 @@
+﻿/* SIDE NAV */
+.navcolumn_df {
+    padding: 20% 5px 0px 1px;
+    background-color: #121b4e;
+    color: white;
+    font-size: 30px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+/********** LEFT_PANEL *********/
+#left_panel_df {
+    flex: 0 0 auto !important;
+    padding: 5px;
+    margin: 2px;
+    width: 650px;
+    min-height: 400px;
+    min-width: 525px;
+    max-width: 60%;
+    background-color: #92bbc5 !important;
+}
+
+#veri_title_left {
+    text-align: center;
+    background-color: #eaeaea;
+    border: 2px double black !important;
+}
+
+/* TAB SATIRI */
+
+#special_veri_options {
+    border: none !important;
+    background-color: inherit;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+/* MATRIS EKLEME PANEL */
+#veri_add_table {
+    min-width: 280px;
+    display: flex;
+    background-color: #5f70b9;
+    border: 2px solid black;
+    border-top: 0px;
+    min-height: 65px;
+    padding: 2px;
+}
+
+#veri_name {
+    flex: 14%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 15%;
+}
+
+#veri_add_eqsign {
+    display: flex;
+    align-items: center;
+    flex: 1%;
+    padding: 2px;
+    margin: 1px;
+}
+
+/* Standard panel */
+#veri_vals {
+    min-height: 57px;
+    flex: 70%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 22%;
+}
+
+/* Add button */
+#veri_add_button, #veri_fromfile_create_button {
+    flex: 15%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 13%;
+}
+
+/* Özel matris ekleme panel */
+
+#veri_vals_special {
+    min-height: 57px;
+    flex: 35%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 11.5%;
+}
+
+#veri_special_args {
+    flex: 35%;
+    padding: 2px;
+    margin: 2px;
+    min-width: 11.5%;
+}
+
+/* Dosyadan */
+#veri_file_button {
+    display: none;
+    min-width: 10%;
+    overflow: auto;
+    margin: 0px 2px 0px 2px;
+    padding: 1px;
+}
+
+#veri_fromfile_create_button {
+    display: none;
+    white-space: normal;
+}
+
+/*** MATRIS KAYITLARI TABLOSU ***/
+.df_matris_table_head {
+    background-color: #b8860b !important;
+}
+
+.df_saved_mattable_title {
+    color: white;
+    text-align: center;
+    padding: 1px;
+    font-weight: bold;
+}
+
+.df_matris_table {
+    background-color: #d4d1c9;
+}
+
+    .df_matris_table tr td:first-child {
+        border-top-left-radius: 11px;
+        border-bottom-left-radius: 11px;
+    }
+
+    .df_matris_table tr td:last-child {
+        border-top-right-radius: 11px;
+        border-bottom-right-radius: 11px;
+    }
+
+    .df_matris_table tr {
+        padding-bottom: 3px;
+    }
+
+    .df_matris_table td {
+        overflow: auto;
+    }
+
+
+.veri_table_head {
+    background-color: #384977 !important;
+}
+
+.df_saved_dftable_title {
+    color: white;
+    text-align: center;
+    padding: 1px;
+    font-weight: bold;
+}
+
+#veri_table_base {
+    width: 100%;
+    table-layout: fixed;
+    border-spacing: 0px 1rem !important;
+}
+
+.veri_table {
+    background-color: #3c6384;
+    color: white !important;
+}
+
+    .veri_table tr td:first-child {
+        border-top-left-radius: 11px;
+        border-bottom-left-radius: 11px;
+    }
+
+    .veri_table tr td:last-child {
+        border-top-right-radius: 11px;
+        border-bottom-right-radius: 11px;
+    }
+
+    .veri_table tr {
+        padding-bottom: 3px;
+    }
+
+    .veri_table td {
+        overflow: auto;
+    }
+
+.dfdelbtn {
+    background-color: #384977 !important;
+    border-color: white !important;
+    border-radius: 13px !important;
+}
+
+/********** RIGHT_PANEL *********/
+#right_panel_df {
+    background-color: #384977 !important;
+    flex: 1 1 auto !important;
+    padding: 5px;
+    margin: 2px;
+    width: 100%;
+    min-height: 200px;
+}
+
+#veri_title_right {
+    text-align: center;
+    background-color: #eaeaea;
+    border: 2px double black !important;
+}
+
+/* KOMUT PANEL */
+#veri_komut_panel {
+    display: flex;
+    flex-direction: row;
+    padding: 1px;
+    background-color: #dddde0;
+    border: 2px solid black;
+    border-top: 1px solid black;
+}
+
+#matris_komut_satır_df {
+    flex-grow: 2;
+    padding: 3px;
+    margin: 1px;
+    background-color: #373738;
+    color: white;
+    overflow: auto;
+}
+
+    #matris_komut_satır_df:focus {
+        outline: none;
+    }
+    /*
+    #matris_komut_satır_df::placeholder { 
+        color: #b6b1b1;
+        font-weight:bold;
+        opacity: 1; 
+    }
+
+    #matris_komut_satır_df:-ms-input-placeholder { 
+        color: #b6b1b1;
+        font-weight: bold;
+    }
+
+    #matris_komut_satır_df::-ms-input-placeholder { 
+        color: #b6b1b1;
+        font-weight: bold;
+    }*/
+    #matris_komut_satır_df[contenteditable] {
+        display: inline-block;
+    }
+
+        #matris_komut_satır_df[contenteditable]:empty::before {
+            content: attr(data-placeholder);
+            color: #b6b1b1;
+            display: inline-block;
+        }
+
+        #matris_komut_satır_df[contenteditable]:empty:focus::before {
+            content: attr(data-focused-advice);
+            color: #b6b1b1;
+        }
+
+#veri_komut_button {
+    background-color: #109b0a;
+    color: white;
+    font-weight: bold;
+    z-index: 2;
+    margin: 2px;
+}
+
+#veri_komut_options {
+    background-color: #dea702;
+    color: #1b1a1a;
+    font-weight: bold;
+    margin: 2px;
+}
+
+
+/* OUTPUT PANEL */
+#veri_komut_output {
+    padding-right: 6px;
+}
+
+#veri_komut_table_base {
+    width: 100%;
+}
+
+    #veri_komut_table_base thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+.command_start_df {
+    font-weight: bold;
+    font-size: 16px;
+    color: darkgoldenrod;
+}
+
+.cmdrepeat_df {
+    min-height: 25px;
+    font-family: monospace;
+    background-color: #eee;
+    font-weight: bold;
+    border-bottom: 2px solid #374ce2;
+    border-top: 2px solid #374ce2;
+}
+
+.cmdHelpCommandGiven_df{
+    background-color: #2a2b57;
+    color: white;
+    border-bottom: 1px solid #56da56;
+    border-top: 1px solid #56da56;
+}
+
+.cmdoutput_df {
+    color: white;
+    padding: 2px;
+    white-space: pre-wrap;
+    font-weight: 600;
+    font-family: "Courier New", Courier, monospace
+}
+
+#output_body_df {
+    border: 2px solid #1d1c1c;
+    color: black;
+    background-color: #5b5858 !important;
+    display: block;
+    max-height: 48em;
+    overflow-y: scroll;
+    max-width: inherit;
+}
+
+    #output_body_df tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    #output_body_df td {
+        overflow: auto;
+    }
