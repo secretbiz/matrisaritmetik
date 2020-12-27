@@ -453,11 +453,12 @@ namespace MatrisAritmetik.Core.Models
                 _ => "---",
             };
 
+            string output = (Output is null || Output == null) ? string.Empty : ((object)Output).ToString();
             return $"Komut: {OriginalCommand}"
                    + $"\nDurum: {state}"
                    + (cmdset.Length == 0 ? string.Empty : ("\nKomut stili:" + cmdset.ToString()))
                    + (outset.Length == 0 ? string.Empty : ("\nÇıktı stili:" + outset.ToString()))
-                   + (string.IsNullOrWhiteSpace(Output is null ? string.Empty : Output.ToString()) ? string.Empty : ("\nÇıktı:\n" + Output.ToString()));
+                   + (string.IsNullOrWhiteSpace(output) ? string.Empty : ("\nÇıktı:\n" + output));
 
         }
         #endregion

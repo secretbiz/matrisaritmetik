@@ -480,6 +480,11 @@ namespace MatrisAritmetik.Core.Models
         }
 
         /// <summary>
+        /// Alternative way to access values directly
+        /// </summary>
+        public override List<List<object>> Values => _values;
+
+        /// <summary>
         /// Get column label settings
         /// </summary>
         /// <returns>Current column settings</returns>
@@ -522,7 +527,7 @@ namespace MatrisAritmetik.Core.Models
         {
             if (_values != null)
             {
-                if (_values.Count * _values[0].Count > (int)DataframeLimits.forSize)
+                if (_values.Count != 0 && _values.Count * _values[0].Count > (int)DataframeLimits.forSize)
                 {
                     if (_values.Count > (int)DataframeLimits.forRows)
                     {
@@ -562,7 +567,7 @@ namespace MatrisAritmetik.Core.Models
         {
             if (value != null)
             {
-                if (value.Count * value[0].Count > (int)DataframeLimits.forSize)
+                if (value.Count != 0 && value.Count * value[0].Count > (int)DataframeLimits.forSize)
                 {
                     List<List<object>> temp = new List<List<object>>();
                     int collimit = (int)DataframeLimits.forCols;
@@ -621,7 +626,7 @@ namespace MatrisAritmetik.Core.Models
                 }
 
                 Row = _values.Count;
-                Col = _row > 0 ? _values[0].Count : 0;
+                Col = Row > 0 ? _values[0].Count : 0;
             }
             else
             {
@@ -663,9 +668,9 @@ namespace MatrisAritmetik.Core.Models
                         int delindex = (int)DataframeLimits.forRows;
                         for (int i = 0; i < _rowlabels.Count; i++)
                         {
-                            if (_rowlabels[i].TotalSpan != _row)
+                            if (_rowlabels[i].TotalSpan != Row)
                             {
-                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Row, _rowlabels[i].TotalSpan));
                             }
 
                             if (_rowlabels[i].Length > delindex)
@@ -716,9 +721,9 @@ namespace MatrisAritmetik.Core.Models
                         int len = (int)DataframeLimits.forRows;
                         for (int i = 0; i < value.Count; i++)
                         {
-                            if (value[i].TotalSpan != _row)
+                            if (value[i].TotalSpan != Row)
                             {
-                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, value[i].TotalSpan));
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Row, value[i].TotalSpan));
                             }
                             if (value[i].Length > len)
                             {
@@ -731,9 +736,9 @@ namespace MatrisAritmetik.Core.Models
                 {
                     for (int i = 0; i < _rowlabels.Count; i++)
                     {
-                        if (_rowlabels[i].TotalSpan != _row)
+                        if (_rowlabels[i].TotalSpan != Row)
                         {
-                            throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_row, _rowlabels[i].TotalSpan));
+                            throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Row, _rowlabels[i].TotalSpan));
                         }
                     }
                 }
@@ -774,9 +779,9 @@ namespace MatrisAritmetik.Core.Models
                         int delindex = (int)DataframeLimits.forCols;
                         for (int i = 0; i < _collabels.Count; i++)
                         {
-                            if (_collabels[i].TotalSpan != _col)
+                            if (_collabels[i].TotalSpan != Col)
                             {
-                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Col, _collabels[i].TotalSpan));
                             }
                             if (_collabels[i].Length > delindex)
                             {
@@ -826,9 +831,9 @@ namespace MatrisAritmetik.Core.Models
                         int len = (int)DataframeLimits.forCols;
                         for (int i = 0; i < value.Count; i++)
                         {
-                            if (value[i].TotalSpan != _col)
+                            if (value[i].TotalSpan != Col)
                             {
-                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, value[i].TotalSpan));
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Col, value[i].TotalSpan));
                             }
                             if (value[i].Length > len)
                             {
@@ -840,9 +845,9 @@ namespace MatrisAritmetik.Core.Models
                     {
                         for (int i = 0; i < _collabels.Count; i++)
                         {
-                            if (_collabels[i].TotalSpan != _col)
+                            if (_collabels[i].TotalSpan != Col)
                             {
-                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(_col, _collabels[i].TotalSpan));
+                                throw new Exception(CompilerMessage.DF_TOTALSPAN_UNMATCH(Col, _collabels[i].TotalSpan));
                             }
                         }
                     }
@@ -904,21 +909,21 @@ namespace MatrisAritmetik.Core.Models
             // Labels
             if (rowLabels == null)
             {
-                //_rowlabels = new List<LabelList>() { new LabelList(_row, 1, "row_", 1) };
+                SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
             }
             else
             {
                 SetRowLabels(rowLabels);
-                _rowlabels.Reverse();
+                GetRowLabels().Reverse();
             }
             if (colLabels == null)
             {
-                _collabels = new List<LabelList>() { new LabelList(_col, 1, "col_", 1) };
+                SetColLabels(new List<LabelList>() { new LabelList(Col, 1, "col_", 1) });
             }
             else
             {
                 SetColLabels(colLabels);
-                _collabels.Reverse();
+                GetColLabels().Reverse();
             }
 
             // Settings
@@ -972,15 +977,15 @@ namespace MatrisAritmetik.Core.Models
             int[] elementwidths = GetColumnWidths(mat);
             int spanseplength = GetColSettings().GetSpanSeperator().Length;
 
-            if (_collabels != null)
+            if (GetColLabels() != null)
             {
                 int currentlabelindex;
-                for (int j = 0; j < _col; j++)
+                for (int j = 0; j < Col; j++)
                 {
-                    for (int k = 0; k < _collabels.Count; k++)
+                    for (int k = 0; k < GetColLabels().Count; k++)
                     {
-                        currentlabelindex = _collabels[k].GetLabelIndexAtSpan(j + 1);
-                        Label current_label = _collabels[k].Labels[currentlabelindex];
+                        currentlabelindex = GetColLabels()[k].GetLabelIndexAtSpan(j + 1);
+                        Label current_label = GetColLabels()[k].Labels[currentlabelindex];
                         int labellen = current_label.Value.Length + spanseplength;
                         // Label span is a single column
                         if (current_label.Span == 1)
@@ -1006,7 +1011,7 @@ namespace MatrisAritmetik.Core.Models
                                 int spanstart = 0;
                                 for (int k2 = 0; k2 < currentlabelindex; k2++)
                                 {
-                                    spanstart += _collabels[k].Labels[k2].Span;
+                                    spanstart += GetColLabels()[k].Labels[k2].Span;
                                 }
                                 for (int j2 = spanstart; j2 < current_label.Span + spanstart; j2++)
                                 {
@@ -1035,18 +1040,18 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Array of widths for each level of <see cref="Dataframe.GetRowLabels()"/></returns>
         private int[] GetRowLabelColumnWidths()
         {
-            if (_rowlabels == null)
+            if (GetRowLabels() == null)
             {
                 return Array.Empty<int>();
             }
             // Row label columns' widths
-            int lvlcount = _rowlabels.Count;
+            int lvlcount = GetRowLabels().Count;
 
             int[] allwidths = new int[lvlcount];
 
             for (int c = 0; c < lvlcount; c++)
             {
-                List<Label> lbls = _rowlabels[c].Labels ?? new List<Label>();
+                List<Label> lbls = GetRowLabels()[c].Labels ?? new List<Label>();
                 int currentmax = 0;
                 for (int l = 0; l < lbls.Count; l++)
                 {
@@ -1074,7 +1079,7 @@ namespace MatrisAritmetik.Core.Models
             string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
 
             int colno, index;
-            int rowlabellevel = _rowlabels.Count;
+            int rowlabellevel = GetRowLabels().Count;
             List<dynamic> row = new List<dynamic>();
             LabelList currentlist;
 
@@ -1084,12 +1089,12 @@ namespace MatrisAritmetik.Core.Models
                 lastindex[t] = -1;
             }
 
-            for (int i = 0; i < _row; i++)
+            for (int i = 0; i < Row; i++)
             {
                 for (int k = rowlabellevel - 1; k >= 0; k--)
                 {
                     row = _values[i];
-                    currentlist = _rowlabels[k];
+                    currentlist = GetRowLabels()[k];
                     index = currentlist.GetLabelIndexAtSpan(i + 1);
                     if (index == lastindex[k]) // Don't re-write same label again
                     {   // TO-DO: Create a placeholder for dataframes and use that here
@@ -1334,7 +1339,7 @@ namespace MatrisAritmetik.Core.Models
             string seed_str = CreatedFromSeed ? $"Seed: {Seed}\n" : string.Empty;
             return $"Veri Tablosu: {name}\n"
                    + seed_str
-                   + $"Boyut: {_row}x{_col}\n"
+                   + $"Boyut: {Row}x{Col}\n"
                    + "Elementler:\n"
                    + ToString();
         }
@@ -1352,7 +1357,7 @@ namespace MatrisAritmetik.Core.Models
                 return "";
             }
 
-            if (_rowlabels == null && _collabels == null)
+            if (GetRowLabels() == null && GetColLabels() == null)
             {
                 using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
                 return matrisBase.ToString();
@@ -1365,12 +1370,12 @@ namespace MatrisAritmetik.Core.Models
             int[] rowlbl_widths = GetRowLabelColumnWidths();
 
             // Column labels row(s)
-            if (_collabels != null)
+            if (GetColLabels() != null)
             {
                 string col_corner_sep = GetColSettings().GetLabelSeperatorFromCorner();
                 string col_span_sep = GetColSettings().GetSpanSeperator();
                 string col_level_sep = GetColSettings().GetLevelSeperator();
-                int colrepeat = ArraySum(col_widths, 0, _col) + ((_col - 1) * col_span_sep.Length);
+                int colrepeat = ArraySum(col_widths, 0, Col) + ((Col - 1) * col_span_sep.Length);
                 col_level_sep = new string(col_level_sep[0], colrepeat);
 
                 string col_element_sep = GetColSettings().GetLabelSeperatorFromElements();
@@ -1379,10 +1384,10 @@ namespace MatrisAritmetik.Core.Models
                 if (rowlbl_widths.Length == 0)
                 {
                     // Column label rows first
-                    int colLabelLength = _collabels.Count;
+                    int colLabelLength = GetColLabels().Count;
                     for (int i = colLabelLength - 1; i >= 0; i--)
                     {
-                        LabelList labelList = _collabels[i];
+                        LabelList labelList = GetColLabels()[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
                             Label lbl = labelList.Labels[j];
@@ -1442,13 +1447,13 @@ namespace MatrisAritmetik.Core.Models
                     int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + ((rowlbl_widths.Length - 1) * (row_span_sep.Length + 1)) + row_element_sep.Length + col_corner_sep.Length - 1;
 
                     // Column label rows first
-                    int colLabelLength = _collabels.Count;
+                    int colLabelLength = GetColLabels().Count;
                     for (int i = colLabelLength - 1; i >= 0; i--)
                     {
                         res.Append(' ', rowlabelextra);
                         res.Append(col_corner_sep);
 
-                        LabelList labelList = _collabels[i];
+                        LabelList labelList = GetColLabels()[i];
                         for (int j = 0; j < labelList.Length; j++)
                         {
                             Label lbl = labelList.Labels[j];
@@ -1489,7 +1494,7 @@ namespace MatrisAritmetik.Core.Models
             }
             else // No column labels
             {
-                if (_rowlabels == null) // No labels at all
+                if (GetRowLabels() == null) // No labels at all
                 {
                     using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
                     return matrisBase.ToString();
@@ -2364,7 +2369,7 @@ namespace MatrisAritmetik.Core.Models
         #region Debug
         private string GetDebuggerDisplay()
         {
-            return "df(" + _row + "," + _col + ")\n" + ToString();
+            return "df(" + Row + "," + Col + ")\n" + ToString();
         }
         #endregion
 

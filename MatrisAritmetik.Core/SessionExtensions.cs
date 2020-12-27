@@ -176,11 +176,11 @@ namespace MatrisAritmetik.Core
         }
 
         /// <summary>
-        /// Set matrix options variable
+        /// Set dataframe labels variable
         /// </summary>
         /// <param name="session">Current session</param>
-        /// <param name="key">Key for matrix options</param>
-        /// <param name="dict">Dictionary of matrix names and their options</param>
+        /// <param name="key">Key for dataframe labels</param>
+        /// <param name="dict">Dictionary of dataframe names and their labels with keys "col_labels" and "row_labels"</param>
         public static void SetDfLabels(this ISession session,
                                        string key,
                                        Dictionary<string, Dictionary<string, List<LabelList>>> dict)
@@ -204,8 +204,8 @@ namespace MatrisAritmetik.Core
         /// Set dataframe settings variable
         /// </summary>
         /// <param name="session">Current session</param>
-        /// <param name="key">Key for matrix options</param>
-        /// <param name="dict">Dictionary of dataframe names and their options</param>
+        /// <param name="key">Key for dataframe settings</param>
+        /// <param name="dict">Dictionary of dataframe names and their settings</param>
         public static void SetDfSettings(this ISession session,
                                          string key,
                                          Dictionary<string, Dictionary<string, dynamic>> dict)
@@ -379,11 +379,11 @@ namespace MatrisAritmetik.Core
         }
 
         /// <summary>
-        /// Gets the matrix options
+        /// Gets the dataframe labels
         /// </summary>
         /// <param name="session">Current session</param>
-        /// <param name="key">Matrix options key name</param>
-        /// <returns>Dictionary of matrix names and options</returns>
+        /// <param name="key">Dataframe labels key name</param>
+        /// <returns>Dictionary of dataframe names and labels in a dictionary with keys "col_labels" and "row_labels"</returns>
         public static Dictionary<string, Dictionary<string, List<LabelList>>> GetDfLabels(this ISession session,
                                                                                           string key)
         {
@@ -393,13 +393,7 @@ namespace MatrisAritmetik.Core
                 return new Dictionary<string, Dictionary<string, List<LabelList>>>();
             }
 
-            Dictionary<string, Dictionary<string, List<LabelList>>> opts = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, List<LabelList>>>>(value);
-            foreach (string mat in opts.Keys)
-            {
-                opts[mat]["col_labels"] = opts[mat]["col_labels"];
-                opts[mat]["row_labels"] = opts[mat]["row_labels"];
-            }
-            return opts;
+            return JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, List<LabelList>>>>(value);
         }
 
         /// <summary>
@@ -429,20 +423,21 @@ namespace MatrisAritmetik.Core
         }
 
         /// <summary>
-        /// Get the proper matrix dictionary for the session
+        /// Get the proper dataframe dictionary for the session
         /// </summary>
         /// <param name="session">Session to use</param>
-        /// <param name="dfdictkey">Matrix values key name</param>
-        /// <param name="optdictkey">Matrix options key name</param>
-        /// <returns>Matrices in a dictionary</returns>
+        /// <param name="dfvalskey">Dataframe values key name</param>
+        /// <param name="labelskey">Dataframe labels key name</param>
+        /// <param name="settingskey">Dataframe settings key name</param>
+        /// <returns>Dataframes in a dictionary</returns>
         public static Dictionary<string, Dataframe> GetDfDict(this ISession session,
-                                                              string dfdictkey,
+                                                              string dfvalskey,
                                                               string labelskey,
                                                               string settingskey)
         {
             Dictionary<string, Dataframe> _dict = new Dictionary<string, Dataframe>();
 
-            Dictionary<string, List<List<object>>> vals = session.GetMatVals(dfdictkey);
+            Dictionary<string, List<List<object>>> vals = session.GetMatVals(dfvalskey);
             vals ??= new Dictionary<string, List<List<object>>>();
 
             Dictionary<string, Dictionary<string, List<LabelList>>> labels = session.GetDfLabels(labelskey);

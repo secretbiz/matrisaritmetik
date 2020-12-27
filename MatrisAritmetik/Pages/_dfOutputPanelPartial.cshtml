@@ -4,7 +4,7 @@
 
     MatrisAritmetik.Core.Models.Command cmd;
     MatrisAritmetik.Core.CommandMessage msg;
-    MatrisAritmetik.Core.Models.Dataframe matoutput;
+    MatrisAritmetik.Core.Models.MatrisBase<object> matoutput;
 
     string cmdstyle = ";"; string outstyle = ";";
     int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.DataframeLimits.forCols * 12, (int)MatrisAritmetik.Core.DataframeLimits.forRows) / 2;
@@ -131,11 +131,11 @@
                     {
                         try
                         {
-                            matoutput = new MatrisAritmetik.Core.Models.Dataframe(utilityService.StringTo2DList((string)cmd.Output.ToString()));
+                            matoutput = new MatrisAritmetik.Core.Models.MatrisBase<object>(utilityService.StringTo2DList((string)cmd.Output.ToString()));
                         }
                         catch (Exception)
                         {
-                            matoutput = (new MatrisAritmetik.Core.Models.Dataframe(new List<List<dynamic>>()," ","\n",null,null,null,null));
+                            matoutput = (new MatrisAritmetik.Core.Models.MatrisBase<object>(new List<List<object>>()));
                         }
                         if (matoutput.IsValid())
                         {
@@ -179,6 +179,7 @@
                                     </math>
                                 </td>
                             </tr>
+                            matoutput.Dispose();
                         }
                         else
                         {

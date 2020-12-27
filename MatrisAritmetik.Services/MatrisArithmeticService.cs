@@ -642,26 +642,25 @@ namespace MatrisAritmetik.Services
 
             r1 -= based;
             r2 -= based;
-            if (r2 <= r1)
+            if (r2 <= r1 || r1 < 0)
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_ROW_INDICES);
             }
 
             c1 -= based;
             c2 -= based;
-            if (c2 <= c1)
+            if (c2 <= c1 || c1 < 0)
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_COL_INDICES);
             }
 
-            int i = 0;
-            foreach (int index in new List<int>() { r1, r2, c1, c2 })
+            if (r2 >= A.Row)
             {
-                if (index < 0 || index >= A.Col)
-                {
-                    throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX(i < 2 ? "satır" : "sütun", based, (i < 2 ? A.Row : A.Col) - 1));
-                }
-                i++;
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
+            }
+            if (c2 >= A.Col)
+            {
+                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
             }
 
             return new MatrisBase<T>(A[new Range(r1, r2), new Range(c1, c2)]);

@@ -59,7 +59,7 @@ namespace MatrisAritmetik.Core
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects)
+                    Message = string.Empty;
                 }
 
                 Message = null;

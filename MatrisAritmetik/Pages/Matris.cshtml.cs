@@ -586,7 +586,7 @@ namespace MatrisAritmetik.Pages
 
                             foreach (string key in tempdict.Keys)
                             {
-                                if (!(tempdict[key] is Dataframe df))
+                                if (!(tempdict[key] is Dataframe))
                                 {
                                     if (_dict.ContainsKey(key))
                                     {
