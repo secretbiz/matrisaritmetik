@@ -138,7 +138,7 @@ namespace MatrisAritmetik.Core.Services
         /// <returns>A <paramref name="row"/>x<paramref name="col"/> matrix filled with <paramref name="fill"/></returns>
         Dataframe FillDf(int row,
                          int col,
-                         float fill);
+                         dynamic fill);
 
         #endregion
 

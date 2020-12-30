@@ -93,8 +93,12 @@ namespace MatrisAritmetik.Core.Services
         /// Try and find a function with the given <paramref name="name"/>
         /// </summary>
         /// <param name="name">Function name to search for</param>
+        /// <param name="filter">List of label names to use as filter</param>
+        /// <param name="blacklist">True if labels given in <paramref name="filter"/> are for blacklisting</param>
         /// <returns>A <see cref="CommandInfo"/> instance if given <paramref name="name"/> was found, or null otherwise</returns>
-        CommandInfo TryParseBuiltFunc(string name);
+        CommandInfo TryParseBuiltFunc(string name,
+                                      List<string> filter = null,
+                                      bool blacklist = false);
 
         /// <summary>
         /// Tokenize a string expression

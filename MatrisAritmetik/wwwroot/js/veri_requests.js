@@ -15,6 +15,18 @@
     }
 }
 
+function getExtras() {
+    var st = "";
+    var opts = document.getElementById("extra_options").selectedOptions;
+    for (var i = 0; i < opts.length; i++) {
+        st += opts[i].value;
+        if (i != opts.length - 1) {
+            st += ",";
+        }
+    }
+    return st;
+        
+}
 //////// df ekleme fonksiyonu
 function addDataframe(event) {
     var tkn = event.currentTarget.token;
@@ -38,7 +50,8 @@ function addDataframe(event) {
                     "name": document.getElementById("veri_name").value,
                     "vals": document.getElementById("veri_vals").value,
                     "delimiter": delim,
-                    "newline": newline
+                    "newline": newline,
+                    "extras": getExtras()
                 },
                 success: function (data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
                 error: function (error) { console.log(error); }
@@ -54,7 +67,8 @@ function addDataframe(event) {
                     __RequestVerificationToken: tkn,
                     "name": document.getElementById("veri_name").value,
                     "func": document.getElementById("veri_vals_special").value,
-                    "args": document.getElementById("veri_special_args").value
+                    "args": document.getElementById("veri_special_args").value,
+                    "extras": getExtras()
                 },
                 success: function (_data) { updateMatTable(tkn); updatedfTable(tkn); updateHistoryPanelDf(tkn); },
                 error: function (error) { console.log(error); }
@@ -193,7 +207,7 @@ async function uploadFilesDf(event) {
     if (files.length != 1)
         return;
 
-    if (files[0].size > 5e+7) {
+    if (files[0].size * 2 > 5e+6) {
         resetFilePanelDf(null);
         alert("Dosya boyutu en fazla 5MB olabilir!");
         return;
@@ -211,6 +225,7 @@ async function uploadFilesDf(event) {
     formData.append("name", document.getElementById("veri_name").value);
     formData.append("delim", document.getElementById("displaySelectedSpacer").value);
     formData.append("newline", document.getElementById("displaySelectedLiner").value);
+    formData.append("extras", getExtras());
 
     await fetch('Veri?handler=UploadFile',
         {

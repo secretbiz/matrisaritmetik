@@ -8,6 +8,12 @@ namespace MatrisAritmetik.Core
     /// </summary>
     public static class CompilerMessage
     {
+        #region FILE MESSAGES
+        public const string FILE_TYPE_INVALID = "Dosya tipi geçersiz! Text veya CSV olmalı!";
+        public const string FILE_SIZE_INVALID = "Dosya boyutu en fazla 5MB olabilir!";
+        public const string TEXT_SIZE_INVALID = "Yazı boyutu en fazla 5MB olabilir!";
+        #endregion
+
         #region DATAFRAME MESSAGES
 
         #region SPAN
@@ -76,6 +82,17 @@ namespace MatrisAritmetik.Core
         {
             return "'" + name + "' adlı veri tablosu silindi!";
         }
+        #endregion
+
+        #region SIZE AND DIMENSIONS
+        /// <summary>
+        /// Dataframe dimensions were invalid
+        /// </summary>
+        public const string DF_INVALID_SIZE = "Veri tablosu boyutları hatalı!";
+        #endregion
+
+        #region INVALID VALUES
+        public const string DF_HAS_NON_NUMBER_VALS = "Veri tablosunda sayı olarak kullanılamayan değerler var!";
         #endregion
 
         #endregion
@@ -676,6 +693,28 @@ namespace MatrisAritmetik.Core
         }
 
         /// <summary>
+        /// Convert type name to turkish
+        /// </summary>
+        /// <param name="parseType">Type name to convert</param>
+        public static void TYPE_TO_TR(ref string parseType)
+        {
+            switch (parseType)
+            {
+                case "int":
+                    parseType = "tamsayı";
+                    break;
+                case "float":
+                    parseType = "ondalıklı";
+                    break;
+                case "double":
+                    parseType = "ondalıklı";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Given value was not successfully parsed 
         /// </summary>
         /// <param name="val">Value</param>
@@ -683,6 +722,12 @@ namespace MatrisAritmetik.Core
         /// <returns>Message telling parsing didn't succeed</returns>
         public static string ARG_PARSE_ERROR(string val, string parseType)
         {
+            TYPE_TO_TR(ref parseType);
+
+            if (string.IsNullOrWhiteSpace(val))
+            {
+                return "Verilen değerlerde " + parseType + " olarak kullanılayanlar var!";
+            }
             return "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
         }
 
@@ -716,6 +761,7 @@ namespace MatrisAritmetik.Core
         /// <returns>Message telling <paramref name="name"/> can't be parsed as <paramref name="realtype"/></returns>
         public static string PARAM_DEFAULT_PARSE_ERROR(string name, string realtype)
         {
+            TYPE_TO_TR(ref realtype);
             return name + " parametresinin default değeri hatalı, " + realtype + " olmalı!";
         }
 

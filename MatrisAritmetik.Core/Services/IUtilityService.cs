@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,11 +22,21 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="delimiter">Delimiter to seperate values from each other</param>
         /// <param name="newline">New-line character to use to seperate rows</param>
         /// <param name="removeliterals">Wheter to remove string literals('\t', '\r', ...)</param>
+        /// <param name="rowlimits">Limit for row dimension</param>
+        /// <param name="collimits">Limit for column dimension</param>
+        /// <param name="allowNonNumber">Wheter to allow non-number values in the list</param>
+        /// <param name="options">List of extra option names</param>
+        /// <param name="nullfiller">Type to fill empty strings with</param>
         /// <returns>2D list of values found in the given <paramref name="text"/></returns>
         List<List<T>> StringTo2DList(string text,
                                      string delimiter = " ",
                                      string newline = "\n",
-                                     bool removeliterals = true);
+                                     bool removeliterals = true,
+                                     int rowlimits = (int)MatrisLimits.forRows,
+                                     int collimits = (int)MatrisLimits.forCols,
+                                     bool allowNonNumber = false,
+                                     List<string> options = null,
+                                     Type nullfiller = null);
 
         /// <summary>
         /// Fix \\ characters in literals
@@ -43,13 +54,15 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="argseperator">Argument seperator used in <paramref name="text"/></param>
         /// <param name="argnamevalseperator">Character to show a parameter name was referred</param>
         /// <param name="removeliterals">Wheter to remove string literals('\t','\r',...)</param>
+        /// <param name="mode">Compiler mode</param>
         /// <returns>A special matrix created with given arguments in <paramref name="text"/></returns>
-        MatrisBase<T> SpecialStringTo2DList(string text,
+        MatrisBase<T> SpecialStringToMatris(string text,
                                             CommandInfo funcinfo,
                                             Dictionary<string, MatrisBase<dynamic>> matdict,
                                             char argseperator = ',',
                                             char argnamevalseperator = ':',
-                                            bool removeliterals = true);
+                                            bool removeliterals = true,
+                                            CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix);
 
         /// <summary>
         /// Create a special dataframe from given args in <paramref name="text"/> and function <paramref name="funcinfo"/>
@@ -60,13 +73,17 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="argseperator">Argument seperator used in <paramref name="text"/></param>
         /// <param name="argnamevalseperator">Character to show a parameter name was referred</param>
         /// <param name="removeliterals">Wheter to remove string literals('\t','\r',...)</param>
+        /// <param name="options">List of option strings</param>
+        /// <param name="mode">Compiler mode</param>
         /// <returns>A special dataframe created with given arguments in <paramref name="text"/></returns>
-        Dataframe SpecialStringTo2DList(string text,
-                                        CommandInfo funcinfo,
-                                        Dictionary<string, Dataframe> dfdict,
-                                        char argseperator = ',',
-                                        char argnamevalseperator = ':',
-                                        bool removeliterals = true);
+        Dataframe SpecialStringToDataframe(string text,
+                                           CommandInfo funcinfo,
+                                           Dictionary<string, Dataframe> dfdict,
+                                           char argseperator = ',',
+                                           char argnamevalseperator = ':',
+                                           bool removeliterals = true,
+                                           List<string> options = null,
+                                           CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix);
         /// <summary>
         /// Performs an async <see cref="Task"/> to read and decode the request body <paramref name="reqbody"/> with given encoding <paramref name="enc"/>
         /// <para>Ignores request parameters given in <paramref name="ignoredparams"/></para>

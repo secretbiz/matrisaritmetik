@@ -9,6 +9,7 @@ using HttpMultipartParser;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
+using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Services
 {
@@ -29,6 +30,348 @@ namespace MatrisAritmetik.Services
         /// Encoded version of "&" sign from the body
         /// </summary>
         private const string ANDSignSpecial = "!!__AND!!";
+
+        private const long max_size = (long)5e+6;
+
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Add a custom null value to given list, if filler is not typeof(float) or null,
+        /// </summary>
+        /// <param name="lis">List to add a value to</param>
+        /// <param name="filler">Type of custom filler</param>
+        /// <param name="val">Value to check if <paramref name="filler"/> was not type float or null</param>
+        private void FillWithCustomNull(List<T> lis,
+                                        Type filler,
+                                        string val,
+                                        bool allowNonNumber)
+        {
+
+            if (string.IsNullOrWhiteSpace(val)) // Check again just in case
+            {
+                InnerFillWithCustomNull(lis, filler, string.Empty, allowNonNumber);
+            }
+            else if (!UseConstantIfExist(lis, val))
+            {
+                InnerFillWithCustomNull(lis, filler, val, allowNonNumber);
+            }
+        }
+        private void InnerFillWithCustomNull(List<T> lis,
+                                             Type filler,
+                                             string val,
+                                             bool allowNonNumber)
+        {
+            if (filler != typeof(float))
+            {
+
+                if (allowNonNumber)
+                {
+                    lis.Add((dynamic)val);
+                }
+                else if (filler == null)
+                {
+                    lis.Add((dynamic)new None());
+                }
+                else
+                {
+                    lis.Add((dynamic)float.NaN);
+                }
+            }
+            else
+            {
+                lis.Add((dynamic)float.NaN);
+            }
+        }
+
+        /// <summary>
+        /// Check given value and add corresponding constant to list if its a constant value's name
+        /// </summary>
+        /// <param name="lis">List to update</param>
+        /// <param name="val">Value to check</param>
+        /// <returns>True if value is added</returns>
+        private bool UseConstantIfExist(List<T> lis, string val)
+        {
+            if (val[0] == '!')
+            {
+                if (Constants.Contains(val[1..^0]))
+                {
+                    lis.Add((dynamic)Constants.Get(val[1..^0]));
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Check given value and add corresponding constant to list if its a constant value's name
+        /// </summary>
+        /// <param name="dict">Dictionary to update</param>
+        /// <param name="name">Dictionary key to use</param>
+        /// <param name="val">Value to check</param>
+        /// <returns>True if value is added</returns>
+        private bool UseConstantIfExist(Dictionary<string, object> dict,
+                                        string name,
+                                        string val)
+        {
+            if (val[0] == '!')
+            {
+                if (Constants.Contains(val[1..^0]))
+                {
+                    dict.Add(name, (dynamic)Constants.Get(val[1..^0]));
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        private void ParseArgumentAsParamType(string currentParamType,
+                                              string currentParamName,
+                                              string currentArg,
+                                              Dictionary<string, object> param_dict,
+                                              Dictionary<string, MatrisBase<object>> matdict,
+                                              CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        {
+            switch (currentParamType)
+            {
+                case "int":
+                    {
+                        if (int.TryParse(currentArg, out int element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+                        break;
+                    }
+                case "float":
+                    {
+                        if (float.TryParse(currentArg, out float element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+
+                        break;
+                    }
+                case "string":
+                    {
+                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            param_dict.Add(currentParamName, currentArg);
+                        }
+                        else
+                        {
+                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
+                        }
+                        break;
+                    }
+                case "Matris":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
+                        }
+
+                        break;
+                    }
+                case "Veri Tablosu":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
+                        }
+
+                        break;
+                    }
+                case "dinamik":
+                    {
+                        if (float.TryParse(currentArg, out float element)) // Try as float
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
+                        {
+                            param_dict.Add(currentParamName, currentArg); // Just use as string
+                        }
+                        else
+                        {
+                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
+                            {
+                                param_dict[currentParamName] = el; // Use constant's float cast
+                            }
+                            else
+                            {
+                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
+                    }
+            }
+        }
+        private void ParseArgumentAsParamType(string currentParamType,
+                                              string currentParamName,
+                                              string currentArg,
+                                              Dictionary<string, object> param_dict,
+                                              Dictionary<string, Dataframe> matdict,
+                                              CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        {
+            switch (currentParamType)
+            {
+                case "int":
+                    {
+                        if (int.TryParse(currentArg, out int element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+                        break;
+                    }
+                case "float":
+                    {
+                        if (float.TryParse(currentArg, out float element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+
+                        break;
+                    }
+                case "string":
+                    {
+                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            param_dict.Add(currentParamName, currentArg);
+                        }
+                        else
+                        {
+                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
+                        }
+                        break;
+                    }
+                case "Matris":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
+                        }
+
+                        break;
+                    }
+                case "Veri Tablosu":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
+                        }
+
+                        break;
+                    }
+                case "dinamik":
+                    {
+                        if (float.TryParse(currentArg, out float element)) // Try as float
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
+                        {
+                            param_dict.Add(currentParamName, currentArg); // Just use as string
+                        }
+                        else
+                        {
+                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
+                            {
+                                param_dict[currentParamName] = el; // Use constant's float cast
+                            }
+                            else
+                            {
+                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
+                    }
+            }
+        }
+
         #endregion
 
         #region UtilityService Methods
@@ -46,10 +389,21 @@ namespace MatrisAritmetik.Services
         public List<List<T>> StringTo2DList(string text,
                                             string delimiter = " ",
                                             string newline = "\n",
-                                            bool removeliterals = true)
+                                            bool removeliterals = true,
+                                            int rowlimits = (int)MatrisLimits.forRows,
+                                            int collimits = (int)MatrisLimits.forCols,
+                                            bool allowNonNumber = false,
+                                            List<string> options = null,
+                                            Type nullfiller = null)
         {
+            if (text.Length > max_size)
+            {
+                throw new Exception(CompilerMessage.TEXT_SIZE_INVALID);
+            }
             string filteredText = text;
             string[] literals = new string[9] { "\t", "\r", "\\", "\"", "\'", "\f", "\v", "\a", "\b" };
+            string single_space = " ";
+
             if (removeliterals)
             {
                 foreach (string lit in literals)
@@ -79,14 +433,14 @@ namespace MatrisAritmetik.Services
             bool typestring = typeof(T).Name == "String";
 
             string[] rows = filteredText.Split(newline);
-            int m = Math.Min((int)MatrisLimits.forRows, rows.Length);
+            int nr = Math.Min(rowlimits, rows.Length);
 
             if (typestring)
             {
-                for (int i = 0; i < m; i++)
+                for (int i = 0; i < nr; i++)
                 {
                     temprow = new List<T>();
-                    rowsplit = rows[i].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                    rowsplit = rows[i].Split(delimiter, delimiter == single_space ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
 
                     if (rowsplit.Length != temp && temp != -1)
                     {
@@ -95,9 +449,20 @@ namespace MatrisAritmetik.Services
 
                     temp = 0;
 
-                    for (int j = 0; j < Math.Min((int)MatrisLimits.forCols, rowsplit.Length); j++)
+                    for (int j = 0; j < Math.Min(collimits, rowsplit.Length); j++)
                     {
-                        temprow.Add((dynamic)rowsplit[j]);
+                        if (!string.IsNullOrWhiteSpace(rowsplit[j]))
+                        {
+                            temprow.Add((dynamic)rowsplit[j]);
+                        }
+                        else if (nullfiller == typeof(float))
+                        {
+                            temprow.Add((dynamic)float.NaN);
+                        }
+                        else
+                        {
+                            temprow.Add((dynamic)new None());
+                        }
                         temp += 1;
                     }
                     vals.Add(temprow);
@@ -105,10 +470,39 @@ namespace MatrisAritmetik.Services
             }
             else
             {
-                for (int i = 0; i < m; i++)
+                int start = options != null
+                    ? options.Contains("use_row_as_lbl")
+                        ? 1
+                        : 0
+                    : 0;
+
+                nr = Math.Min(rowlimits + start, rows.Length);
+
+                // Parse first row as strings if option was given
+                for (int i = 0; i < start; i++)
                 {
                     temprow = new List<T>();
-                    rowsplit = rows[i].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                    rowsplit = rows[i].Split(delimiter, delimiter == single_space ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
+                    for (int j = 0; j < Math.Min(rowlimits, rowsplit.Length); j++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(rowsplit[j]))
+                        {
+                            temprow.Add((dynamic)rowsplit[j]);
+                        }
+                        else
+                        {
+                            FillWithCustomNull(temprow, nullfiller, rowsplit[j], allowNonNumber);
+                        }
+                    }
+
+                    vals.Add(temprow);
+                }
+
+                // Try parsing rest accordingly
+                for (int i = start; i < nr; i++)
+                {
+                    temprow = new List<T>();
+                    rowsplit = rows[i].Split(delimiter, delimiter == single_space ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
 
                     if (rowsplit.Length != temp && temp != -1)
                     {
@@ -117,11 +511,26 @@ namespace MatrisAritmetik.Services
 
                     temp = 0;
 
-                    for (int j = 0; j < Math.Min((int)MatrisLimits.forCols, rowsplit.Length); j++)
+                    for (int j = 0; j < Math.Min(rowlimits, rowsplit.Length); j++)
                     {
-                        if (float.TryParse(rowsplit[j], out float element))
+                        if (!string.IsNullOrWhiteSpace(rowsplit[j]))
                         {
-                            temprow.Add((dynamic)element);
+                            if (float.TryParse(rowsplit[j], out float element))
+                            {
+                                temprow.Add((dynamic)element);
+                            }
+                            else
+                            {
+                                FillWithCustomNull(temprow, nullfiller, rowsplit[j], allowNonNumber);
+                            }
+                        }
+                        else if (allowNonNumber)
+                        {
+                            FillWithCustomNull(temprow, nullfiller, rowsplit[j], allowNonNumber);
+                        }
+                        else if (nullfiller == typeof(float))
+                        {
+                            temprow.Add((dynamic)float.NaN);
                         }
                         else
                         {
@@ -136,13 +545,18 @@ namespace MatrisAritmetik.Services
             return vals;
         }
 
-        public MatrisBase<T> SpecialStringTo2DList(string text,
+        public MatrisBase<T> SpecialStringToMatris(string text,
                                                    CommandInfo funcinfo,
                                                    Dictionary<string, MatrisBase<dynamic>> matdict,
                                                    char argseperator = ',',
                                                    char argnamevalseperator = ':',
-                                                   bool removeliterals = true)
+                                                   bool removeliterals = true,
+                                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
+            if (text.Length > max_size)
+            {
+                throw new Exception(CompilerMessage.TEXT_SIZE_INVALID);
+            }
             string filteredText = text;
             if (removeliterals)
             {
@@ -213,70 +627,7 @@ namespace MatrisAritmetik.Services
                 }
 
                 // Parse as param type
-                switch (currentParamType)
-                {
-                    case "int":
-                        {
-                            if (int.TryParse(currentArg, out int element))
-                            {
-                                param_dict.Add(currentParamName, element);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "tamsayı"));
-                            }
-
-                            break;
-                        }
-                    case "float":
-                        {
-                            if (float.TryParse(currentArg, out float element))
-                            {
-                                param_dict.Add(currentParamName, element);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "ondalıklı"));
-                            }
-
-                            break;
-                        }
-                    case "string":
-                        {
-                            param_dict.Add(currentParamName, currentArg);
-                            break;
-                        }
-                    case "Matris":
-                        {
-                            if (matdict.ContainsKey(currentArg))
-                            {
-                                param_dict.Add(currentParamName, matdict[currentArg]);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
-                            }
-
-                            break;
-                        }
-                    case "Veri Tablosu":
-                        {
-                            if (matdict.ContainsKey(currentArg))
-                            {
-                                param_dict.Add(currentParamName, matdict[currentArg]);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
-                            }
-
-                            break;
-                        }
-                    default:
-                        {
-                            throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
-                        }
-                }
+                ParseArgumentAsParamType(currentParamType, currentParamName, currentArg, param_dict, matdict, mode);
 
             }
 
@@ -311,16 +662,23 @@ namespace MatrisAritmetik.Services
 
             MatrisBase<T> result = (MatrisBase<T>)method.Invoke(serviceObject, param_arg);
 
+            Validations.CheckModeAndMatrixReference(mode, result, true);
             return result;
         }
 
-        public Dataframe SpecialStringTo2DList(string text,
-                                               CommandInfo funcinfo,
-                                               Dictionary<string, Dataframe> dfdict,
-                                               char argseperator = ',',
-                                               char argnamevalseperator = ':',
-                                               bool removeliterals = true)
+        public Dataframe SpecialStringToDataframe(string text,
+                                                  CommandInfo funcinfo,
+                                                  Dictionary<string, Dataframe> dfdict,
+                                                  char argseperator = ',',
+                                                  char argnamevalseperator = ':',
+                                                  bool removeliterals = true,
+                                                  List<string> options = null,
+                                                  CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
+            if (text.Length > max_size)
+            {
+                throw new Exception(CompilerMessage.TEXT_SIZE_INVALID);
+            }
             string filteredText = text;
             if (removeliterals)
             {
@@ -391,57 +749,7 @@ namespace MatrisAritmetik.Services
                 }
 
                 // Parse as param type
-                switch (currentParamType)
-                {
-                    case "int":
-                        {
-                            if (int.TryParse(currentArg, out int element))
-                            {
-                                param_dict.Add(currentParamName, element);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "tamsayı"));
-                            }
-
-                            break;
-                        }
-                    case "float":
-                        {
-                            if (float.TryParse(currentArg, out float element))
-                            {
-                                param_dict.Add(currentParamName, element);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, "ondalıklı"));
-                            }
-
-                            break;
-                        }
-                    case "string":
-                        {
-                            param_dict.Add(currentParamName, currentArg);
-                            break;
-                        }
-                    case "Matris":
-                        {
-                            if (dfdict.ContainsKey(currentArg))
-                            {
-                                param_dict.Add(currentParamName, dfdict[currentArg]);
-                            }
-                            else
-                            {
-                                throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
-                            }
-
-                            break;
-                        }
-                    default:
-                        {
-                            throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
-                        }
-                }
+                ParseArgumentAsParamType(currentParamType, currentParamName, currentArg, param_dict, dfdict, mode);
 
             }
 
@@ -473,8 +781,12 @@ namespace MatrisAritmetik.Services
             }
 
             CompilerUtils.ParseDefaultValues(funcinfo.Param_names.Length, param_arg, paraminfo);
+            Dataframe df = (Dataframe)method.Invoke(serviceObject, param_arg);
 
-            return (Dataframe)method.Invoke(serviceObject, param_arg);
+            Validations.CheckModeAndMatrixReference(mode, df, true);
+
+            df.ApplyOptions(df.GetValues(), options, true);
+            return df;
         }
 
         public async Task ReadFileFromRequest(Stream reqbody,
@@ -484,10 +796,22 @@ namespace MatrisAritmetik.Services
             MultipartFormDataParser parser = await MultipartFormDataParser.ParseAsync(reqbody, enc).ConfigureAwait(false);
             Stream datastream = parser.Files[0].Data;
 
+            List<string> typelist = new List<string>() { "text/plain", "text/csv", "application/vnd.ms-excel" };
+
             using StreamReader reader = new StreamReader(datastream, enc);
+
+            if (!typelist.Contains(parser.GetParameterValue("type")))
+            {
+                throw new Exception(CompilerMessage.FILE_TYPE_INVALID);
+            }
 
             filedata.Add("data",
                          await reader.ReadToEndAsync());
+
+            if ((filedata["data"].Length) > max_size)
+            {
+                throw new Exception(CompilerMessage.FILE_SIZE_INVALID);
+            }
 
             filedata.Add("type",
                          parser.GetParameterValue("type"));
@@ -500,6 +824,9 @@ namespace MatrisAritmetik.Services
 
             filedata.Add("name",
                          parser.GetParameterValue("name"));
+
+            filedata.Add("extras",
+                         parser.GetParameterValue("extras"));
         }
 
         public async Task ReadAndDecodeRequest(Stream reqbody,

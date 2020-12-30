@@ -44,17 +44,7 @@ namespace MatrisAritmetik.Core.Models
         #region Key Indexing
         public dynamic this[string key]
         {
-            get
-            {
-                if (_keys.Contains(key))
-                {
-                    return _vals[_keys.IndexOf(key)];
-                }
-                else
-                {
-                    throw new Exception();
-                }
-            }
+            get => _keys.Contains(key) ? _vals[_keys.IndexOf(key)] : throw new Exception();
             set
             {
                 if (_keys.Contains(key))
@@ -222,14 +212,7 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Description of given <paramref name="key"/>'s corresponding item</returns>
         public string GetDescription(string key)
         {
-            if (!_keys.Contains(key))
-            {
-                throw new Exception();
-            }
-            else
-            {
-                return _desc[_keys.IndexOf(key)];
-            }
+            return !_keys.Contains(key) ? throw new Exception() : _desc[_keys.IndexOf(key)];
         }
 
         #endregion
@@ -237,11 +220,7 @@ namespace MatrisAritmetik.Core.Models
         #region Debug
         private string GetDebuggerDisplay()
         {
-            if (Count == 0)
-            {
-                return "Count=0";
-            }
-            return "Count=" + Count.ToString() + " :" + GetEnumerator().Current.ToString();
+            return Count == 0 ? "Count=0" : "Count=" + Count.ToString() + " :" + GetEnumerator().Current.ToString();
         }
         #endregion
 
@@ -327,7 +306,7 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>True if <paramref name="key"/> exists in <see cref="Constants.Dict"/></returns>
         public static bool Contains(string key)
         {
-            return _dict.ContainsKey(key);
+            return !string.IsNullOrWhiteSpace(key) && _dict.ContainsKey(key.Trim());
         }
 
         /// <summary>
@@ -337,14 +316,7 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Value of the special key if it exists as an <see cref="object"/>, throws othewise</returns>
         public static object Get(string key)
         {
-            if (Contains(key))
-            {
-                return _dict[key];
-            }
-            else
-            {
-                throw new Exception();
-            }
+            return Contains(key) ? (object)_dict[key] : throw new Exception();
         }
 
         /// <summary>
@@ -354,14 +326,7 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Description of special <paramref name="key"/> if it exists, throws otherwise</returns>
         public static string Description(string key)
         {
-            if (Contains(key))
-            {
-                return _dict.GetDescription(key);
-            }
-            else
-            {
-                throw new Exception();
-            }
+            return Contains(key) ? _dict.GetDescription(key) : throw new Exception();
         }
     };
 }

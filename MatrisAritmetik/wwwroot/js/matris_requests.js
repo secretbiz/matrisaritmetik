@@ -161,7 +161,7 @@ async function uploadFiles(event) {
     if (files.length != 1)
         return;
 
-    if (files[0].size > 5e+7) {
+    if (files[0].size*2 > 5e+6) {
         resetFilePanel(null);
         alert("Dosya boyutu en fazla 5MB olabilir!");
         return;
@@ -179,6 +179,7 @@ async function uploadFiles(event) {
     formData.append("name", document.getElementById("matris_name").value);
     formData.append("delim", document.getElementById("displaySelectedSpacer").value);
     formData.append("newline", document.getElementById("displaySelectedLiner").value);
+    formData.append("extras", "");
 
     await fetch('Matris?handler=UploadFile',
         {

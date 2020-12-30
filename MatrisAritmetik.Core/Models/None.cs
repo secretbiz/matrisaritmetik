@@ -18,6 +18,24 @@ namespace MatrisAritmetik.Models.Core
             return "null";
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+            {
+                return true;
+            }
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return ToString();
+        }
         #region Operator overloads
 #pragma warning disable IDE0060 // Remove unused parameter
 
@@ -153,21 +171,6 @@ namespace MatrisAritmetik.Models.Core
         public static dynamic operator !=(None none, None none2)
         {
             throw new Exception(CompilerMessage.OP_WITH_NULL);
-        }
-
-        private string GetDebuggerDisplay()
-        {
-            return ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
         #endregion
 

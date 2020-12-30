@@ -50,34 +50,16 @@ namespace MatrisAritmetik.Pages
         /// String manipulation methods
         /// </summary>
         private readonly IUtilityService<dynamic> _utils;
-        /// <summary>
-        /// Matrix arithmetic methods
-        /// </summary>
-        private readonly IMatrisArithmeticService<dynamic> _matrisService;
-        /// <summary>
-        /// Special matrix creating methods
-        /// </summary>
-        private readonly ISpecialMatricesService _specialMatricesService;
-        /// <summary>
-        /// Statistics methods
-        /// </summary>
-        private readonly IStatisticsService _statsService;
         #endregion
 
         #region Page Constructor
         public VeriModel(ILogger<MatrisModel> logger,
                          IUtilityService<dynamic> utilityService,
-                         IMatrisArithmeticService<dynamic> matrisService,
-                         IFrontService frontService,
-                         ISpecialMatricesService specialMatricesService,
-                         IStatisticsService statsService)
+                         IFrontService frontService)
         {
             _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
-            _matrisService = matrisService;
-            _specialMatricesService = specialMatricesService;
-            _statsService = statsService;
         }
         #endregion
 
@@ -169,14 +151,22 @@ namespace MatrisAritmetik.Pages
                                 reqdict[DfNewLineParam] = _utils.FixLiterals(reqdict[DfNewLineParam]);
                                 reqdict[DfValsParam] = _utils.FixLiterals(reqdict[DfValsParam]);
 
+                                List<string> optlist = GetOptionList(reqdict);
+
                                 using Dataframe df = new Dataframe
                                                                 (
                                                                     _utils.StringTo2DList
                                                                     (
                                                                         reqdict[DfValsParam],
                                                                         reqdict[DfDelimParam],
-                                                                        reqdict[DfNewLineParam]
-                                                                    )
+                                                                        reqdict[DfNewLineParam],
+                                                                        true,
+                                                                        (int)DataframeLimits.forRows,
+                                                                        (int)DataframeLimits.forCols,
+                                                                        true,
+                                                                        optlist
+                                                                    ),
+                                                                    optlist
                                                                 );
                                 _frontService.AddToDfDict
                                 (
@@ -185,7 +175,7 @@ namespace MatrisAritmetik.Pages
                                     _dict
                                 );
 
-                                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict, true);
                                 Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
                                 Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
 
@@ -318,18 +308,23 @@ namespace MatrisAritmetik.Pages
                         return;
                     }
 
-                    using CommandInfo cmdinfo = _frontService.TryParseBuiltFunc(actualFuncName);
+                    using CommandInfo cmdinfo = _frontService.TryParseBuiltFunc(actualFuncName, SpecialsLabels);
                     if (cmdinfo != null)
                     {
                         try
                         {
                             Validations.ValidMatrixName(reqdict[DfNameParam], throwOnBadName: true);
 
-                            using Dataframe df = _utils.SpecialStringTo2DList
+
+                            List<string> optlist = GetOptionList(reqdict);
+
+                            using Dataframe df = _utils.SpecialStringToDataframe
                                                  (
                                                      reqdict[DfSpecialArgsParam],
                                                      cmdinfo,
-                                                     _dict
+                                                     _dict,
+                                                     options: optlist,
+                                                     mode: CompilerDictionaryMode.All
                                                  );
 
                             _frontService.AddToDfDict
@@ -339,7 +334,7 @@ namespace MatrisAritmetik.Pages
                                 _dict
                             );
 
-                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict, true);
                             Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
                             Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
@@ -436,14 +431,22 @@ namespace MatrisAritmetik.Pages
                         {
                             Validations.ValidMatrixName(FileData["name"], throwOnBadName: true);
 
+                            List<string> optlist = GetOptionList(FileData);
+
                             using Dataframe mat = new Dataframe
                                                             (
                                                                 _utils.StringTo2DList
                                                                 (
                                                                     FileData["data"],
                                                                     FileData["delim"],
-                                                                    FileData["newline"]
-                                                                )
+                                                                    FileData["newline"],
+                                                                    true,
+                                                                    (int)DataframeLimits.forRows,
+                                                                    (int)DataframeLimits.forCols,
+                                                                    true,
+                                                                    optlist
+                                                                ),
+                                                                optlist
                                                             );
                             _frontService.AddToDfDict
                             (
@@ -453,7 +456,7 @@ namespace MatrisAritmetik.Pages
                             );
 
 
-                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict, true);
                             Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
                             Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
@@ -536,7 +539,7 @@ namespace MatrisAritmetik.Pages
                 reqdict[DfNameParam] = reqdict[DfNameParam].Replace("matris_table_delbutton_", "");
 
                 Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
-                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
+                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict, true);
                 Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
                 if (_frontService.DeleteFromMatrisDict(reqdict[DfNameParam], _dict))
@@ -545,8 +548,7 @@ namespace MatrisAritmetik.Pages
                     opts.Remove(reqdict[DfNameParam]);
                 }
 
-                // Uncomment this if deleting matrices are made possible through compiler
-                //_frontService.SetMatrixDicts(_dict, vals, opts);
+                _frontService.SetMatrixDicts(_dict, vals, opts);
 
                 HttpContext.Session.Set(SessionMatrisDict, vals);
                 HttpContext.Session.SetMatOptions(SessionSeedDict, opts);
@@ -579,7 +581,7 @@ namespace MatrisAritmetik.Pages
                 reqdict[DfNameParam] = reqdict[DfNameParam].Replace("veri_table_delbutton_", "");
 
                 Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
-                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict);
+                Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionDfDict, true);
                 Dictionary<string, Dictionary<string, List<LabelList>>> labels = HttpContext.Session.GetDfLabels(SessionDfLabels);
                 Dictionary<string, Dictionary<string, dynamic>> settings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
@@ -590,8 +592,7 @@ namespace MatrisAritmetik.Pages
                     settings.Remove(reqdict[DfNameParam]);
                 }
 
-                // Uncomment this if deleting matrices are made possible through compiler
-                //_frontService.SetMatrixDicts(_dict, vals, opts);
+                _frontService.SetDfDicts(_dict, vals, labels, settings);
 
                 HttpContext.Session.Set(SessionDfDict, vals);
                 HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
@@ -641,7 +642,7 @@ namespace MatrisAritmetik.Pages
                             Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
                             Dictionary<string, Dataframe> dfdict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
-                            Dictionary<string, List<List<object>>> dfvals = HttpContext.Session.GetMatVals(SessionDfDict);
+                            Dictionary<string, List<List<object>>> dfvals = HttpContext.Session.GetMatVals(SessionDfDict, true);
                             Dictionary<string, Dictionary<string, List<LabelList>>> dflabels = HttpContext.Session.GetDfLabels(SessionDfLabels);
                             Dictionary<string, Dictionary<string, dynamic>> dfsettings = HttpContext.Session.GetDfSettings(SessionDfSettings);
 
@@ -827,6 +828,13 @@ namespace MatrisAritmetik.Pages
             return mpart;
         }
 
+        #endregion
+
+        #region Private Methods
+        private List<string> GetOptionList(Dictionary<string, string> dict)
+        {
+            return string.IsNullOrWhiteSpace(dict["extras"]) ? null : new List<string>(dict["extras"].Split(","));
+        }
         #endregion
 
         #region Dispose

@@ -862,8 +862,9 @@ namespace MatrisAritmetik.Services
                         {
                             Type serviceType = op.service switch
                             {
-                                "MatrisArithmeticService" => typeof(MatrisArithmeticService<object>),
+                                "MatrisArithmeticService" => typeof(MatrisArithmeticService),
                                 "SpecialMatricesService" => typeof(SpecialMatricesService),
+                                "StatisticsService" => typeof(StatisticsService),
                                 "FrontService" => typeof(FrontService),
                                 _ => throw new Exception(CompilerMessage.UNKNOWN_SERVICE(op.service))
                             };
@@ -1687,7 +1688,9 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public CommandInfo TryParseBuiltFunc(string name)
+        public CommandInfo TryParseBuiltFunc(string name,
+                                             List<string> filter = null,
+                                             bool blacklist = false)
         {
             if (GetBuiltInCommands() == null)
             {
@@ -1698,7 +1701,12 @@ namespace MatrisAritmetik.Services
                 ReadCommandInformation();
             }
 
-            foreach (CommandInfo cinfo in from CommandLabel lbl in GetBuiltInCommands()
+            if (filter == null && !blacklist)
+            {
+                blacklist = true;
+            }
+
+            foreach (CommandInfo cinfo in from CommandLabel lbl in GetCommandLabelList(filter, blacklist)
                                           from CommandInfo cinfo in new List<CommandInfo>(lbl.Functions)
                                           where cinfo.Function == name
                                           select cinfo)
@@ -1779,19 +1787,7 @@ namespace MatrisAritmetik.Services
 
         public bool CheckCmdDate(DateTime calldate)
         {
-            // First command
-            if (calldate == null)
-            {
-                return true;
-            }
-            else if ((DateTime.Now - calldate).TotalSeconds < (int)CompilerLimits.forCmdSendRateInSeconds)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return calldate == null || (DateTime.Now - calldate).TotalSeconds >= (int)CompilerLimits.forCmdSendRateInSeconds;
         }
 
         public void CleanUp()

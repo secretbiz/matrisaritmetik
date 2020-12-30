@@ -52,28 +52,16 @@ namespace MatrisAritmetik.Pages
         /// String manipulation methods
         /// </summary>
         private readonly IUtilityService<dynamic> _utils;
-        /// <summary>
-        /// Matrix arithmetic methods
-        /// </summary>
-        private readonly IMatrisArithmeticService<dynamic> _matrisService;
-        /// <summary>
-        /// Special matrix creating methods
-        /// </summary>
-        private readonly ISpecialMatricesService _specialMatricesService;
         #endregion
 
         #region Page Constructor
         public MatrisModel(ILogger<MatrisModel> logger,
                            IUtilityService<dynamic> utilityService,
-                           IMatrisArithmeticService<dynamic> matrisService,
-                           IFrontService frontService,
-                           ISpecialMatricesService specialMatricesService)
+                           IFrontService frontService)
         {
             _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
-            _matrisService = matrisService;
-            _specialMatricesService = specialMatricesService;
         }
         #endregion
 
@@ -89,7 +77,7 @@ namespace MatrisAritmetik.Pages
         /// <summary>
         /// List of labels to ignore
         /// </summary>
-        private readonly List<string> IgnoreLabels = new List<string>() { "Özel Veri Tablosu" };
+        private readonly List<string> IgnoreLabels = new List<string>() { "Özel Veri Tablosu", "İstatistiksel" };
         #endregion
 
         #region GET Actions
@@ -178,7 +166,8 @@ namespace MatrisAritmetik.Pages
                                                                     (
                                                                         reqdict[MatrisValsParam],
                                                                         reqdict[MatrisDelimParam],
-                                                                        reqdict[MatrisNewLineParam]
+                                                                        reqdict[MatrisNewLineParam],
+                                                                        nullfiller: typeof(float)
                                                                     )
                                                                 );
                                 _frontService.AddToMatrisDict
@@ -308,7 +297,7 @@ namespace MatrisAritmetik.Pages
                         return;
                     }
 
-                    using CommandInfo cmdinfo = _frontService.TryParseBuiltFunc(actualFuncName);
+                    using CommandInfo cmdinfo = _frontService.TryParseBuiltFunc(actualFuncName, SpecialsLabels);
                     if (cmdinfo != null)
                     {
                         try
@@ -321,11 +310,12 @@ namespace MatrisAritmetik.Pages
                             _frontService.AddToMatrisDict
                             (
                                 reqdict[MatrisNameParam],
-                                _utils.SpecialStringTo2DList
+                                _utils.SpecialStringToMatris
                                 (
                                     reqdict[MatrisSpecialArgsParam],
                                     cmdinfo,
-                                    _dict
+                                    _dict,
+                                    mode: CompilerDictionaryMode.Matrix
                                 ),
                                 _dict
                             );
@@ -423,7 +413,9 @@ namespace MatrisAritmetik.Pages
                                                                 (
                                                                     FileData["data"],
                                                                     FileData["delim"],
-                                                                    FileData["newline"]
+                                                                    FileData["newline"],
+                                                                    allowNonNumber: true,
+                                                                    nullfiller: typeof(float)
                                                                 )
                                                             );
                             _frontService.AddToMatrisDict
@@ -519,8 +511,7 @@ namespace MatrisAritmetik.Pages
                     opts.Remove(reqdict[MatrisNameParam]);
                 }
 
-                // Uncomment this if deleting matrices are made possible through compiler
-                //_frontService.SetMatrixDicts(_dict, vals, opts);
+                _frontService.SetMatrixDicts(_dict, vals, opts);
 
                 HttpContext.Session.Set(SessionMatrisDict, vals);
                 HttpContext.Session.SetMatOptions(SessionSeedDict, opts);

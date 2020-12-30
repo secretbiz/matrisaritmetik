@@ -4,56 +4,50 @@ using System.Linq;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
+using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Services
 {
-    public class MatrisArithmeticService<T> : IMatrisArithmeticService<T>
+    public class MatrisArithmeticService : IMatrisArithmeticService<object>
     {
         #region MatrisArithmeticService Methods
 
-        public MatrisBase<T> Transpose(MatrisBase<T> A)
+        public MatrisBase<object> Transpose(MatrisBase<object> A)
         {
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
-            List<List<T>> result = new List<List<T>>();
+            List<List<object>> result = new List<List<object>>();
 
             for (int j = 0; j < A.Col; j++)
             {
                 result.Add(A.ColList(j, 0));
             }
 
-            return new MatrisBase<T>(result);
+            return A is Dataframe df
+                ? new Dataframe(result,
+                                df.Delimiter,
+                                df.NewLine,
+                                df.GetCopyOfLabels(df.GetColLabels()),
+                                df.GetCopyOfLabels(df.GetRowLabels()),
+                                df.GetRowSettings().Copy(),
+                                df.GetColSettings().Copy())
+                : new MatrisBase<object>(result);
         }
 
-        public MatrisBase<T> Conjugate(MatrisBase<T> A)
+        public MatrisBase<object> Conjugate(MatrisBase<object> A)
         {
             return Transpose(A);
         }
 
-        public MatrisBase<T> Echelon(MatrisBase<T> A)
+        private void InnerEchelon(MatrisBase<object> A, MatrisBase<object> result)
         {
-            // Bad dimensions
-            if (!A.IsValid())
-            {
-                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
-            }
-
-            // Zero matrix
-            if (A.IsZero((float)0.0))
-            {
-                return A;
-            }
-
-            MatrisBase<T> result;
-
             int nr = A.Row;
             int nc = A.Col;
-
             List<int> zeroCols = new List<int>();
-            List<List<T>> filteredResult = A.Copy().GetValues();
+            List<List<object>> filteredResult = A.Copy().GetValues();
             for (int j = 0; j < nc; j++)
             {
                 if (A.IsZeroCol(j, 0, (float)0.0))
@@ -68,7 +62,7 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            result = new MatrisBase<T>(filteredResult);
+            result.SetValues(filteredResult);
 
             for (int r = 0; r < nr; r++)
             {
@@ -96,10 +90,17 @@ namespace MatrisAritmetik.Services
                             nr--;
                         }
 
-                        if (!Sub(result, p, nr, p, p + 1, 0).IsZeroCol(1))
+                        if (!Sub(result, p, nr, p, p + 1, 0).IsZeroCol(0, 0))
                         {
-                            result.SwapToEnd(p, 0);
-                            swapCount++;
+                            for (int ri = p + 1; ri < nr; ri++)
+                            {
+                                if (Math.Abs(float.Parse(result.GetValues()[ri][p].ToString())) > 1e-6)
+                                {
+                                    result.Swap(p, ri, based: 0);
+                                    swapCount++;
+                                    break;
+                                }
+                            }
                         }
                         else
                         {
@@ -125,14 +126,14 @@ namespace MatrisAritmetik.Services
                             {
                                 for (int i = 0; i < result.Row; i++)
                                 {
-                                    result[i].Insert(j, (dynamic)(float)0.0);
+                                    result.GetValues()[i].Insert(j, (dynamic)(float)0.0);
                                 }
                             }
                             result.SetCol(A.Col);
                         }
                         result.FixMinusZero();
                         result.SwapCount = swapCount;
-                        return result;
+                        return;
                     }
                 }
 
@@ -148,7 +149,7 @@ namespace MatrisAritmetik.Services
                         float x = -(float.Parse(result.GetValues()[p + r][p].ToString()) / float.Parse(result.GetValues()[p][p].ToString()));
                         for (int c = p; c < nc; c++)
                         {
-                            result[p + r][c] = (dynamic)((float.Parse(result.GetValues()[p][c].ToString()) * x) + float.Parse(result.GetValues()[p + r][c].ToString()));
+                            result.GetValues()[p + r][c] = (dynamic)((float.Parse(result.GetValues()[p][c].ToString()) * x) + float.Parse(result.GetValues()[p + r][c].ToString()));
                         }
                     }
                 }
@@ -170,7 +171,7 @@ namespace MatrisAritmetik.Services
                 {
                     for (int i = 0; i < result.Row; i++)
                     {
-                        result[i].Insert(j, (dynamic)(float)0.0);
+                        result.GetValues()[i].Insert(j, (dynamic)(float)0.0);
                     }
                 }
                 result.SetCol(A.Col);
@@ -178,10 +179,9 @@ namespace MatrisAritmetik.Services
 
             result.FixMinusZero();
             result.SwapCount = swapCount;
-            return result;
         }
 
-        public MatrisBase<T> RREchelon(MatrisBase<T> A)
+        public MatrisBase<object> Echelon(MatrisBase<object> A)
         {
             // Bad dimensions
             if (!A.IsValid())
@@ -195,8 +195,24 @@ namespace MatrisAritmetik.Services
                 return A;
             }
 
-            MatrisBase<T> result = A.Copy();
+            if (A is Dataframe df)
+            {
+                CompilerUtils.AssertMatrixValsAreNumbers(A);
+                Dataframe result = df.Copy();
+                InnerEchelon(df, result);
+                return result;
+            }
+            else
+            {
+                MatrisBase<object> result = A.Copy();
+                InnerEchelon(A, result);
+                return result;
+            }
 
+        }
+
+        private void InnerRREchelon(MatrisBase<object> A, MatrisBase<object> result)
+        {
             int lead = 0;
             int nr = A.Row;
             int nc = A.Col;
@@ -243,10 +259,40 @@ namespace MatrisAritmetik.Services
 
             result.FixMinusZero();
 
-            return result;
         }
 
-        public float Determinant(MatrisBase<T> A)
+        public MatrisBase<object> RREchelon(MatrisBase<object> A)
+        {
+            // Bad dimensions
+            if (!A.IsValid())
+            {
+                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
+            }
+
+            // Zero matrix
+            if (A.IsZero((float)0.0))
+            {
+                return A;
+            }
+
+            if (A is Dataframe df)
+            {
+                CompilerUtils.AssertMatrixValsAreNumbers(A);
+
+                Dataframe result = df.Copy();
+                InnerRREchelon(df, result);
+                return result;
+            }
+            else
+            {
+                MatrisBase<object> result = A.Copy();
+                InnerRREchelon(A, result);
+                return result;
+            }
+
+        }
+
+        public float Determinant(MatrisBase<object> A)
         {
             if (!A.IsSquare())
             {
@@ -255,21 +301,24 @@ namespace MatrisAritmetik.Services
 
             if (A.IsZero((float)0.0))
             {
+                CompilerUtils.AssertMatrixValsAreNumbers(A);
                 return (float)0.0;
             }
 
             if (A.Row == 1)
             {
+                CompilerUtils.AssertMatrixValsAreNumbers(A);
                 return float.Parse(A.GetValues()[0][0].ToString());
             }
 
             if (A.Row == 2)
             {
+                CompilerUtils.AssertMatrixValsAreNumbers(A);
                 return (float.Parse(A.GetValues()[0][0].ToString()) * float.Parse(A.GetValues()[1][1].ToString()))
                        - (float.Parse(A.GetValues()[0][1].ToString()) * float.Parse(A.GetValues()[1][0].ToString()));
             }
 
-            using MatrisBase<T> ech = Echelon(A.Copy());
+            using MatrisBase<object> ech = Echelon(A.Copy());
 
             float det = float.Parse(ech.GetValues()[0][0].ToString());
             if (ech.SwapCount % 2 == 1)
@@ -286,9 +335,9 @@ namespace MatrisAritmetik.Services
             return det;
         }
 
-        public int Rank(MatrisBase<T> A)
+        public int Rank(MatrisBase<object> A)
         {
-            using MatrisBase<T> ech = Echelon(A.Copy());
+            using MatrisBase<object> ech = Echelon(A.Copy());
             int zeroCount = 0;
             if (A.Row <= A.Col)
             {
@@ -314,7 +363,7 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public float Trace(MatrisBase<T> A)
+        public float Trace(MatrisBase<object> A)
         {
             if (!A.IsValid())
             {
@@ -324,13 +373,20 @@ namespace MatrisAritmetik.Services
             int m = Math.Min(A.Row, A.Col);
             for (int i = 1; i < m; i++)
             {
-                trace += float.Parse(A[i, i].ToString());
+                if (float.TryParse(A[i, i].ToString(), out float res))
+                {
+                    trace += res;
+                }
+                else
+                {
+                    return float.NaN;
+                }
             }
 
             return trace;
         }
 
-        public MatrisBase<T> Inverse(MatrisBase<T> A)
+        public MatrisBase<object> Inverse(MatrisBase<object> A)
         {
             if (!A.IsSquare())
             {
@@ -342,13 +398,23 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_DET_ZERO_NO_INV);
             }
 
-            using MatrisBase<T> temp = Concatenate(A.Copy(), (dynamic)((ISpecialMatricesService)new SpecialMatricesService()).Identity(A.Row), 1);
+            using MatrisBase<object> temp = Concatenate(A is Dataframe ? ((Dataframe)A.Copy()) : A.Copy(),
+                                                        (dynamic)new SpecialMatricesService().Identity(A.Row),
+                                                        1);
 
-            return new MatrisBase<T>(vals: RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
+            return A is Dataframe df
+                    ? new Dataframe(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))],
+                                    df.Delimiter,
+                                    df.NewLine,
+                                    df.GetCopyOfLabels(df.GetRowLabels()),
+                                    df.GetCopyOfLabels(df.GetColLabels()),
+                                    df.GetRowSettings().Copy(),
+                                    df.GetColSettings().Copy())
+                    : new MatrisBase<object>(vals: RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
         }
 
-        public MatrisBase<T> PseudoInverse(MatrisBase<T> A,
-                                           int side = -1)
+        public MatrisBase<object> PseudoInverse(MatrisBase<object> A,
+                                                int side = -1)
         {
             if (Rank(A) != Math.Min(A.Row, A.Col))
             {
@@ -360,6 +426,8 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_PSEINV_BAD_SIDE);
             }
 
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+
             string sidename = side == -1 ? "sol" : "sağ";
 
             // Left inverse
@@ -367,7 +435,15 @@ namespace MatrisAritmetik.Services
             {
                 try
                 {
-                    return MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
+                    return A is Dataframe df
+                        ? new Dataframe(MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A)).GetValues(),
+                                             df.Delimiter,
+                                             df.NewLine,
+                                             df.GetCopyOfLabels(df.GetRowLabels()),
+                                             df.GetCopyOfLabels(df.GetColLabels()),
+                                             df.GetRowSettings().Copy(),
+                                             df.GetColSettings().Copy())
+                        : MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
                 }
                 catch (Exception err)
                 {
@@ -383,7 +459,15 @@ namespace MatrisAritmetik.Services
             {
                 try
                 {
-                    return MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
+                    return A is Dataframe df
+                        ? new Dataframe(MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A)))).GetValues(),
+                                             df.Delimiter,
+                                             df.NewLine,
+                                             df.GetCopyOfLabels(df.GetRowLabels()),
+                                             df.GetCopyOfLabels(df.GetColLabels()),
+                                             df.GetRowSettings().Copy(),
+                                             df.GetColSettings().Copy())
+                        : MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
                 }
                 catch (Exception err)
                 {
@@ -397,36 +481,58 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public MatrisBase<T> Adjoint(MatrisBase<T> A)
+        public MatrisBase<object> Adjoint(MatrisBase<object> A)
         {
             if (!A.IsSquare())
             {
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            List<List<T>> adj = new List<List<T>>();
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+
+            List<List<object>> adj = new List<List<object>>();
             int r = A.Row;
             int c = A.Col;
             for (int i = 0; i < r; i++)
             {
-                adj.Add(new List<T>());
+                adj.Add(new List<object>());
                 for (int j = 0; j < c; j++)
                 {
                     adj[i].Add((dynamic)(((i + j) % 2 == 1 ? -1 : 1) * Minor(A, i, j, 0)));
                 }
             }
-            return Transpose(new MatrisBase<T>(adj));
+
+            return A is Dataframe df
+                ? new Dataframe(Transpose(new MatrisBase<object>(adj)).GetValues(),
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     df.GetCopyOfLabels(df.GetRowLabels()),
+                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : Transpose(new MatrisBase<object>(adj));
         }
 
-        public MatrisBase<T> MatrisMul(MatrisBase<T> A,
-                                       MatrisBase<T> B)
+        public MatrisBase<object> MatrisMul(MatrisBase<object> A,
+                                            MatrisBase<object> B)
         {
-            return CompilerUtils.MatrisMul(A, B);
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+            CompilerUtils.AssertMatrixValsAreNumbers(B);
+
+            return A is Dataframe df
+                ? new Dataframe(CompilerUtils.MatrisMul(A, B).GetValues(),
+                                df.Delimiter,
+                                df.NewLine,
+                                null,
+                                null,
+                                df.GetRowSettings().Copy(),
+                                df.GetColSettings().Copy())
+                : CompilerUtils.MatrisMul(A, B);
         }
 
-        public MatrisBase<T> Concatenate(MatrisBase<T> A,
-                                         MatrisBase<T> B,
-                                         int axis = 0)
+        public MatrisBase<object> Concatenate(MatrisBase<object> A,
+                                              MatrisBase<object> B,
+                                              int axis = 0)
         {
             if (axis == 0)
             {
@@ -435,7 +541,7 @@ namespace MatrisAritmetik.Services
                     throw new Exception(CompilerMessage.MAT_CONCAT_DIM_ERROR("Satır"));
                 }
 
-                List<List<T>> newvals = new List<List<T>>();
+                List<List<object>> newvals = new List<List<object>>();
 
                 for (int r1 = 0; r1 < A.Row; r1++)
                 {
@@ -446,9 +552,15 @@ namespace MatrisAritmetik.Services
                     newvals.Add(B.RowList(r2, 0));
                 }
 
-                MatrisBase<T> res = new MatrisBase<T>() { Row = A.Row + B.Row, Col = A.Col };
-                res.SetValues(newvals);
-                return res;
+                return A is Dataframe df
+                    ? new Dataframe(newvals,
+                                         df.Delimiter,
+                                         df.NewLine,
+                                         null,
+                                         null,
+                                         df.GetRowSettings().Copy(),
+                                         df.GetColSettings().Copy())
+                    : new MatrisBase<object>(newvals);
             }
             else if (axis == 1)
             {
@@ -457,7 +569,7 @@ namespace MatrisAritmetik.Services
                     throw new Exception(CompilerMessage.MAT_CONCAT_DIM_ERROR("Sütun"));
                 }
 
-                List<List<T>> newvals = new List<List<T>>();
+                List<List<object>> newvals = new List<List<object>>();
 
                 for (int r = 0; r < A.Row; r++)
                 {
@@ -465,9 +577,15 @@ namespace MatrisAritmetik.Services
                     newvals[r].AddRange(B.RowList(r, 0));
                 }
 
-                MatrisBase<T> res = new MatrisBase<T>() { Row = A.Row, Col = A.Col + B.Col };
-                res.SetValues(newvals);
-                return res;
+                return A is Dataframe df
+                    ? new Dataframe(newvals,
+                                         df.Delimiter,
+                                         df.NewLine,
+                                         null,
+                                         null,
+                                         df.GetRowSettings().Copy(),
+                                         df.GetColSettings().Copy())
+                    : new MatrisBase<object>(newvals);
             }
             else
             {
@@ -475,7 +593,7 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public float Minor(MatrisBase<T> A,
+        public float Minor(MatrisBase<object> A,
                            int row,
                            int col,
                            int based = 0)
@@ -483,18 +601,20 @@ namespace MatrisAritmetik.Services
             return Determinant(MinorMatris(A, row, col, based));
         }
 
-        public MatrisBase<T> MinorMatris(MatrisBase<T> A,
-                                         int row,
-                                         int col,
-                                         int based = 0)
+        public MatrisBase<object> MinorMatris(MatrisBase<object> A,
+                                              int row,
+                                              int col,
+                                              int based = 0)
         {
             if (!A.IsSquare())
             {
                 throw new Exception(CompilerMessage.MAT_NOT_SQUARE);
             }
 
-            List<List<T>> newlis = new List<List<T>>();
-            List<List<T>> vals = A.GetValues();
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+
+            List<List<object>> newlis = new List<List<object>>();
+            List<List<object>> vals = A.GetValues();
             row -= based;
             col -= based;
 
@@ -511,7 +631,7 @@ namespace MatrisAritmetik.Services
             int rowindex = 0;
             for (int i = 0; i < row; i++)
             {
-                newlis.Add(new List<T>());
+                newlis.Add(new List<object>());
                 for (int j = 0; j < col; j++)
                 {
                     newlis[rowindex].Add(vals[i][j]);
@@ -525,7 +645,7 @@ namespace MatrisAritmetik.Services
 
             for (int i = row + 1; i < A.Row; i++)
             {
-                newlis.Add(new List<T>());
+                newlis.Add(new List<object>());
                 for (int j = 0; j < col; j++)
                 {
                     newlis[rowindex].Add(vals[i][j]);
@@ -537,47 +657,48 @@ namespace MatrisAritmetik.Services
                 rowindex++;
             }
 
-            return new MatrisBase<T>(newlis);
+            return new MatrisBase<object>(newlis);
         }
 
-        public int RowDim(MatrisBase<T> A)
+        public int RowDim(MatrisBase<object> A)
         {
             return A.IsValid() ? A.Row : 0;
         }
 
-        public int ColDim(MatrisBase<T> A)
+        public int ColDim(MatrisBase<object> A)
         {
             return A.IsValid() ? A.Col : 0;
         }
 
-        public MatrisBase<T> Get(MatrisBase<T> A,
-                                 int i,
-                                 int j,
-                                 int based = 0)
+        public MatrisBase<object> Get(MatrisBase<object> A,
+                                      int i,
+                                      int j,
+                                      int based = 0)
         {
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
-            if (i - based < 0 || i - based >= A.Row)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
-            }
-            if (j - based < 0 || j - based >= A.Col)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
-            }
-
-            MatrisBase<T> res = new MatrisBase<T>() { Row = 1, Col = 1 };
-            res.SetValues(new List<List<T>>() { new List<T>() { A[r: i - based, c: j - based] } });
-            return res;
+            return i - based < 0 || i - based >= A.Row
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1))
+                : j - based < 0 || j - based >= A.Col
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1))
+                : A is Dataframe df
+                    ? new Dataframe(new List<List<object>>() { new List<object>() { A[r: i - based, c: j - based] } },
+                                    df.Delimiter,
+                                    df.NewLine,
+                                    null,
+                                    null,
+                                    df.GetRowSettings().Copy(),
+                                    df.GetColSettings().Copy())
+                    : new MatrisBase<object>(new List<List<object>>() { new List<object>() { A[r: i - based, c: j - based] } });
         }
 
-        public MatrisBase<T> Set(MatrisBase<T> A,
-                                 int i,
-                                 int j,
-                                 float value,
-                                 int based = 0)
+        public MatrisBase<object> Set(MatrisBase<object> A,
+                                      int i,
+                                      int j,
+                                      float value,
+                                      int based = 0)
         {
             if (!A.IsValid())
             {
@@ -592,48 +713,48 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
             }
 
-            List<List<T>> newlis = A.Copy().GetValues();
+            List<List<object>> newlis = A is Dataframe ? ((Dataframe)A.Copy()).GetValues() : A.Copy().GetValues();
             newlis[i - based][j - based] = (dynamic)value;
 
-            return new MatrisBase<T>(newlis);
+            return A is Dataframe df
+                ? new Dataframe(newlis,
+                                df.Delimiter,
+                                df.NewLine,
+                                df.GetCopyOfLabels(df.GetRowLabels()),
+                                df.GetCopyOfLabels(df.GetColLabels()),
+                                df.GetRowSettings().Copy(),
+                                df.GetColSettings().Copy())
+                : new MatrisBase<object>(newlis);
         }
 
-        public MatrisBase<T> Row(MatrisBase<T> A,
-                                 int i,
-                                 int based = 0)
+        public MatrisBase<object> Row(MatrisBase<object> A,
+                                      int i,
+                                      int based = 0)
         {
-            if (!A.IsValid())
-            {
-                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
-            }
-            if (i - based < 0 || i - based >= A.Row)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
-            }
-            return A.RowMat(i, based);
+            return !A.IsValid()
+                ? throw new Exception(CompilerMessage.MAT_INVALID_SIZE)
+                : i - based < 0 || i - based >= A.Row
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1))
+                : A.RowMat(i, based);
         }
 
-        public MatrisBase<T> Col(MatrisBase<T> A,
-                                 int j,
-                                 int based = 0)
+        public MatrisBase<object> Col(MatrisBase<object> A,
+                                      int j,
+                                      int based = 0)
         {
-            if (!A.IsValid())
-            {
-                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
-            }
-            if (j - based < 0 || j - based >= A.Col)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
-            }
-            return A.ColMat(j, based);
+            return !A.IsValid()
+                ? throw new Exception(CompilerMessage.MAT_INVALID_SIZE)
+                : j - based < 0 || j - based >= A.Col
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1))
+                : A.ColMat(j, based);
         }
 
-        public MatrisBase<T> Sub(MatrisBase<T> A,
-                                 int r1,
-                                 int r2,
-                                 int c1,
-                                 int c2,
-                                 int based = 0)
+        public MatrisBase<object> Sub(MatrisBase<object> A,
+                                      int r1,
+                                      int r2,
+                                      int c1,
+                                      int c2,
+                                      int based = 0)
         {
             if (!A.IsValid())
             {
@@ -654,21 +775,26 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_INVALID_COL_INDICES);
             }
 
-            if (r2 >= A.Row)
+            if (r2 > A.Row)
             {
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
             }
-            if (c2 >= A.Col)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1));
-            }
-
-            return new MatrisBase<T>(A[new Range(r1, r2), new Range(c1, c2)]);
+            return c2 > A.Col
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1))
+                : A is Dataframe df
+                ? new Dataframe(A[new Range(r1, r2), new Range(c1, c2)],
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     null,
+                                     null,
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : new MatrisBase<object>(A[new Range(r1, r2), new Range(c1, c2)]);
         }
 
-        public MatrisBase<T> Resize(MatrisBase<T> A,
-                                    int row,
-                                    int col)
+        public MatrisBase<object> Resize(MatrisBase<object> A,
+                                         int row,
+                                         int col)
         {
             if (!A.IsValid())
             {
@@ -682,14 +808,14 @@ namespace MatrisAritmetik.Services
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.GetValues();
+            List<List<object>> vals = A.GetValues();
 
-            List<List<T>> newlis = new List<List<T>>();
+            List<List<object>> newlis = new List<List<object>>();
 
             dynamic val;
             for (int r = 0; r < row; r++)
             {
-                newlis.Add(new List<T>());
+                newlis.Add(new List<object>());
             }
 
             for (int r = 0; r < m; r++)
@@ -701,24 +827,34 @@ namespace MatrisAritmetik.Services
                 }
             }
 
-            return new MatrisBase<T>(newlis);
+            return A is Dataframe df
+                ? new Dataframe(newlis,
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     null,
+                                     null,
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : new MatrisBase<object>(newlis);
         }
 
-        public MatrisBase<T> Sign(MatrisBase<T> A)
+        public MatrisBase<object> Sign(MatrisBase<object> A)
         {
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.GetValues();
-            List<List<T>> newvals = new List<List<T>>();
+            List<List<object>> vals = A.GetValues();
+            List<List<object>> newvals = new List<List<object>>();
             dynamic val;
             for (int i = 0; i < m; i++)
             {
-                newvals.Add(new List<T>());
+                newvals.Add(new List<object>());
                 for (int j = 0; j < n; j++)
                 {
                     val = float.Parse(vals[i][j].ToString());
@@ -732,50 +868,77 @@ namespace MatrisAritmetik.Services
                     }
                 }
             }
-            return new MatrisBase<T>(newvals);
+
+            return A is Dataframe df
+                ? new Dataframe(newvals,
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     df.GetCopyOfLabels(df.GetRowLabels()),
+                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : new MatrisBase<object>(newvals);
         }
 
-        public MatrisBase<T> Abs(MatrisBase<T> A)
+        public MatrisBase<object> Abs(MatrisBase<object> A)
         {
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
+
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.GetValues();
-            List<List<T>> newvals = new List<List<T>>();
+            List<List<object>> vals = A.GetValues();
+            List<List<object>> newvals = new List<List<object>>();
 
             for (int i = 0; i < m; i++)
             {
-                newvals.Add(new List<T>());
+                newvals.Add(new List<object>());
                 for (int j = 0; j < n; j++)
                 {
                     newvals[i].Add((dynamic)Math.Abs(float.Parse(vals[i][j].ToString())));
                 }
             }
-            return new MatrisBase<T>(newvals);
+
+            return A is Dataframe df
+                ? new Dataframe(newvals,
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     df.GetCopyOfLabels(df.GetRowLabels()),
+                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : new MatrisBase<object>(newvals);
         }
 
-        public MatrisBase<T> Round(MatrisBase<T> A,
-                                   int n = 0)
+        public MatrisBase<object> Round(MatrisBase<object> A,
+                                        int n = 0)
         {
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
             }
 
-            if (n < 0)
-            {
-                throw new Exception(CompilerMessage.ARG_INVALID_VALUE("n", " Sıfırdan büyük olmalı."));
-            }
+            CompilerUtils.AssertMatrixValsAreNumbers(A);
 
-            return A.Round(n);
+            return n < 0
+                ? throw new Exception(CompilerMessage.ARG_INVALID_VALUE("n", " Sıfırdan büyük olmalı."))
+                : A is Dataframe df
+                ? new Dataframe(A.Round(n).GetValues(),
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     df.GetCopyOfLabels(df.GetRowLabels()),
+                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : A.Round(n);
         }
 
-        public MatrisBase<T> Shuffle(MatrisBase<T> A,
-                                     int axis = 2)
+        public MatrisBase<object> Shuffle(MatrisBase<object> A,
+                                          int axis = 2)
         {
             if (!A.IsValid())
             {
@@ -787,14 +950,14 @@ namespace MatrisAritmetik.Services
 
             if (m == 1 && n == 1)
             {
-                return A.Copy();
+                return A is Dataframe ? ((Dataframe)A.Copy()) : A.Copy();
             }
 
             if (axis == 0)
             {
                 if (m == 1)
                 {
-                    return A.Copy();
+                    return A is Dataframe ? ((Dataframe)A.Copy()) : A.Copy();
                 }
 
                 List<int> indices = new List<int>();
@@ -804,13 +967,13 @@ namespace MatrisAritmetik.Services
                 }
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
-                List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.GetValues();
+                List<List<object>> newvals = new List<List<object>>();
+                List<List<object>> vals = A.GetValues();
 
                 int i = 0;
                 foreach (int k in indices)
                 {
-                    newvals.Add(new List<T>());
+                    newvals.Add(new List<object>());
                     for (int j = 0; j < n; j++)
                     {
                         newvals[i].Add(vals[k][j]);
@@ -818,13 +981,22 @@ namespace MatrisAritmetik.Services
                     i++;
                 }
 
-                return new MatrisBase<T>(newvals);
+                return A is Dataframe data
+                    ? new Dataframe(newvals,
+                                    data.Delimiter,
+                                    data.NewLine,
+                                    null,
+                                    data.GetCopyOfLabels(data.GetColLabels()),
+                                    null,
+                                    data.GetColSettings().Copy(),
+                                    true)
+                    : new MatrisBase<object>(newvals);
             }
             else if (axis == 1)
             {
                 if (n == 1)
                 {
-                    return A.Copy();
+                    return A is Dataframe ? ((Dataframe)A.Copy()) : A.Copy();
                 }
 
                 List<int> indices = new List<int>();
@@ -834,19 +1006,28 @@ namespace MatrisAritmetik.Services
                 }
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
-                List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.GetValues();
+                List<List<object>> newvals = new List<List<object>>();
+                List<List<object>> vals = A.GetValues();
 
                 for (int i = 0; i < m; i++)
                 {
-                    newvals.Add(new List<T>());
+                    newvals.Add(new List<object>());
                     foreach (int k in indices)
                     {
                         newvals[i].Add(vals[i][k]);
                     }
                 }
 
-                return new MatrisBase<T>(newvals);
+                return A is Dataframe data
+                    ? new Dataframe(newvals,
+                                    data.Delimiter,
+                                    data.NewLine,
+                                    data.GetCopyOfLabels(data.GetRowLabels()),
+                                    null,
+                                    data.GetRowSettings().Copy(),
+                                    null,
+                                    true)
+                    : new MatrisBase<object>(newvals);
             }
             else if (axis == 2)
             {
@@ -866,8 +1047,8 @@ namespace MatrisAritmetik.Services
                 }
 
                 indices = indices.OrderBy(x => Guid.NewGuid()).ToList();
-                List<List<T>> newvals = new List<List<T>>();
-                List<List<T>> vals = A.GetValues();
+                List<List<object>> newvals = new List<List<object>>();
+                List<List<object>> vals = A.GetValues();
 
                 int c = 0;
                 int r = -1;
@@ -875,7 +1056,7 @@ namespace MatrisAritmetik.Services
                 {
                     if (c % n == 0)
                     {
-                        newvals.Add(new List<T>());
+                        newvals.Add(new List<object>());
                         r++;
                     }
 
@@ -883,7 +1064,12 @@ namespace MatrisAritmetik.Services
                     c++;
                 }
 
-                return new MatrisBase<T>(newvals);
+                return A is Dataframe data
+                    ? new Dataframe(newvals,
+                                    data.Delimiter,
+                                    data.NewLine,
+                                    forceLabelsWhenNull: true)
+                    : new MatrisBase<object>(newvals);
             }
             else
             {
@@ -892,16 +1078,11 @@ namespace MatrisAritmetik.Services
 
         }
 
-        public MatrisBase<T> Replace(MatrisBase<T> A,
-                                     float old,
-                                     float with,
-                                     float TOL = (float)1e-6)
+        public MatrisBase<object> Replace(MatrisBase<object> A,
+                                          dynamic old = null,
+                                          dynamic with = null,
+                                          float TOL = (float)1e-6)
         {
-            static bool inRange(float num, float min, float max)
-            {
-                return (num <= max) && (num >= min);
-            }
-
             if (!A.IsValid())
             {
                 throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
@@ -912,34 +1093,145 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.ARG_INVALID_VALUE("TOL", " Sıfırdan büyük-eşit olmalı."));
             }
 
-            List<List<T>> newVals = new List<List<T>>();
+            List<List<object>> newVals = new List<List<object>>();
 
             int m = A.Row;
             int n = A.Col;
-            List<List<T>> vals = A.GetValues();
+            List<List<object>> vals = A.GetValues();
 
-            dynamic val;
-            float max = old + TOL;
-            float min = old - TOL;
-
-            for (int i = 0; i < m; i++)
+            if (with is null)
             {
-                newVals.Add(new List<T>());
-                for (int j = 0; j < n; j++)
+                with = new None();
+            }
+
+            if (old is null || old is None)
+            {
+                for (int i = 0; i < m; i++)
                 {
-                    val = (dynamic)float.Parse(vals[i][j].ToString());
-                    if (inRange(val, min, max))
+                    newVals.Add(new List<object>());
+                    for (int j = 0; j < n; j++)
                     {
-                        newVals[i].Add((dynamic)with);
+                        if (vals[i][j] is null || vals[i][j] is None)
+                        {
+                            newVals[i].Add(with);
+                        }
+                        else
+                        {
+                            newVals[i].Add(vals[i][j]);
+                        }
                     }
-                    else
+                }
+            }
+            else if (float.TryParse(((object)old).ToString(), out float search))
+            {
+                if (float.IsNaN(search))
+                {
+                    for (int i = 0; i < m; i++)
                     {
-                        newVals[i].Add(val);
+                        newVals.Add(new List<object>());
+                        for (int j = 0; j < n; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float found)
+                                && float.IsNaN(found))
+                            {
+                                newVals[i].Add(with);
+                            }
+                            else
+                            {
+                                newVals[i].Add(vals[i][j]);
+                            }
+                        }
+                    }
+                }
+                else if (float.IsNegativeInfinity(search))
+                {
+                    for (int i = 0; i < m; i++)
+                    {
+                        newVals.Add(new List<object>());
+                        for (int j = 0; j < n; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float found)
+                                && float.IsNegativeInfinity(found))
+                            {
+                                newVals[i].Add(with);
+                            }
+                            else
+                            {
+                                newVals[i].Add(vals[i][j]);
+                            }
+                        }
+                    }
+                }
+                else if (float.IsPositiveInfinity(search))
+                {
+                    for (int i = 0; i < m; i++)
+                    {
+                        newVals.Add(new List<object>());
+                        for (int j = 0; j < n; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float found)
+                                && float.IsPositiveInfinity(found))
+                            {
+                                newVals[i].Add(with);
+                            }
+                            else
+                            {
+                                newVals[i].Add(vals[i][j]);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    float max = search + TOL;
+                    float min = search - TOL;
+                    for (int i = 0; i < m; i++)
+                    {
+                        newVals.Add(new List<object>());
+                        for (int j = 0; j < n; j++)
+                        {
+                            if (float.TryParse(vals[i][j].ToString(), out float found)
+                                && (found <= max)
+                                && (found >= min))
+                            {
+                                newVals[i].Add(with);
+                            }
+                            else
+                            {
+                                newVals[i].Add(vals[i][j]);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < m; i++)
+                {
+                    newVals.Add(new List<object>());
+                    for (int j = 0; j < n; j++)
+                    {
+                        if (!(vals[i][j] is None) && !(vals[i][j] is null) && vals[i][j].ToString() == ((object)old).ToString())
+                        {
+                            newVals[i].Add(with);
+                        }
+                        else
+                        {
+                            newVals[i].Add(vals[i][j]);
+                        }
                     }
                 }
             }
 
-            return new MatrisBase<T>(newVals);
+            return A is Dataframe df
+                ? new Dataframe(newVals,
+                                     df.Delimiter,
+                                     df.NewLine,
+                                     df.GetCopyOfLabels(df.GetRowLabels()),
+                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     df.GetRowSettings().Copy(),
+                                     df.GetColSettings().Copy())
+                : new MatrisBase<object>(newVals);
         }
         #endregion
     }

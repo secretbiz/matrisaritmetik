@@ -121,13 +121,14 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>Function templates, description, settings and an example call</returns>
         public string Info()
         {
+            string alter = string.Join(" , ", Alias_list);
+            alter = string.IsNullOrWhiteSpace(alter) ? string.Empty : "\n\n\t-> Alternatif: " + alter;
 
-            return "Fonksiyon(Tam): " + Function_template_filled + @"
-        Açıklama: " + Description + @"
-        Alternatif: """ + string.Join(" , ", Alias_list) + @"""" + @"
-        Gerekli Minimal Format: !" + Function + "(" + MinimalFormat() + ")" + @"
-        Örnek: !" + Function + "(" + string.Join(",", Param_types) + ")";
-
+            return $"Fonksiyon: {Function_template_filled.Replace(",", ", ")} "
+                   + $"\n\t-> Açıklama: {Description}"
+                   + alter
+                   + $"\n\n\t-> Minimal Format: !{Function}({MinimalFormat()})"
+                   + $"\n\n\t-> Örnek: {Function}({string.Join(", ", Param_types)})";
         }
 
         public CommandInfo Copy()

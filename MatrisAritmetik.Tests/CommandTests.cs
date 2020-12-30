@@ -19,10 +19,7 @@ namespace MatrisAritmetik.Tests
                                              IFrontService service)
         {
             CommandInfo cmdinfo = service.TryParseBuiltFunc(func);
-            if (cmdinfo != null)
-            { return cmdinfo; }
-            else
-            { throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!"); }
+            return cmdinfo ?? throw new System.Exception("Fonksiyon " + func + " bilgisi alınamadı!");
         }
 
         public static CommandInfo RankInfo = InfoSetter("Rank", FrontService);

@@ -35,7 +35,7 @@ namespace MatrisAritmetik
 
             services.AddScoped<IFrontService, FrontService>();
             services.AddScoped<IUtilityService<dynamic>, UtilityService<dynamic>>();
-            services.AddScoped<IMatrisArithmeticService<dynamic>, MatrisArithmeticService<dynamic>>();
+            services.AddScoped<IMatrisArithmeticService<object>, MatrisArithmeticService>();
             services.AddScoped<ISpecialMatricesService, SpecialMatricesService>();
             services.AddScoped<IStatisticsService, StatisticsService>();
         }

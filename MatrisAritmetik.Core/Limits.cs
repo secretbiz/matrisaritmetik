@@ -25,7 +25,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Limit how many matrices can be stored in a dictionary
         /// </summary>
-        forMatrisCount = 16,
+        forMatrisCount = 8,
 
         /// <summary>
         /// Character limit for a matrix name
@@ -87,7 +87,7 @@ namespace MatrisAritmetik.Core
         /// <summary>
         /// Minimum amount of time in seconds to wait and accept command execution
         /// </summary>
-        forCmdSendRateInSeconds = 2,
+        forCmdSendRateInSeconds = 3,
 
         /// <summary>
         /// Limit how many command can be shown each command history page

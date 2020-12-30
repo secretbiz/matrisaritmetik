@@ -135,7 +135,7 @@ namespace MatrisAritmetik.Core.Models
                             }
                             else
                             {
-                                temp[i].Add((dynamic)new None());
+                                temp[i].Add((dynamic)float.NaN);
                             }
                         }
                     }
@@ -184,7 +184,7 @@ namespace MatrisAritmetik.Core.Models
                                     }
                                     else
                                     {
-                                        _values[i].Add((dynamic)new None());
+                                        _values[i].Add((dynamic)float.NaN);
                                     }
                                 }
                             }
@@ -435,15 +435,9 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>A shallow copy of the values in range</returns>
         public List<List<T>> this[Range r]
         {
-            get
-            {
-                if (r.Start.Equals(r.End) || r.End.Value > Row || r.Start.Value >= Row)
-                {
-                    return null;
-                }
-
-                return GetValues().GetRange(r.Start.Value, r.End.Value - r.Start.Value);
-            }
+            get => r.Start.Equals(r.End) || r.End.Value > Row || r.Start.Value >= Row
+                    ? null
+                    : GetValues().GetRange(r.Start.Value, r.End.Value - r.Start.Value);
             set
             {
                 if (r.Start.Equals(r.End) || r.End.Value > Row || r.Start.Value >= Row)
@@ -482,15 +476,7 @@ namespace MatrisAritmetik.Core.Models
         public List<T> this[int index]
         {
 
-            get
-            {
-                if (index >= Row)
-                {
-                    return null;
-                }
-
-                return GetValues()[index];
-            }
+            get => index >= Row ? null : GetValues()[index];
             set
             {
                 if (index >= Row)
@@ -510,20 +496,7 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>The instance stored in the given index</returns>
         public T this[int r, int c]
         {
-            get
-            {
-                if (r >= Row)
-                {
-                    return default;
-                }
-
-                if (c >= Col)
-                {
-                    return default;
-                }
-
-                return GetValues()[r][c];
-            }
+            get => r >= Row ? default : c >= Col ? default : GetValues()[r][c];
             set
             {
                 if (r >= Row)
@@ -638,18 +611,16 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="r">Row index</param>
         /// <param name="based">Index base</param>
         /// <returns>New row-Matrix</returns>
-        public MatrisBase<T> RowMat(int r,
-                                    int based = 1)
+        public virtual MatrisBase<object> RowMat(int r,
+                                                 int based = 1)
         {
-            List<List<T>> listrow = new List<List<T>>() { new List<T>() };
+            List<List<object>> listrow = new List<List<object>>() { new List<object>() };
             for (int j = 0; j < Col; j++)
             {
                 listrow[0].Add((dynamic)GetValues()[r - based][j]);
             }
 
-            MatrisBase<T> res = new MatrisBase<T>() { Row = 1, Col = Col };
-            res.SetValues(listrow);
-            return res;
+            return new MatrisBase<object>(listrow);
         }
 
         /// <summary>
@@ -675,16 +646,16 @@ namespace MatrisAritmetik.Core.Models
         /// <param name="c">Column index</param>
         /// <param name="based">Index base</param>
         /// <returns>New column-Matrix</returns>
-        public MatrisBase<T> ColMat(int c,
-                                    int based = 1)
+        public virtual MatrisBase<object> ColMat(int c,
+                                                 int based = 1)
         {
-            List<List<T>> listcol = new List<List<T>>();
+            List<List<object>> listcol = new List<List<object>>();
             for (int i = 0; i < Row; i++)
             {
-                listcol.Add(new List<T>() { (dynamic)GetValues()[i][c - based] });
+                listcol.Add(new List<object>() { (dynamic)GetValues()[i][c - based] });
             }
 
-            return new MatrisBase<T>(listcol);
+            return new MatrisBase<object>(listcol);
         }
         #endregion
 
@@ -855,14 +826,30 @@ namespace MatrisAritmetik.Core.Models
         /// </summary>
         /// <param name="n">Exponential value</param>
         /// <returns>A new matrix raised to the power of <paramref name="n"/></returns>
-        public MatrisBase<T> Power(dynamic n)
+        public virtual MatrisBase<T> Power(dynamic n)
         {
-            n = double.Parse(n.ToString());
+            if (n is null)
+            {
+                return null;
+            }
+
+            if (float.TryParse(n.ToString(), out float res))
+            {
+                n = res;
+            }
+            else
+            {
+                return null;
+            }
+
+            int nr = Row;
+            int nc = Col;
             List<List<T>> newlist = new List<List<T>>();
-            for (int i = 0; i < Row; i++)
+
+            for (int i = 0; i < nr; i++)
             {
                 newlist.Add(new List<T>());
-                for (int j = 0; j < Col; j++)
+                for (int j = 0; j < nc; j++)
                 {
                     newlist[i].Add(Math.Pow(double.Parse(GetValues()[i][j].ToString()), n));
                 }
@@ -1064,7 +1051,7 @@ namespace MatrisAritmetik.Core.Models
                               int based = 1,
                               float tolerance = (float)0.00001)
         {
-            using MatrisBase<T> matrisBase = ColMat(col_index, based);
+            using MatrisBase<object> matrisBase = ColMat(col_index, based);
             return matrisBase.IsZero(tolerance);
         }
 
@@ -1079,7 +1066,7 @@ namespace MatrisAritmetik.Core.Models
                               int based = 1,
                               float tolerance = (float)0.00001)
         {
-            using MatrisBase<T> matrisBase = RowMat(row_index, based);
+            using MatrisBase<object> matrisBase = RowMat(row_index, based);
             return matrisBase.IsZero(tolerance);
         }
 
@@ -1090,11 +1077,48 @@ namespace MatrisAritmetik.Core.Models
         /// <returns>True if row and column dimensions match</returns>
         public bool IsSameSize(MatrisBase<T> other)
         {
-            if (other == (dynamic)null)
+            return other == (dynamic)null ? false : Row == other.Row && Col == other.Col;
+        }
+
+        /// <summary>
+        /// Check if matrix is a row vector
+        /// </summary>
+        /// <returns>True if row dimension is 1</returns>
+        public bool IsARowVector()
+        {
+            return Row == 1 && IsValid();
+        }
+
+        /// <summary>
+        /// Check if matrix is a column vector
+        /// </summary>
+        /// <returns>True if column dimension is 1</returns>
+        public bool IsAColumnVector()
+        {
+            return Col == 1 && IsValid();
+        }
+
+        /// <summary>
+        /// Amount of non-number values in column index(base=<paramref name="based"/>) <paramref name="c"/>
+        /// </summary>
+        /// <param name="c">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>Amount of values that are not parsable as floats in column <paramref name="c"/></returns>
+        public int AmountOfNanInColumn(int c, int based = 0)
+        {
+            int amount = 0;
+            int nr = Row;
+            for (int i = 0; i < nr; i++)
             {
-                return false;
+                if (GetValues()[i][c - based] is None
+                   || GetValues()[i][c - based] is null
+                   || ((!float.TryParse(GetValues()[i][c - based].ToString(), out float res)
+                        || float.IsNaN(res))))
+                {
+                    amount++;
+                }
             }
-            return Row == other.Row && Col == other.Col;
+            return amount;
         }
         #endregion
 
@@ -1269,17 +1293,12 @@ namespace MatrisAritmetik.Core.Models
                 {
                     return int.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @int;
                 }
-                else if (other is float @float)
-                {
-                    return float.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @float;
-                }
-                else if (other is double @double)
-                {
-                    return double.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @double;
-                }
                 else
                 {
-                    return false;
+                    return other is float @float
+                        ? float.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @float
+                        : other is double @double
+                                               && double.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @double;
                 }
             }
             else
@@ -1740,28 +1759,17 @@ namespace MatrisAritmetik.Core.Models
 
         public static MatrisBase<dynamic> operator %(dynamic val, MatrisBase<T> mat)
         {
-            if (mat.IsScalar())
-            {
-                if (float.TryParse(val.ToString(), out float res))
-                {
-                    return new MatrisBase<dynamic>()
+            return mat.IsScalar()
+                ? float.TryParse(val.ToString(), out float res)
+                    ? new MatrisBase<dynamic>()
                     {
                         Row = 1,
                         Col = 1,
                         _values = new List<List<dynamic>>()
                         { new List<dynamic>() { res % (dynamic)float.Parse(mat.GetValues()[0][0].ToString()) } }
-                    };
-                }
-                else
-                {
-                    throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED);
-
-                }
-            }
-            else
-            {
-                throw new Exception(CompilerMessage.MODULO_MAT_INVALID);
-            }
+                    }
+                    : throw new Exception(CompilerMessage.DYNAMIC_VAL_PARSE_FAILED)
+                : throw new Exception(CompilerMessage.MODULO_MAT_INVALID);
         }
 
         #endregion

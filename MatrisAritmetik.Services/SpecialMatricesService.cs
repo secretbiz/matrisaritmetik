@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
+using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Services
 {
@@ -409,7 +410,7 @@ namespace MatrisAritmetik.Services
 
         public Dataframe FillDf(int row,
                                 int col,
-                                float fill)
+                                dynamic fill)
         {
             if (row <= 0 || col <= 0)
             {
@@ -420,16 +421,39 @@ namespace MatrisAritmetik.Services
             col = Math.Min(col, (int)DataframeLimits.forCols);
 
             List<List<object>> vals = new List<List<object>>();
-            for (int i = 0; i < row; i++)
+            if (fill != null)
             {
-                vals.Add(new List<object>());
-                for (int j = 0; j < col; j++)
+                if (float.TryParse(((object)fill).ToString(), out float res))
                 {
-                    vals[i].Add(fill);
+                    fill = res;
+                }
+                else
+                {
+                    fill = ((object)fill).ToString();
+                }
+
+                for (int i = 0; i < row; i++)
+                {
+                    vals.Add(new List<object>());
+                    for (int j = 0; j < col; j++)
+                    {
+                        vals[i].Add(fill);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < row; i++)
+                {
+                    vals.Add(new List<object>());
+                    for (int j = 0; j < col; j++)
+                    {
+                        vals[i].Add(new None());
+                    }
                 }
             }
 
-            return new Dataframe(vals); ;
+            return new Dataframe(vals);
         }
 
         public Dataframe SymIntDf(int dimension,

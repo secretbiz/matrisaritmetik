@@ -223,8 +223,8 @@ namespace MatrisAritmetik.Core.Services
         /// <param name="TOL">Tolerance for <paramref name="old"/></param>
         /// <returns>A new matrix with replaced values</returns>
         MatrisBase<T> Replace(MatrisBase<T> A,
-                              float old,
-                              float with,
+                              dynamic old = null,
+                              dynamic with = null,
                               float TOL = (float)1e-6);
 
         /// <summary>

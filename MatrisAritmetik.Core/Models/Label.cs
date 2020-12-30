@@ -174,6 +174,30 @@ namespace MatrisAritmetik.Core.Models
         public LabelList() { }
 
         /// <summary>
+        /// Create labels from list of stringable objects
+        /// </summary>
+        /// <param name="lis">Objects to create labels from</param>
+        public LabelList(List<object> lis)
+        {
+            if (lis == null || lis.Count == 0)
+            {
+                _labels = new List<Label>();
+            }
+            else
+            {
+                for (int i = 0; i < lis.Count; i++)
+                {
+                    _labels.Add(
+                        new Label(lis[i].ToString()
+                                        .Trim()
+                                        .Replace('\t', '_')
+                                        .Replace('\r', '_')
+                                        .Replace('\n', '_')
+                                        .Replace(' ', '_'), 1));
+                }
+            }
+        }
+        /// <summary>
         /// Create a <see cref="LabelList"/> with given <paramref name="length"/> where each label has a span of <paramref name="spaneach"/>
         /// <para>Each label's value starts with <paramref name="prefix"/> and ends with it's index(base as <paramref name="based"/>)</para>
         /// </summary>

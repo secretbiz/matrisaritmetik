@@ -453,7 +453,7 @@ namespace MatrisAritmetik.Core.Models
                 _ => "---",
             };
 
-            string output = (Output is null || Output == null) ? string.Empty : ((object)Output).ToString();
+            string output = (Output == null) ? string.Empty : ((object)Output).ToString();
             return $"Komut: {OriginalCommand}"
                    + $"\nDurum: {state}"
                    + (cmdset.Length == 0 ? string.Empty : ("\nKomut stili:" + cmdset.ToString()))

@@ -98,6 +98,12 @@ namespace MatrisAritmetik.Services
             return result;
         }
 
+        /// <summary>
+        /// Gets the matrix multiplication of <paramref name="A"/> and <paramref name="B"/> in the given order
+        /// </summary>
+        /// <param name="A">Matrix on the left</param>
+        /// <param name="B">Matrix on the right</param>
+        /// <returns>Resulting matrix from the matrix multiplication of <paramref name="A"/> and <paramref name="B"/></returns>
         public static MatrisBase<T> MatrisMul<T>(MatrisBase<T> A, MatrisBase<T> B)
         {
             if (A.Col != B.Row)
@@ -229,6 +235,56 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.OP_WITH_NULL);
             }
         }
+
+        /// <summary>
+        /// Assert given matrix has values which are all parsable as numbers
+        /// </summary>
+        /// <param name="df">Matrix or dataframe to check</param>
+        /// <exception cref="CommandMessage.DF_HAS_NON_NUMBER_VALS"><see cref=""/></exception>
+        public static void AssertMatrixValsAreNumbers(MatrisBase<object> df)
+        {
+            if (df is Dataframe _df && !_df.IsAllNumbers())
+            {
+                throw new Exception(CompilerMessage.DF_HAS_NON_NUMBER_VALS);
+            }
+        }
+
+        /// <summary>
+        /// Static method for creating a <see cref="MatrisBase{object}"/> instance
+        /// </summary>
+        /// <param name="vals">Matrix values</param>
+        /// <param name="delim">Delimiter used while reading the matrix if any</param>
+        /// <param name="newline">New-line character used while reading the matrix if any</param>
+        /// <returns>A new instance of <see cref="MatrisBase{object}"/></returns>
+        public static MatrisBase<object> MatrisBaseConstructor(List<List<object>> vals,
+                                                               string delim = " ",
+                                                               string newline = "\n")
+        {
+            return new MatrisBase<object>(vals, delim, newline);
+        }
+
+        /// <summary>
+        /// Static method for creating a <see cref="Dataframe"/> instance
+        /// </summary>
+        /// <param name="vals">Dataframe values</param>
+        /// <param name="delim">Delimiter used while reading if any</param>
+        /// <param name="newline">New-line character used while reading if any</param>
+        /// <param name="rowLabels">Labels for rows</param>
+        /// <param name="colLabels">Labels for columns</param>
+        /// <param name="rowSettings">Settings for row labels</param>
+        /// <param name="colSettings">Settings for column labels</param>
+        /// <returns>A new instance of <see cref="Dataframe"/></returns>
+        public static Dataframe DataframeConstructor(List<List<object>> vals,
+                                                     string delim = " ",
+                                                     string newline = "\n",
+                                                     List<LabelList> rowLabels = null,
+                                                     List<LabelList> colLabels = null,
+                                                     DataframeRowSettings rowSettings = null,
+                                                     DataframeColSettings colSettings = null)
+        {
+            return new Dataframe(vals, delim, newline, rowLabels, colLabels, rowSettings, colSettings);
+        }
+
         #endregion
 
         #region Operator Methods
@@ -369,13 +425,17 @@ namespace MatrisAritmetik.Services
             CheckMatrixAndUpdateVal(RHS, matDict, mode, true);
             CheckMatrixAndUpdateVal(LHS, matDict, mode, true);
 
-            RHS.tknType = LHS.tknType == TokenType.MATRIS ? TokenType.MATRIS : RHS.tknType;
-
             if (RHS.tknType == TokenType.MATRIS)
             {
                 Validations.CheckModeAndMatrixReference(mode, RHS.val);
+            }
+
+            if (LHS.tknType == TokenType.MATRIS)
+            {
                 Validations.CheckModeAndMatrixReference(mode, LHS.val);
             }
+
+            RHS.tknType = LHS.tknType == TokenType.MATRIS ? TokenType.MATRIS : RHS.tknType;
 
             switch (symbol)
             {
@@ -544,7 +604,7 @@ namespace MatrisAritmetik.Services
                 }
 
                 MatrisBase<dynamic> res = _base.val.Copy();
-                using MatrisBase<dynamic> mat = res.Copy();
+                using MatrisBase<dynamic> mat = res is Dataframe ? ((Dataframe)res.Copy()) : res.Copy();
 
                 AssertNotNull(_expo);
 
@@ -584,7 +644,7 @@ namespace MatrisAritmetik.Services
                  ? (MatrisBase<dynamic>)LHS.val
                  : throw new Exception(CompilerMessage.OP_BETWEEN_("./", "matrisler"));
 
-            RHS.val = MatrisMul(mat2, new MatrisArithmeticService<dynamic>().Inverse(mat1));
+            RHS.val = MatrisMul<object>(mat2, new MatrisArithmeticService().Inverse(mat1));
 
             Validations.CheckModeAndMatrixReference(mode, RHS.val);
         }

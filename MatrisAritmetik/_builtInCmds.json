@@ -242,7 +242,7 @@
 
                 "alias_list": [],
                 "function": "FillDf",
-                "param_types": [ "int", "int", "float" ],
+                "param_types": [ "int", "int", "dinamik" ],
                 "param_names": [ "row", "col", "fill" ],
                 "required_params": 3,
                 "returns": "Veri Tablosu",
@@ -350,7 +350,7 @@
 
                 "alias_list": [],
                 "function": "Replace",
-                "param_types": [ "Matris", "float", "float", "float" ],
+                "param_types": [ "Matris", "dinamik", "dinamik", "float" ],
                 "param_names": [ "A", "old", "with", "TOL" ],
                 "required_params": 3,
                 "returns": "Matris",
@@ -542,6 +542,220 @@
                 "function_template_filled": "!Trace(A)",
 
                 "service": "MatrisArithmeticService"
+            }
+        ]
+    },
+
+    {
+        "Label": "İstatistiksel",
+        "Functions": [
+            {
+                "fullname": "Açıkla",
+                "description": "Verilen A veri tablosunun her bir sütununun minimum, medyan, maksimum, mod,\n\tortalama, standart sapma ve varyans değerlerini sütun ve sütun isimlerini satır olarak döner.\n\tPopülasyon ile hesaplama için usePopulation:1\n\tSayı olmayan değerleri hesaba katmamak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Describe",
+                "param_types": [ "Matris", "int", "int" ],
+                "param_names": [ "A", "usePopulation", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Describe(,,)",
+                "function_template_filled": "!Describe(A,usePopulation:0,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "İlk",
+                "description": "Verilen A veri tablosunun ilk n satırı",
+
+                "alias_list": [],
+                "function": "Head",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "n" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Head(,)",
+                "function_template_filled": "!Head(A,n:5)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Son",
+                "description": "Verilen A veri tablosunun son n satırı",
+
+                "alias_list": [],
+                "function": "Tail",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "n" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Tail(,)",
+                "function_template_filled": "!Tail(A,n:5)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Örneklem",
+                "description": "Verilen A veri tablosunun rastgele 'n' adet satırı.",
+
+                "alias_list": [],
+                "function": "Sample",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "n" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Sample(,)",
+                "function_template_filled": "!Sample(A,n:5)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Maksimum",
+                "description": "Verilen A veri tablosunun sütunlarının maksimum değerleri.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Max",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Max(,)",
+                "function_template_filled": "!Max(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Minimum",
+                "description": "Verilen A veri tablosunun sütunlarının minimum değerleri.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Min",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Min(,)",
+                "function_template_filled": "!Min(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Medyan",
+                "description": "Verilen A veri tablosunun sütunlarının medyan değerleri",
+
+                "alias_list": [],
+                "function": "Median",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Median(,)",
+                "function_template_filled": "!Median(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Mod",
+                "description": "Verilen A veri tablosunun sütunlarının mod değerleri",
+
+                "alias_list": [],
+                "function": "Mode",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Mode(,)",
+                "function_template_filled": "!Mode(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Toplam",
+                "description": "Verilen A veri tablosunun sütunlarının toplam değerleri.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Sum",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Sum(,)",
+                "function_template_filled": "!Sum(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Çarpım",
+                "description": "Verilen A veri tablosunun sütunlarının çarpım değerleri.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Mul",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Mul(,)",
+                "function_template_filled": "!Mul(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Ortalama",
+                "description": "Verilen A veri tablosunun sütunlarının ortalama değerleri.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Mean",
+                "param_types": [ "Matris", "int" ],
+                "param_names": [ "A", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Mean(,)",
+                "function_template_filled": "!Mean(A,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Standart sapma",
+                "description": "Verilen A veri tablosunun sütunlarının standart sapma değerleri.\n\t'usePopulation': popülasyon ile hesap için 1, örneklem ile hesap için 0.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "SDev",
+                "param_types": [ "Matris", "int", "int" ],
+                "param_names": [ "A", "usePopulation", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!SDev(,,)",
+                "function_template_filled": "!SDev(A,usePopulation:0,numberOnly:1)",
+
+                "service": "StatisticsService"
+            },
+            {
+                "fullname": "Varyans",
+                "description": "Verilen A veri tablosunun sütunlarının varyans değerleri.\n\t'usePopulation': popülasyon ile hesap için 1, örneklem ile hesap için 0.\n\tYalnızca sayıları kullanmak için numberOnly:1",
+
+                "alias_list": [],
+                "function": "Var",
+                "param_types": [ "Matris", "int", "int" ],
+                "param_names": [ "A", "usePopulation", "numberOnly" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!Var(,,)",
+                "function_template_filled": "!Var(A,usePopulation:0,numberOnly:1)",
+
+                "service": "StatisticsService"
             }
         ]
     },

@@ -7,100 +7,138 @@
 
 }
 
-@if (Model != null)
-{
-    @if (Model.Count() != 0)
+<table id="veri_table_base">
+    @if (Model != null)
     {
-        <thead id="veri_table_head" class="veri_table veri_table_head">
-            <tr>
-                <td colspan="18" class="df_saved_dftable_title">Kayıtlı Veri Tabloları (@(Model.Count()))</td>
-            </tr>
-        </thead>
-    }
-    @foreach (var name in Model.Keys)
-    {
-        <tbody id="veri_table" class="veri_table">
+        @if (Model.Count() != 0)
+        {
+            <thead id="veri_table_head" class="veri_table veri_table_head">
+                <tr>
+                    <td colspan="19" class="df_saved_dftable_title">Kayıtlı Veri Tabloları (@(Model.Count()))</td>
+                </tr>
+            </thead>
+        }
+        @foreach (var name in Model.Keys)
+        {
+            <tbody id="veri_table" class="veri_table">
 
-            <tr id='@ConcatName("veri_table_",name)'>
-                @*Name*@
-                <td colspan="3">
-                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                        <mi>@name</mi>
-                    </math>
-                </td>
-
-                <td colspan="1">
-                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                        <mo>=</mo>
-                    </math>
-                </td>
-
-                @*Values*@
-                <td colspan="11">
-                    <div id='@ConcatName("veri_vals_",name)' style="max-height:200px;overflow-y:auto;">
+                <tr id='@ConcatName("veri_table_",name)'>
+                    @*Name*@
+                    <td colspan="3">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-                            <mrow>
-                                <mo> ( </mo>
-                                <mtable>
-                                    @if (Model[name].ElementCount > MaxTolarableSize)
-                                    {
-                                        @foreach (var row in Model[name].CornerMatrix().GetValues())
-                                        {
-                                            <mtr>
-                                                @foreach (var val in row)
-                                                {
-                                                    <mtd>
-                                                        <mn>@val</mn>
-                                                    </mtd>
-                                                }
-                                            </mtr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        @foreach (var row in Model[name].GetValues())
-                                        {
-                                            <mtr>
-                                                @foreach (var val in row)
-                                                {
-                                                    <mtd>
-                                                        <mn>@val</mn>
-                                                    </mtd>
-                                                }
-                                            </mtr>
-                                        }
-                                    }
-                                </mtable>
-                                <mo> ) </mo>
-                            </mrow>
+                            <mi>@name</mi>
                         </math>
-                    </div>
-                </td>
-
-                @*Buttons*@
-                @*
-                    <td colspan="2" align="center">
-                        <input id='@ConcatName("veri_islem_",name)' type="button" class="button" value="İşlemler" name="veri_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verie özel işlemler")' />
                     </td>
-                *@
-                <td colspan="3" align="center">
-                    <ul class="list-inline m-0">
-                        <li class="list-inline-item">
-                            <button name="veri_table_delbutton" id='@ConcatName("veri_table_delbutton_",name)' class="btn btn-warning btn-sm dfdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verii sil")'>
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </li>
-                    </ul>
-                </td>
 
-            </tr>
-        </tbody>
+                    <td colspan="1">
+                        <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                            <mo>=</mo>
+                        </math>
+                    </td>
+
+                    @*Values*@
+                    <td colspan="11">
+                        <div id='@ConcatName("veri_vals_",name)' style="max-height:200px;overflow-y:auto;">
+                            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                                <mrow>
+                                    <mo> ( </mo>
+                                    <mtable>
+                                        @if (Model[name].ElementCount > MaxTolarableSize)
+                                        {
+                                            @foreach (var row in Model[name].CornerMatrix().GetValues())
+                                            {
+                                                <mtr>
+                                                    @foreach (var val in row)
+                                                    {
+                                                        <mtd>
+                                                            <mn>@val</mn>
+                                                        </mtd>
+                                                    }
+                                                </mtr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @foreach (var row in Model[name].GetValues())
+                                            {
+                                                <mtr>
+                                                    @foreach (var val in row)
+                                                    {
+                                                        <mtd>
+                                                            <mn>@val</mn>
+                                                        </mtd>
+                                                    }
+                                                </mtr>
+                                            }
+                                        }
+                                    </mtable>
+                                    <mo> ) </mo>
+                                </mrow>
+                            </math>
+                        </div>
+                    </td>
+
+                    @*Buttons*@
+                    @*
+                        <td colspan="2" align="center">
+                            <input id='@ConcatName("veri_islem_",name)' type="button" class="button" value="İşlemler" name="veri_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verie özel işlemler")' />
+                        </td>
+                    *@
+                    <td colspan="2">
+                        <div class="visuals_dropdown">
+                            <button onclick="visualsDropdown('@name')"
+                                    class="visuals_dropbtn btn"
+                                    style="height: 30px; background-image: url(images/line_chart.png); background-repeat: no-repeat; margin-left: 3px; padding: 20px 20px; background-position: center;"></button>
+                            <div id='@ConcatName("visual_options_",name)' class="visuals_dropdown-content">
+                                <a style="cursor:default;">Grafik/Diyagram Seçenekleri</a>
+                                <a href="#">Çizgi</a>
+                                <a href="#" 
+                                   onclick="displayChartDiv('@name');
+                                            setTimeout(function () { dragElement('@name'); }, 1000);
+                                            setTimeout(function () { createChart('@name', 'bar') }, 100)"
+                                >Bar</a>
+                                <a href="#">Serpilme</a>
+                            </div>
+                        </div>
+                        <a title="Text olarak kaydet" class="btn savebtn" href='@ConcatName("data:text/plain;charset=utf-8,",Model[name].ToString())' download='@name'>
+                            <img src="./images/download.png">
+                        </a>
+                    </td>
+                    <td colspan="2" align="center">
+                        <ul class="list-inline m-0">
+                            <li class="list-inline-item">
+                                <button name="veri_table_delbutton" id='@ConcatName("veri_table_delbutton_",name)' class="btn btn-warning btn-sm dfdelbtn" type="button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verii sil")'>
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+
+        }
+        @*Draggable charts*@
+        @foreach (var name in Model.Keys)
+        {
+            <div id='@ConcatName("chart_movable_", name)'
+                 onload="dragElement(this)"
+                 style="display:none;position: absolute !important;z-index: 9;background-color: #f1f1f1;text-align: center;border: 1px solid #d3d3d3;">
+
+                <div id='@ConcatName("chart_mover_", name)'
+                     style=" padding: 10px; cursor: move; z-index: 10; background-color: rgba(15, 24, 68, 0.83); color: #fff;">Click here to move</div>
+
+                <canvas id='@ConcatName("chart_", name)' width="333" height="333">
+                    <p id='@ConcatName("chart_fallback_", name)' style="display:none">Göreselleştirmeler burada gösterilir...</p>
+                </canvas>
+
+            </div>
+        }
+        @*Dispose stuff*@
+        foreach (MatrisAritmetik.Core.Models.Dataframe m in Model.Values)
+        {
+            m.Dispose();
+        }
+
+        Model.Clear();
     }
-
-    foreach (MatrisAritmetik.Core.Models.Dataframe m in Model.Values)
-    {
-        m.Dispose();
-    }
-
-    Model.Clear();
-}
+</table>

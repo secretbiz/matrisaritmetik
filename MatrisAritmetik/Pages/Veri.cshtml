@@ -23,11 +23,20 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
+    @* Chart.js *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js" integrity="sha512-SuxO9djzjML6b9w9/I07IWnLnQhgyYVSpHZx0JV97kGBfTIsUYlWflyuW4ypnvhBrslz1yJ3R+S14fdCWmSmSA==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js" integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw==" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.jquery.min.js"></script>
+    <link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet" />
     <style>
         .ui-resizable-e {
             width: 14px !important;
             border-right: 7px solid #2d3773 !important;
             margin-right: 2px;
+            z-index: 0 !important;
         }
     </style>
 </head>
@@ -87,7 +96,7 @@
             @* Matris ekleme bilgileri satırı *@
             <div id="veri_add_table">
 
-                <input type="text" id="veri_name" placeholder="Matris ismi" />
+                <input type="text" id="veri_name" placeholder="Tablo ismi" contenteditable="true" spellcheck="false"/>
                 <span id="veri_add_eqsign">=</span>
 
                 @* Özel matris ekleme inputları*@
@@ -95,7 +104,7 @@
                 <input type="text" id="veri_special_args" style="display:none" placeholder="Parametre:Değer" />
 
                 @* Text ile matris ekleme inputları*@
-                <textarea name="veri_vals" id="veri_vals" placeholder="Elementler"></textarea>
+                <textarea name="veri_vals" id="veri_vals" placeholder="Elementler" contenteditable="true" spellcheck="false"></textarea>
 
                 @*Dosyadan*@
                 <input id="veri_file_button" name="veri_file_button" type="file" size="1" accept=".csv,.txt" />
@@ -129,6 +138,15 @@
 
                 </div>
 
+                @* Ek Ayarlar *@
+                <div class="veri_extra_options_column">
+                    <select data-placeholder="Ek ayarlar" multiple class="chosen-select" name="extra_options" id="extra_options">
+                        <option title="Sütunlara etiket ekle" value="add_col_labels">Sütun başlıkları ekle</option>
+                        <option title="Satırlara etiket ekle" value="add_row_labels">Satır başlıkları ekle</option>
+                        <option title="İlk satırı sütun etiketi olarak kullan" value="use_row_as_lbl">İlk satırı sütunlar için başlık yap</option>
+                    </select>
+                </div>
+
                 @* Ekleme butonları *@
                 <input id="veri_fromfile_create_button" type="button" class="button" value="Dosyayı oku" name="veri_fromfile_create" />
                 <input id="veri_add_button" type="button" class="button" value="Oluştur" name="veri_create" currenttab="text" />
@@ -136,9 +154,7 @@
             </div>
 
             @* Kayıtlı dataframe tablosu *@
-            <table id="veri_table_base">
-                <partial name="_VeriTablePartial" model=@ViewData["df_dict"] />
-            </table>
+            <partial name="_VeriTablePartial" model=@ViewData["df_dict"] />
 
             @* Kayıtlı matris tablosu *@
             <table id="matris_table_base">
@@ -165,7 +181,7 @@
                       data-focused-advice="Yardım için '?' yazın"
                       contentEditable="true"
                       spellcheck="false"></span>
-                
+
                 <input id="veri_komut_button" type="button" class="button" value="Çözümle" name="veri_komut_btn" data-toggle="tooltip" data-placement="top" title="İfadeyi/Komutu çözümle" />
                 <select id="veri_komut_options">
                     <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
@@ -281,7 +297,123 @@
     updateMatTable('@token');
     updatedfTable('@token');
 </script>
+<script>
+    $(".chosen-select").chosen({
+        no_results_text: "Ayar bulunamadı!"
+    })
+</script>
 
+<script>
+    function visualsDropdown(name) {
+        document.getElementById("visual_options_" + name).classList.toggle("visuals_show");
+    }
+
+    // Handle when clicked out of certain parts
+    window.addEventListener("click", function (event) {
+        if (!event.target.matches('.visuals_dropbtn')) {
+            var dropdowns = document.getElementsByClassName("visuals_dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('visuals_show')) {
+                    openDropdown.classList.remove('visuals_show');
+                }
+            }
+        }
+
+        if (!event.target.matches('.navcolumn_df')) {
+            document.getElementById("df_sidenav").style.width = "0";
+        }
+    }, false);
+</script>
+<script>
+    function displayChartDiv(name) {
+        document.getElementById("chart_movable_" + name).style.display = "block";
+    }
+    function createChart(name, type, labels) {
+        var ctx = document.getElementById('chart_'+name);
+        var chart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: ["sütun_1", "sütun_2", "sütun_3", "sütun_4", "sütun_5", "sütun_6"],
+                datasets: [{
+                    label: 'Örnek Bar Diyagramı',
+                    data: [12, 19, 3, -4, 2, -30],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                    }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+        return chart;
+    }
+</script>
+<script>
+    function dragElement(name) {
+        elmnt = document.getElementById("chart_movable_" + name);
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "header")) {
+            /* if present, the header is where you move the DIV from:*/
+            document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+        } else {
+            /* otherwise, move the DIV from anywhere inside the DIV:*/
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            /* stop moving when mouse button is released:*/
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+</script>
 @{
     if (ViewData != null)
     {

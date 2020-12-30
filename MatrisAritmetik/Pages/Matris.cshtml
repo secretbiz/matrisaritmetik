@@ -80,7 +80,7 @@
             @* Matris ekleme bilgileri satırı *@
             <div id="matris_add_table">
 
-                <input type="text" id="matris_name" placeholder="Matris ismi" />
+                <input type="text" id="matris_name" placeholder="Matris ismi" contenteditable="true" spellcheck="false"/>
                 <span id="matris_add_eqsign">=</span>
 
                 @* Özel matris ekleme inputları*@
@@ -88,7 +88,7 @@
                 <input type="text" id="matris_special_args" style="display:none" placeholder="Parametre:Değer" />
 
                 @* Text ile matris ekleme inputları*@
-                <textarea name="matris_vals" id="matris_vals" placeholder="Elementler"></textarea>
+                <textarea name="matris_vals" id="matris_vals" placeholder="Elementler" contenteditable="true" spellcheck="false"></textarea>
 
                 @*Dosyadan*@
                 <input id="matris_file_button" name="matris_file_button" type="file" size="1" accept=".csv,.txt" />
@@ -241,7 +241,13 @@
     updateTable('@token');
 
 </script>
-
+<script>
+    window.addEventListener("click", function (event) {
+        if (!event.target.matches('.navcolumn')) {
+            document.getElementById("mat_sidenav").style.width = "0";
+        }
+    }, false);
+</script>
 @{
     if (ViewData != null)
     {

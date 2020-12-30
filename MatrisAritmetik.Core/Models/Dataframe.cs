@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using MatrisAritmetik.Models.Core;
 
 namespace MatrisAritmetik.Core.Models
 {
@@ -588,6 +589,10 @@ namespace MatrisAritmetik.Core.Models
                             {
                                 temp[i].Add(res);
                             }
+                            else if (value[i][j] is None || value[i][j] is null)
+                            {
+                                _values[i].Add(new None());
+                            }
                             else
                             {
                                 temp[i].Add(value[i][j].ToString());
@@ -615,6 +620,10 @@ namespace MatrisAritmetik.Core.Models
                                 if (float.TryParse(value[i][j].ToString(), out float res))
                                 {
                                     _values[i].Add(res);
+                                }
+                                else if (value[i][j] is None || value[i][j] is null)
+                                {
+                                    _values[i].Add(new None());
                                 }
                                 else
                                 {
@@ -880,24 +889,46 @@ namespace MatrisAritmetik.Core.Models
         public Dataframe() { }
 
         /// <summary>
+        /// Create a dataframe with given <paramref name="vals"/> and <paramref name="options"/>
+        /// </summary>
+        /// <param name="vals">Values to use</param>
+        /// <param name="options">Option strings</param>
+        public Dataframe(List<List<object>> vals, List<string> options)
+        {
+            if (options == null || options.Count == 0)
+            {
+                // Values and dimensions
+                SetValues(vals);
+                SetRowSettings(new DataframeRowSettings());
+                SetColSettings(new DataframeColSettings());
+            }
+            else
+            {
+                ApplyOptions(vals, options);
+            }
+
+        }
+
+        /// <summary>
         /// Create a new instance with given values <paramref name="vals"/> and labels <paramref name="rowLabels"/>, <paramref name="colLabels"/>
         /// and use settings <paramref name="rowSettings"/>, <paramref name="colSettings"/>
         ///  and use delimiter <paramref name="delim"/> and new-line <paramref name="newline"/> while printing
         /// </summary>
-        /// <param name="vals"></param>
-        /// <param name="delim"></param>
-        /// <param name="newline"></param>
-        /// <param name="rowLabels"></param>
-        /// <param name="colLabels"></param>
-        /// <param name="rowSettings"></param>
-        /// <param name="colSettings"></param>
+        /// <param name="vals">Values to store</param>
+        /// <param name="delim">Delimiter used while given <paramref name="vals"/> were being read</param>
+        /// <param name="newline">New-line character used while <paramref name="vals"/> were being read</param>
+        /// <param name="rowLabels">Labels for rows, null for default names with single column span per label</param>
+        /// <param name="colLabels">Labels for columns, null for default names with single column span per label</param>
+        /// <param name="rowSettings">Settings for row labels, null for default <see cref="DataframeRowSettings"/> instance</param>
+        /// <param name="colSettings">Settings for column labels, null for default <see cref="DataframeColSettings"/> instance</param>
         public Dataframe(List<List<object>> vals,
                          string delim = " ",
                          string newline = "\n",
                          List<LabelList> rowLabels = null,
                          List<LabelList> colLabels = null,
                          DataframeRowSettings rowSettings = null,
-                         DataframeColSettings colSettings = null)
+                         DataframeColSettings colSettings = null,
+                         bool forceLabelsWhenNull = false)
         {
             // Values and dimensions
             SetValues(vals);
@@ -909,7 +940,10 @@ namespace MatrisAritmetik.Core.Models
             // Labels
             if (rowLabels == null)
             {
-                SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
+                if (forceLabelsWhenNull)
+                {
+                    SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
+                }
             }
             else
             {
@@ -918,7 +952,10 @@ namespace MatrisAritmetik.Core.Models
             }
             if (colLabels == null)
             {
-                SetColLabels(new List<LabelList>() { new LabelList(Col, 1, "col_", 1) });
+                if (forceLabelsWhenNull)
+                {
+                    SetColLabels(new List<LabelList>() { new LabelList(Col, 1, "col_", 1) });
+                }
             }
             else
             {
@@ -950,31 +987,12 @@ namespace MatrisAritmetik.Core.Models
         #region Private Methods
 
         /// <summary>
-        /// Sum all values in an integer array within given range
-        /// </summary>
-        /// <param name="arr">Array to use</param>
-        /// <param name="start">Starting index</param>
-        /// <param name="end">Ending index exclusively</param>
-        /// <returns>Sum of values within given range</returns>
-        private static int ArraySum(int[] arr, int start, int end)
-        {
-            int total = 0;
-            for (int i = start; i < end; i++)
-            {
-                total += arr[i];
-            }
-            return total;
-        }
-
-        /// <summary>
         /// Get width of columns using <see cref="Dataframe.GetValues()"/> and <see cref="Dataframe.GetColLabels()"/> widths
         /// </summary>
         /// <returns>Array of widths for each column</returns>
         private int[] GetColumnWidths()
         {
-            // Element columns' widths
-            using MatrisBase<dynamic> mat = new MatrisBase<dynamic>(_values);
-            int[] elementwidths = GetColumnWidths(mat);
+            int[] elementwidths = GetColumnWidths(this);
             int spanseplength = GetColSettings().GetSpanSeperator().Length;
 
             if (GetColLabels() != null)
@@ -999,7 +1017,7 @@ namespace MatrisAritmetik.Core.Models
                         else // Spans over multiple columns
                         {
                             // If its shorter than current width, continue to next level
-                            if (labellen < ArraySum(elementwidths, j, current_label.Span) + (spanseplength * (current_label.Span - 1)))
+                            if (labellen < int.Parse(ArrayMethods.ArraySum(new List<int>(elementwidths), j, current_label.Span).ToString()) + (spanseplength * (current_label.Span - 1)))
                             {
                                 continue;
                             }
@@ -1078,9 +1096,10 @@ namespace MatrisAritmetik.Core.Models
             string row_level_sep = GetRowSettings().GetLevelSeperator();
             string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
 
+            int repeat;
             int colno, index;
-            int rowlabellevel = GetRowLabels().Count;
-            List<dynamic> row = new List<dynamic>();
+            int rowlabellevel = GetRowLabels() == null ? 0 : GetRowLabels().Count;
+            List<object> row;
             LabelList currentlist;
 
             int[] lastindex = new int[rowlabellevel];
@@ -1091,18 +1110,26 @@ namespace MatrisAritmetik.Core.Models
 
             for (int i = 0; i < Row; i++)
             {
+                row = GetValues()[i];
                 for (int k = rowlabellevel - 1; k >= 0; k--)
                 {
-                    row = _values[i];
                     currentlist = GetRowLabels()[k];
                     index = currentlist.GetLabelIndexAtSpan(i + 1);
                     if (index == lastindex[k]) // Don't re-write same label again
                     {   // TO-DO: Create a placeholder for dataframes and use that here
-                        res.Append(' ', rowlbl_widths[k] + 1);
+                        repeat = rowlbl_widths[k] + 1;
+                        if (repeat > 0)
+                        {
+                            res.Append(' ', repeat);
+                        }
                     }
                     else
                     {
-                        res.Append(' ', rowlbl_widths[k] - currentlist.Labels[index].Value.Length + 1);
+                        repeat = rowlbl_widths[k] - currentlist.Labels[index].Value.Length + 1;
+                        if (repeat > 0)
+                        {
+                            res.Append(' ', repeat);
+                        }
                         res.Append(currentlist.Labels[index].Value);
                         lastindex[k] = index;
                     }
@@ -1113,12 +1140,19 @@ namespace MatrisAritmetik.Core.Models
                     }
                 }
 
-                res.Append(row_element_sep);
+                if (rowlabellevel != 0)
+                {
+                    res.Append(row_element_sep);
+                }
 
                 colno = 0;
                 foreach (dynamic element in row)
                 {
-                    res.Append(' ', col_widths[colno] - element.ToString().Length);
+                    repeat = col_widths[colno] - element.ToString().Length;
+                    if (repeat > 0)
+                    {
+                        res.Append(' ', repeat);
+                    }
                     res.Append((string)element.ToString());
 
                     if (colno != Col - 1)
@@ -1132,27 +1166,97 @@ namespace MatrisAritmetik.Core.Models
             }
         }
 
-        /// <summary>
-        /// Create a copy of given <see cref="LabelList"/> list
-        /// </summary>
-        /// <param name="lis">List of <see cref="LabelList"/> to copy</param>
-        /// <returns>Deep copy of the objects</returns>
-        private List<LabelList> GetCopyOfLabels(List<LabelList> lis)
-        {
-            if (lis == null)
-            {
-                return null;
-            }
-            List<LabelList> newlis = new List<LabelList>();
-            foreach (LabelList l in lis)
-            {
-                newlis.Add(l.Copy());
-            }
-            return newlis;
-        }
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Apply given options with given values to the dataframe, override labels with 'null' first if desired
+        /// </summary>
+        /// <param name="vals">Values to use</param>
+        /// <param name="options">Option strings to use</param>
+        /// <param name="overrideExisting">If true, column and row labels will be overriden 'null' no matter the rest of the paramaters</param>
+        public void ApplyOptions(List<List<object>> vals, List<string> options, bool overrideExisting = false)
+        {
+            if (overrideExisting)
+            {
+                SetColLabels(null);
+                SetRowLabels(null);
+            }
+
+            if (options == null || options.Count == 0
+                || vals == null || vals.Count == 0
+                || vals[0] == null || vals[0].Count == 0)
+            {
+                return;
+            }
+
+            bool firstRowAsLabel = options.Contains("use_row_as_lbl");
+            bool addColLabels = options.Contains("add_col_labels");
+            bool addRowLabels = options.Contains("add_row_labels");
+
+            if (firstRowAsLabel)
+            {
+                if (vals.Count == 1)
+                {
+                    SetValues(vals);
+                    SetColLabels(new List<LabelList>() { new LabelList(vals[0]) });
+                    if (addRowLabels)
+                    {
+                        SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
+                    }
+                }
+                else
+                {
+                    SetValues(vals.GetRange(1, vals.Count - 1));
+                    SetColLabels(new List<LabelList>() { new LabelList(vals[0]) });
+                    if (addRowLabels)
+                    {
+                        SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
+                    }
+                }
+            }
+            else
+            {
+                SetValues(vals);
+
+                if (addRowLabels)
+                {
+                    SetRowLabels(new List<LabelList>() { new LabelList(Row, 1, "row_", 1) });
+                }
+                if (addColLabels)
+                {
+                    SetColLabels(new List<LabelList>() { new LabelList(Col, 1, "col_", 1) });
+                }
+            }
+            SetRowSettings(new DataframeRowSettings());
+            SetColSettings(new DataframeColSettings());
+        }
+
+        /// <summary>
+        /// Get a deep copy of given list of label-list
+        /// </summary>
+        /// <param name="lis">Label-list list</param>
+        /// <returns>Deep copy of given list or null if <paramref name="lis"/> was null</returns>
+        public List<LabelList> GetCopyOfLabels(List<LabelList> lis)
+        {
+            if (lis == null)
+            {
+                return lis;
+            }
+
+            List<LabelList> lbls = new List<LabelList>();
+            foreach (LabelList lbl in lis)
+            {
+                lbls.Add(lbl.Copy());
+            }
+
+            return lbls;
+        }
+
+        #endregion
+
+        #region Public Method Overloads
         /// <summary>
         /// Creates a deep copy of the dataframe
         /// </summary>
@@ -1171,26 +1275,13 @@ namespace MatrisAritmetik.Core.Models
                 }
             }
 
-            List<LabelList> rowlbls = null;
-            if (GetRowLabels() != null)
-            {
-                rowlbls = new List<LabelList>();
-                foreach (LabelList lbl in GetRowLabels())
-                {
-                    rowlbls.Add(lbl.Copy());
-                }
-            }
-            List<LabelList> colbls = null;
-            if (GetColLabels() != null)
-            {
-                colbls = new List<LabelList>();
-                foreach (LabelList lbl in GetColLabels())
-                {
-                    colbls.Add(lbl.Copy());
-                }
-            }
-
-            return new Dataframe(lis, Delimiter.ToString(), NewLine.ToString(), rowlbls, colbls, GetRowSettings().Copy(), GetColSettings().Copy());
+            return new Dataframe(lis,
+                                 Delimiter.ToString(),
+                                 NewLine.ToString(),
+                                 GetCopyOfLabels(GetRowLabels()),
+                                 GetCopyOfLabels(GetColLabels()),
+                                 GetRowSettings().Copy(),
+                                 GetColSettings().Copy());
         }
 
         /// <summary>
@@ -1328,6 +1419,54 @@ namespace MatrisAritmetik.Core.Models
             }
             return new Dataframe(smallerList, rowSettings: GetRowSettings().Copy(), colSettings: GetColSettings().Copy());
         }
+        /// <summary>
+        /// Apply exponentiation operation over each value in the matrix
+        /// </summary>
+        /// <param name="n">Exponential value</param>
+        /// <returns>A new matrix raised to the power of <paramref name="n"/></returns>
+        public override MatrisBase<object> Power(dynamic n)
+        {
+            if (n is null)
+            {
+                return null;
+            }
+
+            if (float.TryParse(n.ToString(), out float res))
+            {
+                n = res;
+            }
+            else
+            {
+                return null;
+            }
+
+            int nr = Row;
+            int nc = Col;
+            List<List<object>> newlist = new List<List<object>>();
+
+            for (int i = 0; i < nr; i++)
+            {
+                newlist.Add(new List<object>());
+                for (int j = 0; j < nc; j++)
+                {
+                    if (float.TryParse(GetValues()[i][j].ToString(), out float r))
+                    {
+                        newlist[i].Add((float)Math.Pow(r, n));
+                    }
+                    else
+                    {
+                        newlist[i].Add(float.NaN);
+                    }
+                }
+            }
+            return new Dataframe(newlist,
+                                 Delimiter,
+                                 NewLine,
+                                 null,
+                                 GetCopyOfLabels(GetColLabels()),
+                                 null,
+                                 GetColSettings().Copy());
+        }
 
         /// <summary>
         /// Creates a dataframe detail summary
@@ -1343,9 +1482,43 @@ namespace MatrisAritmetik.Core.Models
                    + "Elementler:\n"
                    + ToString();
         }
-        #endregion
 
-        #region Public Method Overloads
+        /// <summary>
+        /// Get a new row-dataframe from given row index <paramref name="r"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="r">Row index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>New row-dataframe</returns>
+        public override MatrisBase<object> RowMat(int r,
+                                                  int based = 1)
+        {
+            List<List<object>> listrow = new List<List<object>>() { new List<object>() };
+            for (int j = 0; j < Col; j++)
+            {
+                listrow[0].Add((dynamic)GetValues()[r - based][j]);
+            }
+
+            return new Dataframe(listrow);
+        }
+
+        /// <summary>
+        /// Get a new column-dataframe from given column index <paramref name="c"/> with base <paramref name="based"/>
+        /// </summary>
+        /// <param name="c">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>New column-dataframe</returns>
+        public override MatrisBase<object> ColMat(int c,
+                                                  int based = 1)
+        {
+            List<List<object>> listcol = new List<List<object>>();
+            for (int i = 0; i < Row; i++)
+            {
+                listcol.Add(new List<object>() { (dynamic)GetValues()[i][c - based] });
+            }
+
+            return new Dataframe(listcol);
+        }
+
         /// <summary>
         /// Create a printable string with dataframe's labels and elements aligned   
         /// </summary>
@@ -1356,13 +1529,13 @@ namespace MatrisAritmetik.Core.Models
             {
                 return "";
             }
-
+            /*
             if (GetRowLabels() == null && GetColLabels() == null)
             {
                 using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
                 return matrisBase.ToString();
             }
-
+            */
             StringBuilder res = new StringBuilder();
 
             // Column sizes
@@ -1375,7 +1548,9 @@ namespace MatrisAritmetik.Core.Models
                 string col_corner_sep = GetColSettings().GetLabelSeperatorFromCorner();
                 string col_span_sep = GetColSettings().GetSpanSeperator();
                 string col_level_sep = GetColSettings().GetLevelSeperator();
-                int colrepeat = ArraySum(col_widths, 0, Col) + ((Col - 1) * col_span_sep.Length);
+                int colrepeat = int.Parse(ArrayMethods.ArraySum(new List<int>(col_widths), 0, Col).ToString())
+                                + ((Col - 1) * col_span_sep.Length);
+
                 col_level_sep = new string(col_level_sep[0], colrepeat);
 
                 string col_element_sep = GetColSettings().GetLabelSeperatorFromElements();
@@ -1398,7 +1573,8 @@ namespace MatrisAritmetik.Core.Models
                                 spanstart += labelList.Labels[k2].Span;
                             }
 
-                            int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
+                            int space_count = int.Parse(ArrayMethods.ArraySum(new List<int>(col_widths), spanstart, spanstart + lbl.Span).ToString())
+                                              - lbl.Value.Length + (lbl.Span - 1);
 
                             res.Append(' ', space_count); // Left align for now
                             res.Append(lbl.Value);
@@ -1444,7 +1620,8 @@ namespace MatrisAritmetik.Core.Models
                     string row_corner_sep = GetRowSettings().GetLabelSeperatorFromCorner();
                     string row_span_sep = GetRowSettings().GetSpanSeperator();
                     string row_element_sep = GetRowSettings().GetLabelSeperatorFromElements();
-                    int rowlabelextra = ArraySum(rowlbl_widths, 0, rowlbl_widths.Length) + ((rowlbl_widths.Length - 1) * (row_span_sep.Length + 1)) + row_element_sep.Length + col_corner_sep.Length - 1;
+                    int rowlabelextra = int.Parse(ArrayMethods.ArraySum(new List<int>(rowlbl_widths), 0, rowlbl_widths.Length).ToString())
+                                        + ((rowlbl_widths.Length - 1) * (row_span_sep.Length + 1)) + row_element_sep.Length + col_corner_sep.Length - 1;
 
                     // Column label rows first
                     int colLabelLength = GetColLabels().Count;
@@ -1464,7 +1641,8 @@ namespace MatrisAritmetik.Core.Models
                                 spanstart += labelList.Labels[k2].Span;
                             }
 
-                            int space_count = ArraySum(col_widths, spanstart, spanstart + lbl.Span) - lbl.Value.Length + (lbl.Span - 1);
+                            int space_count = int.Parse(ArrayMethods.ArraySum(new List<int>(col_widths), spanstart, spanstart + lbl.Span).ToString())
+                                              - lbl.Value.Length + (lbl.Span - 1);
 
                             res.Append(' ', space_count); // Left align for now
                             res.Append(lbl.Value);
@@ -1494,17 +1672,56 @@ namespace MatrisAritmetik.Core.Models
             }
             else // No column labels
             {
-                if (GetRowLabels() == null) // No labels at all
-                {
-                    using MatrisBase<dynamic> matrisBase = new MatrisBase<dynamic>(_values);
-                    return matrisBase.ToString();
-                }
-                else // Row labels only
-                {
-                    SetElementsWithRowLabels(res, rowlbl_widths, col_widths);
-                }
+                SetElementsWithRowLabels(res, rowlbl_widths, col_widths);
             }
             return res.ToString();
+        }
+        #endregion
+
+        #region Dataframe Features
+        /// <summary>
+        /// Check if given column at index <paramref name="c"/> is all numbers
+        /// </summary>
+        /// <param name="c">Column index</param>
+        /// <param name="based">Index base</param>
+        /// <returns>True if all values in the column <paramref name="c"/> is parsable as floats</returns>
+        public bool IsAllNumberColumn(int c, int based = 1)
+        {
+            foreach (object val in ColList(c, based))
+            {
+                if (float.TryParse(val.ToString(), out _))
+                {
+                    continue;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Check if all values in the dataframe is parsable as floats
+        /// </summary>
+        /// <returns>True if all values are parsable, otherwise false</returns>
+        public bool IsAllNumbers()
+        {
+            for (int j = 0; j < Col; j++)
+            {
+                foreach (object val in ColList(j, 0))
+                {
+                    if (float.TryParse(val.ToString(), out _))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
         #endregion
 
@@ -1593,17 +1810,13 @@ namespace MatrisAritmetik.Core.Models
                 {
                     return int.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @int;
                 }
-                else if (other is float @float)
-                {
-                    return float.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @float;
-                }
-                else if (other is double @double)
-                {
-                    return double.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @double;
-                }
                 else
                 {
-                    return other.ToString() == df[0, 0].ToString();
+                    return other is float @float
+                        ? float.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @float
+                        : other is double @double
+                                            ? double.Parse(df[0, 0].ToString(), CultureInfo.CurrentCulture) == @double
+                                            : (bool)(other.ToString() == df[0, 0].ToString());
                 }
             }
             else
@@ -1726,7 +1939,7 @@ namespace MatrisAritmetik.Core.Models
                 val = 0;
             }
 
-            if (float.TryParse(val.ToString(), out float res))
+            if (float.TryParse(((object)val).ToString(), out float res))
             {
                 List<List<object>> vals = df.GetValues();
                 List<List<object>> newlis = new List<List<object>>();
@@ -1735,7 +1948,14 @@ namespace MatrisAritmetik.Core.Models
                     newlis.Add(new List<object>());
                     for (int j = 0; j < df.Col; j++)
                     {
-                        newlis[i].Add(float.Parse(vals[i][j].ToString()) + res);
+                        if (float.TryParse(vals[i][j].ToString(), out float res2))
+                        {
+                            newlis[i].Add(res + res2);
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                        }
                     }
                 }
                 Dataframe result = df.Copy();
@@ -1881,7 +2101,7 @@ namespace MatrisAritmetik.Core.Models
                 val = 0;
             }
 
-            if (float.TryParse(val.ToString(), out float res))
+            if (float.TryParse(((object)val).ToString(), out float res))
             {
                 List<List<object>> vals = df.GetValues();
                 List<List<object>> newlis = new List<List<object>>();
@@ -1890,7 +2110,14 @@ namespace MatrisAritmetik.Core.Models
                     newlis.Add(new List<object>());
                     for (int j = 0; j < df.Col; j++)
                     {
-                        newlis[i].Add(float.Parse(vals[i][j].ToString()) - res);
+                        if (float.TryParse(vals[i][j].ToString(), out float res2))
+                        {
+                            newlis[i].Add(res2 - res);
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                        }
                     }
                 }
                 Dataframe result = df.Copy();
@@ -1984,7 +2211,7 @@ namespace MatrisAritmetik.Core.Models
                 val = 1;
             }
 
-            if (float.TryParse(val.ToString(), out float res))
+            if (float.TryParse(((object)val).ToString(), out float res))
             {
                 List<List<object>> vals = df.GetValues();
                 List<List<object>> newlis = new List<List<object>>();
@@ -1993,7 +2220,14 @@ namespace MatrisAritmetik.Core.Models
                     newlis.Add(new List<object>());
                     for (int j = 0; j < df.Col; j++)
                     {
-                        newlis[i].Add(float.Parse(vals[i][j].ToString()) * res);
+                        if (float.TryParse(vals[i][j].ToString(), out float res2))
+                        {
+                            newlis[i].Add(res2 * res);
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ADDITION_PARSE_FAILED);
+                        }
                     }
                 }
                 Dataframe result = df.Copy();
@@ -2123,7 +2357,7 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                if (float.TryParse(val.ToString(), out float res))
+                if (float.TryParse(((object)val).ToString(), out float res))
                 {
                     List<List<object>> vals = df.GetValues();
                     List<List<object>> newlis = new List<List<object>>();
@@ -2160,7 +2394,7 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                if (float.TryParse(val.ToString(), out float res))
+                if (float.TryParse(((object)val).ToString(), out float res))
                 {
                     List<List<object>> vals = df.GetValues();
                     List<List<object>> newlis = new List<List<object>>();
@@ -2304,7 +2538,7 @@ namespace MatrisAritmetik.Core.Models
             }
             else
             {
-                if (float.TryParse(val.ToString(), out float res))
+                if (float.TryParse(((object)val).ToString(), out float res))
                 {
                     List<List<object>> vals = df.GetValues();
                     List<List<object>> newlis = new List<List<object>>();
@@ -2337,7 +2571,7 @@ namespace MatrisAritmetik.Core.Models
         {
             if (df.IsScalar())
             {
-                if (float.TryParse(val.ToString(), out float res))
+                if (float.TryParse(((object)val).ToString(), out float res))
                 {
                     if (float.TryParse(df.GetValues()[0][0].ToString(), out float dval))
                     {

@@ -24,32 +24,16 @@ namespace MatrisAritmetik.Core
 
             if (string.IsNullOrEmpty(name.Replace(" ", "")))
             {
-                if (throwOnBadName)
-                {
-                    throw new System.Exception(CompilerMessage.MAT_NAME_EMPTY);
-                }
-                return false;
+                return throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_EMPTY) : false;
             }
 
             if (name.Length > (int)MatrisLimits.forName)
             {
-                if (throwOnBadName)
-                {
-                    throw new System.Exception(CompilerMessage.MAT_NAME_CHAR_LIMIT(name.Length));
-                }
-                return false;
+                return throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_CHAR_LIMIT(name.Length)) : false;
             }
 
-            if (!"0123456789".Contains(name[0]) && (name_regex.Match(name).Groups[0].Value == name))
-            {
-                return true;
-            }
-
-            if (throwOnBadName)
-            {
-                throw new System.Exception(CompilerMessage.MAT_NAME_INVALID);
-            }
-            return false;
+            return !"0123456789".Contains(name[0]) && (name_regex.Match(name).Groups[0].Value == name)
+|| (throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_INVALID) : false);
         }
 
         /// <summary>
@@ -57,15 +41,27 @@ namespace MatrisAritmetik.Core
         /// </summary>
         /// <param name="mode">Compiler mode</param>
         /// <param name="mat">Matrix to check</param>
+        /// <param name="disposeIfInvalid">True if given matrix needs to be disposed after an unsuccessful validation</param>
         public static void CheckModeAndMatrixReference(CompilerDictionaryMode mode,
-                                                       dynamic mat)
+                                                       dynamic mat,
+                                                       bool disposeIfInvalid = false)
         {
             if (mode == CompilerDictionaryMode.Dataframe && !(mat is Dataframe))
             {
+                if (disposeIfInvalid)
+                {
+                    ((Dataframe)mat).Dispose();
+                }
+
                 throw new Exception(CompilerMessage.COMPILER_MODE_MISMATCH(mode));
             }
-            else if (mode == CompilerDictionaryMode.Matrix && mat is Dataframe)
+            else if (mode == CompilerDictionaryMode.Matrix && mat is Dataframe dataframe)
             {
+                if (disposeIfInvalid)
+                {
+                    dataframe.Dispose();
+                }
+
                 throw new Exception(CompilerMessage.COMPILER_MODE_MISMATCH(mode));
             }
         }

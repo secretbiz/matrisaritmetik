@@ -13,7 +13,7 @@ namespace MatrisAritmetik.Tests
         /// <summary>
         /// Service for matrix algebric-arithmetic and special matrices
         /// </summary>
-        private readonly IMatrisArithmeticService<dynamic> MatrisArithmeticService = new MatrisArithmeticService<dynamic>();
+        private readonly IMatrisArithmeticService<object> MatrisArithmeticService = new MatrisArithmeticService();
         private readonly ISpecialMatricesService SpecialMatricesService = new SpecialMatricesService();
 
         /// <summary>
