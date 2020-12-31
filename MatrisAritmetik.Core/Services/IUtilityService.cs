@@ -109,6 +109,21 @@ namespace MatrisAritmetik.Core.Services
         Task ReadFileFromRequest(Stream reqbody,
                                  Encoding enc,
                                  Dictionary<string, string> filedata);
+
+        /// <summary>
+        /// Read option string from given dictionary
+        /// </summary>
+        /// <param name="dict">Request parameter-value dictionary</param>
+        /// <returns>List of option strings</returns>
+        List<string> GetOptionList(Dictionary<string, string> dict);
+
+        /// <summary>
+        /// Dispose given dictionaries
+        /// </summary>
+        /// <param name="dfdict">Dataframes</param>
+        /// <param name="lbls">Labels</param>
+        void DisposeDfDicts(Dictionary<string, Dataframe> dfdict,
+                            Dictionary<string, Dictionary<string, List<LabelList>>> lbls);
         #endregion
 
         #region List Related Methods

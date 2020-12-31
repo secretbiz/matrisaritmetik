@@ -285,6 +285,18 @@ namespace MatrisAritmetik.Services
             return new Dataframe(vals, delim, newline, rowLabels, colLabels, rowSettings, colSettings);
         }
 
+        /// <summary>
+        /// Create a 1D list of <see cref="LabelList"/>s from given names with span 1 each
+        /// </summary>
+        /// <param name="names">Array of label names</param>
+        /// <returns>1D list of <see cref="LabelList"/>s</returns>
+        public static List<LabelList> Create1DLabelListFromList(params string[] names)
+        {
+            return new List<LabelList>()
+            {
+                new LabelList(new List<object>(names))
+            };
+        }
         #endregion
 
         #region Operator Methods

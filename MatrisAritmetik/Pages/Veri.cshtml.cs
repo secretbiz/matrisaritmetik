@@ -74,24 +74,17 @@ namespace MatrisAritmetik.Pages
         private readonly List<string> SpecialsLabels = new List<string>() { "Özel Veri Tablosu" };
         #endregion
 
+        public List<CommandLabel> SpecialFuncTab => _frontService.GetCommandLabelList(SpecialsLabels);
+
         #region GET Actions
         /// <summary>
         /// Default GET action
         /// </summary>
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-            if (_frontService.GetCommandLabelList() == null)
-            {
-                _frontService.ReadCommandInformation();
-            }
-            else if (_frontService.GetCommandLabelList().Count == 0)
-            {
-                _frontService.ReadCommandInformation();
-            }
+            ViewData["komut_optionsdict"] = await _frontService.GetCommandLabelListAsync(null, true);
 
-            ViewData["komut_optionsdict"] = _frontService.GetCommandLabelList(null, true);
-
-            ViewData["special_optiondict"] = _frontService.GetCommandLabelList(SpecialsLabels);
+            ViewData["special_optiondict"] = await _frontService.GetCommandLabelListAsync(SpecialsLabels);
 
             ViewData["matrix_dict"] = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
 
@@ -151,7 +144,7 @@ namespace MatrisAritmetik.Pages
                                 reqdict[DfNewLineParam] = _utils.FixLiterals(reqdict[DfNewLineParam]);
                                 reqdict[DfValsParam] = _utils.FixLiterals(reqdict[DfValsParam]);
 
-                                List<string> optlist = GetOptionList(reqdict);
+                                List<string> optlist = _utils.GetOptionList(reqdict);
 
                                 using Dataframe df = new Dataframe
                                                                 (
@@ -191,7 +184,7 @@ namespace MatrisAritmetik.Pages
                                                                 msg
                                                               );
 
-                                DisposeDfDicts(null, labels);
+                                _utils.DisposeDfDicts(null, labels);
                                 vals.Clear();
                                 labels.Clear();
                                 settings.Clear();
@@ -226,7 +219,7 @@ namespace MatrisAritmetik.Pages
                                                       );
                     }
 
-                    DisposeDfDicts(_dict, null);
+                    _utils.DisposeDfDicts(_dict, null);
                     _dict.Clear();
                 }
                 else
@@ -279,7 +272,7 @@ namespace MatrisAritmetik.Pages
                                                             SessionLastMessage,
                                                             msg
                                                           );
-                            DisposeDfDicts(_dict, null);
+                            _utils.DisposeDfDicts(_dict, null);
                             return;
                         }
                     }
@@ -291,7 +284,7 @@ namespace MatrisAritmetik.Pages
                                                         SessionLastMessage,
                                                         msg
                                                       );
-                        DisposeDfDicts(_dict, null);
+                        _utils.DisposeDfDicts(_dict, null);
                         return;
                     }
                     string actualFuncName = reqdict[DfSpecialFuncParam][1..reqdict[DfSpecialFuncParam].IndexOf("(", StringComparison.CurrentCulture)];
@@ -304,7 +297,7 @@ namespace MatrisAritmetik.Pages
                                                         SessionLastMessage,
                                                         msg
                                                       );
-                        DisposeDfDicts(_dict, null);
+                        _utils.DisposeDfDicts(_dict, null);
                         return;
                     }
 
@@ -316,7 +309,7 @@ namespace MatrisAritmetik.Pages
                             Validations.ValidMatrixName(reqdict[DfNameParam], throwOnBadName: true);
 
 
-                            List<string> optlist = GetOptionList(reqdict);
+                            List<string> optlist = _utils.GetOptionList(reqdict);
 
                             using Dataframe df = _utils.SpecialStringToDataframe
                                                  (
@@ -350,7 +343,7 @@ namespace MatrisAritmetik.Pages
                                                             msg
                                                           );
 
-                            DisposeDfDicts(null, labels);
+                            _utils.DisposeDfDicts(null, labels);
                             vals.Clear();
                             labels.Clear();
                             settings.Clear();
@@ -368,7 +361,7 @@ namespace MatrisAritmetik.Pages
                                                           );
                         }
 
-                        DisposeDfDicts(_dict, null);
+                        _utils.DisposeDfDicts(_dict, null);
 
                         _dict.Clear();
                     }
@@ -431,7 +424,7 @@ namespace MatrisAritmetik.Pages
                         {
                             Validations.ValidMatrixName(FileData["name"], throwOnBadName: true);
 
-                            List<string> optlist = GetOptionList(FileData);
+                            List<string> optlist = _utils.GetOptionList(FileData);
 
                             using Dataframe mat = new Dataframe
                                                             (
@@ -472,7 +465,7 @@ namespace MatrisAritmetik.Pages
                                                             msg
                                                           );
 
-                            DisposeDfDicts(null, labels);
+                            _utils.DisposeDfDicts(null, labels);
 
                             vals.Clear();
                             labels.Clear();
@@ -508,7 +501,7 @@ namespace MatrisAritmetik.Pages
                                                   );
                 }
 
-                DisposeDfDicts(_dict, null);
+                _utils.DisposeDfDicts(_dict, null);
                 _dict.Clear();
                 FileData.Clear();
 
@@ -598,7 +591,7 @@ namespace MatrisAritmetik.Pages
                 HttpContext.Session.SetDfLabels(SessionDfLabels, labels);
                 HttpContext.Session.SetDfSettings(SessionDfSettings, settings);
 
-                DisposeDfDicts(_dict, labels);
+                _utils.DisposeDfDicts(_dict, labels);
 
                 using CommandMessage msg = new CommandMessage(CompilerMessage.DELETED_DF(reqdict[DfNameParam]), CommandState.SUCCESS);
                 HttpContext.Session.SetLastMsg(
@@ -713,7 +706,7 @@ namespace MatrisAritmetik.Pages
                             HttpContext.Session.SetDfLabels(SessionDfLabels, dflabels);
                             HttpContext.Session.SetDfSettings(SessionDfSettings, dfsettings);
 
-                            DisposeDfDicts(null, dflabels);
+                            _utils.DisposeDfDicts(null, dflabels);
 
                             foreach (MatrisBase<dynamic> d in tempdict.Values)
                             {
@@ -830,47 +823,5 @@ namespace MatrisAritmetik.Pages
 
         #endregion
 
-        #region Private Methods
-        private List<string> GetOptionList(Dictionary<string, string> dict)
-        {
-            return string.IsNullOrWhiteSpace(dict["extras"]) ? null : new List<string>(dict["extras"].Split(","));
-        }
-        #endregion
-
-        #region Dispose
-        /// <summary>
-        /// Dispose given dataframe dictionary and/or labels dictionary
-        /// </summary>
-        /// <param name="dfdict">Dataframe dictionary</param>
-        /// <param name="lbls">Labels dictionary</param>
-        private void DisposeDfDicts(Dictionary<string, Dataframe> dfdict,
-                                    Dictionary<string, Dictionary<string, List<LabelList>>> lbls)
-        {
-            if (dfdict != null)
-            {
-                foreach (Dataframe d in dfdict.Values)
-                {
-                    d.Dispose();
-                }
-            }
-            if (lbls != null)
-            {
-                foreach (Dictionary<string, List<LabelList>> d in lbls.Values)
-                {
-                    foreach (List<LabelList> ls in d.Values)
-                    {
-                        if (ls != null)
-                        {
-                            foreach (LabelList l in ls)
-                            {
-                                l.Dispose();
-                            }
-                            ls.Clear();
-                        }
-                    }
-                }
-            }
-        }
-        #endregion
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using MatrisAritmetik.Core;
 using MatrisAritmetik.Core.Models;
 using MatrisAritmetik.Core.Services;
@@ -1374,9 +1375,58 @@ namespace MatrisAritmetik.Services
             builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
         }
 
+        public async Task ReadCommandInformationAsync()
+        {
+            using StreamReader r = new StreamReader("_builtInCmds.json");
+            string json = await r.ReadToEndAsync();
+            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
+        }
+
         public List<CommandLabel> GetCommandLabelList(List<string> filter = null,
                                                       bool blacklist = false)
         {
+            if (GetBuiltInCommands() == null || GetBuiltInCommands().Count == 0)
+            {
+                ReadCommandInformation();
+            }
+
+            if (filter == null)
+            {
+                return blacklist ? GetBuiltInCommands() : new List<CommandLabel>();
+            }
+
+            List<CommandLabel> filtered = new List<CommandLabel>();
+            if (blacklist)
+            {
+                foreach (CommandLabel lbl in GetBuiltInCommands())
+                {
+                    if (!filter.Contains(lbl.Label))
+                    {
+                        filtered.Add(lbl);
+                    }
+                }
+            }
+            else
+            {
+                foreach (CommandLabel lbl in GetBuiltInCommands())
+                {
+                    if (filter.Contains(lbl.Label))
+                    {
+                        filtered.Add(lbl);
+                    }
+                }
+            }
+            return filtered;
+        }
+
+        public async Task<List<CommandLabel>> GetCommandLabelListAsync(List<string> filter = null,
+                                                                       bool blacklist = false)
+        {
+            if (GetBuiltInCommands() == null || GetBuiltInCommands().Count == 0)
+            {
+                await ReadCommandInformationAsync();
+            }
+
             if (filter == null)
             {
                 return blacklist ? GetBuiltInCommands() : new List<CommandLabel>();
@@ -1692,11 +1742,7 @@ namespace MatrisAritmetik.Services
                                              List<string> filter = null,
                                              bool blacklist = false)
         {
-            if (GetBuiltInCommands() == null)
-            {
-                ReadCommandInformation();
-            }
-            else if (GetBuiltInCommands().Count == 0)
+            if (GetBuiltInCommands() == null || GetBuiltInCommands().Count == 0)
             {
                 ReadCommandInformation();
             }

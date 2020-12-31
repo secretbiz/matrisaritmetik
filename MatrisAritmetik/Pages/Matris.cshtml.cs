@@ -84,20 +84,11 @@ namespace MatrisAritmetik.Pages
         /// <summary>
         /// Default GET action
         /// </summary>
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-            if (_frontService.GetCommandLabelList() == null)
-            {
-                _frontService.ReadCommandInformation();
-            }
-            else if (_frontService.GetCommandLabelList().Count == 0)
-            {
-                _frontService.ReadCommandInformation();
-            }
+            ViewData["komut_optionsdict"] = await _frontService.GetCommandLabelListAsync(IgnoreLabels, true);
 
-            ViewData["komut_optionsdict"] = _frontService.GetCommandLabelList(IgnoreLabels, true);
-
-            ViewData["special_optiondict"] = _frontService.GetCommandLabelList(SpecialsLabels);
+            ViewData["special_optiondict"] = await _frontService.GetCommandLabelListAsync(SpecialsLabels);
 
             ViewData["matrix_dict"] = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
 

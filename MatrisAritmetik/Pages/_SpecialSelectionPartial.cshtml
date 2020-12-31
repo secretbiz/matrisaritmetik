@@ -8,7 +8,7 @@
     <option value="special_options_placeholder" class="options_placeholder">Matris Türleri</option>
     @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
     {
-        <optgroup label="@cmdlabel.Label" >
+        <optgroup label="@cmdlabel.Label">
             @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
             {
                 <option value="@cmdinfo.Function_template_filled" title="@cmdinfo.Info()" data="@cmdinfo.MinimalFormat()">
@@ -17,6 +17,4 @@
             }
         </optgroup>
     }
-
-    Model.Clear();
 }

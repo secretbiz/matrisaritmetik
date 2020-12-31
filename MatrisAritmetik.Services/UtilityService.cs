@@ -865,6 +865,40 @@ namespace MatrisAritmetik.Services
 
         }
 
+        public List<string> GetOptionList(Dictionary<string, string> dict)
+        {
+            return string.IsNullOrWhiteSpace(dict["extras"]) ? null : new List<string>(dict["extras"].Split(","));
+        }
+
+        public void DisposeDfDicts(Dictionary<string, Dataframe> dfdict,
+                                   Dictionary<string, Dictionary<string, List<LabelList>>> lbls)
+        {
+            if (dfdict != null)
+            {
+                foreach (Dataframe d in dfdict.Values)
+                {
+                    d.Dispose();
+                }
+            }
+            if (lbls != null)
+            {
+                foreach (Dictionary<string, List<LabelList>> d in lbls.Values)
+                {
+                    foreach (List<LabelList> ls in d.Values)
+                    {
+                        if (ls != null)
+                        {
+                            foreach (LabelList l in ls)
+                            {
+                                l.Dispose();
+                            }
+                            ls.Clear();
+                        }
+                    }
+                }
+            }
+        }
+
         public int IndexOfAbsMax(List<T> lis)
         {
             if (lis.Count == 0)

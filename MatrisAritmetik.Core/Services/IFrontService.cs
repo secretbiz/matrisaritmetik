@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core.Services
@@ -51,13 +52,27 @@ namespace MatrisAritmetik.Core.Services
         void ReadCommandInformation();
 
         /// <summary>
+        /// Read "_builtInCmds.json" file async
+        /// </summary>
+        Task ReadCommandInformationAsync();
+
+        /// <summary>
         /// Get built-in command informations in labels
         /// </summary>
         /// <param name="filter">Label names to pick from all labels</param>
         /// <param name="blacklist">Wheter to use filter as blacklist or a whitelist</param>
         /// <returns>A list of <see cref="CommandLabel"/>s containing built-in command information</returns>
         List<CommandLabel> GetCommandLabelList(List<string> filter = null,
-                                               bool blacklist = false);
+                                                    bool blacklist = false);
+
+        /// <summary>
+        /// Get built-in command informations in labels async
+        /// </summary>
+        /// <param name="filter">Label names to pick from all labels</param>
+        /// <param name="blacklist">Wheter to use filter as blacklist or a whitelist</param>
+        /// <returns>A list of <see cref="CommandLabel"/>s containing built-in command information</returns>
+        Task<List<CommandLabel>> GetCommandLabelListAsync(List<string> filter = null,
+                                                          bool blacklist = false);
 
         /// <summary>
         /// Sets given <paramref name="vals"/> values dictionary and <paramref name="opts"/> options dictionary according to <paramref name="dict"/> matrix dictionary

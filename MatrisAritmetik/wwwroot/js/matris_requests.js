@@ -377,7 +377,14 @@ function colorInput(_event) {
     var parentnode = null;
     var ind = null;
 
-    parentnode = parentspan.baseNode.parentNode.id;
+    parentnode = parentspan.baseNode;
+    if (parentnode != null) {
+        parentnode = parentnode.parentNode.id;
+    }
+    else {
+        return;
+    }
+
     var baseind = parentnode.split("_")[1];
     if (parentnode.substring(0, 3) == "cmd") {
 

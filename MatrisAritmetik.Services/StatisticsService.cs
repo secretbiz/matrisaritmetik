@@ -49,29 +49,27 @@ namespace MatrisAritmetik.Services
             meas.Clear();
             sdev.Clear();
             vars.Clear();
+
+            List<LabelList> newcollabels = CompilerUtils.Create1DLabelListFromList("Min", "Median", "Max", "Mode", "Mean", "Sdev", "Var");
+
             if (df is Dataframe dataframe)
             {
-                List<LabelList> newcollabels = new List<LabelList>()
-                {
-                    new LabelList(
-                                    new List<object>()
-                                    {
-                                        "Min", "Median", "Max", "Mode", "Mean", "Sdev", "Var"
-                                    }
-                                    )
-                };
                 return new Dataframe(desc,
                                      dataframe.Delimiter,
                                      dataframe.NewLine,
-                                     dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                     dataframe.GetCopyOfLabels(dataframe.GetColLabels()) ?? new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
                                      newcollabels,
                                      dataframe.GetRowSettings().Copy(),
-                                     dataframe.GetColSettings().Copy()
+                                     dataframe.GetColSettings().Copy(),
+                                     true
                                      );
             }
             else
             {
-                return new MatrisBase<object>(desc);
+                return new Dataframe(desc,
+                                     rowLabels: new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
+                                     colLabels: newcollabels
+                                     );
             }
 
         }
