@@ -3,10 +3,10 @@
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
     int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.DataframeLimits.forCols * 10, (int)MatrisAritmetik.Core.DataframeLimits.forRows) / 2;
-    //var tkn = ViewData["tkn"];
 
 }
-
+<script src="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.jquery.min.js"></script>
+<link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet" />
 <table id="veri_table_base">
     @if (Model != null)
     {
@@ -14,7 +14,7 @@
         {
             <thead id="veri_table_head" class="veri_table veri_table_head">
                 <tr>
-                    <td colspan="19" class="df_saved_dftable_title">Kayıtlı Veri Tabloları (@(Model.Count()))</td>
+                    <td colspan="22" class="df_saved_dftable_title">Kayıtlı Veri Tabloları (@(Model.Count()))</td>
                 </tr>
             </thead>
         }
@@ -84,26 +84,49 @@
                             <input id='@ConcatName("veri_islem_",name)' type="button" class="button" value="İşlemler" name="veri_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı verie özel işlemler")' />
                         </td>
                     *@
-                    <td colspan="2">
-                        <div class="visuals_dropdown">
-                            <button onclick="visualsDropdown('@name')"
-                                    class="visuals_dropbtn btn"
-                                    style="height: 30px; background-image: url(images/line_chart.png); background-repeat: no-repeat; margin-left: 3px; padding: 20px 20px; background-position: center;"></button>
-                            <div id='@ConcatName("visual_options_",name)' class="visuals_dropdown-content">
-                                <a style="cursor:default;">Grafik/Diyagram Seçenekleri</a>
-                                <a href="#">Çizgi</a>
-                                <a href="#" 
-                                   onclick="displayChartDiv('@name');
-                                            setTimeout(function () { dragElement('@name'); }, 1000);
-                                            setTimeout(function () { createChart('@name', 'bar') }, 100)"
-                                >Bar</a>
-                                <a href="#">Serpilme</a>
-                            </div>
+                <td colspan="5">
+                    <hr />
+                    <div class="visuals_dropdown">
+                        <button onclick="visualsDropdown('@name')"
+                                title="Tablonun özet diyagramını oluştur"
+                                class="visuals_dropbtn btn"
+                                style="height: 30px; background-image: url(images/line_chart.png); background-repeat: no-repeat; margin-left: 3px; padding: 20px 20px; background-position: center;"></button>
+                        <div id='@ConcatName("visual_options_",name)' class="visuals_dropdown-content">
+                            <a href="#" style="cursor:default;background-color:darkblue !important;color:white !important;font-weight:900 !important;font-size:18px !important">Tablo Özeti</a>
+                            <a href="#" id='@ConcatName("df_chart_line_",name)' name="df_chart_line_button">Çizgi</a>
+                            <a href="#" id='@ConcatName("df_chart_bar_",name)' name="df_chart_bar_button">Çubuk</a>
+                            <a href="#" id='@ConcatName("df_chart_pie_",name)' name="df_chart_pie_button">Daire</a>
                         </div>
-                        <a title="Text olarak kaydet" class="btn savebtn" href='@ConcatName("data:text/plain;charset=utf-8,",Model[name].ToString())' download='@name'>
-                            <img src="./images/download.png">
-                        </a>
-                    </td>
+
+                        <div title="Diyagramda hangi sütunlar bulunmalı" class="veri_extra_options_column extra_options_fitter">
+                            <select data-placeholder="Sütun seç" multiple
+                                    class="chosen-select"
+                                    name='@ConcatName("visual_col_indices_",name)'
+                                    id='@ConcatName("visual_col_indices_",name)'
+                                    style="display: flex; max-width: 9vw !important;">
+                                @if (Model[name].GetColLabels() == null || Model[name].GetColLabels().Count() == 0)
+                                {
+                                    @for (int i = 1; i < Model[name].Col + 1; i++)
+                                    {
+                                        <option title="" value='@i'>Sütun @i</option>
+                                    }
+                                }
+                                else
+                                {
+                                    @for (int i = 1; i < Model[name].Col + 1; i++)
+                                    {
+                                        <option title="" value='@i'>@Model[name].GetColLabels()[0].Labels[i - 1].Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <hr />
+                    <a title="Text olarak kaydet" class="btn savebtn" href='@ConcatName("data:text/plain;charset=utf-8,",Model[name].ToString())' download='@name'>
+                        <img src="./images/download.png">
+                    </a>
+                    <hr />
+                </td>
                     <td colspan="2" align="center">
                         <ul class="list-inline m-0">
                             <li class="list-inline-item">
@@ -125,11 +148,15 @@
                  style="display:none;position: absolute !important;z-index: 9;background-color: #f1f1f1;text-align: center;border: 1px solid #d3d3d3;">
 
                 <div id='@ConcatName("chart_mover_", name)'
-                     style=" padding: 10px; cursor: move; z-index: 10; background-color: rgba(15, 24, 68, 0.83); color: #fff;">Click here to move</div>
+                     style=" padding: 8px; font-size:24px !important; cursor: move; z-index: 10; background-color: #12154f !important; color: white !important;">
+                    <span><a onclick="destroyChart('@name')" style="margin-left: 94%; cursor: pointer;">&times;</a></span>
+                </div>
 
-                <canvas id='@ConcatName("chart_", name)' width="333" height="333">
-                    <p id='@ConcatName("chart_fallback_", name)' style="display:none">Göreselleştirmeler burada gösterilir...</p>
-                </canvas>
+                <div class="canvaswrapper">
+                    <canvas id='@ConcatName("chart_", name)' width="720" height="450" aria-label="Tablo Özeti" role="img">
+                        <p id='@ConcatName("chart_fallback_", name)' style="display:none">Görselleştirmeler burada gösterilir...</p>
+                    </canvas>
+                </div>
 
             </div>
         }
@@ -142,3 +169,23 @@
         Model.Clear();
     }
 </table>
+<script>
+    setTimeout(function () {
+
+        try {
+            $(".chosen-select").chosen({
+                no_results_text: "Ayar bulunamadı!"
+            });
+        } catch (e) {
+            for (var i = 0; i < $(".chosen-select").length; i++) {
+                try {
+                    $($(".chosen-select")[i], true).chosen({
+                        no_results_text: "Ayar bulunamadı!"
+                    });
+                } catch (e2) {
+
+                }
+            }
+        }
+    }, 700);
+</script>

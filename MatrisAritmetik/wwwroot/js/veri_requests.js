@@ -8,11 +8,40 @@
 
         var hist = document.getElementById("output_body_df");
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, hist]);
+        updateSelectChosenTags();
+        setTimeout(function () {
+            updateSelectChosenTags();
+        }, 300);
+        setTimeout(function () {
+            updateSelectChosenTags();
+        }, 600);
+        setTimeout(function () {
+            updateSelectChosenTags();
+        }, 1200);
         //console.log("rerendering math...");
     }
     catch (err) {
         console.log(err.message);
     }
+}
+
+//////// df description
+export function createDescription(name, tkn) {
+    
+}
+//////// df description 2
+export function createDescriptionPost(name, tkn) {
+    $.ajax(
+        {
+            type: 'POST',
+            data:
+            {
+                __RequestVerificationToken: tkn,
+                "name": name,
+            },
+            success: function (data, status, msg) { console.log(data); console.log(status); console.log(msg); },
+            error: function (error) { console.log(error); }
+        });
 }
 
 function getExtras() {
@@ -27,6 +56,20 @@ function getExtras() {
     return st;
         
 }
+
+function getColumnIndices(name) {
+    var st = "";
+    var opts = document.getElementById("visual_col_indices_"+name).selectedOptions;
+    for (var i = 0; i < opts.length; i++) {
+        st += opts[i].value;
+        if (i != opts.length - 1) {
+            st += ",";
+        }
+    }
+    return st;
+
+}
+
 //////// df ekleme fonksiyonu
 function addDataframe(event) {
     var tkn = event.currentTarget.token;
@@ -88,7 +131,113 @@ export function updatedfTable(token) {
             buttons[i].token = token;
         }
 
+        // chart butonları
+        // bar
+        var chart_bar_buttons = document.getElementsByName("df_chart_bar_button");
+        for (var i = 0; i < chart_bar_buttons.length; i++) {
+            let name = chart_bar_buttons[i].id.replace("df_chart_bar_", "");
+            chart_bar_buttons[i].addEventListener("click", function () {
+                displayChartDiv(name);
+                setTimeout(function () { dragElement(name); }, 700);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: 'Veri?handler=CreateDescription',
+                        data:
+                        {
+                            __RequestVerificationToken: token,
+                            'name': name,
+                            'cols': getColumnIndices(name),
+                        },
+                        success: function (data) {
+                            updateSelectChosenTags();
+                            createChart(name, "bar", data["__Keys"], data)
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            updateSelectChosenTags(); }
+                    });
+            }, false);
+            chart_bar_buttons[i].token = token;
+        }
+        // line
+        var chart_line_buttons = document.getElementsByName("df_chart_line_button");
+        for (var i = 0; i < chart_line_buttons.length; i++) {
+            let name = chart_line_buttons[i].id.replace("df_chart_line_", "");
+            chart_line_buttons[i].addEventListener("click", function () {
+                displayChartDiv(name);
+                setTimeout(function () { dragElement(name); }, 700);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: 'Veri?handler=CreateDescription',
+                        data:
+                        {
+                            __RequestVerificationToken: token,
+                            'name': name,
+                            'cols': getColumnIndices(name),
+                        },
+                        success: function (data) {
+                            updateSelectChosenTags();
+                            createChart(name, "line", data["__Keys"], data)
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            updateSelectChosenTags();
+                        }
+                    });
+            }, false);
+            chart_line_buttons[i].token = token;
+        }
+        // pie
+        var chart_pie_buttons = document.getElementsByName("df_chart_pie_button");
+        for (var i = 0; i < chart_pie_buttons.length; i++) {
+            let name = chart_pie_buttons[i].id.replace("df_chart_pie_", "");
+            chart_pie_buttons[i].addEventListener("click", function () {
+                displayChartDiv(name);
+                setTimeout(function () { dragElement(name); }, 700);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: 'Veri?handler=CreateDescription',
+                        data:
+                        {
+                            __RequestVerificationToken: token,
+                            'name': name,
+                            'cols': getColumnIndices(name),
+                        },
+                        success: function (data) {
+                            updateSelectChosenTags();
+                            createChart(name, "pie", data["__Keys"], data)
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            updateSelectChosenTags();
+                        }
+                    });
+            }, false);
+            chart_pie_buttons[i].token = token;
+        }
+        updateSelectChosenTags();
     });
+}
+
+function updateSelectChosenTags() {
+    try {
+        $(".chosen-select").chosen({
+            no_results_text: "Ayar bulunamadı!"
+        });
+    } catch (e) {
+        for (var i = 0; i < $(".chosen-select").length; i++) {
+            try {
+                $($(".chosen-select")[i],true).chosen({
+                    no_results_text: "Ayar bulunamadı!"
+                });
+            } catch (e2) {
+
+            }
+        }
+    }
 }
 
 export function updateMatTable(token) {
@@ -101,8 +250,10 @@ export function updateMatTable(token) {
             buttons[i].addEventListener("click", deleteMatrixDf, false);
             buttons[i].token = token;
         }
+        updateSelectChosenTags();
 
     });
+    updateSelectChosenTags();
 }
 
 

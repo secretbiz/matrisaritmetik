@@ -4,11 +4,11 @@
 @{
     var token = antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
     bool failedToGetSpecials = false;
-    if(ViewData["special_optiondict"] == null || ((List<MatrisAritmetik.Core.Models.CommandLabel>)ViewData["special_optiondict"]).Count == 0)
+    if (ViewData["special_optiondict"] == null || ((List<MatrisAritmetik.Core.Models.CommandLabel>)ViewData["special_optiondict"]).Count == 0)
     {
         failedToGetSpecials = true;
     }
-
+    ViewData["token"] = token;
 }
 
 <head>
@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js" integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes"></script>
 
     <script src="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.jquery.min.js"></script>
     <link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet" />
@@ -88,14 +89,19 @@
                         @* Dosyadan *@
                         <li id="veri_create_fromfile_parent" class=""><a id="veri_create_fromfile">Dosyadan</a></li>
 
+                        @* Özel matris dropdown menü partial *@
                         @if (!failedToGetSpecials)
                         {
-                            @* Özel matris dropdown menü partial *@
                             <select id="special_veri_options">
                                 <partial name="_SpecialSelectionPartial" model=@ViewData["special_optiondict"] />
                             </select>
                         }
-
+                        else
+                        {
+                            <select id="special_veri_options" style="display:none" disabled>
+                                <partial name="_SpecialSelectionPartial" model=@ViewData["special_optiondict"] />
+                            </select>
+                        }
                     </ul>
 
                 </div>
@@ -105,7 +111,7 @@
             @* Matris ekleme bilgileri satırı *@
             <div id="veri_add_table">
 
-                <input type="text" id="veri_name" placeholder="Tablo ismi" contenteditable="true" spellcheck="false"/>
+                <input type="text" id="veri_name" placeholder="Tablo ismi" contenteditable="true" spellcheck="false" />
                 <span id="veri_add_eqsign">=</span>
 
                 @* Özel matris ekleme inputları*@
@@ -163,7 +169,7 @@
             </div>
 
             @* Kayıtlı dataframe tablosu *@
-            <partial name="_VeriTablePartial" model=@ViewData["df_dict"] />
+            <partial name="_VeriTablePartial" model=@ViewData["df_dict"] view-data="ViewData" />
 
             @* Kayıtlı matris tablosu *@
             <table id="matris_table_base">
@@ -231,6 +237,7 @@
     });
 
 </script>
+@*Navbar*@
 <script>
     function openNav() {
         document.getElementById("df_sidenav").style.width = "250px";
@@ -243,11 +250,28 @@
 @* Sayfa yenilendiğinde listener'lar için*@
 @* TO-DO: Daha düzgün bi yol bul*@
 <script>
+    function updateSelectChosenTags() {
+        try {
+            $(".chosen-select").chosen({
+                no_results_text: "Ayar bulunamadı!"
+            });
+        } catch (e) {
+            for (var i = 0; i < $(".chosen-select").length; i++) {
+                try {
+                    $($(".chosen-select")[i]).chosen({
+                        no_results_text: "Ayar bulunamadı!"
+                    });
+                } catch (e2) {
+                    
+                }
+            }
+        }
+    }
 
     function updatedfTable(token) {
         $('#veri_table_base').load('/Veri?handler=UpdateDataframeTable', { __RequestVerificationToken: token }, function () {
-            var dfs = document.getElementById("veri_table_base");
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, dfs]);
+            var math = document.getElementById("veri_table_base");
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
             // Butonları bul & eventlistener ekle
             var buttons = document.getElementsByName("veri_table_delbutton");
             for (var i = 0; i < buttons.length; i++) {
@@ -255,6 +279,95 @@
                 buttons[i].token = token;
             }
 
+            // chart butonları
+            // bar
+            var chart_bar_buttons = document.getElementsByName("df_chart_bar_button");
+            for (var i = 0; i < chart_bar_buttons.length; i++) {
+                let name = chart_bar_buttons[i].id.replace("df_chart_bar_", "");
+                chart_bar_buttons[i].addEventListener("click", function () {
+                    displayChartDiv(name);
+                    setTimeout(function () { dragElement(name); }, 700);
+                    $.ajax(
+                        {
+                            type: 'POST',
+                            url: 'Veri?handler=CreateDescription',
+                            data:
+                            {
+                                __RequestVerificationToken: token,
+                                'name': name,
+                                'cols': getColumnIndices(name),
+                            },
+                            success: function (data) {
+                                updateSelectChosenTags();
+                                createChart(name, "bar", data["__Keys"], data)
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                updateSelectChosenTags();
+                            }
+                        });
+                }, false);
+                chart_bar_buttons[i].token = token;
+            }
+            // line
+            var chart_line_buttons = document.getElementsByName("df_chart_line_button");
+            for (var i = 0; i < chart_line_buttons.length; i++) {
+                let name = chart_line_buttons[i].id.replace("df_chart_line_", "");
+                chart_line_buttons[i].addEventListener("click", function () {
+                    displayChartDiv(name);
+                    setTimeout(function () { dragElement(name); }, 700);
+                    $.ajax(
+                        {
+                            type: 'POST',
+                            url: 'Veri?handler=CreateDescription',
+                            data:
+                            {
+                                __RequestVerificationToken: token,
+                                'name': name,
+                                'cols': getColumnIndices(name),
+                            },
+                            success: function (data) {
+                                updateSelectChosenTags();
+                                createChart(name, "line", data["__Keys"], data)
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                updateSelectChosenTags();
+                            }
+                        });
+                }, false);
+                chart_line_buttons[i].token = token;
+            }
+            // pie
+            var chart_pie_buttons = document.getElementsByName("df_chart_pie_button");
+            for (var i = 0; i < chart_pie_buttons.length; i++) {
+                let name = chart_pie_buttons[i].id.replace("df_chart_pie_", "");
+                chart_pie_buttons[i].addEventListener("click", function () {
+                    displayChartDiv(name);
+                    setTimeout(function () { dragElement(name); }, 700);
+                    $.ajax(
+                        {
+                            type: 'POST',
+                            url: 'Veri?handler=CreateDescription',
+                            data:
+                            {
+                                __RequestVerificationToken: token,
+                                'name': name,
+                                'cols': getColumnIndices(name),
+                            },
+                            success: function (data) {
+                                updateSelectChosenTags();
+                                createChart(name, "pie", data["__Keys"], data)
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                updateSelectChosenTags();
+                            }
+                        });
+                }, false);
+                chart_pie_buttons[i].token = token;
+            }
+            updateSelectChosenTags();
         });
     }
 
@@ -299,17 +412,34 @@
                     __RequestVerificationToken: tkn,
                     "name": event.currentTarget.id,
                 },
-                success: function (_data) { updateMatTable(tkn); updatedfTable(tkn); },
+                success: function (_data) { destroyChart(event.currentTarget.id); updateMatTable(tkn); updatedfTable(tkn); },
                 error: function (error) { console.log(error); }
             });
     }
+    function getColumnIndices(name) {
+        var st = "";
+        var opts = document.getElementById("visual_col_indices_" + name).selectedOptions;
+        for (var i = 0; i < opts.length; i++) {
+            st += opts[i].value;
+            if (i != opts.length - 1) {
+                st += ",";
+            }
+        }
+        return st;
+
+    }
     updateMatTable('@token');
     updatedfTable('@token');
-</script>
-<script>
-    $(".chosen-select").chosen({
-        no_results_text: "Ayar bulunamadı!"
-    })
+    updateSelectChosenTags();
+    setTimeout(function () {
+        updateSelectChosenTags();
+    }, 300);
+    setTimeout(function () {
+        updateSelectChosenTags();
+    }, 600);
+    setTimeout(function () {
+        updateSelectChosenTags();
+    }, 1200);
 </script>
 
 <script>
@@ -336,48 +466,75 @@
     }, false);
 </script>
 <script>
+    const charts = {};
     function displayChartDiv(name) {
         document.getElementById("chart_movable_" + name).style.display = "block";
     }
-    function createChart(name, type, labels) {
-        var ctx = document.getElementById('chart_'+name);
+    function hideChartDiv(name) {
+        document.getElementById("chart_movable_" + name).style.display = "none";
+    }
+
+    function createChart(name, type, labels, datasets) {
+        if (charts[name]) {
+            charts[name].destroy();
+        }
+        var ctx = document.getElementById('chart_' + name);
+        if (!ctx) {
+            return;
+        }
+        var sets = []
+
+        var features = ["Min", "Median", "Max", "Mode", "Mean", "Sdev", "Var"];
+        features.forEach(feature => 
+            sets.push(
+                {
+                    label: feature,
+                    data: datasets[feature],
+                }
+            )
+        )
+
         var chart = new Chart(ctx, {
             type: type,
             data: {
-                labels: ["sütun_1", "sütun_2", "sütun_3", "sütun_4", "sütun_5", "sütun_6"],
-                datasets: [{
-                    label: 'Örnek Bar Diyagramı',
-                    data: [12, 19, 3, -4, 2, -30],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                    }]
+                labels: labels,
+                datasets: sets
             },
             options: {
+                responsive: true,
+                plugins: {
+                    colorschemes: {
+                        scheme: 'office.Folio6'
+                    }
+
+                },
                 scales: {
                     yAxes: [{
                         ticks: {
                             beginAtZero: true
                         }
                     }]
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function (tooltipItem, data) {
+                            return data.datasets[tooltipItem.datasetIndex].label
+                                + ': '
+                                + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        }
+                    }
                 }
             }
         });
+        charts[name] = chart;
         return chart;
+    }
+
+    function destroyChart(name) {
+        if (charts[name]) {
+            charts[name].destroy();
+            hideChartDiv(name);
+        }
     }
 </script>
 <script>

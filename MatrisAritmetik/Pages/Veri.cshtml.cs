@@ -33,6 +33,7 @@ namespace MatrisAritmetik.Pages
         private const string DfNewLineParam = "newline";
         private const string DfSpecialFuncParam = "func";
         private const string DfSpecialArgsParam = "args";
+        private const string DfColIndexParam = "cols";
         #endregion
 
         #region ViewData Keys
@@ -50,16 +51,28 @@ namespace MatrisAritmetik.Pages
         /// String manipulation methods
         /// </summary>
         private readonly IUtilityService<dynamic> _utils;
+        /// <summary>
+        /// Matrix operations
+        /// </summary>
+        private readonly IMatrisArithmeticService<object> _matService;
+        /// <summary>
+        /// Statistics
+        /// </summary>
+        private readonly IStatisticsService _statService;
         #endregion
 
         #region Page Constructor
         public VeriModel(ILogger<MatrisModel> logger,
                          IUtilityService<dynamic> utilityService,
-                         IFrontService frontService)
+                         IFrontService frontService,
+                         IMatrisArithmeticService<object> matService,
+                         IStatisticsService stattService)
         {
             _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
+            _matService = matService;
+            _statService = stattService;
         }
         #endregion
 
@@ -751,7 +764,7 @@ namespace MatrisAritmetik.Pages
                 }
                 else
                 {
-                    using CommandMessage msg = new CommandMessage("", CommandState.IDLE);
+                    using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("Komut yollama", reqdict[CommandParam]), CommandState.ERROR);
                     HttpContext.Session.SetLastMsg(
                                                     SessionLastMessage,
                                                     msg
@@ -775,6 +788,113 @@ namespace MatrisAritmetik.Pages
             HttpContext.Session.Set(SessionLastCommandDate, LastCmdDate);
         }
 
+        /// <summary>
+        /// Create a description matrix with given request
+        /// </summary>
+        /// <returns>An <see cref="OkObjectResult"/> with description dataframe of the requested dataframe</returns>
+        public async Task<OkObjectResult> OnPostCreateDescription()
+        {
+            Dictionary<string, string> reqdict = new Dictionary<string, string>();
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+            if (reqdict.ContainsKey(DfNameParam)
+                && reqdict.ContainsKey(DfColIndexParam))
+            {
+                List<object> colinds = new List<object>(reqdict[DfColIndexParam].Split(",", StringSplitOptions.RemoveEmptyEntries));
+                if (colinds.Count == 0)
+                {
+                    using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_PARAM_INVALID("Sütun isimleri", reqdict[DfColIndexParam]), CommandState.WARNING);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    msg
+                                                  );
+                    return new OkObjectResult(new Dictionary<string, dynamic>()
+                    {
+                        {"null", new List<object>() },
+                        {"__Keys", new List<string>() }
+                    });
+                }
+
+                try
+                {
+                    Dictionary<string, dynamic> response = new Dictionary<string, dynamic>();
+                    Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
+
+                    // CREATE TEMPORARY DATAFRAME FROM COLUMN INDICES
+                    for (int i = 0; i < colinds.Count; i++)
+                    {
+                        colinds[i] = int.Parse((string)colinds[i]);
+                    }
+                    List<LabelList> newcollbls = new List<LabelList>() { new LabelList() };
+                    List<Label> labels = _dict[reqdict[DfNameParam]].GetColLabels() == null
+                                        ? new LabelList(_dict[reqdict[DfNameParam]].Col).Labels
+                                        : _dict[reqdict[DfNameParam]].GetColLabels()[0].Labels;
+
+                    MatrisBase<object> sub = _dict[reqdict[DfNameParam]].ColMat((int)colinds[0], 1);
+                    newcollbls[0].Labels.Add(labels[(int)colinds[0] - 1].Copy());
+                    for (int j = 1; j < colinds.Count; j++)
+                    {
+                        newcollbls[0].Labels.Add(labels[(int)colinds[j] - 1].Copy());
+                        sub = _matService.Concatenate(sub, _dict[reqdict[DfNameParam]].ColMat((int)colinds[j], 1), 1);
+                    }
+                    sub = new Dataframe(sub.GetValues(), colLabels: newcollbls);
+
+                    // DESCRIPTION
+                    using Dataframe desc = (Dataframe)_matService.Replace(
+                        _matService.Replace(
+                            _matService.Replace(
+                                _statService.Describe(sub), float.NaN, null),
+                                float.PositiveInfinity,
+                                "inf"),
+                        float.NegativeInfinity,
+                        "-inf");
+
+                    List<string> keys = new List<string>();
+                    for (int c = 0; c < desc.Col; c++)
+                    {
+                        response.Add(desc.GetColLabels()[0].Labels[c].Value, desc.ColList(c, 0));
+                    }
+                    for (int r = 0; r < desc.Row; r++)
+                    {
+                        keys.Add(desc.GetRowLabels()[0].Labels[r].Value);
+                    }
+                    response.Add("__Keys", keys);
+
+                    // DISPOSE
+                    _utils.DisposeDfDicts(_dict, null);
+                    sub.Dispose();
+                    reqdict.Clear();
+
+                    return new OkObjectResult(response);
+                }
+                catch (Exception err)
+                {
+                    using CommandMessage msg = new CommandMessage(err.Message, CommandState.ERROR);
+                    HttpContext.Session.SetLastMsg(
+                                                    SessionLastMessage,
+                                                    msg
+                                                  );
+                    return new OkObjectResult(new Dictionary<string, dynamic>()
+                    {
+                        {"null", new List<object>() },
+                        {"__Keys", new List<string>() }
+                    });
+                }
+            }
+            else
+            {
+                using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_MISSING_KEYS("Komut yollama", reqdict[CommandParam]), CommandState.ERROR);
+                HttpContext.Session.SetLastMsg(
+                                                SessionLastMessage,
+                                                msg
+                                              );
+
+                return new OkObjectResult(new Dictionary<string, dynamic>()
+                    {
+                        {"null", new List<object>() },
+                        {"__Keys", new List<string>() }
+                    });
+            }
+        }
         #endregion
 
         #region POST Action Partials

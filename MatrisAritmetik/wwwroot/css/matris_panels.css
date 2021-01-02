@@ -95,8 +95,8 @@ body {
     margin: 2px;
     width: 650px;
     min-height: 400px;
-    min-width: 525px;
-    max-width:  60%;
+    min-width: 40vw;
+    max-width: 62vw;
     background-color: palegoldenrod !important;
 }
 #matris_title_left {
@@ -328,6 +328,7 @@ body {
     margin: 2px;
     width: 100%;
     min-height: 200px;
+    min-width: 35vw;
 }
 #matris_title_right {
     text-align: center;
@@ -400,7 +401,7 @@ body {
 
 /* OUTPUT PANEL */
 #matris_komut_output {
-    padding-right: 6px;
+    /*padding-right: 6px;*/
 }
 #matris_komut_table_base {
     width: 100%;

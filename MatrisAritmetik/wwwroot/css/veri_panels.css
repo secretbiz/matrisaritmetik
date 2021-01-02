@@ -12,10 +12,10 @@
     flex: 0 0 auto !important;
     padding: 5px;
     margin: 2px;
-    width: 650px;
+    width: 45vw;
     min-height: 400px;
-    min-width: 525px;
-    max-width: 60%;
+    min-width: 40vw;
+    max-width: 62vw;
     background-color: #92bbc5 !important;
 }
 
@@ -244,11 +244,21 @@
     background-color: #2980B9;
 }
 
+.canvaswrapper {
+    width: 750px !important;
+    height: 510px !important;
+}
+
 .dfdelbtn {
     background-color: #384977 !important;
     border-color: white !important;
     border-radius: 13px !important;
 }
+
+/*
+.extra_options_fitter {
+    min-width: 6vw !important;
+}*/
 
 /********** RIGHT_PANEL *********/
 #right_panel_df {
@@ -258,6 +268,7 @@
     margin: 2px;
     width: 100%;
     min-height: 200px;
+    min-width: 35vw;
 }
 
 #veri_title_right {
@@ -337,7 +348,7 @@
 
 /* OUTPUT PANEL */
 #veri_komut_output {
-    padding-right: 6px;
+    /*padding-right: 6px;*/
 }
 
 #veri_komut_table_base {
