@@ -5,34 +5,16 @@
 
 @if (Model != null)
 {
-    if (Model.Count == 0) @*TO-DO: Labels are disposing somewhere, found out where*@
+    <option value="special_options_placeholder" class="options_placeholder">Matris Türleri</option>
+    @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
     {
-        <option value="special_options_placeholder" class="options_placeholder">Matris Türleri</option>
-        @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in new MatrisAritmetik.Services.FrontService().GetCommandLabelList(new List<string>() { "Özel Veri Tablosu" }))
-        {
-            <optgroup label="@cmdlabel.Label">
-                @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
-                {
-                    <option value="@cmdinfo.Function_template_filled" title="@cmdinfo.Info()" data="@cmdinfo.MinimalFormat()">
-                        @cmdinfo.Fullname
-                    </option>
-                }
-            </optgroup>
-        }
-    }
-    else
-    {
-        <option value="special_options_placeholder" class="options_placeholder">Matris Türleri</option>
-        @foreach (MatrisAritmetik.Core.Models.CommandLabel cmdlabel in Model)
-        {
-            <optgroup label="@cmdlabel.Label">
-                @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
-                {
-                    <option value="@cmdinfo.Function_template_filled" title="@cmdinfo.Info()" data="@cmdinfo.MinimalFormat()">
-                        @cmdinfo.Fullname
-                    </option>
-                }
-            </optgroup>
-        }
+        <optgroup label="@cmdlabel.Label">
+            @foreach (MatrisAritmetik.Core.Models.CommandInfo cmdinfo in cmdlabel.Functions)
+            {
+                <option value="@cmdinfo.Function_template_filled" title="@cmdinfo.Info()" data="@cmdinfo.MinimalFormat()">
+                    @cmdinfo.Fullname
+                </option>
+            }
+        </optgroup>
     }
 }

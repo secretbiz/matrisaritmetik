@@ -3,9 +3,12 @@
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
 @{
     var token = antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
-    List<MatrisAritmetik.Core.Models.CommandLabel> specialFuncs = ViewData["special_optiondict"] == null 
-                                                                    ? Model.SpecialFuncTab
-                                                                    : ViewData["special_optiondict"] as List<MatrisAritmetik.Core.Models.CommandLabel>;
+    bool failedToGetSpecials = false;
+    if(ViewData["special_optiondict"] == null || ((List<MatrisAritmetik.Core.Models.CommandLabel>)ViewData["special_optiondict"]).Count == 0)
+    {
+        failedToGetSpecials = true;
+    }
+
 }
 
 <head>
@@ -85,10 +88,13 @@
                         @* Dosyadan *@
                         <li id="veri_create_fromfile_parent" class=""><a id="veri_create_fromfile">Dosyadan</a></li>
 
-                        @* Özel matris dropdown menü partial *@
-                        <select id="special_veri_options">
-                            <partial name="_SpecialSelectionPartial" model=@specialFuncs />
-                        </select>
+                        @if (!failedToGetSpecials)
+                        {
+                            @* Özel matris dropdown menü partial *@
+                            <select id="special_veri_options">
+                                <partial name="_SpecialSelectionPartial" model=@ViewData["special_optiondict"] />
+                            </select>
+                        }
 
                     </ul>
 

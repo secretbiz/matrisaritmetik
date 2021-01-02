@@ -1365,21 +1365,21 @@ namespace MatrisAritmetik.Services
 
         public void SetBuiltInCommands(List<CommandLabel> value)
         {
-            builtInCommands ??= value;
+            builtInCommands = value ?? new List<CommandLabel>();
         }
 
         public void ReadCommandInformation()
         {
             using StreamReader r = new StreamReader("_builtInCmds.json");
             string json = r.ReadToEnd();
-            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
+            SetBuiltInCommands(JsonConvert.DeserializeObject<List<CommandLabel>>(json));
         }
 
         public async Task ReadCommandInformationAsync()
         {
             using StreamReader r = new StreamReader("_builtInCmds.json");
             string json = await r.ReadToEndAsync();
-            builtInCommands = JsonConvert.DeserializeObject<List<CommandLabel>>(json);
+            SetBuiltInCommands(JsonConvert.DeserializeObject<List<CommandLabel>>(json));
         }
 
         public List<CommandLabel> GetCommandLabelList(List<string> filter = null,
@@ -1398,20 +1398,46 @@ namespace MatrisAritmetik.Services
             List<CommandLabel> filtered = new List<CommandLabel>();
             if (blacklist)
             {
-                foreach (CommandLabel lbl in GetBuiltInCommands())
+                List<CommandLabel> cmds = GetBuiltInCommands();
+                for (int i = 0; i < cmds.Count; i++)
                 {
+                    CommandLabel lbl = cmds[i];
                     if (!filter.Contains(lbl.Label))
                     {
+                        for (int j = 0; j < lbl.Functions.Length; j++) // Dispose check. TO-DO: Find out where the dispose error is
+                        {
+                            CommandInfo cinfo = lbl.Functions[j];
+                            if (string.IsNullOrWhiteSpace(cinfo.Function))
+                            {
+                                ReadCommandInformation();
+                                cmds = GetBuiltInCommands();
+                                lbl = cmds[i];
+                                break;
+                            }
+                        }
                         filtered.Add(lbl);
                     }
                 }
             }
             else
             {
-                foreach (CommandLabel lbl in GetBuiltInCommands())
+                List<CommandLabel> cmds = GetBuiltInCommands();
+                for (int i = 0; i < cmds.Count; i++)
                 {
+                    CommandLabel lbl = cmds[i];
                     if (filter.Contains(lbl.Label))
                     {
+                        for (int j = 0; j < lbl.Functions.Length; j++) // Dispose check. TO-DO: Find out where the dispose error is
+                        {
+                            CommandInfo cinfo = lbl.Functions[j];
+                            if (string.IsNullOrWhiteSpace(cinfo.Function))
+                            {
+                                ReadCommandInformation();
+                                cmds = GetBuiltInCommands();
+                                lbl = cmds[i];
+                                break;
+                            }
+                        }
                         filtered.Add(lbl);
                     }
                 }
@@ -1435,20 +1461,46 @@ namespace MatrisAritmetik.Services
             List<CommandLabel> filtered = new List<CommandLabel>();
             if (blacklist)
             {
-                foreach (CommandLabel lbl in GetBuiltInCommands())
+                List<CommandLabel> cmds = GetBuiltInCommands();
+                for (int i = 0; i < cmds.Count; i++)
                 {
+                    CommandLabel lbl = cmds[i];
                     if (!filter.Contains(lbl.Label))
                     {
+                        for (int j = 0; j < lbl.Functions.Length; j++) // Dispose check. TO-DO: Find out where the dispose error is
+                        {
+                            CommandInfo cinfo = lbl.Functions[j];
+                            if (string.IsNullOrWhiteSpace(cinfo.Function))
+                            {
+                                ReadCommandInformation();
+                                cmds = GetBuiltInCommands();
+                                lbl = cmds[i];
+                                break;
+                            }
+                        }
                         filtered.Add(lbl);
                     }
                 }
             }
             else
             {
-                foreach (CommandLabel lbl in GetBuiltInCommands())
+                List<CommandLabel> cmds = GetBuiltInCommands();
+                for (int i = 0; i < cmds.Count; i++)
                 {
+                    CommandLabel lbl = cmds[i];
                     if (filter.Contains(lbl.Label))
                     {
+                        for (int j = 0; j < lbl.Functions.Length; j++) // Dispose check. TO-DO: Find out where the dispose error is
+                        {
+                            CommandInfo cinfo = lbl.Functions[j];
+                            if (string.IsNullOrWhiteSpace(cinfo.Function))
+                            {
+                                ReadCommandInformation();
+                                cmds = GetBuiltInCommands();
+                                lbl = cmds[i];
+                                break;
+                            }
+                        }
                         filtered.Add(lbl);
                     }
                 }
@@ -1742,11 +1794,6 @@ namespace MatrisAritmetik.Services
                                              List<string> filter = null,
                                              bool blacklist = false)
         {
-            if (GetBuiltInCommands() == null || GetBuiltInCommands().Count == 0)
-            {
-                ReadCommandInformation();
-            }
-
             if (filter == null && !blacklist)
             {
                 blacklist = true;
