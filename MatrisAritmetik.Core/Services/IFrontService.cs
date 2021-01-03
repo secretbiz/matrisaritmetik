@@ -8,7 +8,7 @@ namespace MatrisAritmetik.Core.Services
     /// <summary>
     /// Service for methods related to changes in front-end
     /// </summary>
-    public interface IFrontService : IDisposable
+    public interface IFrontService
     {
         #region Matrix dictionary
         /// <summary>

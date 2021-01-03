@@ -42,7 +42,7 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region Service Interface Instances
-        private readonly ILogger<MatrisModel> _logger;
+        private readonly ILogger<VeriModel> _logger;
         /// <summary>
         /// Front-end related methods
         /// </summary>
@@ -50,7 +50,7 @@ namespace MatrisAritmetik.Pages
         /// <summary>
         /// String manipulation methods
         /// </summary>
-        private readonly IUtilityService<dynamic> _utils;
+        private readonly IUtilityService<object> _utils;
         /// <summary>
         /// Matrix operations
         /// </summary>
@@ -62,17 +62,17 @@ namespace MatrisAritmetik.Pages
         #endregion
 
         #region Page Constructor
-        public VeriModel(ILogger<MatrisModel> logger,
-                         IUtilityService<dynamic> utilityService,
+        public VeriModel(ILogger<VeriModel> logger,
+                         IUtilityService<object> utilityService,
                          IFrontService frontService,
                          IMatrisArithmeticService<object> matService,
-                         IStatisticsService stattService)
+                         IStatisticsService statService)
         {
             _logger = logger;
             _utils = utilityService;
             _frontService = frontService;
             _matService = matService;
-            _statService = stattService;
+            _statService = statService;
         }
         #endregion
 
