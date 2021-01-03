@@ -42,10 +42,10 @@ namespace MatrisAritmetik.Services
         /// <param name="lis">List to add a value to</param>
         /// <param name="filler">Type of custom filler</param>
         /// <param name="val">Value to check if <paramref name="filler"/> was not type float or null</param>
-        private void FillWithCustomNull(List<T> lis,
-                                        Type filler,
-                                        string val,
-                                        bool allowNonNumber)
+        private static void FillWithCustomNull(List<T> lis,
+                                               Type filler,
+                                               string val,
+                                               bool allowNonNumber)
         {
 
             if (string.IsNullOrWhiteSpace(val)) // Check again just in case
@@ -57,10 +57,10 @@ namespace MatrisAritmetik.Services
                 InnerFillWithCustomNull(lis, filler, val, allowNonNumber);
             }
         }
-        private void InnerFillWithCustomNull(List<T> lis,
-                                             Type filler,
-                                             string val,
-                                             bool allowNonNumber)
+        private static void InnerFillWithCustomNull(List<T> lis,
+                                                    Type filler,
+                                                    string val,
+                                                    bool allowNonNumber)
         {
             if (filler != typeof(float))
             {
@@ -90,7 +90,7 @@ namespace MatrisAritmetik.Services
         /// <param name="lis">List to update</param>
         /// <param name="val">Value to check</param>
         /// <returns>True if value is added</returns>
-        private bool UseConstantIfExist(List<T> lis, string val)
+        private static bool UseConstantIfExist(List<T> lis, string val)
         {
             if (val[0] == '!')
             {
@@ -114,9 +114,9 @@ namespace MatrisAritmetik.Services
         /// <param name="name">Dictionary key to use</param>
         /// <param name="val">Value to check</param>
         /// <returns>True if value is added</returns>
-        private bool UseConstantIfExist(Dictionary<string, object> dict,
-                                        string name,
-                                        string val)
+        private static bool UseConstantIfExist(Dictionary<string, object> dict,
+                                               string name,
+                                               string val)
         {
             if (val[0] == '!')
             {
@@ -133,12 +133,12 @@ namespace MatrisAritmetik.Services
             return false;
         }
 
-        private void ParseArgumentAsParamType(string currentParamType,
-                                              string currentParamName,
-                                              string currentArg,
-                                              Dictionary<string, object> param_dict,
-                                              Dictionary<string, MatrisBase<object>> matdict,
-                                              CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        private static void ParseArgumentAsParamType(string currentParamType,
+                                                     string currentParamName,
+                                                     string currentArg,
+                                                     Dictionary<string, object> param_dict,
+                                                     Dictionary<string, MatrisBase<object>> matdict,
+                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (currentParamType)
             {
@@ -252,12 +252,12 @@ namespace MatrisAritmetik.Services
                     }
             }
         }
-        private void ParseArgumentAsParamType(string currentParamType,
-                                              string currentParamName,
-                                              string currentArg,
-                                              Dictionary<string, object> param_dict,
-                                              Dictionary<string, Dataframe> matdict,
-                                              CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        private static void ParseArgumentAsParamType(string currentParamType,
+                                                     string currentParamName,
+                                                     string currentArg,
+                                                     Dictionary<string, object> param_dict,
+                                                     Dictionary<string, Dataframe> matdict,
+                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (currentParamType)
             {

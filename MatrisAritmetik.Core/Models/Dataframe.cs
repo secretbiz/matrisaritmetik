@@ -1238,7 +1238,7 @@ namespace MatrisAritmetik.Core.Models
         /// </summary>
         /// <param name="lis">Label-list list</param>
         /// <returns>Deep copy of given list or null if <paramref name="lis"/> was null</returns>
-        public List<LabelList> GetCopyOfLabels(List<LabelList> lis)
+        public static List<LabelList> GetCopyOfLabels(List<LabelList> lis)
         {
             if (lis == null)
             {

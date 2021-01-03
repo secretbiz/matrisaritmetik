@@ -37,7 +37,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn"><see cref="Token"/> to use</param>
         /// <param name="symbol">Symbol/operator to use</param>
         /// <returns>Given token with values set</returns>
-        private Token SetTokenFieldsViaSymbol(Token tkn,
+        private static Token SetTokenFieldsViaSymbol(Token tkn,
                                               string symbol)
         {
             switch (symbol)
@@ -149,7 +149,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to apply values to </param>
         /// <param name="name">Special value's name</param>
         /// <returns>True if token was set as a special value token</returns>
-        private bool SetAsSpecialToken(Token tkn,
+        private static bool SetAsSpecialToken(Token tkn,
                                        string name)
         {
             if (Constants.Contains(name))
@@ -299,7 +299,7 @@ namespace MatrisAritmetik.Services
         /// </summary>
         /// <param name="exp">Expression to use</param>
         /// <returns>Properly split valid assignment expression</returns>
-        private void SetExpressionForAssignOP(ref string exp)
+        private static void SetExpressionForAssignOP(ref string exp)
         {
             string[] expsplits = exp.Split("=", StringSplitOptions.RemoveEmptyEntries);
             if (expsplits.Length == 0)
@@ -366,7 +366,7 @@ namespace MatrisAritmetik.Services
         /// </summary>
         /// <param name="exp">String expression to split</param>
         /// <returns>Array of tokenizable string expressions</returns>
-        private string[] TokenizeSplit(string exp)
+        private static string[] TokenizeSplit(string exp)
         {
             exp = exp
                 .Replace("+", " + ")
@@ -411,8 +411,8 @@ namespace MatrisAritmetik.Services
         /// <param name="name">Parameter name</param>
         /// <param name="paramarr">Parameter array</param>
         /// <returns>Index of the <paramref name="name"/> if found, -1 otherwise</returns>
-        private int GetParamIndex(string name,
-                                  ParameterInfo[] paramarr)
+        private static int GetParamIndex(string name,
+                                         ParameterInfo[] paramarr)
         {
             int ind = 0;
             foreach (ParameterInfo p in paramarr)
@@ -522,12 +522,12 @@ namespace MatrisAritmetik.Services
         /// <param name="argIndex">Index of the argument</param>
         /// <param name="matDict">Matrix dictionary to reference to</param>
         /// <returns>Argument at index <paramref name="argIndex"/> after changes applied</returns>
-        private object ApplyArgumentValue(Token op,
-                                          Token operand,
-                                          object[] arguments,
-                                          int argIndex,
-                                          Dictionary<string, MatrisBase<dynamic>> matDict,
-                                          CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        private static object ApplyArgumentValue(Token op,
+                                                 Token operand,
+                                                 object[] arguments,
+                                                 int argIndex,
+                                                 Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                 CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (operand.tknType)
             {
@@ -578,12 +578,12 @@ namespace MatrisAritmetik.Services
         /// <param name="param_dict">Parameter dictionary to keep track of parameters</param>
         /// <param name="matDict">Matrix dictionary to reference to if needed</param>
         /// <returns>Parsed <paramref name="arguments"/></returns>
-        private object[] CheckAndParseArgumentsAndHints(Token op,
-                                                        List<Token> operands,
-                                                        object[] arguments,
-                                                        ParameterInfo[] paraminfo,
-                                                        Dictionary<string, MatrisBase<dynamic>> matDict,
-                                                        CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        private static object[] CheckAndParseArgumentsAndHints(Token op,
+                                                               List<Token> operands,
+                                                               object[] arguments,
+                                                               ParameterInfo[] paraminfo,
+                                                               Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                               CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             Dictionary<string, dynamic> param_dict = new Dictionary<string, dynamic>();
             bool hintUsed = false;
@@ -643,7 +643,7 @@ namespace MatrisAritmetik.Services
         /// <param name="operandIndex">Index of operand to use</param>
         /// <param name="argumentIndex">Index of argument to parse</param>
         /// <returns> Argument at index <paramref name="argumentIndex"/> after parsed as parameter's type</returns>
-        private object ParseTokenValAsParameterType(Token op,
+        private static object ParseTokenValAsParameterType(Token op,
                                                     List<Token> operands,
                                                     object[] arguments,
                                                     int operandIndex,
@@ -730,7 +730,7 @@ namespace MatrisAritmetik.Services
         /// <param name="operands">List of operands</param>
         /// <param name="matDict">Matrix dictionary to refer to if necessary</param>
         /// <returns>Operands list after evaluation</returns>
-        private List<Token> EvalWithSymbolOperator(Token op,
+        private static List<Token> EvalWithSymbolOperator(Token op,
                                                    List<Token> operands,
                                                    Dictionary<string, MatrisBase<dynamic>> matDict,
                                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
@@ -902,7 +902,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to use as help reference</param>
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="cmd"/> updated with helpful message</returns>
-        private Command SetDocsCommand(Command cmd,
+        private static Command SetDocsCommand(Command cmd,
                                        Token tkn,
                                        Dictionary<string, MatrisBase<dynamic>> matdict,
                                        CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
@@ -995,7 +995,7 @@ namespace MatrisAritmetik.Services
         /// <param name="tkn">Token to use</param>
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="tkn"/> with updated <see cref="Token.val"/></returns>
-        private void SetDocsAsValue(Token tkn,
+        private static void SetDocsAsValue(Token tkn,
                                     Dictionary<string, MatrisBase<dynamic>> matdict,
                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {

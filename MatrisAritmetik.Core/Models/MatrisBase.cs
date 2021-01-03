@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using MatrisAritmetik.Models.Core;
 
@@ -1182,7 +1181,7 @@ namespace MatrisAritmetik.Core.Models
                 {
                     if (_values != null)
                     {
-                        for (int i = 0; i < _values.Count(); i++)
+                        for (int i = 0; i < _values.Count; i++)
                         {
                             _values[i].Clear();
                             _values[i] = null;

@@ -1,10 +1,12 @@
-﻿using MatrisAritmetik.Core.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using MatrisAritmetik.Core.Models;
 
 namespace MatrisAritmetik.Core
 {
     /// <summary>
     /// Enumerated <see cref="MatrisBase{T}"/> limitations
     /// </summary>
+    [SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "<Pending>")]
     public enum MatrisLimits
     {
         /// <summary>
@@ -36,6 +38,7 @@ namespace MatrisAritmetik.Core
     /// <summary>
     /// Enumerated <see cref="Dataframe"/> limitations
     /// </summary>
+    [SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "<Pending>")]
     public enum DataframeLimits
     {
         /// <summary>

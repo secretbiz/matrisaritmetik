@@ -57,7 +57,7 @@ namespace MatrisAritmetik.Services
                 return new Dataframe(desc,
                                      dataframe.Delimiter,
                                      dataframe.NewLine,
-                                     dataframe.GetCopyOfLabels(dataframe.GetColLabels()) ?? new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
+                                     Dataframe.GetCopyOfLabels(dataframe.GetColLabels()) ?? new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
                                      newcollabels,
                                      dataframe.GetRowSettings().Copy(),
                                      dataframe.GetColSettings().Copy(),
@@ -99,7 +99,7 @@ namespace MatrisAritmetik.Services
                                          dataframe.Delimiter,
                                          dataframe.NewLine,
                                          null,
-                                         dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                         Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
                                          dataframe.GetRowSettings().Copy(),
                                          dataframe.GetColSettings().Copy()
                                          )
@@ -132,7 +132,7 @@ namespace MatrisAritmetik.Services
                                          dataframe.Delimiter,
                                          dataframe.NewLine,
                                          null,
-                                         dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                         Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
                                          dataframe.GetRowSettings().Copy(),
                                          dataframe.GetColSettings().Copy()
                                          )
@@ -175,7 +175,7 @@ namespace MatrisAritmetik.Services
                                     dataframe.Delimiter,
                                     dataframe.NewLine,
                                     null,
-                                    dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                    Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
                                     dataframe.GetRowSettings().Copy(),
                                     dataframe.GetColSettings().Copy()
                                     )
@@ -203,7 +203,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { mins });
@@ -229,7 +229,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { maxs });
@@ -257,7 +257,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { sums });
@@ -285,7 +285,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { muls });
@@ -324,7 +324,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { means });
@@ -411,7 +411,7 @@ namespace MatrisAritmetik.Services
                                 data.Delimiter,
                                 data.NewLine,
                                 null,
-                                data.GetCopyOfLabels(data.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                 null,
                                 data.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { sdevs });
@@ -489,7 +489,7 @@ namespace MatrisAritmetik.Services
                                      dataframe.Delimiter,
                                      dataframe.NewLine,
                                      null,
-                                     dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
                                      null,
                                      dataframe.GetColSettings().Copy());
             }
@@ -596,7 +596,7 @@ namespace MatrisAritmetik.Services
                                 dataframe.Delimiter,
                                 dataframe.NewLine,
                                 null,
-                                dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
                                 null,
                                 dataframe.GetColSettings().Copy())
                 : new MatrisBase<object>(new List<List<object>>() { modes });

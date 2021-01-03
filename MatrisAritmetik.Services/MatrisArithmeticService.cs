@@ -30,8 +30,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(result,
                                 df.Delimiter,
                                 df.NewLine,
-                                df.GetCopyOfLabels(df.GetColLabels()),
-                                df.GetCopyOfLabels(df.GetRowLabels()),
+                                Dataframe.GetCopyOfLabels(df.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(df.GetRowLabels()),
                                 df.GetRowSettings().Copy(),
                                 df.GetColSettings().Copy())
                 : new MatrisBase<object>(result);
@@ -211,7 +211,7 @@ namespace MatrisAritmetik.Services
 
         }
 
-        private void InnerRREchelon(MatrisBase<object> A, MatrisBase<object> result)
+        private static void InnerRREchelon(MatrisBase<object> A, MatrisBase<object> result)
         {
             int lead = 0;
             int nr = A.Row;
@@ -406,8 +406,8 @@ namespace MatrisAritmetik.Services
                     ? new Dataframe(RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))],
                                     df.Delimiter,
                                     df.NewLine,
-                                    df.GetCopyOfLabels(df.GetRowLabels()),
-                                    df.GetCopyOfLabels(df.GetColLabels()),
+                                    Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                    Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                     df.GetRowSettings().Copy(),
                                     df.GetColSettings().Copy())
                     : new MatrisBase<object>(vals: RREchelon(temp)[new Range(new Index(0), new Index(temp.Row)), new Range(new Index(A.Col), new Index(temp.Col))]);
@@ -439,8 +439,8 @@ namespace MatrisAritmetik.Services
                         ? new Dataframe(MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A)).GetValues(),
                                              df.Delimiter,
                                              df.NewLine,
-                                             df.GetCopyOfLabels(df.GetRowLabels()),
-                                             df.GetCopyOfLabels(df.GetColLabels()),
+                                             Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                             Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                              df.GetRowSettings().Copy(),
                                              df.GetColSettings().Copy())
                         : MatrisMul(Inverse(MatrisMul(Conjugate(A), A)), Conjugate(A));
@@ -463,8 +463,8 @@ namespace MatrisAritmetik.Services
                         ? new Dataframe(MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A)))).GetValues(),
                                              df.Delimiter,
                                              df.NewLine,
-                                             df.GetCopyOfLabels(df.GetRowLabels()),
-                                             df.GetCopyOfLabels(df.GetColLabels()),
+                                             Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                             Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                              df.GetRowSettings().Copy(),
                                              df.GetColSettings().Copy())
                         : MatrisMul(Conjugate(A), Inverse(MatrisMul(A, Conjugate(A))));
@@ -506,8 +506,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(Transpose(new MatrisBase<object>(adj)).GetValues(),
                                      df.Delimiter,
                                      df.NewLine,
-                                     df.GetCopyOfLabels(df.GetRowLabels()),
-                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                      df.GetRowSettings().Copy(),
                                      df.GetColSettings().Copy())
                 : Transpose(new MatrisBase<object>(adj));
@@ -720,8 +720,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(newlis,
                                 df.Delimiter,
                                 df.NewLine,
-                                df.GetCopyOfLabels(df.GetRowLabels()),
-                                df.GetCopyOfLabels(df.GetColLabels()),
+                                Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                 df.GetRowSettings().Copy(),
                                 df.GetColSettings().Copy())
                 : new MatrisBase<object>(newlis);
@@ -873,8 +873,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(newvals,
                                      df.Delimiter,
                                      df.NewLine,
-                                     df.GetCopyOfLabels(df.GetRowLabels()),
-                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                      df.GetRowSettings().Copy(),
                                      df.GetColSettings().Copy())
                 : new MatrisBase<object>(newvals);
@@ -907,8 +907,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(newvals,
                                      df.Delimiter,
                                      df.NewLine,
-                                     df.GetCopyOfLabels(df.GetRowLabels()),
-                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                      df.GetRowSettings().Copy(),
                                      df.GetColSettings().Copy())
                 : new MatrisBase<object>(newvals);
@@ -930,8 +930,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(A.Round(n).GetValues(),
                                      df.Delimiter,
                                      df.NewLine,
-                                     df.GetCopyOfLabels(df.GetRowLabels()),
-                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                      df.GetRowSettings().Copy(),
                                      df.GetColSettings().Copy())
                 : A.Round(n);
@@ -986,7 +986,7 @@ namespace MatrisAritmetik.Services
                                     data.Delimiter,
                                     data.NewLine,
                                     null,
-                                    data.GetCopyOfLabels(data.GetColLabels()),
+                                    Dataframe.GetCopyOfLabels(data.GetColLabels()),
                                     null,
                                     data.GetColSettings().Copy(),
                                     true)
@@ -1022,7 +1022,7 @@ namespace MatrisAritmetik.Services
                     ? new Dataframe(newvals,
                                     data.Delimiter,
                                     data.NewLine,
-                                    data.GetCopyOfLabels(data.GetRowLabels()),
+                                    Dataframe.GetCopyOfLabels(data.GetRowLabels()),
                                     null,
                                     data.GetRowSettings().Copy(),
                                     null,
@@ -1227,8 +1227,8 @@ namespace MatrisAritmetik.Services
                 ? new Dataframe(newVals,
                                      df.Delimiter,
                                      df.NewLine,
-                                     df.GetCopyOfLabels(df.GetRowLabels()),
-                                     df.GetCopyOfLabels(df.GetColLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
                                      df.GetRowSettings().Copy(),
                                      df.GetColSettings().Copy())
                 : new MatrisBase<object>(newVals);

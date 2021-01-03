@@ -11,7 +11,7 @@ namespace MatrisAritmetik.Core.Models
     /// Class for enumerating built-in special values
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class ConstantsEnum : IEnumerable
+    public class ConstantsEnum : IEnumerable, IDisposable
     {
         #region Fields
         private readonly List<string> _keys = new List<string>();
@@ -36,8 +36,6 @@ namespace MatrisAritmetik.Core.Models
         public ICollection<string> Descriptions => _desc;
 
         public int Count => _keys.Count;
-
-        public bool IsReadOnly => false;
 
         #endregion
 
