@@ -724,11 +724,9 @@ namespace MatrisAritmetik.Core
         {
             TYPE_TO_TR(ref parseType);
 
-            if (string.IsNullOrWhiteSpace(val))
-            {
-                return "Verilen değerlerde " + parseType + " olarak kullanılayanlar var!";
-            }
-            return "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
+            return string.IsNullOrWhiteSpace(val)
+                ? "Verilen değerlerde " + parseType + " olarak kullanılayanlar var!"
+                : "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
         }
 
         /// <summary>

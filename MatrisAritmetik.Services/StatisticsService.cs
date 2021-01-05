@@ -52,9 +52,8 @@ namespace MatrisAritmetik.Services
 
             List<LabelList> newcollabels = CompilerUtils.Create1DLabelListFromList("Min", "Median", "Max", "Mode", "Mean", "Sdev", "Var");
 
-            if (df is Dataframe dataframe)
-            {
-                return new Dataframe(desc,
+            return df is Dataframe dataframe
+                ? new Dataframe(desc,
                                      dataframe.Delimiter,
                                      dataframe.NewLine,
                                      Dataframe.GetCopyOfLabels(dataframe.GetColLabels()) ?? new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
@@ -62,15 +61,11 @@ namespace MatrisAritmetik.Services
                                      dataframe.GetRowSettings().Copy(),
                                      dataframe.GetColSettings().Copy(),
                                      true
-                                     );
-            }
-            else
-            {
-                return new Dataframe(desc,
+                                     )
+                : new Dataframe(desc,
                                      rowLabels: new List<LabelList>() { new LabelList(df.Col, 1, "col_", 1) },
                                      colLabels: newcollabels
                                      );
-            }
 
         }
 
@@ -88,13 +83,9 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", 1, df.Row));
             }
 
-            if (df.Row == n)
-            {
-                return df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy();
-            }
-            else
-            {
-                return df is Dataframe dataframe
+            return df.Row == n
+                ? df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy()
+                : df is Dataframe dataframe
                     ? new Dataframe(dataframe[new Range(0, n)],
                                          dataframe.Delimiter,
                                          dataframe.NewLine,
@@ -104,7 +95,6 @@ namespace MatrisAritmetik.Services
                                          dataframe.GetColSettings().Copy()
                                          )
                     : new MatrisBase<object>(df[new Range(0, n)]);
-            }
         }
 
         public MatrisBase<object> Tail(MatrisBase<object> df,
@@ -121,13 +111,9 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", 1, df.Row));
             }
 
-            if (df.Row == n)
-            {
-                return df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy();
-            }
-            else
-            {
-                return df is Dataframe dataframe
+            return df.Row == n
+                ? df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy()
+                : df is Dataframe dataframe
                     ? new Dataframe(dataframe[new Range(df.Row - n, df.Row)],
                                          dataframe.Delimiter,
                                          dataframe.NewLine,
@@ -137,7 +123,6 @@ namespace MatrisAritmetik.Services
                                          dataframe.GetColSettings().Copy()
                                          )
                     : new MatrisBase<object>(df[new Range(df.Row - n, df.Row)]);
-            }
         }
 
         public MatrisBase<object> Sample(MatrisBase<object> df,

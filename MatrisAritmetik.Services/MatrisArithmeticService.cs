@@ -675,11 +675,9 @@ namespace MatrisAritmetik.Services
                                       int j,
                                       int based = 0)
         {
-            if (!A.IsValid())
-            {
-                throw new Exception(CompilerMessage.MAT_INVALID_SIZE);
-            }
-            return i - based < 0 || i - based >= A.Row
+            return !A.IsValid()
+                ? throw new Exception(CompilerMessage.MAT_INVALID_SIZE)
+                : i - based < 0 || i - based >= A.Row
                 ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1))
                 : j - based < 0 || j - based >= A.Col
                 ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1))
@@ -775,11 +773,9 @@ namespace MatrisAritmetik.Services
                 throw new Exception(CompilerMessage.MAT_INVALID_COL_INDICES);
             }
 
-            if (r2 > A.Row)
-            {
-                throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1));
-            }
-            return c2 > A.Col
+            return r2 > A.Row
+                ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("satır", based, A.Row - 1))
+                : c2 > A.Col
                 ? throw new Exception(CompilerMessage.MAT_OUT_OF_RANGE_INDEX("sütun", based, A.Col - 1))
                 : A is Dataframe df
                 ? new Dataframe(A[new Range(r1, r2), new Range(c1, c2)],

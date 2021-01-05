@@ -730,9 +730,9 @@ namespace MatrisAritmetik.Services
         /// <param name="matDict">Matrix dictionary to refer to if necessary</param>
         /// <returns>Operands list after evaluation</returns>
         private static List<Token> EvalWithSymbolOperator(Token op,
-                                                   List<Token> operands,
-                                                   Dictionary<string, MatrisBase<dynamic>> matDict,
-                                                   CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+                                                          List<Token> operands,
+                                                          Dictionary<string, MatrisBase<dynamic>> matDict,
+                                                          CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (op.symbol)
             {
@@ -902,9 +902,9 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="cmd"/> updated with helpful message</returns>
         private static Command SetDocsCommand(Command cmd,
-                                       Token tkn,
-                                       Dictionary<string, MatrisBase<dynamic>> matdict,
-                                       CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+                                              Token tkn,
+                                              Dictionary<string, MatrisBase<dynamic>> matdict,
+                                              CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (tkn.info)
             {
@@ -995,8 +995,8 @@ namespace MatrisAritmetik.Services
         /// <param name="matdict">Matrix dictionary to reference to</param>
         /// <returns>Given <paramref name="tkn"/> with updated <see cref="Token.val"/></returns>
         private static void SetDocsAsValue(Token tkn,
-                                    Dictionary<string, MatrisBase<dynamic>> matdict,
-                                    CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+                                           Dictionary<string, MatrisBase<dynamic>> matdict,
+                                           CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
             switch (tkn.info)
             {

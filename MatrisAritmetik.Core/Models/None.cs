@@ -20,11 +20,7 @@ namespace MatrisAritmetik.Models.Core
 
         public override bool Equals(object obj)
         {
-            if (obj is null)
-            {
-                return true;
-            }
-            return base.Equals(obj);
+            return obj is null || base.Equals(obj);
         }
 
         public override int GetHashCode()

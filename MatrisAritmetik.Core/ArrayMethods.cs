@@ -111,12 +111,7 @@ namespace MatrisAritmetik.Core
                         continue;
                     }
                 }
-                if (compared)
-                {
-                    return current;
-                }
-                return float.NaN;
-
+                return compared ? current : float.NaN;
             }
             else
             {
@@ -193,12 +188,7 @@ namespace MatrisAritmetik.Core
                         continue;
                     }
                 }
-                if (compared)
-                {
-                    return current;
-                }
-                return float.NaN;
-
+                return compared ? current : float.NaN;
             }
             else
             {
@@ -279,12 +269,7 @@ namespace MatrisAritmetik.Core
                         continue;
                     }
                 }
-                if (compared)
-                {
-                    return current;
-                }
-                return float.NaN;
-
+                return compared ? current : (object)float.NaN;
             }
             else
             {
@@ -365,12 +350,7 @@ namespace MatrisAritmetik.Core
                         continue;
                     }
                 }
-                if (compared)
-                {
-                    return current;
-                }
-                return float.NaN;
-
+                return compared ? current : (object)float.NaN;
             }
             else
             {

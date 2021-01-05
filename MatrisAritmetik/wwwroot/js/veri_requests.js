@@ -25,25 +25,6 @@
     }
 }
 
-//////// df description
-export function createDescription(name, tkn) {
-    
-}
-//////// df description 2
-export function createDescriptionPost(name, tkn) {
-    $.ajax(
-        {
-            type: 'POST',
-            data:
-            {
-                __RequestVerificationToken: tkn,
-                "name": name,
-            },
-            success: function (data, status, msg) { console.log(data); console.log(status); console.log(msg); },
-            error: function (error) { console.log(error); }
-        });
-}
-
 function getExtras() {
     var st = "";
     var opts = document.getElementById("extra_options").selectedOptions;

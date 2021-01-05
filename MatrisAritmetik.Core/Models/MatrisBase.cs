@@ -1288,17 +1288,12 @@ namespace MatrisAritmetik.Core.Models
 
             if (mat.IsScalar())
             {
-                if (other is int @int)
-                {
-                    return int.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @int;
-                }
-                else
-                {
-                    return other is float @float
+                return other is int @int
+                    ? int.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @int
+                    : other is float @float
                         ? float.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @float
                         : other is double @double
                                                && double.Parse(mat[0, 0].ToString(), CultureInfo.CurrentCulture) == @double;
-                }
             }
             else
             {

@@ -27,13 +27,11 @@ namespace MatrisAritmetik.Core
                 return throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_EMPTY) : false;
             }
 
-            if (name.Length > (int)MatrisLimits.forName)
-            {
-                return throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_CHAR_LIMIT(name.Length)) : false;
-            }
-
-            return !"0123456789".Contains(name[0]) && (name_regex.Match(name).Groups[0].Value == name)
-|| (throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_INVALID) : false);
+            return name.Length > (int)MatrisLimits.forName
+                ? throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_CHAR_LIMIT(name.Length)) : false
+                : !"0123456789".Contains(name[0])
+                   && (name_regex.Match(name).Groups[0].Value == name)
+                   || (throwOnBadName ? throw new System.Exception(CompilerMessage.MAT_NAME_INVALID) : false);
         }
 
         /// <summary>

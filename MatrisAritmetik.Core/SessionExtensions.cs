@@ -108,11 +108,7 @@ namespace MatrisAritmetik.Core
                         return float.NegativeInfinity;
                     default:
                         {
-                            if (float.TryParse(val, out float d))
-                            {
-                                return d;
-                            }
-                            return val;
+                            return float.TryParse(val, out float d) ? d : (object)val;
                         };
                 }
             }
