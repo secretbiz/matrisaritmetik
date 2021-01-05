@@ -175,22 +175,22 @@ namespace MatrisAritmetik.Core.Models
                     labelSeperatorFromCorner = string.Empty;
                     levelSeperator = string.Empty;
                     spanSeperator = string.Empty;
+                    SetLabelSeperatorFromElements(null);
+                    SetLabelSeperatorFromCorner(null);
+                    SetLevelSeperator(null);
+                    SetSpanSeperator(null);
                 }
 
-                SetLabelSeperatorFromElements(null);
-                SetLabelSeperatorFromCorner(null);
-                SetLevelSeperator(null);
-                SetSpanSeperator(null);
                 disposedValue = true;
             }
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~DataframeRowSettings()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
+        //~DataframeRowSettings()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         public void Dispose()
         {
@@ -368,22 +368,22 @@ namespace MatrisAritmetik.Core.Models
                     labelSeperatorFromCorner = string.Empty;
                     levelSeperator = string.Empty;
                     spanSeperator = string.Empty;
+                    SetLabelSeperatorFromElements(null);
+                    SetLabelSeperatorFromCorner(null);
+                    SetLevelSeperator(null);
+                    SetSpanSeperator(null);
                 }
 
-                SetLabelSeperatorFromElements(null);
-                SetLabelSeperatorFromCorner(null);
-                SetLevelSeperator(null);
-                SetSpanSeperator(null);
                 disposedValue = true;
             }
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~DataframeColSettings()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
+        //~DataframeColSettings()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         public void Dispose()
         {
@@ -2659,11 +2659,11 @@ namespace MatrisAritmetik.Core.Models
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~Dataframe()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
+        //~Dataframe()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         #endregion
 

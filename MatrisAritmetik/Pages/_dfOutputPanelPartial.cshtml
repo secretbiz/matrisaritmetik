@@ -3,7 +3,7 @@
     Layout = null;
 
     MatrisAritmetik.Core.Models.Command cmd;
-    MatrisAritmetik.Core.CommandMessage msg;
+    MatrisAritmetik.Core.Models.CommandMessage msg;
     MatrisAritmetik.Core.Models.MatrisBase<object> matoutput;
 
     string cmdstyle = ";"; string outstyle = ";";
@@ -18,7 +18,7 @@
         if (!Model.ContainsKey(cmdhist))
             Model.Add(cmdhist, new List<MatrisAritmetik.Core.Models.Command>());
         if (!Model.ContainsKey(lastmsg))
-            Model.Add(lastmsg, new Core.CommandMessage("", Core.CommandState.IDLE));
+            Model.Add(lastmsg, new Core.Models.CommandMessage("", Core.CommandState.IDLE));
     }
 
     string SettingString(Dictionary<string, string> set)
@@ -219,7 +219,7 @@
     }
     ((List<MatrisAritmetik.Core.Models.Command>)Model[cmdhist]).Clear();
 
-    ((MatrisAritmetik.Core.CommandMessage)Model[lastmsg]).Dispose();
+    ((MatrisAritmetik.Core.Models.CommandMessage)Model[lastmsg]).Dispose();
 
     Model.Clear();
 }

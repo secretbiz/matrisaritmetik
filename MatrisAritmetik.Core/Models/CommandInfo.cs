@@ -178,28 +178,28 @@ namespace MatrisAritmetik.Core.Models
                         alias_list.Clear();
                         alias_list = null;
                     }
+                    Fullname = null;
+                    Returns = null;
+                    Function = null;
+                    Description = null;
+                    Service = null;
+                    Function_template = null;
+                    Function_template_filled = null;
+                    Param_names = null;
+                    Param_types = null;
                 }
 
-                Fullname = null;
-                Returns = null;
-                Function = null;
-                Description = null;
-                Service = null;
-                Function_template = null;
-                Function_template_filled = null;
-                Param_names = null;
-                Param_types = null;
 
                 disposedValue = true;
             }
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~CommandInfo()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
+        //~CommandInfo()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         public void Dispose()
         {

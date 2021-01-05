@@ -486,24 +486,24 @@ namespace MatrisAritmetik.Core.Models
                         }
                         SetTokens(null);
                     }
+                    Output = null;
+                    OriginalCommand = null;
+                    CleanedCommand = null;
+                    OriginalSettings = null;
+                    SetTermsToEvaluate(null);
+                    SetStateMessage(null);
                 }
 
-                Output = null;
-                OriginalCommand = null;
-                CleanedCommand = null;
-                OriginalSettings = null;
-                SetTermsToEvaluate(null);
-                SetStateMessage(null);
                 disposedValue = true;
             }
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~Command()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
+        //~Command()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         public void Dispose()
         {

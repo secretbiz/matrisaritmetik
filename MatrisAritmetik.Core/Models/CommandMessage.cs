@@ -4,44 +4,54 @@ using System.Diagnostics;
 namespace MatrisAritmetik.Core.Models
 {
     /// <summary>
-    /// Class to hold similar functions under a label
+    /// Class for storing a <see cref="Command"/>'s <see cref="CommandStateMessage"/> and <see cref="CommandState"/> in a single instance
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class CommandLabel : IDisposable
+    public class CommandMessage : IDisposable
     {
         #region Public Fields
         /// <summary>
-        /// Name of this label
+        /// Command's current state
         /// </summary>
-        public string Label = "Genel";
+        private CommandState state = CommandState.IDLE;
         /// <summary>
-        /// Stored functions under <see cref="CommandLabel.Label"/>
+        /// Last message
         /// </summary>
-        public CommandInfo[] Functions;
+        private string message = "";
+
         private bool disposedValue;
+
+        /// <summary>
+        /// Command's current state
+        /// </summary>
+        public CommandState State { get => state; set => state = value; }
+        /// <summary>
+        /// Last message
+        /// </summary>
+        public string Message { get => message; set => message = value; }
         #endregion
 
         #region Constructors
-        public CommandLabel()
-        {
-        }
         /// <summary>
-        /// Creates an instance with the given label and a list of <see cref="CommandInfo"/ instances>
+        /// Creates a basic <see cref="CommandMessage"/> instance
         /// </summary>
-        /// <param name="label">Name of the label</param>
-        /// <param name="cmds">Array of <see cref="CommandInfo"/> instances</param>
-        public CommandLabel(string label, CommandInfo[] cmds)
+        /// <param name="msg">Message to store</param>
+        /// <param name="s"><see cref="Command"/>'s state to store</param>
+        public CommandMessage(string msg, CommandState s = CommandState.IDLE)
         {
-            Label = label;
-            Functions = cmds;
+            Message = msg;
+            State = s;
+        }
+
+        public CommandMessage()
+        {
         }
         #endregion
 
         #region Debug
         private string GetDebuggerDisplay()
         {
-            string f_amount = (Functions == null) ? "0" : Functions.Length.ToString();
-            return Label + " with " + f_amount + " functions";
+            return State.ToString() + ":" + Message;
         }
         #endregion
 
@@ -52,24 +62,19 @@ namespace MatrisAritmetik.Core.Models
             {
                 if (disposing)
                 {
-                    if (Functions != null)
-                    {
-                        foreach (CommandInfo c in Functions)
-                        {
-                            c.Dispose();
-                        }
-                    }
-                    Functions = null;
+                    Message = string.Empty;
+                    Message = null;
+                    disposedValue = true;
                 }
-                disposedValue = true;
+
             }
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        //~CommandLabel()
+        //~CommandMessage()
         //{
         //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //   Dispose(disposing: false);
+        //    Dispose(disposing: false);
         //}
 
         public void Dispose()
@@ -78,6 +83,7 @@ namespace MatrisAritmetik.Core.Models
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }
