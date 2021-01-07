@@ -238,6 +238,10 @@ namespace MatrisAritmetik.Services
                     }
                 }
 
+                if (nc == lead)
+                {
+                    break;
+                }
                 result.Swap(i, r, 0, 0);
 
                 if (float.Parse(result[r, lead].ToString()) != (float)0.0)
