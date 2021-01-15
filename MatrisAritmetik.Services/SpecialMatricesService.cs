@@ -12,6 +12,18 @@ namespace MatrisAritmetik.Services
         #region SpecialMatricesService Methods
 
         #region Matrix Methods
+        public MatrisBase<object> ToMat(Dataframe dataframe)
+        {
+            if (dataframe.IsValid() && dataframe.IsAllNumbers())
+            {
+                return new MatrisBase<object>(dataframe.Copy().GetValues());
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.INVALID_CONVERSION_TO_MAT);
+            }
+        }
+
         public MatrisBase<dynamic> Identity(int dimension)
         {
             if (dimension <= 0)
@@ -61,7 +73,7 @@ namespace MatrisAritmetik.Services
 
             int amount = Math.Min((int)((end - start) / interval), axis == 0 ? (int)MatrisLimits.forRows : (int)MatrisLimits.forCols);
 
-            if (Math.Abs(end - (start + (amount * interval))) > 1e-8)
+            if (Math.Abs(end - (start + (amount * interval))) > 1e-7)
             {
                 throw new Exception(CompilerMessage.MAT_INTERVAL_EXCESS);
             }
@@ -332,6 +344,18 @@ namespace MatrisAritmetik.Services
         #endregion
 
         #region Dataframe Methods
+
+        public Dataframe ToDf(MatrisBase<object> matrix)
+        {
+            if (matrix.IsValid())
+            {
+                return new Dataframe(matrix.Copy().GetValues());
+            }
+            else
+            {
+                throw new Exception(CompilerMessage.INVALID_CONVERSION_TO_DF);
+            }
+        }
         public Dataframe IdentityDf(int dimension)
         {
             if (dimension <= 0)
@@ -381,7 +405,7 @@ namespace MatrisAritmetik.Services
 
             int amount = Math.Min((int)((end - start) / interval), axis == 0 ? (int)DataframeLimits.forRows : (int)DataframeLimits.forCols);
 
-            if (Math.Abs(end - (start + (amount * interval))) > 1e-8)
+            if (Math.Abs(end - (start + (amount * interval))) > 1e-7)
             {
                 throw new Exception(CompilerMessage.MAT_INTERVAL_EXCESS);
             }

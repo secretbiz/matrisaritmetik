@@ -35,6 +35,7 @@ namespace MatrisAritmetik.Pages
         private const string MatrisNewLineParam = "newline";
         private const string MatrisSpecialFuncParam = "func";
         private const string MatrisSpecialArgsParam = "args";
+        private const string MatrisDelBtnPrefix = "matris_table_delbutton_";
         #endregion
 
         #region ViewData Keys
@@ -77,7 +78,7 @@ namespace MatrisAritmetik.Pages
         /// <summary>
         /// List of labels to ignore
         /// </summary>
-        private readonly List<string> IgnoreLabels = new List<string>() { "Özel Veri Tablosu", "İstatistiksel" };
+        private readonly List<string> IgnoreLabels = new List<string>() { "Özel Veri Tablosu", "Dönüştür" };
         #endregion
 
         #region GET Actions
@@ -125,7 +126,7 @@ namespace MatrisAritmetik.Pages
                 DateTime LastCmdDate = DateTime.Now;
 
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(MatrisNameParam)
                     && reqdict.ContainsKey(MatrisValsParam)
@@ -248,7 +249,7 @@ namespace MatrisAritmetik.Pages
                 DateTime LastCmdDate = DateTime.Now;
 
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(MatrisNameParam) && reqdict.ContainsKey(MatrisSpecialFuncParam) && reqdict.ContainsKey(MatrisSpecialArgsParam))
                 {
@@ -386,7 +387,7 @@ namespace MatrisAritmetik.Pages
 
                 Dictionary<string, string> FileData = new Dictionary<string, string>();
 
-                await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData).ConfigureAwait(false);
+                await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData);
 
                 Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
 
@@ -486,11 +487,11 @@ namespace MatrisAritmetik.Pages
         {
             Dictionary<string, string> reqdict = new Dictionary<string, string>();
 
-            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
             if (reqdict.ContainsKey(MatrisNameParam))
             {
-                reqdict[MatrisNameParam] = reqdict[MatrisNameParam].Replace("matris_table_delbutton_", "");
+                reqdict[MatrisNameParam] = reqdict[MatrisNameParam].Replace(MatrisDelBtnPrefix, string.Empty);
 
                 Dictionary<string, MatrisBase<dynamic>> _dict = HttpContext.Session.GetMatrixDict(SessionMatrisDict, SessionSeedDict);
                 Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
@@ -532,7 +533,7 @@ namespace MatrisAritmetik.Pages
             if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastOutputDate)))
             {
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(CommandParam))
                 {
@@ -548,8 +549,7 @@ namespace MatrisAritmetik.Pages
                             Dictionary<string, List<List<object>>> vals = HttpContext.Session.GetMatVals(SessionMatrisDict);
                             Dictionary<string, Dictionary<string, dynamic>> opts = HttpContext.Session.GetMatOptions(SessionSeedDict);
 
-                            Dictionary<string, Dictionary<string, dynamic>> dfsettings = HttpContext.Session.GetDfSettings(SessionDfSettings);
-                            foreach (string name in dfsettings.Keys)
+                            foreach (string name in HttpContext.Session.GetDfSettings(SessionDfSettings).Keys)
                             {
                                 tempdict.Add(name, new Dataframe());
                             }
@@ -589,7 +589,6 @@ namespace MatrisAritmetik.Pages
                             _dict.Clear();
                             vals.Clear();
                             opts.Clear();
-                            dfsettings.Clear();
                         }
                         catch (Exception err)
                         {
@@ -634,7 +633,12 @@ namespace MatrisAritmetik.Pages
             }
             else
             {
-                using CommandMessage msg = new CommandMessage(RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastOutputDate)), CommandState.WARNING);
+                using CommandMessage msg =
+                    new CommandMessage(
+                                        RequestMessage.REQUEST_SPAM(HttpContext.Session.Get<DateTime>(SessionLastOutputDate))
+                                        , CommandState.WARNING
+                                      );
+
                 HttpContext.Session.SetLastMsg(
                                                 SessionLastMessage,
                                                 msg
@@ -666,16 +670,13 @@ namespace MatrisAritmetik.Pages
         /// <returns>Partial view result of the command and output history panel</returns>
         public PartialViewResult OnPostUpdateHistoryPanel()
         {
-            PartialViewResult mpart =
-                Partial(
-                            "_OutputPanelPartial",
-                            new Dictionary<string, dynamic>()
-                            {
-                                { CommandHistoryKey , HttpContext.Session.GetCmdList(SessionOutputHistory) },
-                                { LastMessageKey , HttpContext.Session.GetLastMsg(SessionLastMessage) }
-                            }
-                        );
-
+            PartialViewResult mpart = Partial("_OutputPanelPartial",
+                                               new Dictionary<string, dynamic>()
+                                               {
+                                                   { CommandHistoryKey , HttpContext.Session.GetCmdList(SessionOutputHistory) },
+                                                   { LastMessageKey , HttpContext.Session.GetLastMsg(SessionLastMessage) }
+                                               }
+                                             );
             return mpart;
         }
 

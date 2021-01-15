@@ -829,12 +829,12 @@ namespace MatrisAritmetik.Services
 
             return A is Dataframe df
                 ? new Dataframe(newlis,
-                                     df.Delimiter,
-                                     df.NewLine,
-                                     null,
-                                     null,
-                                     df.GetRowSettings().Copy(),
-                                     df.GetColSettings().Copy())
+                                df.Delimiter,
+                                df.NewLine,
+                                null,
+                                null,
+                                df.GetRowSettings().Copy(),
+                                df.GetColSettings().Copy())
                 : new MatrisBase<object>(newlis);
         }
 
@@ -871,12 +871,12 @@ namespace MatrisAritmetik.Services
 
             return A is Dataframe df
                 ? new Dataframe(newvals,
-                                     df.Delimiter,
-                                     df.NewLine,
-                                     Dataframe.GetCopyOfLabels(df.GetRowLabels()),
-                                     Dataframe.GetCopyOfLabels(df.GetColLabels()),
-                                     df.GetRowSettings().Copy(),
-                                     df.GetColSettings().Copy())
+                                df.Delimiter,
+                                df.NewLine,
+                                Dataframe.GetCopyOfLabels(df.GetRowLabels()),
+                                Dataframe.GetCopyOfLabels(df.GetColLabels()),
+                                df.GetRowSettings().Copy(),
+                                df.GetColSettings().Copy())
                 : new MatrisBase<object>(newvals);
         }
 

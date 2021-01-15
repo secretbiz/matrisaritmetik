@@ -9,6 +9,14 @@ namespace MatrisAritmetik.Core.Services
     public interface ISpecialMatricesService
     {
         #region Non-Random Matrices
+
+        /// <summary>
+        /// Convert a <see cref="Dataframe"/> to a <see cref="MatrisBase{T}"/>
+        /// </summary>
+        /// <param name="dataframe"><see cref="Dataframe"/> to convert</param>
+        /// <returns>A new instance of <see cref="MatrisBase{T}"/> with copies of the values in <paramref name="dataframe"/></returns>
+        MatrisBase<object> ToMat(Dataframe dataframe);
+
         /// <summary>
         /// Creates an Identity matrix
         /// </summary>
@@ -106,6 +114,14 @@ namespace MatrisAritmetik.Core.Services
         #endregion
 
         #region Non-Random Dataframe
+
+        /// <summary>
+        /// Convert a <see cref="MatrisBase{T}"/> to a <see cref="Dataframe"/>
+        /// </summary>
+        /// <param name="matrix"><see cref="MatrisBase{T}"/> to convert</param>
+        /// <returns>A new instance of <see cref="Dataframe"/> with copies of the values in <paramref name="matrix"/></returns>
+        Dataframe ToDf(MatrisBase<object> matrix);
+
         /// <summary>
         /// Creates an Identity matrix-like dataframe
         /// </summary>

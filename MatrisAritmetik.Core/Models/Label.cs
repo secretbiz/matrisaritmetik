@@ -154,10 +154,7 @@ namespace MatrisAritmetik.Core.Models
             }
         }
         /// <summary>
-        /// Get new list of all <see cref="Label"/>s
-        /// </summary>
-        /// <summary>
-        /// Set the list of all <see cref="Label"/>s
+        /// Get/Set new list of all <see cref="Label"/>s
         /// </summary>
         public List<Label> Labels
         {

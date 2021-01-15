@@ -9,75 +9,6 @@ using Newtonsoft.Json;
 
 namespace MatrisAritmetik.Core
 {
-    public class SpecialConverter : JsonConverter
-    {
-        private readonly Type[] _types;
-
-        public SpecialConverter(params Type[] types)
-        {
-            _types = types;
-        }
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-
-            if (value is null || value is None)
-            {
-                writer.WriteValue(SessionExtensions.CustomNull);
-            }
-            else if (float.TryParse(value.ToString(), out float res))
-            {
-                if (float.IsNaN(res))
-                {
-                    writer.WriteValue(SessionExtensions.CustomNan);
-                }
-                else if (float.IsPositiveInfinity(res))
-                {
-                    writer.WriteValue(SessionExtensions.CustomInf);
-                }
-                else if (float.IsNegativeInfinity(res))
-                {
-                    writer.WriteValue(SessionExtensions.CustomNinf);
-                }
-                else
-                {
-                    writer.WriteValue(res);
-                }
-            }
-            else
-            {
-                writer.WriteValue(value);
-            }
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            // This is not used
-            string val = reader.ReadAsString() ?? "!null";
-            return val switch
-            {
-                SessionExtensions.CustomNull => new None(),
-                SessionExtensions.CustomNan => float.NaN,
-                SessionExtensions.CustomInf => float.PositiveInfinity,
-                SessionExtensions.CustomNinf => float.NegativeInfinity,
-                _ => float.TryParse(val, out float d)
-                    ? d
-                    : float.TryParse(existingValue == null
-                                ? string.Empty
-                                : existingValue.ToString(), out float ex)
-                        ? ex
-                        : float.NaN
-            };
-        }
-
-        public override bool CanRead => false;
-
-        public override bool CanConvert(Type objectType)
-        {
-            return _types.Any(t => t == objectType);
-        }
-    }
-
     /// <summary>
     /// Class for setting and getting session variables
     /// </summary>
@@ -128,6 +59,29 @@ namespace MatrisAritmetik.Core
 
 
         #region Variable Setters
+        /// <summary>
+        /// Set the last message variable
+        /// </summary>
+        /// <param name="session">Current session</param>
+        /// <param name="key">Last message variable key</param>
+        /// <param name="msg">Last message</param>
+        public static void SetLastMsg(this ISession session,
+                                      string key,
+                                      CommandMessage msg)
+        {
+            string serialized = "";
+            Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
+            {
+                { "msg", msg.Message },
+                { "state", msg.State }
+            };
+            serialized += JsonConvert.SerializeObject(cmdinfo);
+
+            session.SetString(key, serialized);
+
+            msg.Dispose();
+        }
+
         /// <summary>
         /// Default session variable setter
         /// </summary>
@@ -196,28 +150,6 @@ namespace MatrisAritmetik.Core
             lis.Clear();
         }
 
-        /// <summary>
-        /// Set the last message variable
-        /// </summary>
-        /// <param name="session">Current session</param>
-        /// <param name="key">Last message variable key</param>
-        /// <param name="msg">Last message</param>
-        public static void SetLastMsg(this ISession session,
-                                      string key,
-                                      CommandMessage msg)
-        {
-            string serialized = "";
-            Dictionary<string, dynamic> cmdinfo = new Dictionary<string, dynamic>
-            {
-                { "msg", msg.Message },
-                { "state", msg.State }
-            };
-            serialized += JsonConvert.SerializeObject(cmdinfo);
-
-            session.SetString(key, serialized);
-
-            msg.Dispose();
-        }
 
         /// <summary>
         /// Set matrix options variable
@@ -550,5 +482,73 @@ namespace MatrisAritmetik.Core
 
         #endregion
 
+    }
+    public class SpecialConverter : JsonConverter
+    {
+        private readonly Type[] _types;
+
+        public SpecialConverter(params Type[] types)
+        {
+            _types = types;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+
+            if (value is null || value is None)
+            {
+                writer.WriteValue(SessionExtensions.CustomNull);
+            }
+            else if (float.TryParse(value.ToString(), out float res))
+            {
+                if (float.IsNaN(res))
+                {
+                    writer.WriteValue(SessionExtensions.CustomNan);
+                }
+                else if (float.IsPositiveInfinity(res))
+                {
+                    writer.WriteValue(SessionExtensions.CustomInf);
+                }
+                else if (float.IsNegativeInfinity(res))
+                {
+                    writer.WriteValue(SessionExtensions.CustomNinf);
+                }
+                else
+                {
+                    writer.WriteValue(res);
+                }
+            }
+            else
+            {
+                writer.WriteValue(value);
+            }
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            // This is not used
+            string val = reader.ReadAsString() ?? "!null";
+            return val switch
+            {
+                SessionExtensions.CustomNull => new None(),
+                SessionExtensions.CustomNan => float.NaN,
+                SessionExtensions.CustomInf => float.PositiveInfinity,
+                SessionExtensions.CustomNinf => float.NegativeInfinity,
+                _ => float.TryParse(val, out float d)
+                    ? d
+                    : float.TryParse(existingValue == null
+                                ? string.Empty
+                                : existingValue.ToString(), out float ex)
+                        ? ex
+                        : float.NaN
+            };
+        }
+
+        public override bool CanRead => false;
+
+        public override bool CanConvert(Type objectType)
+        {
+            return _types.Any(t => t == objectType);
+        }
     }
 }

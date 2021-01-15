@@ -15,6 +15,21 @@ namespace MatrisAritmetik.Core.Services
     {
         #region String Related Methods
         /// <summary>
+        /// Performs an async <see cref="Task"/> to read and decode the request body <paramref name="reqbody"/> with given encoding <paramref name="enc"/>
+        /// <para>Ignores request parameters given in <paramref name="ignoredparams"/></para>
+        /// <para>Adds parameters and values to <paramref name="decodedRequestDict"/> dictionary</para>
+        /// </summary>
+        /// <param name="reqbody">Request's body to be read</param>
+        /// <param name="enc">Encoding of the body</param>
+        /// <param name="ignoredparams">List of parameters to ignore while reading</param>
+        /// <param name="decodedRequestDict">Dictionary to store read values</param>
+        /// <returns>Awaitable</returns>
+        Task ReadAndDecodeRequest(Stream reqbody,
+                                  Encoding enc,
+                                  List<string> ignoredparams,
+                                  Dictionary<string, string> decodedRequestDict);
+
+        /// <summary>
         /// Convert the string <paramref name="text"/> using <paramref name="delimiter"/> and <paramref name="newline"/> options
         /// to a 2D list of values casted as <typeparamref name="T"/>
         /// </summary>
@@ -84,20 +99,6 @@ namespace MatrisAritmetik.Core.Services
                                            bool removeliterals = true,
                                            List<string> options = null,
                                            CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix);
-        /// <summary>
-        /// Performs an async <see cref="Task"/> to read and decode the request body <paramref name="reqbody"/> with given encoding <paramref name="enc"/>
-        /// <para>Ignores request parameters given in <paramref name="ignoredparams"/></para>
-        /// <para>Adds parameters and values to <paramref name="decodedRequestDict"/> dictionary</para>
-        /// </summary>
-        /// <param name="reqbody"></param>
-        /// <param name="enc"></param>
-        /// <param name="ignoredparams"></param>
-        /// <param name="decodedRequestDict"></param>
-        /// <returns>Awaitable</returns>
-        Task ReadAndDecodeRequest(Stream reqbody,
-                                  Encoding enc,
-                                  List<string> ignoredparams,
-                                  Dictionary<string, string> decodedRequestDict);
 
         /// <summary>
         /// Read the file data from given request body
@@ -126,22 +127,5 @@ namespace MatrisAritmetik.Core.Services
                             Dictionary<string, Dictionary<string, List<LabelList>>> lbls);
         #endregion
 
-        #region List Related Methods
-        /// <summary>
-        /// Gets the index of the absolute max value in the list <paramref name="lis"/>
-        /// <para>If the absolute max value occurs more than once, first index is returned</para>
-        /// </summary>
-        /// <param name="lis">List of values to get absolute max value's index of</param>
-        /// <returns>Zero-based index of the absolute max value in <paramref name="lis"/></returns>
-        int IndexOfAbsMax(List<T> lis);
-
-        /// <summary>
-        /// Gets the minimum value of the list <paramref name="lis"/>
-        /// </summary>
-        /// <param name="lis">List of values to get the minimum of</param>
-        /// <returns>Minimum value in the <paramref name="lis"/></returns>
-        T MinOfList(List<T> lis);
-
-        #endregion
     }
 }

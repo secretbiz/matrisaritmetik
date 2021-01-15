@@ -88,8 +88,8 @@ function deleteMatrix(event) {
                 __RequestVerificationToken: tkn,
                 "name": event.currentTarget.id,
             },
-            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); },
-            error: function (error) { console.log(error); }
+            success: function (_data) { updateTable(tkn); updateHistoryPanel(tkn); },
+            error: function (_error) { }
         });
 }
 
@@ -119,7 +119,7 @@ function sendCmd(event) {
                 __RequestVerificationToken: tkn,
                 "cmd": filteredcmd,
             },
-            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); updateMathContent(); },
+            success: function (data) { updateTable(tkn); updateHistoryPanel(tkn); },
             error: function (error) { console.log(error); }
         });
 }
@@ -362,10 +362,12 @@ if (special_matris_options) { special_matris_options.addEventListener("change", 
 
 //////// komut geçmişi panelini güncelle
 function updateHistoryPanel(token) {
-    $('#output_body').load('/Matris?handler=UpdateHistoryPanel', { __RequestVerificationToken: token }, function () {
-        updateTable(token);
+    $('#output_body').load('/Matris?handler=UpdateHistoryPanel',
+        { __RequestVerificationToken: token },
+        function ()
+        {
+            updateTable(token);
         }
-
     );
 }
 

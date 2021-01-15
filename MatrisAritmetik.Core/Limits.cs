@@ -52,7 +52,7 @@ namespace MatrisAritmetik.Core
         forRows = 512,
 
         /// <summary>
-        /// Maximum depth level of row labels (<see cref="Dataframe"/>.RowLabels.Count)
+        /// Maximum depth level of row labels (<see cref="Dataframe"/>.GetRowLabels().Count)
         /// </summary>
         forRowLabelLevels = 2,
 
@@ -62,7 +62,7 @@ namespace MatrisAritmetik.Core
         forCols = 12,
 
         /// <summary>
-        /// Maximum depth level of column labels (<see cref="Dataframe"/>.ColumnLabels.Count)
+        /// Maximum depth level of column labels (<see cref="Dataframe."/>.GetColLabels().Count)
         /// </summary>
         forColLabelLevels = 3,
 
@@ -83,7 +83,7 @@ namespace MatrisAritmetik.Core
     }
 
     /// <summary>
-    /// Enumerated limits for command history
+    /// Enumerated limits for the compiler
     /// </summary>
     public enum CompilerLimits
     {
@@ -91,15 +91,5 @@ namespace MatrisAritmetik.Core
         /// Minimum amount of time in seconds to wait and accept command execution
         /// </summary>
         forCmdSendRateInSeconds = 3,
-
-        /// <summary>
-        /// Limit how many command can be shown each command history page
-        /// </summary>
-        forShowOldCommands = 16,
-
-        /// <summary>
-        /// Limit how many characters can be shown for each output string
-        /// </summary>
-        forOutputCharacterLength = 128 * 128
     };
 }

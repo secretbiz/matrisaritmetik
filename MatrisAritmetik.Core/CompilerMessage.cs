@@ -298,6 +298,221 @@ namespace MatrisAritmetik.Core
 
         #region COMPILER RELATED
 
+        #region FUNCTION ERRORS AND WARNINGS
+
+        public const string INVALID_CONVERSION_TO_MAT = "Verilen veri tablosu, matris olarak kullanılamaz!";
+
+        public const string INVALID_CONVERSION_TO_DF = "Verilen matris, veri tablosu olarak kullanılamaz!";
+
+        /// <summary>
+        /// Positional argument was given after a parameter-hinted argument
+        /// </summary>
+        public const string ARG_GIVEN_AFTER_HINTED_PARAM = "Parametre ismi kullanıldıktan sonra pozisyonel argüman kullanılamaz!";
+
+        /// <summary>
+        /// No arguments were passed to function
+        /// </summary>
+        /// <param name="name">Function name</param>
+        /// <param name="count">Parameter count of <paramref name="name"/> function</param>
+        /// <returns>Parameter count of <paramref name="name"/> function and how to get information about them</returns>
+        public static string FUNC_REQUIRES_ARGS(string name, int count)
+        {
+            return name + " " + count + " parametreli bir fonksiyondur. Detaylar için: ?" + name;
+        }
+
+        /// <summary>
+        /// Too many arguments were given
+        /// </summary>
+        /// <param name="name">Function name</param>
+        /// <param name="max">Maximum parameter count</param>
+        /// <param name="given">Argument count</param>
+        /// <returns>Message telling <paramref name="name"/> parameter count information</returns>
+        public static string FUNC_PARAMCOUNT_EXCESS(string name, int max, int given)
+        {
+            return name + " fonksiyonu en fazla " + max + " parametre kabul eder, " + given + " verildi!";
+        }
+
+        /// <summary>
+        /// Given service name was invalid
+        /// <para> THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string UNKNOWN_SERVICE(string name)
+        {
+            return "Bilinmeyen servis ismi: " + name;
+        }
+
+        /// <summary>
+        /// Given name didn't match any saved matrix or variable
+        /// </summary>
+        /// <param name="name">Given incorrect name</param>
+        /// <returns>Message telling given <paramref name="name"/> didn't match any known variable</returns>
+        public static string UNKNOWN_VARIABLE(string name)
+        {
+            return "'" + name + "' adlı bir matris/değişken bulunamadı!";
+        }
+
+        /// <summary>
+        /// Passed argument type was unexpected or unknown
+        /// </summary>
+        /// <param name="name">Function name</param>
+        /// <param name="ind">Parameter index</param>
+        /// <returns>Message telling <paramref name="name"/> got an unexpected type argument</returns>
+        public static string UNKNOWN_ARGUMENT_TYPE(string name, int ind)
+        {
+            return name + " fonksiyonunun " + ind + ". argümanının türü belirlenemedi!";
+        }
+
+        /// <summary>
+        /// Defined parameter type was unknown
+        /// <para>THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
+        /// </summary>
+        /// <param name="name">Given type name</param>
+        /// <returns>Message telling type <paramref name="name"/> was unknown</returns>
+        public static string UNKNOWN_PARAMETER_TYPE(string name)
+        {
+            return "Fonksiyon için tanımlanan parametre türü tanımlanamadı: " + name;
+        }
+
+        /// <summary>
+        /// Convert type name to turkish
+        /// </summary>
+        /// <param name="parseType">Type name to convert</param>
+        public static void TYPE_TO_TR(ref string parseType)
+        {
+            switch (parseType)
+            {
+                case "int":
+                    parseType = "tamsayı";
+                    break;
+                case "float":
+                    parseType = "ondalıklı";
+                    break;
+                case "double":
+                    parseType = "ondalıklı";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Given value was not successfully parsed 
+        /// </summary>
+        /// <param name="val">Value</param>
+        /// <param name="parseType">Type name tried <paramref name="val"/> to be parsed as</param>
+        /// <returns>Message telling parsing didn't succeed</returns>
+        public static string ARG_PARSE_ERROR(string val, string parseType)
+        {
+            TYPE_TO_TR(ref parseType);
+
+            return string.IsNullOrWhiteSpace(val)
+                ? "Verilen değerlerde " + parseType + " olarak kullanılayanlar var!"
+                : "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
+        }
+
+        /// <summary>
+        /// Given value to parameter <paramref name="name"/> was not valid
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <param name="msg">Extra message</param>
+        /// <returns>Message telling given argument to parameter <paramref name="name"/> is not valid</returns>
+        public static string ARG_INVALID_VALUE(string name, string msg)
+        {
+            return name + " parametresi değeri hatalı. " + msg;
+        }
+
+        /// <summary>
+        /// Non-default valued parameter didn't get any arguments
+        /// </summary>
+        /// <param name="name">Parameter name which expected a value</param>
+        /// <returns>Message telling <paramref name="name"/> requires a value</returns>
+        public static string MISSING_ARGUMENT(string name)
+        {
+            return name + " parametresine değer verilmeli!";
+        }
+
+        /// <summary>
+        /// Given default value for parameter named <paramref name="name"/> was wrong
+        /// <para>THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <param name="realtype">Expected type name</param>
+        /// <returns>Message telling <paramref name="name"/> can't be parsed as <paramref name="realtype"/></returns>
+        public static string PARAM_DEFAULT_PARSE_ERROR(string name, string realtype)
+        {
+            TYPE_TO_TR(ref realtype);
+            return name + " parametresinin default değeri hatalı, " + realtype + " olmalı!";
+        }
+
+        /// <summary>
+        /// Given method doesn't exist in IFrontService interface
+        /// </summary>
+        /// <param name="name">Method name</param>
+        /// <returns>Message telling <paramref name="name"/> is not a method</returns>
+        public static string UNKNOWN_FRONTSERVICE_FUNC(string name)
+        {
+            return "FrontService servisi " + name + " adlı bir metod bulundurmaz!";
+        }
+
+        /// <summary>
+        /// A parameter was referenced multiple times
+        /// </summary>
+        /// <param name="name">Parameter name</param>
+        /// <returns>Message telling <paramref name="name"/> was referenced multiple times</returns>
+        public static string MULTIPLE_REFERENCES(string name)
+        {
+            return name + " parametresine sadece bir defa değer verilebilir!";
+        }
+
+        /// <summary>
+        /// Parameter name was invalid or unknown
+        /// </summary>
+        /// <param name="name">Given name</param>
+        /// <returns>Message telling <paramref name="name"/> was unknown</returns>
+        public static string PARAMETER_NAME_INVALID(string name)
+        {
+            if (name == null)
+            {
+                return "Parametre ismi hatalı!";
+            }
+            else if (string.IsNullOrEmpty(name.Trim()))
+            {
+                return "Parametre ismi hatalı!";
+            }
+            return "'" + name + "' adlı bir parametre bulunamadı!";
+        }
+
+        /// <summary>
+        /// Parameter name hinted was invalid or unknown 
+        /// </summary>
+        /// <param name="name">Given name</param>
+        /// <returns>Message telling <paramref name="name"/> was invalid</returns>
+        public static string PARAMETER_HINT_INVALID(string name)
+        {
+            if (name == null)
+            {
+                return "Parametre ismi hatalı!";
+            }
+            else if (string.IsNullOrEmpty(name.Trim()))
+            {
+                return "Parametre ismi hatalı!";
+            }
+            return name + " bir parametre adı olarak kullanılamaz!";
+        }
+
+        /// <summary>
+        /// Expected format name_hint:argument wasn't matched 
+        /// </summary>
+        /// <param name="format">Expected format</param>
+        /// <returns>Message informing about the expected format</returns>
+        public static string STRING_FORMAT_INVALID(string format)
+        {
+            return "Argüman formatı hatalı, format: " + format + " olmalı!";
+        }
+        #endregion
+
         #region COMPILER MODE RELATED
         /// <summary>
         /// Given mode was not valid to reference a value
@@ -618,216 +833,6 @@ namespace MatrisAritmetik.Core
         /// </summary>
         public const string OP_WITH_NULL = "Aritmetik işlemlerde null değeri kullanılamaz!";
 
-        #endregion
-
-        #region FUNCTION ERRORS
-        /// <summary>
-        /// Positional argument was given after a parameter-hinted argument
-        /// </summary>
-        public const string ARG_GIVEN_AFTER_HINTED_PARAM = "Parametre ismi kullanıldıktan sonra pozisyonel argüman kullanılamaz!";
-
-        /// <summary>
-        /// No arguments were passed to function
-        /// </summary>
-        /// <param name="name">Fucntion name</param>
-        /// <param name="count">Parameter count of <paramref name="name"/> function</param>
-        /// <returns>Parameter count of <paramref name="name"/> function and how to get information about them</returns>
-        public static string FUNC_REQUIRES_ARGS(string name, int count)
-        {
-            return name + " " + count + " parametreli bir fonksiyondur. Detaylar için: ?" + name;
-        }
-
-        /// <summary>
-        /// Too many arguments were given
-        /// </summary>
-        /// <param name="name">Function name</param>
-        /// <param name="max">Maximum parameter count</param>
-        /// <param name="given">Argument count</param>
-        /// <returns>Message telling <paramref name="name"/> parameter count information</returns>
-        public static string FUNC_PARAMCOUNT_EXCESS(string name, int max, int given)
-        {
-            return name + " fonksiyonu en fazla " + max + " parametre kabul eder, " + given + " verildi!";
-        }
-
-        /// <summary>
-        /// Given service name was invalid
-        /// <para> THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static string UNKNOWN_SERVICE(string name)
-        {
-            return "Bilinmeyen servis ismi: " + name;
-        }
-
-        /// <summary>
-        /// Given name didn't match any saved matrix or variable
-        /// </summary>
-        /// <param name="name">Given incorrect name</param>
-        /// <returns>Message telling given <paramref name="name"/> didn't match any known variable</returns>
-        public static string UNKNOWN_VARIABLE(string name)
-        {
-            return "'" + name + "' adlı bir matris/değişken bulunamadı!";
-        }
-
-        /// <summary>
-        /// Passed argument type was unexpected or unknown
-        /// </summary>
-        /// <param name="name">Function name</param>
-        /// <param name="ind">Parameter index</param>
-        /// <returns>Message telling <paramref name="name"/> got an unexpected type argument</returns>
-        public static string UNKNOWN_ARGUMENT_TYPE(string name, int ind)
-        {
-            return name + " fonksiyonunun " + ind + ". argümanının türü belirlenemedi!";
-        }
-
-        /// <summary>
-        /// Defined parameter type was unknown
-        /// <para>THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
-        /// </summary>
-        /// <param name="name">Given type name</param>
-        /// <returns>Message telling type <paramref name="name"/> was unknown</returns>
-        public static string UNKNOWN_PARAMETER_TYPE(string name)
-        {
-            return "Fonksiyon için tanımlanan parametre türü tanımlanamadı: " + name;
-        }
-
-        /// <summary>
-        /// Convert type name to turkish
-        /// </summary>
-        /// <param name="parseType">Type name to convert</param>
-        public static void TYPE_TO_TR(ref string parseType)
-        {
-            switch (parseType)
-            {
-                case "int":
-                    parseType = "tamsayı";
-                    break;
-                case "float":
-                    parseType = "ondalıklı";
-                    break;
-                case "double":
-                    parseType = "ondalıklı";
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Given value was not successfully parsed 
-        /// </summary>
-        /// <param name="val">Value</param>
-        /// <param name="parseType">Type name tried <paramref name="val"/> to be parsed as</param>
-        /// <returns>Message telling parsing didn't succeed</returns>
-        public static string ARG_PARSE_ERROR(string val, string parseType)
-        {
-            TYPE_TO_TR(ref parseType);
-
-            return string.IsNullOrWhiteSpace(val)
-                ? "Verilen değerlerde " + parseType + " olarak kullanılayanlar var!"
-                : "'" + val + "' değeri " + parseType + " olarak kullanılamadı!";
-        }
-
-        /// <summary>
-        /// Given value to parameter <paramref name="name"/> was not valid
-        /// </summary>
-        /// <param name="name">Parameter name</param>
-        /// <param name="msg">Extra message</param>
-        /// <returns>Message telling given argument to parameter <paramref name="name"/> is not valid</returns>
-        public static string ARG_INVALID_VALUE(string name, string msg)
-        {
-            return name + " parametresi değeri hatalı. " + msg;
-        }
-
-        /// <summary>
-        /// Non-default valued parameter didn't get any arguments
-        /// </summary>
-        /// <param name="name">Parameter name which expected a value</param>
-        /// <returns>Message telling <paramref name="name"/> requires a value</returns>
-        public static string MISSING_ARGUMENT(string name)
-        {
-            return name + " parametresine değer verilmeli!";
-        }
-
-        /// <summary>
-        /// Given default value for parameter named <paramref name="name"/> was wrong
-        /// <para>THIS IS AN EXCEPTION ONLY USED INTERNALLY</para>
-        /// </summary>
-        /// <param name="name">Parameter name</param>
-        /// <param name="realtype">Expected type name</param>
-        /// <returns>Message telling <paramref name="name"/> can't be parsed as <paramref name="realtype"/></returns>
-        public static string PARAM_DEFAULT_PARSE_ERROR(string name, string realtype)
-        {
-            TYPE_TO_TR(ref realtype);
-            return name + " parametresinin default değeri hatalı, " + realtype + " olmalı!";
-        }
-
-        /// <summary>
-        /// Given method doesn't exist in IFrontService interface
-        /// </summary>
-        /// <param name="name">Method name</param>
-        /// <returns>Message telling <paramref name="name"/> is not a method</returns>
-        public static string UNKNOWN_FRONTSERVICE_FUNC(string name)
-        {
-            return "FrontService servisi " + name + " adlı bir metod bulundurmaz!";
-        }
-
-        /// <summary>
-        /// A parameter was referenced multiple times
-        /// </summary>
-        /// <param name="name">Parameter name</param>
-        /// <returns>Message telling <paramref name="name"/> was referenced multiple times</returns>
-        public static string MULTIPLE_REFERENCES(string name)
-        {
-            return name + " parametresine sadece bir defa değer verilebilir!";
-        }
-
-        /// <summary>
-        /// Parameter name was invalid or unknown
-        /// </summary>
-        /// <param name="name">Given name</param>
-        /// <returns>Message telling <paramref name="name"/> was unknown</returns>
-        public static string PARAMETER_NAME_INVALID(string name)
-        {
-            if (name == null)
-            {
-                return "Parametre ismi hatalı!";
-            }
-            else if (string.IsNullOrEmpty(name.Trim()))
-            {
-                return "Parametre ismi hatalı!";
-            }
-            return "'" + name + "' adlı bir parametre bulunamadı!";
-        }
-
-        /// <summary>
-        /// Parameter name hinted was invalid or unknown 
-        /// </summary>
-        /// <param name="name">Given name</param>
-        /// <returns>Message telling <paramref name="name"/> was invalid</returns>
-        public static string PARAMETER_HINT_INVALID(string name)
-        {
-            if (name == null)
-            {
-                return "Parametre ismi hatalı!";
-            }
-            else if (string.IsNullOrEmpty(name.Trim()))
-            {
-                return "Parametre ismi hatalı!";
-            }
-            return name + " bir parametre adı olarak kullanılamaz!";
-        }
-
-        /// <summary>
-        /// Expected format name_hint:argument wasn't matched 
-        /// </summary>
-        /// <param name="format">Expected format</param>
-        /// <returns>Message informing about the expected format</returns>
-        public static string STRING_FORMAT_INVALID(string format)
-        {
-            return "Argüman formatı hatalı, format: " + format + " olmalı!";
-        }
         #endregion
 
         #endregion

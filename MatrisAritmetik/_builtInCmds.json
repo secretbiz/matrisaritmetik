@@ -270,7 +270,43 @@
             }
         ]
     },
+    {
+        "Label": "Dönüştür",
+        "Functions": [
+            {
+                "fullname": "Matrise",
+                "description": "Bir veri tablosunun, matrise dönmüşmüş halini döner",
 
+                "alias_list": [],
+                "function": "ToMat",
+                "param_types": [ "Veri Tablosu" ],
+                "param_names": [ "dataframe" ],
+                "required_params": 1,
+                "returns": "Matris",
+
+                "function_template": "!ToMat()",
+                "function_template_filled": "!ToMat(dataframe)",
+
+                "service": "SpecialMatricesService"
+            },
+            {
+                "fullname": "Veri Tablosuna",
+                "description": "Bir matrisin, veri tablosuna dönüşmüş halini döner",
+
+                "alias_list": [],
+                "function": "ToDf",
+                "param_types": [ "Matris" ],
+                "param_names": [ "matrix" ],
+                "required_params": 1,
+                "returns": "Veri Tablosu",
+
+                "function_template": "!ToDf()",
+                "function_template_filled": "!ToDf(matrix)",
+
+                "service": "SpecialMatricesService"
+            }
+        ]
+    },
     {
         "Label": "Aritmetik",
         "Functions": [

@@ -87,13 +87,12 @@ namespace MatrisAritmetik.Services
                 ? df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy()
                 : df is Dataframe dataframe
                     ? new Dataframe(dataframe[new Range(0, n)],
-                                         dataframe.Delimiter,
-                                         dataframe.NewLine,
-                                         null,
-                                         Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
-                                         dataframe.GetRowSettings().Copy(),
-                                         dataframe.GetColSettings().Copy()
-                                         )
+                                    dataframe.Delimiter,
+                                    dataframe.NewLine,
+                                    null,
+                                    Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                    dataframe.GetRowSettings().Copy(),
+                                    dataframe.GetColSettings().Copy())
                     : new MatrisBase<object>(df[new Range(0, n)]);
         }
 
@@ -115,13 +114,12 @@ namespace MatrisAritmetik.Services
                 ? df is Dataframe ? ((Dataframe)df.Copy()) : df.Copy()
                 : df is Dataframe dataframe
                     ? new Dataframe(dataframe[new Range(df.Row - n, df.Row)],
-                                         dataframe.Delimiter,
-                                         dataframe.NewLine,
-                                         null,
-                                         Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
-                                         dataframe.GetRowSettings().Copy(),
-                                         dataframe.GetColSettings().Copy()
-                                         )
+                                    dataframe.Delimiter,
+                                    dataframe.NewLine,
+                                    null,
+                                    Dataframe.GetCopyOfLabels(dataframe.GetColLabels()),
+                                    dataframe.GetRowSettings().Copy(),
+                                    dataframe.GetColSettings().Copy())
                     : new MatrisBase<object>(df[new Range(df.Row - n, df.Row)]);
         }
 

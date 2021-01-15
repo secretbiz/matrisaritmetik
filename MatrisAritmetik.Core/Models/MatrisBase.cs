@@ -34,13 +34,7 @@ namespace MatrisAritmetik.Core.Models
         public virtual int Row
         {
             get => _row;
-            set
-            {
-                if (_row == -1) // Only set if first time
-                {
-                    _row = value > (int)MatrisLimits.forRows ? (int)MatrisLimits.forRows : value;
-                }
-            }
+            set => _row = value > (int)MatrisLimits.forRows ? (int)MatrisLimits.forRows : value;
         }
 
         /// <summary>
@@ -49,14 +43,46 @@ namespace MatrisAritmetik.Core.Models
         public virtual int Col
         {
             get => _col;
-            set
-            {
-                if (_col == -1) // Only set if first time
-                {
-                    _col = value > (int)MatrisLimits.forCols ? (int)MatrisLimits.forCols : value;
-                }
-            }
+            set => _col = value > (int)MatrisLimits.forCols ? (int)MatrisLimits.forCols : value;
         }
+
+        /// <summary>
+        /// Gets or sets the seed used with <see cref="Random"/> while filling <see cref="MatrisBase{T}.GetValues()"/>
+        /// </summary>
+        public int Seed
+        {
+            get => _seed;
+            set => _seed = value >= 0 ? value : int.MaxValue + value;
+        }
+        /// <summary>
+        /// Delimiter to use while printing the matrix values
+        /// </summary>
+        public string Delimiter
+        {
+            get => _delimiter;
+            set => _delimiter = value != null && value.Length > 0 ? value : " ";
+        }
+        /// <summary>
+        /// New-line character to use while printing the matrix
+        /// </summary>
+        public string NewLine
+        {
+            get => _newline;
+            set => _newline = value != null && value.Length > 0 ? value : "\n";
+        }
+        /// <summary>
+        /// Amount of digits to round to while printing
+        /// </summary>
+        public int Digits
+        {
+            get => _digits;
+            set => _digits = value >= 0 ? value : 0;
+        }
+
+        /// <summary>
+        /// Wheter the matrix was filled with random values
+        /// </summary>
+        public bool CreatedFromSeed { get => createdFromSeed; set => createdFromSeed = value; }
 
         /// <summary>
         /// Alternative way to access values directly
@@ -146,7 +172,8 @@ namespace MatrisAritmetik.Core.Models
                     int lastcolsize = value.Count == 0 ? 0 : value[0].Count;
                     if (typeof(T) == typeof(string))
                     {
-                        for (int i = 0; i < value.Count; i++)
+                        int nr = Math.Min(value.Count, (int)MatrisLimits.forRows);
+                        for (int i = 0; i < nr; i++)
                         {
                             if (value[i].Count != lastcolsize)
                             {
@@ -156,7 +183,8 @@ namespace MatrisAritmetik.Core.Models
                             else
                             {
                                 _values.Add(new List<T>());
-                                for (int j = 0; j < value[i].Count; j++)
+                                int nc = Math.Min(value[i].Count, (int)MatrisLimits.forCols);
+                                for (int j = 0; j < nc; j++)
                                 {
                                     _values[i].Add((dynamic)value[i][j].ToString());
                                 }
@@ -165,7 +193,8 @@ namespace MatrisAritmetik.Core.Models
                     }
                     else
                     {
-                        for (int i = 0; i < value.Count; i++)
+                        int nr = Math.Min(value.Count, (int)MatrisLimits.forRows);
+                        for (int i = 0; i < nr; i++)
                         {
                             if (value[i].Count != lastcolsize)
                             {
@@ -175,7 +204,8 @@ namespace MatrisAritmetik.Core.Models
                             else
                             {
                                 _values.Add(new List<T>());
-                                for (int j = 0; j < value[i].Count; j++)
+                                int nc = Math.Min(value[i].Count, (int)MatrisLimits.forCols);
+                                for (int j = 0; j < nc; j++)
                                 {
                                     if (float.TryParse(value[i][j].ToString(), out float res))
                                     {
@@ -209,51 +239,9 @@ namespace MatrisAritmetik.Core.Models
         }
 
         /// <summary>
-        /// Gets or sets the seed used with <see cref="Random"/> while filling <see cref="MatrisBase{T}.GetValues()"/>
-        /// </summary>
-        public int Seed
-        {
-            get => _seed;
-            set => _seed = value >= 0 ? value : int.MaxValue + value;
-        }
-        /// <summary>
-        /// Delimiter to use while printing the matrix values
-        /// </summary>
-        public string Delimiter
-        {
-            get => _delimiter;
-            set => _delimiter = value != null && value.Length > 0 ? value : " ";
-        }
-        /// <summary>
-        /// New-line character to use while printing the matrix
-        /// </summary>
-        public string NewLine
-        {
-            get => _newline;
-            set => _newline = value != null && value.Length > 0 ? value : "\n";
-        }
-        /// <summary>
-        /// Amount of digits to round to while printing
-        /// </summary>
-        public int Digits
-        {
-            get => _digits;
-            set => _digits = value >= 0 ? value : 0;
-        }
-        /// <summary>
-        /// Disposal information
-        /// </summary>
-        private bool disposedValue;
-
-        /// <summary>
         /// For storing how many times row's were swapped during echelon form process
         /// </summary>
         public int SwapCount { get => swapCount; set => swapCount = value; }
-
-        /// <summary>
-        /// Wheter the matrix was filled with random values
-        /// </summary>
-        public bool CreatedFromSeed { get => createdFromSeed; set => createdFromSeed = value; }
 
         #endregion
 
@@ -1173,6 +1161,11 @@ namespace MatrisAritmetik.Core.Models
         #endregion
 
         #region Dispose
+        /// <summary>
+        /// Disposal information
+        /// </summary>
+        private bool disposedValue;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

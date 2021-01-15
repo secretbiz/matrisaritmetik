@@ -155,7 +155,11 @@
                       contentEditable="true"
                       spellcheck="false"></span>
                 
-                <input id="matris_komut_button" type="button" class="button" value="Çözümle" name="matris_komut_btn" data-toggle="tooltip" data-placement="top" title="İfadeyi/Komutu çözümle" />
+                <input type="button" id="matris_komut_button" name="matris_komut_btn" 
+                       class="button" 
+                       value="Çözümle" data-toggle="tooltip" data-placement="top" 
+                       title="İfadeyi/Komutu çözümle" />
+
                 <select id="matris_komut_options">
                     <partial name="_CommandSelectionPartial" model=@ViewData["komut_optionsdict"] />
                 </select>
@@ -207,7 +211,15 @@
 @* Sayfa yenilendiğinde listener'lar için*@
 @* TO-DO: Daha düzgün bi yol bul*@
 <script>
-
+    //////// komut geçmişi panelini güncelle
+    function updateHistoryPanel(token) {
+        $('#output_body').load('/Matris?handler=UpdateHistoryPanel',
+            { __RequestVerificationToken: token },
+            function () {
+                updateTable(token);
+            }
+        );
+    }
     function updateTable(token) {
         $('#matris_table_base').load('/Matris?handler=UpdateMatrisTable', { __RequestVerificationToken: token }, function () {
             var math = document.getElementById("matris_table_base");
@@ -233,12 +245,12 @@
                     __RequestVerificationToken: tkn,
                     "name": event.currentTarget.id,
                 },
-                success: function (data) { updateTable(tkn); },
+                success: function (data) { updateHistoryPanel(tkn); },
                 error: function (error) { console.log(error); }
             });
     }
 
-    updateTable('@token');
+    updateHistoryPanel('@token');
 
 </script>
 <script>

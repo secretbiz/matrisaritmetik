@@ -135,7 +135,7 @@ namespace MatrisAritmetik.Pages
                 DateTime LastCmdDate = DateTime.Now;
 
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(DfNameParam)
                     && reqdict.ContainsKey(DfValsParam)
@@ -268,7 +268,7 @@ namespace MatrisAritmetik.Pages
                 DateTime LastCmdDate = DateTime.Now;
 
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(DfNameParam) && reqdict.ContainsKey(DfSpecialFuncParam) && reqdict.ContainsKey(DfSpecialArgsParam))
                 {
@@ -425,7 +425,7 @@ namespace MatrisAritmetik.Pages
 
                 Dictionary<string, string> FileData = new Dictionary<string, string>();
 
-                await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData).ConfigureAwait(false);
+                await _utils.ReadFileFromRequest(Request.Body, Encoding.Default, FileData);
 
                 Dictionary<string, Dataframe> _dict = HttpContext.Session.GetDfDict(SessionDfDict, SessionDfLabels, SessionDfSettings);
 
@@ -538,7 +538,7 @@ namespace MatrisAritmetik.Pages
         {
             Dictionary<string, string> reqdict = new Dictionary<string, string>();
 
-            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
             if (reqdict.ContainsKey(DfNameParam))
             {
@@ -580,7 +580,7 @@ namespace MatrisAritmetik.Pages
         {
             Dictionary<string, string> reqdict = new Dictionary<string, string>();
 
-            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
             if (reqdict.ContainsKey(DfNameParam))
             {
@@ -631,7 +631,7 @@ namespace MatrisAritmetik.Pages
             if (_frontService.CheckCmdDate(HttpContext.Session.Get<DateTime>(SessionLastOutputDate)))
             {
                 Dictionary<string, string> reqdict = new Dictionary<string, string>();
-                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+                await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
 
                 if (reqdict.ContainsKey(CommandParam))
                 {
@@ -795,7 +795,7 @@ namespace MatrisAritmetik.Pages
         public async Task<OkObjectResult> OnPostCreateDescription()
         {
             Dictionary<string, string> reqdict = new Dictionary<string, string>();
-            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict).ConfigureAwait(false);
+            await _utils.ReadAndDecodeRequest(Request.Body, Encoding.Default, IgnoredParams, reqdict);
             if (reqdict.ContainsKey(DfNameParam)
                 && reqdict.ContainsKey(DfColIndexParam))
             {

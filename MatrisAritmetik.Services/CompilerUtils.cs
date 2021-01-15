@@ -558,16 +558,16 @@ namespace MatrisAritmetik.Services
                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
         {
 
-            MatrisBase<dynamic> mat1, mat2;
-            mat1 = CheckMatrixAndUpdateVal(RHS, matDict, mode, true)
+            MatrisBase<dynamic> matRHS, matLHS;
+            matRHS = CheckMatrixAndUpdateVal(RHS, matDict, mode, true)
                 ? (MatrisBase<dynamic>)RHS.val
                 : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
-            mat2 = CheckMatrixAndUpdateVal(LHS, matDict, mode, true)
+            matLHS = CheckMatrixAndUpdateVal(LHS, matDict, mode, true)
                 ? (MatrisBase<dynamic>)LHS.val
                 : throw new Exception(CompilerMessage.OP_BETWEEN_(".*", "matrisler"));
 
-            RHS.val = MatrisMul(mat2, mat1);
+            RHS.val = MatrisMul(matLHS, matRHS);
 
             Validations.CheckModeAndMatrixReference(mode, RHS.val);
         }

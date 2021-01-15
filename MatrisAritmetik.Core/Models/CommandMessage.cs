@@ -9,7 +9,7 @@ namespace MatrisAritmetik.Core.Models
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class CommandMessage : IDisposable
     {
-        #region Public Fields
+        #region Private Fields
         /// <summary>
         /// Command's current state
         /// </summary>
@@ -20,7 +20,9 @@ namespace MatrisAritmetik.Core.Models
         private string message = "";
 
         private bool disposedValue;
+        #endregion
 
+        #region Public Fields
         /// <summary>
         /// Command's current state
         /// </summary>

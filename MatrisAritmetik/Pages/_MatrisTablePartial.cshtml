@@ -3,7 +3,7 @@
     Layout = null;
     string ConcatName(string prefix, string name) { return prefix + name; };
     int MaxTolarableSize = Math.Min((int)MatrisAritmetik.Core.MatrisLimits.forCols, (int)MatrisAritmetik.Core.MatrisLimits.forRows);
-    //var tkn = ViewData["tkn"];
+
     var headclass = ViewData["headcls"]; //"matris_table matris_table_head" or "df_matris_table df_matris_table_head"
     var headtdclass = ViewData["headtdcls"]; // "saved_mattable_title" or "df_saved_mattable_title"
     var bodyclass = ViewData["bodyclass"]; // "matris_table" or "df_matris_table"
@@ -81,17 +81,12 @@
                 </td>
 
                 @*Buttons*@
-                @*
-                    <td colspan="2" align="center">
-                        <input id='@ConcatName("matris_islem_",name)' type="button" class="button" value="İşlemler" name="matris_kayitli_islem_button" data-toggle="tooltip" data-placement="right" title='@ConcatName(name," adlı matrise özel işlemler")' />
-                    </td>
-                *@
-                
                 <td colspan="2">
                     <a title="Text olarak kaydet" class="btn" href='@ConcatName("data:text/plain;charset=utf-8,",Model[name].ToString())' download='@name'>
                         <img src="./images/download.png">
                     </a>
                 </td>
+
                 <td colspan="2" align="center">
                     <ul class="list-inline m-0">
                         <li class="list-inline-item">

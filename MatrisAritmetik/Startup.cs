@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using MatrisAritmetik.Core.Services;
@@ -58,29 +58,23 @@ namespace MatrisAritmetik
               {
                   errorApp.Run(async context =>
                   {
-                      Console.WriteLine("Content-Length: " + context.Request.Headers["Content-Length"]);
-                      string tmp;
                       try
                       {
                           context.Request.Body.Seek(0, SeekOrigin.Begin);
                       }
-                      catch (Exception ex)
+                      catch (Exception err)
                       {
-                          if (ex.InnerException != null)
+                          if (err.InnerException != null)
                           {
-                              Console.WriteLine(ex.Message);
+                              Console.WriteLine(err.Message);
                           }
                           else
                           {
-                              Console.WriteLine("Can't rewind body stream. " + ex.Message);
+                              Console.WriteLine("İstek gövdesi tekrar okunamadı. " + err.Message);
                           }
                       }
-                      using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
-                      {
-                          tmp = await reader.ReadToEndAsync().ConfigureAwait(false);
-                      }
-
-                      Console.WriteLine("Body: " + tmp);
+                      using StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8);
+                      string tmp = await reader.ReadToEndAsync();
 
                   });
               });

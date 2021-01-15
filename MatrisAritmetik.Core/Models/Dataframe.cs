@@ -574,8 +574,8 @@ namespace MatrisAritmetik.Core.Models
                     int collimit = (int)DataframeLimits.forCols;
 
                     int lastcolsize = Math.Min(value[0].Count, collimit);
-
-                    for (int i = 0; i < Math.Min(value.Count, (int)DataframeLimits.forRows); i++)
+                    int nr = Math.Min(value.Count, (int)DataframeLimits.forRows);
+                    for (int i = 0; i < nr; i++)
                     {
                         int colsize = Math.Min(value[i].Count, collimit);
                         if (lastcolsize != colsize)
@@ -615,7 +615,8 @@ namespace MatrisAritmetik.Core.Models
                         else
                         {
                             _values.Add(new List<object>());
-                            for (int j = 0; j < value[i].Count; j++)
+                            int nc = Math.Min(value[i].Count, (int)DataframeLimits.forCols);
+                            for (int j = 0; j < nc; j++)
                             {
                                 if (float.TryParse(value[i][j].ToString(), out float res))
                                 {

@@ -31,19 +31,12 @@ namespace MatrisAritmetik.Core.Models
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class Token : IDisposable
     {
-        #region Fields
+        #region Public Fields
 
-        #region Common Fields For Every Token
         /// <summary>
         /// Token type, see <see cref="TokenType"/>
         /// </summary>
         public TokenType tknType = TokenType.NULL;
-
-        /// <summary>
-        /// Priority of this token over other tokens, see <see cref="Token"/>
-        /// </summary>
-        public int priority;
-        #endregion
 
         #region Number, Matrix or Function Token Fields
         /// <summary>
@@ -79,9 +72,14 @@ namespace MatrisAritmetik.Core.Models
         public string symbol = " ";
 
         /// <summary>
+        /// Priority of this operator token over other operators
+        /// </summary>
+        public int priority;
+
+        /// <summary>
         /// Associativity of this operator, see <see cref="OperatorAssociativity"/>
         /// </summary>
-        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;   // Order
+        public OperatorAssociativity assoc = OperatorAssociativity.LEFT;
         #endregion
 
         #region Operator and Function Tokens

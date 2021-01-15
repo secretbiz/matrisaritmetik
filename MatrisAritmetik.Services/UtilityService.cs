@@ -35,346 +35,43 @@ namespace MatrisAritmetik.Services
 
         #endregion
 
-        #region Private Methods
-        /// <summary>
-        /// Add a custom null value to given list, if filler is not typeof(float) or null,
-        /// </summary>
-        /// <param name="lis">List to add a value to</param>
-        /// <param name="filler">Type of custom filler</param>
-        /// <param name="val">Value to check if <paramref name="filler"/> was not type float or null</param>
-        private static void FillWithCustomNull(List<T> lis,
-                                               Type filler,
-                                               string val,
-                                               bool allowNonNumber)
-        {
-
-            if (string.IsNullOrWhiteSpace(val)) // Check again just in case
-            {
-                InnerFillWithCustomNull(lis, filler, string.Empty, allowNonNumber);
-            }
-            else if (!UseConstantIfExist(lis, val))
-            {
-                InnerFillWithCustomNull(lis, filler, val, allowNonNumber);
-            }
-        }
-        private static void InnerFillWithCustomNull(List<T> lis,
-                                                    Type filler,
-                                                    string val,
-                                                    bool allowNonNumber)
-        {
-            if (filler != typeof(float))
-            {
-
-                if (allowNonNumber)
-                {
-                    lis.Add((dynamic)val);
-                }
-                else if (filler == null)
-                {
-                    lis.Add((dynamic)new None());
-                }
-                else
-                {
-                    lis.Add((dynamic)float.NaN);
-                }
-            }
-            else
-            {
-                lis.Add((dynamic)float.NaN);
-            }
-        }
-
-        /// <summary>
-        /// Check given value and add corresponding constant to list if its a constant value's name
-        /// </summary>
-        /// <param name="lis">List to update</param>
-        /// <param name="val">Value to check</param>
-        /// <returns>True if value is added</returns>
-        private static bool UseConstantIfExist(List<T> lis, string val)
-        {
-            if (val[0] == '!')
-            {
-                if (Constants.Contains(val[1..^0]))
-                {
-                    lis.Add((dynamic)Constants.Get(val[1..^0]));
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Check given value and add corresponding constant to list if its a constant value's name
-        /// </summary>
-        /// <param name="dict">Dictionary to update</param>
-        /// <param name="name">Dictionary key to use</param>
-        /// <param name="val">Value to check</param>
-        /// <returns>True if value is added</returns>
-        private static bool UseConstantIfExist(Dictionary<string, object> dict,
-                                               string name,
-                                               string val)
-        {
-            if (val[0] == '!')
-            {
-                if (Constants.Contains(val[1..^0]))
-                {
-                    dict.Add(name, (dynamic)Constants.Get(val[1..^0]));
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        private static void ParseArgumentAsParamType(string currentParamType,
-                                                     string currentParamName,
-                                                     string currentArg,
-                                                     Dictionary<string, object> param_dict,
-                                                     Dictionary<string, MatrisBase<object>> matdict,
-                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
-        {
-            switch (currentParamType)
-            {
-                case "int":
-                    {
-                        if (int.TryParse(currentArg, out int element))
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
-                        }
-                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
-                        {
-                            param_dict[currentParamName] = const_cast;
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
-                        }
-                        break;
-                    }
-                case "float":
-                    {
-                        if (float.TryParse(currentArg, out float element))
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
-                        }
-                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
-                        {
-                            param_dict[currentParamName] = const_cast;
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
-                        }
-
-                        break;
-                    }
-                case "string":
-                    {
-                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            param_dict.Add(currentParamName, currentArg);
-                        }
-                        else
-                        {
-                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
-                        }
-                        break;
-                    }
-                case "Matris":
-                    {
-                        if (matdict.ContainsKey(currentArg))
-                        {
-                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
-                            param_dict.Add(currentParamName, matdict[currentArg]);
-                        }
-                        else // TO-DO: ADD COMMAND EVALUATION HERE
-                        {
-                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
-                        }
-
-                        break;
-                    }
-                case "Veri Tablosu":
-                    {
-                        if (matdict.ContainsKey(currentArg))
-                        {
-                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
-                            param_dict.Add(currentParamName, matdict[currentArg]);
-                        }
-                        else // TO-DO: ADD COMMAND EVALUATION HERE
-                        {
-                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
-                        }
-
-                        break;
-                    }
-                case "dinamik":
-                    {
-                        if (float.TryParse(currentArg, out float element)) // Try as float
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
-                        {
-                            param_dict.Add(currentParamName, currentArg); // Just use as string
-                        }
-                        else
-                        {
-                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
-                            {
-                                param_dict[currentParamName] = el; // Use constant's float cast
-                            }
-                            else
-                            {
-                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
-                            }
-                        }
-                        break;
-                    }
-                default:
-                    {
-                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
-                    }
-            }
-        }
-        private static void ParseArgumentAsParamType(string currentParamType,
-                                                     string currentParamName,
-                                                     string currentArg,
-                                                     Dictionary<string, object> param_dict,
-                                                     Dictionary<string, Dataframe> matdict,
-                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
-        {
-            switch (currentParamType)
-            {
-                case "int":
-                    {
-                        if (int.TryParse(currentArg, out int element))
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
-                        }
-                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
-                        {
-                            param_dict[currentParamName] = const_cast;
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
-                        }
-                        break;
-                    }
-                case "float":
-                    {
-                        if (float.TryParse(currentArg, out float element))
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
-                        }
-                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
-                        {
-                            param_dict[currentParamName] = const_cast;
-                        }
-                        else
-                        {
-                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
-                        }
-
-                        break;
-                    }
-                case "string":
-                    {
-                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
-                        {
-                            param_dict.Add(currentParamName, currentArg);
-                        }
-                        else
-                        {
-                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
-                        }
-                        break;
-                    }
-                case "Matris":
-                    {
-                        if (matdict.ContainsKey(currentArg))
-                        {
-                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
-                            param_dict.Add(currentParamName, matdict[currentArg]);
-                        }
-                        else // TO-DO: ADD COMMAND EVALUATION HERE
-                        {
-                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
-                        }
-
-                        break;
-                    }
-                case "Veri Tablosu":
-                    {
-                        if (matdict.ContainsKey(currentArg))
-                        {
-                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
-                            param_dict.Add(currentParamName, matdict[currentArg]);
-                        }
-                        else // TO-DO: ADD COMMAND EVALUATION HERE
-                        {
-                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
-                        }
-
-                        break;
-                    }
-                case "dinamik":
-                    {
-                        if (float.TryParse(currentArg, out float element)) // Try as float
-                        {
-                            param_dict.Add(currentParamName, element);
-                        }
-                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
-                        {
-                            param_dict.Add(currentParamName, currentArg); // Just use as string
-                        }
-                        else
-                        {
-                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
-                            {
-                                param_dict[currentParamName] = el; // Use constant's float cast
-                            }
-                            else
-                            {
-                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
-                            }
-                        }
-                        break;
-                    }
-                default:
-                    {
-                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
-                    }
-            }
-        }
-
-        #endregion
-
         #region UtilityService Methods
+        public async Task ReadAndDecodeRequest(Stream reqbody,
+                                               Encoding enc,
+                                               List<string> ignoredparams,
+                                               Dictionary<string, string> decodedRequestDict)
+        {
+            using StreamReader reader = new StreamReader(reqbody, enc);
+            string url = await reader.ReadToEndAsync();
+
+            string[] body = WebUtility.UrlDecode(url).Split("&");    // body = "param=somevalue&param2=someothervalue"
+            string[] pairsplit;
+
+            decodedRequestDict.Clear();
+
+            foreach (string pair in body)
+            {
+                pairsplit = pair.Split("="); // pairsplit[] = { key , value }
+
+                if (pairsplit.Length != 2)
+                {   // Something wasn't right
+                    decodedRequestDict.Clear();
+                    return;
+                }
+
+                if (ignoredparams.Contains(pairsplit[0]))
+                {
+                    continue;
+                }
+
+                if (!decodedRequestDict.ContainsKey(pairsplit[0]))
+                {
+                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace(EQSignSpecial, "=").Replace(ANDSignSpecial, "&").Replace(ReverMatMulSpecial, "./"));
+                }
+            }
+
+        }
+
         public string FixLiterals(string old)
         {
             string[] literals = new string[10] { "\n", "\t", "\r", "\\", "\"", "\'", "\f", "\v", "\a", "\b" };
@@ -793,7 +490,7 @@ namespace MatrisAritmetik.Services
                                               Encoding enc,
                                               Dictionary<string, string> filedata)
         {
-            MultipartFormDataParser parser = await MultipartFormDataParser.ParseAsync(reqbody, enc).ConfigureAwait(false);
+            MultipartFormDataParser parser = await MultipartFormDataParser.ParseAsync(reqbody, enc);
             Stream datastream = parser.Files[0].Data;
 
             List<string> typelist = new List<string>() { "text/plain", "text/csv", "application/vnd.ms-excel" };
@@ -827,42 +524,6 @@ namespace MatrisAritmetik.Services
 
             filedata.Add("extras",
                          parser.GetParameterValue("extras"));
-        }
-
-        public async Task ReadAndDecodeRequest(Stream reqbody,
-                                               Encoding enc,
-                                               List<string> ignoredparams,
-                                               Dictionary<string, string> decodedRequestDict)
-        {
-            using StreamReader reader = new StreamReader(reqbody, enc);
-            string url = await reader.ReadToEndAsync();
-
-            string[] body = WebUtility.UrlDecode(url).Split("&");    // body = "param=somevalue&param2=someothervalue"
-            string[] pairsplit;
-
-            decodedRequestDict.Clear();
-
-            foreach (string pair in body)
-            {
-                pairsplit = pair.Split("="); // pairsplit[] = { key , value }
-
-                if (pairsplit.Length != 2)
-                {   // Something wasn't right
-                    decodedRequestDict.Clear();
-                    return;
-                }
-
-                if (ignoredparams.Contains(pairsplit[0]))
-                {
-                    continue;
-                }
-
-                if (!decodedRequestDict.ContainsKey(pairsplit[0]))
-                {
-                    decodedRequestDict.Add(pairsplit[0], pairsplit[1].Replace(EQSignSpecial, "=").Replace(ANDSignSpecial, "&").Replace(ReverMatMulSpecial, "./"));
-                }
-            }
-
         }
 
         public List<string> GetOptionList(Dictionary<string, string> dict)
@@ -899,52 +560,346 @@ namespace MatrisAritmetik.Services
             }
         }
 
-        public int IndexOfAbsMax(List<T> lis)
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Add a custom null value to given list, if filler is not typeof(float) or null,
+        /// </summary>
+        /// <param name="lis">List to add a value to</param>
+        /// <param name="filler">Type of custom filler</param>
+        /// <param name="val">Value to check if <paramref name="filler"/> was not type float or null</param>
+        private static void FillWithCustomNull(List<T> lis,
+                                               Type filler,
+                                               string val,
+                                               bool allowNonNumber)
         {
-            if (lis.Count == 0)
-            {
-                throw new Exception("Liste boş!");
-            }
 
-            if (lis.Count == 1)
+            if (string.IsNullOrWhiteSpace(val)) // Check again just in case
             {
-                return 0;
+                InnerFillWithCustomNull(lis, filler, string.Empty, allowNonNumber);
             }
-
-            int currentmax = 0;
-            for (int i = 1; i < lis.Count; i++)
+            else if (!UseConstantIfExist(lis, val))
             {
-                if (Math.Abs(float.Parse(lis[i].ToString())) > Math.Abs(float.Parse(lis[currentmax].ToString())))
+                InnerFillWithCustomNull(lis, filler, val, allowNonNumber);
+            }
+        }
+        private static void InnerFillWithCustomNull(List<T> lis,
+                                                    Type filler,
+                                                    string val,
+                                                    bool allowNonNumber)
+        {
+            if (filler != typeof(float))
+            {
+
+                if (allowNonNumber)
                 {
-                    currentmax = i;
+                    lis.Add((dynamic)val);
+                }
+                else if (filler == null)
+                {
+                    lis.Add((dynamic)new None());
+                }
+                else
+                {
+                    lis.Add((dynamic)float.NaN);
                 }
             }
-            return currentmax;
+            else
+            {
+                lis.Add((dynamic)float.NaN);
+            }
         }
 
-        public T MinOfList(List<T> lis)
+        /// <summary>
+        /// Check given value and add corresponding constant to list if its a constant value's name
+        /// </summary>
+        /// <param name="lis">List to update</param>
+        /// <param name="val">Value to check</param>
+        /// <returns>True if value is added</returns>
+        private static bool UseConstantIfExist(List<T> lis, string val)
         {
-            if (lis.Count == 0)
+            if (val[0] == '!')
             {
-                throw new Exception("Liste boş!");
-            }
-
-            if (lis.Count == 1)
-            {
-                return lis[0];
-            }
-
-            T currentmin = lis[0];
-            foreach (dynamic val in lis.GetRange(1, lis.Count - 1))
-            {
-                if (float.Parse(val.ToString()) < float.Parse(currentmin.ToString()))
+                if (Constants.Contains(val[1..^0]))
                 {
-                    currentmin = val;
+                    lis.Add((dynamic)Constants.Get(val[1..^0]));
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
-            return currentmin;
+            return false;
+        }
+
+        /// <summary>
+        /// Check given value and add corresponding constant to list if its a constant value's name
+        /// </summary>
+        /// <param name="dict">Dictionary to update</param>
+        /// <param name="name">Dictionary key to use</param>
+        /// <param name="val">Value to check</param>
+        /// <returns>True if value is added</returns>
+        private static bool UseConstantIfExist(Dictionary<string, object> dict,
+                                               string name,
+                                               string val)
+        {
+            if (val[0] == '!')
+            {
+                if (Constants.Contains(val[1..^0]))
+                {
+                    dict.Add(name, (dynamic)Constants.Get(val[1..^0]));
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        private static void ParseArgumentAsParamType(string currentParamType,
+                                                     string currentParamName,
+                                                     string currentArg,
+                                                     Dictionary<string, object> param_dict,
+                                                     Dictionary<string, MatrisBase<object>> matdict,
+                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        {
+            switch (currentParamType)
+            {
+                case "int":
+                    {
+                        if (int.TryParse(currentArg, out int element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+                        break;
+                    }
+                case "float":
+                    {
+                        if (float.TryParse(currentArg, out float element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+
+                        break;
+                    }
+                case "string":
+                    {
+                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            param_dict.Add(currentParamName, currentArg);
+                        }
+                        else
+                        {
+                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
+                        }
+                        break;
+                    }
+                case "Matris":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
+                        }
+
+                        break;
+                    }
+                case "Veri Tablosu":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
+                        }
+
+                        break;
+                    }
+                case "dinamik":
+                    {
+                        if (float.TryParse(currentArg, out float element)) // Try as float
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
+                        {
+                            param_dict.Add(currentParamName, currentArg); // Just use as string
+                        }
+                        else
+                        {
+                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
+                            {
+                                param_dict[currentParamName] = el; // Use constant's float cast
+                            }
+                            else
+                            {
+                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
+                    }
+            }
+        }
+        private static void ParseArgumentAsParamType(string currentParamType,
+                                                     string currentParamName,
+                                                     string currentArg,
+                                                     Dictionary<string, object> param_dict,
+                                                     Dictionary<string, Dataframe> matdict,
+                                                     CompilerDictionaryMode mode = CompilerDictionaryMode.Matrix)
+        {
+            switch (currentParamType)
+            {
+                case "int":
+                    {
+                        if (int.TryParse(currentArg, out int element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (int.TryParse(param_dict[currentParamName].ToString(), out int const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+                        break;
+                    }
+                case "float":
+                    {
+                        if (float.TryParse(currentArg, out float element))
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(currentArg, currentParamType));
+                        }
+                        else if (float.TryParse(param_dict[currentParamName].ToString(), out float const_cast)) // Check again if constant was found
+                        {
+                            param_dict[currentParamName] = const_cast;
+                        }
+                        else
+                        {
+                            throw new Exception(CompilerMessage.ARG_PARSE_ERROR(param_dict[currentParamName].ToString(), currentParamType));
+                        }
+
+                        break;
+                    }
+                case "string":
+                    {
+                        if (!UseConstantIfExist(param_dict, currentParamName, currentArg))
+                        {
+                            param_dict.Add(currentParamName, currentArg);
+                        }
+                        else
+                        {
+                            param_dict[currentParamName] = param_dict[currentParamName].ToString();
+                        }
+                        break;
+                    }
+                case "Matris":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_MATRIX(currentArg));
+                        }
+
+                        break;
+                    }
+                case "Veri Tablosu":
+                    {
+                        if (matdict.ContainsKey(currentArg))
+                        {
+                            Validations.CheckModeAndMatrixReference(mode, matdict[currentArg]);
+                            param_dict.Add(currentParamName, matdict[currentArg]);
+                        }
+                        else // TO-DO: ADD COMMAND EVALUATION HERE
+                        {
+                            throw new Exception(CompilerMessage.NOT_SAVED_DF(currentArg));
+                        }
+
+                        break;
+                    }
+                case "dinamik":
+                    {
+                        if (float.TryParse(currentArg, out float element)) // Try as float
+                        {
+                            param_dict.Add(currentParamName, element);
+                        }
+                        else if (!UseConstantIfExist(param_dict, currentParamName, currentArg)) // Try as constant
+                        {
+                            param_dict.Add(currentParamName, currentArg); // Just use as string
+                        }
+                        else
+                        {
+                            if (float.TryParse(param_dict[currentParamName].ToString(), out float el)) // Try parsing the constant
+                            {
+                                param_dict[currentParamName] = el; // Use constant's float cast
+                            }
+                            else
+                            {
+                                param_dict[currentParamName] = param_dict[currentParamName].ToString(); // Otherwise use constant's string cast
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new Exception(CompilerMessage.UNKNOWN_PARAMETER_TYPE(currentArg));
+                    }
+            }
         }
 
         #endregion
+
     }
 }
